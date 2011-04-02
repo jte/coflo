@@ -18,12 +18,27 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
  
+#include <string>
+#include <vector>
+
+class Block;
+ 
 class Function
 {
 public:
-	Function();
+	Function(const std::string &m_function_id);
 	~Function();
 	
-}
+	void AddBlock(Block *block);
+	
+private:
+	
+	/// Function identifier.
+	std::string m_function_id;
+	
+	/// Block list.
+	std::vector < Block * > m_block_list;
+	
+};
  
 #endif // FUNCTION_H

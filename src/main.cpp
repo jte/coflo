@@ -21,12 +21,16 @@
 
 #include <boost/regex.hpp>
 
+#include "Block.h"
+#include "Function.h"
+
 using namespace boost;
 
 int main(int argc, const char* argv[])
 {
 	static const boost::regex expression("^([[:alpha:]_][[:alnum:]_]*) \\(.*?\\)");
 	static const boost::regex block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)");
+	static const boost::regex block_end_expression("[[:space:]]+# SUCC\\: (.*)");
 	static const boost::regex function_call_expression(".+?([[:alpha:]_][[:alnum:]_]*) \\(.*?\\);");
 	
 	if(argc > 0)
@@ -34,6 +38,9 @@ int main(int argc, const char* argv[])
 		std::ifstream input_file(argv[1], std::ifstream::in);
 		std::string line;
 		std::string in_function_name;
+		
+		Function *current_function;
+		Block *current_block;
 		
 		while(input_file.good())
 		{
@@ -47,18 +54,28 @@ int main(int argc, const char* argv[])
 			{
 				in_function_name = what[1];
 				std::cout << "Found function: " << in_function_name << std::endl;
+				current_function = new Function(in_function_name);
 			}
 			
-			// Lock for block starts.
+			// Look for block starts.
 			if(regex_match(line.c_str(), what, block_start_expression)) 
 			{
 				std::cout << "Found block: " << what[1] << std::endl;
+				current_block = new Block(atoi(what[1].str().c_str()));
 			}
 			
-			// Lock for function calls.
+			// Look for block ends.
+			if(regex_match(line.c_str(), what, block_end_expression)) 
+			{
+				std::cout << "Found block end: " << what[1] << std::endl;
+				current_function->AddBlock(current_block);
+			}
+			
+			// Look for function calls.
 			if(regex_match(line.c_str(), what, function_call_expression)) 
 			{
 				std::cout << "Found call: " << what[1] << std::endl;
+				current_block->AddFunctionCall(what[1]);
 			}
 		}
 	}
