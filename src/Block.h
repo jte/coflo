@@ -18,10 +18,25 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include <vector>
+#include <string>
+
 class Block
 {
-	Block();
+public:
+	Block(long block_number);
 	~Block();
-}
+	
+	void AddFunctionCall(const std::string &function_name);
+	
+private:
+
+	/// The block number.
+	long m_block_number;
+	
+	/// List of the function calls in this block.
+	std::vector< std::string > m_function_calls;
+	
+};
 
 #endif // BLOCK_H

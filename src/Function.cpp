@@ -15,3 +15,19 @@
  * coflo.  If not, see <http://www.gnu.org/licenses/>.
  */
  
+ #include "Function.h"
+ 
+ 
+Function::Function(const std::string &function_id)
+{
+	m_function_id = function_id;
+}
+ 
+Function::~Function()
+{
+}
+ 
+void Function::AddBlock(Block *block)
+{
+	m_block_list.push_back(block);
+}

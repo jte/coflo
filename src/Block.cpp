@@ -15,3 +15,19 @@
  * coflo.  If not, see <http://www.gnu.org/licenses/>.
  */
  
+ #include "Block.h"
+ 
+ Block::Block(long block_number)
+ {
+	m_block_number = block_number;
+ }
+ 
+ Block::~Block()
+ {
+ }
+ 
+ void Block::AddFunctionCall(const std::string &function_name)
+ {
+	m_function_calls.push_back(function_name);
+ }
+ 
