@@ -1,5 +1,5 @@
-# Top-level Makefile.am for coflo
-#
+#!/bin/sh
+# 
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of coflo.
@@ -11,18 +11,14 @@
 # coflo is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along with
 # coflo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory.
-ACLOCAL_AMFLAGS = -I m4
+#
+# Created on Apr 3, 2011, 2:02:20 AM
+#
 
-# The subdirectories containing the source code.
-SUBDIRS = src
-
-#DOXYGEN = "/cygdrive/c/Program Files/Doxygen/bin/doxygen.exe"
-
-#.PHONY: docs
-#docs :
-#	$(DOXYGEN) Doxyfile
+# Run coflo on itself.
+#gcc -fdump-tree-cfg-lineno "${srcdir}"/main.cpp
+./coflo ../src/main.cpp.013t.cfg
