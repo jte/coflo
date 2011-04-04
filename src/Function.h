@@ -31,6 +31,8 @@ public:
 	
 	void AddBlock(Block *block);
 
+	void LinkInterFunctionBlocks();
+
 	void Print();
 	
 private:

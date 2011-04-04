@@ -18,7 +18,7 @@
 #include <iostream>
 
 #include "Function.h"
- 
+
  
 Function::Function(const std::string &function_id)
 {
@@ -32,6 +32,11 @@ Function::~Function()
 void Function::AddBlock(Block *block)
 {
 	m_block_list.push_back(block);
+}
+
+void Function::LinkInterFunctionBlocks()
+{
+	
 }
 
 void Function::Print()
