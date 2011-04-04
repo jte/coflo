@@ -18,7 +18,15 @@
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Function.cpp Function.h \
-	Block.cpp Block.h
+	Block.cpp Block.h \
+	Successor.cpp Successor.h \
+	SuccessorTypes.h
+
+nobase_check_SCRIPTS = test1.sh
+
+# Tests to run for "make check".
+TESTS_ENVIRONMENT = export "TEST_CPPFLAGS=$(CPPFLAGS)" && export "TEST_CXXFLAGS=$(CXXFLAGS)" && $(SHELL) -x
+TESTS = test1.sh
 
 coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS) -Wl,--enable-auto-import

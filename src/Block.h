@@ -21,21 +21,43 @@
 #include <vector>
 #include <string>
 
+class Function;
+class Successor;
+
 class Block
 {
 public:
-	Block(long block_number);
+	Block(Function * parent_function, long block_number, long block_starting_line_in_src);
 	~Block();
 	
 	void AddFunctionCall(const std::string &function_name);
+
+        /**
+         * Extract the successor block information from the passed string.  The
+         * string is expected to be the trailing text of a "#SUCC: <<<this here>>>"
+         * line in the input file.
+         * 
+         * @param successors_string Note that we deliberately are passing this by value,
+         * not by reference, because the function will use it as a temporary.
+         */
+        void AddSuccessors(std::string successors_string);
 	
 private:
 
-	/// The block number.
-	long m_block_number;
-	
-	/// List of the function calls in this block.
-	std::vector< std::string > m_function_calls;
+    /// Pointer to the function which contains this block.
+    Function *m_parent_function;
+    
+    /// The block number.
+    long m_block_number;
+
+    /// The source line it starts on.
+    long block_starting_line_in_src;
+
+    /// List of the function calls in this block.
+    std::vector< std::string > m_function_calls;
+
+    /// List of successors to this block.
+    std::vector< Successor * > m_successor_list;
 	
 };
 
