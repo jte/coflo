@@ -15,7 +15,9 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
  
- #include "Function.h"
+#include <iostream>
+
+#include "Function.h"
  
  
 Function::Function(const std::string &function_id)
@@ -30,4 +32,9 @@ Function::~Function()
 void Function::AddBlock(Block *block)
 {
 	m_block_list.push_back(block);
+}
+
+void Function::Print()
+{
+	std::cout << "Decl: " << m_function_id << std::endl;
 }

@@ -10,37 +10,39 @@
  * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
-#ifndef FUNCTION_H
-#define FUNCTION_H
- 
-#include <string>
-#include <vector>
 
-class Block;
- 
-class Function
+#ifndef TRANSLATIONUNIT_H
+#define	TRANSLATIONUNIT_H
+
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
+
+class Function;
+
+class TranslationUnit
 {
 public:
-	Function(const std::string &m_function_id);
-	~Function();
-	
-	void AddBlock(Block *block);
+    TranslationUnit();
+    TranslationUnit(const TranslationUnit& orig);
+    virtual ~TranslationUnit();
+
+	bool ParseFile(const boost::filesystem::path &filename);
 
 	void Print();
-	
+
 private:
-	
-	/// Function identifier.
-	std::string m_function_id;
-	
-	/// Block list.
-	std::vector < Block * > m_block_list;
-	
+
+	/// The filename.
+	boost::filesystem::path m_filename;
+
+	/// List of function definitions in this file.
+	std::vector< Function * > m_function_defs;
+
 };
- 
-#endif // FUNCTION_H
+
+#endif	/* TRANSLATIONUNIT_H */
+
