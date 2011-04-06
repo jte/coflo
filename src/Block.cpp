@@ -19,7 +19,10 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
+
 #include <boost/regex.hpp>
+#include <boost/foreach.hpp>
 
 #include "SuccessorTypes.h"
 
@@ -104,4 +107,45 @@ void Block::AddSuccessors(std::string successors_string)
 		}
 	}
 }
- 
+
+Successor* Block::GetSuccessorAtIndex(std::vector< Successor * >::size_type index) const
+{
+	if( index < m_successor_list.size())
+	{
+		return m_successor_list[index];
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void Block::PrintBlock(long indent_level)
+{
+	// Print out all function calls in this block.
+	BOOST_FOREACH(std::string fp, m_function_calls)
+	{
+		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << fp << std::endl;
+	}
+
+	// Print successors.
+	BOOST_FOREACH(Successor *s, m_successor_list)
+	{
+		Block *bp;
+
+		bp = s->GetSuccessorBlockPtr();
+
+		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << s->GetSuccessorText() << std::endl;
+
+		if(bp == NULL)
+		{
+			//std::cerr << "ERROR: Found Successor with NULL BlockPtr." << std::endl;
+		}
+		else
+		{
+			//std::cerr << "INFO: Printing block " << bp->GetBlockNumber() << std::endl;
+			// See if we should indent.
+			bp->PrintBlock(indent_level + static_cast<long>(s->GetIndent()));
+		}
+	}
+}

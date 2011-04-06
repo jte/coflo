@@ -31,6 +31,8 @@ public:
 	Block(Function * parent_function, long block_number, long block_starting_line_in_src);
 	~Block();
 
+	long GetBlockNumber() const { return m_block_number; };
+
 	void AddFunctionCall(const std::string &function_name);
 
 	/**
@@ -42,6 +44,10 @@ public:
 	 * not by reference, because the function will use it as a temporary.
 	 */
 	void AddSuccessors(std::string successors_string);
+
+	Successor* GetSuccessorAtIndex(std::vector< Successor * >::size_type index) const;
+
+	void PrintBlock(long indent_level);
 
 private:
 

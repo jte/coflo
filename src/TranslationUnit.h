@@ -32,6 +32,8 @@ public:
 
 	bool ParseFile(const boost::filesystem::path &filename);
 
+	bool LinkFunctionBlocks();
+
 	void Print();
 
 private:

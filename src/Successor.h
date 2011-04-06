@@ -20,6 +20,8 @@
 
 #include <string>
 
+class Block;
+
 class Successor
 {
 public:
@@ -27,10 +29,23 @@ public:
     Successor(const std::string &block_number_as_string);
     Successor(const Successor& orig);
     virtual ~Successor();
+
+	virtual std::string GetSuccessorText() const = 0;
+	virtual bool GetIndent() const = 0;
+
+	long GetSuccessorBlockNumber() const { return m_block_number; };
+
+	Block *GetSuccessorBlockPtr() const { return m_block_ptr; };
+
+	void SetSuccessorBlockPtr(Block *block) { m_block_ptr = block; };
+
 private:
 
     /// The block number of the successor.
     long m_block_number;
+
+	/// Pointer to the successor block.  Only valid after block-linking.
+	Block *m_block_ptr;
 };
 
 #endif	/* SUCCESSOR_H */

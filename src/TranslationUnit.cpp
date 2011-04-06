@@ -20,9 +20,11 @@
 
 #include "TranslationUnit.h"
 
+// Include the necessary Boost libraries.
 #include <boost/regex.hpp>
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 
 #include "Block.h"
 #include "Function.h"
@@ -170,14 +172,23 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 	return true;
 }
 
+bool TranslationUnit::LinkFunctionBlocks()
+{
+	BOOST_FOREACH(Function* fp, m_function_defs)
+	{
+		fp->LinkBlocks();
+	}
+
+	return true;
+}
+
 void TranslationUnit::Print()
 {
 	std::cout << "Translation Unit Filename: " << m_filename << std::endl;
-	std::cout << "Declared functions:" << std::endl;
+	std::cout << "Defined functions:" << std::endl;
 
-	std::vector< Function * >::iterator it;
-	for(it = m_function_defs.begin(); it != m_function_defs.end(); it++)
+	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		(*it)->Print();
+		fp->Print();
 	}
 }
