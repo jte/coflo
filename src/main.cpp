@@ -28,8 +28,18 @@ int main(int argc, const char* argv[])
 	{
 		tu = new TranslationUnit();
 
+		// Parse this file.
+		std::cout << "Parsing \"" << argv[1] << "\"..." << std::endl;
 		bool retval = tu->ParseFile(argv[1]);
+		if(retval == false)
+		{
+			std::cerr << "ERROR: Couldn't parse \"" << argv[1] << "\"" << std::endl;
+			return 1;
+		}
 
+		// Link the blocks in the functions in the file.
+		std::cout << "Linking function blocks..." << std::endl;
+		retval = tu->LinkFunctionBlocks();
 		if(retval == false)
 		{
 			std::cerr << "ERROR: Couldn't parse \"" << argv[1] << "\"" << std::endl;

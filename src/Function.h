@@ -31,7 +31,7 @@ public:
 	
 	void AddBlock(Block *block);
 
-	void LinkInterFunctionBlocks();
+	void LinkBlocks();
 
 	void Print();
 	
@@ -39,6 +39,10 @@ private:
 	
 	/// Function identifier.
 	std::string m_function_id;
+
+	/// Entry block.
+	/// Only valid after LinkBlocks() has been called.
+	Block *m_entry_block;
 	
 	/// Block list.
 	std::vector < Block * > m_block_list;

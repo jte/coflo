@@ -35,10 +35,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
-# Make sure we have at least Boost version 1.38.0.
-AX_BOOST_BASE([1.38.0])
+# Make sure we have a usable Boost version.
+AX_BOOST_BASE([1.45.0])
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
+AX_BOOST_SYSTEM
+AX_BOOST_FILESYSTEM
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
