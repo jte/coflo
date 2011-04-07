@@ -18,6 +18,7 @@
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Function.cpp Function.h \
+	FunctionCall.cpp FunctionCall.h \
 	Block.cpp Block.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \

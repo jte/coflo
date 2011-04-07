@@ -33,10 +33,28 @@ public:
 
 	void LinkBlocks();
 
+	void LinkIntoGraph();
+
 	void Print();
 	
 private:
+
+	/// Typedef for vertex properties.
+	typedef boost::property < boost::vertex_color_t, boost::default_color_type > T_VERTEX_PROPERTIES;
 	
+	/// Typedef for the block graph.
+	typedef boost::adjacency_list
+			<boost::vecS,
+			boost::vecS,
+			boost::bidirectionalS,
+			T_VERTEX_PROPERTIES
+			> T_BLOCK_GRAPH;
+
+	typedef boost::graph_traits<T_BLOCK_GRAPH>::vertex_descriptor T_VERTEX;
+
+	/// The block graph.
+	T_BLOCK_GRAPH m_block_graph;
+
 	/// Function identifier.
 	std::string m_function_id;
 
