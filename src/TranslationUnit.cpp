@@ -25,6 +25,10 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
+
 
 #include "Block.h"
 #include "Function.h"
@@ -126,6 +130,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 
 				std::cout << "Found block: " << what[1] << std::endl;
 
+				// See if there was a starting line number for this block.
 				if(what[2].matched)
 				{
 					block_start_line_no = atoi(what[2].str().c_str());
@@ -174,6 +179,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 
 bool TranslationUnit::LinkFunctionBlocks()
 {
+	// Go through each function in the translation unit and do the block linking.
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		fp->LinkBlocks();

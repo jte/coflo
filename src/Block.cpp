@@ -60,7 +60,7 @@ void Block::AddSuccessors(std::string successors_string)
 		if(regex_match(successors_string.c_str(), match_results, is_exit))
 		{
 			// Add EXIT (i.e. exit function) link to list.
-			m_successor_list.push_back(new SuccessorExit(0));
+			m_successor_list.push_back(new SuccessorExit(1));
 
 			// Consume the substring we just parsed.
 			successors_string = match_results[1];

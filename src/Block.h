@@ -26,8 +26,12 @@ class Successor;
 
 class Block
 {
-
 public:
+	typedef std::vector< std::string > T_FUNCTION_CALL_LIST;
+	typedef T_FUNCTION_CALL_LIST::iterator T_FUNCTION_CALL_LIST_ITERATOR;
+	typedef std::vector< Successor * > T_BLOCK_SUCCESSOR_LIST;
+	typedef T_BLOCK_SUCCESSOR_LIST::iterator T_BLOCK_SUCCESSOR_ITERATOR;
+
 	Block(Function * parent_function, long block_number, long block_starting_line_in_src);
 	~Block();
 
@@ -49,6 +53,13 @@ public:
 
 	void PrintBlock(long indent_level);
 
+	/// \name Iterators.
+	T_FUNCTION_CALL_LIST_ITERATOR begin() { return m_function_calls.begin(); };
+	T_FUNCTION_CALL_LIST_ITERATOR end() { return m_function_calls.end(); };
+
+	T_BLOCK_SUCCESSOR_ITERATOR successor_begin() { return m_successor_list.begin(); };
+	T_BLOCK_SUCCESSOR_ITERATOR successor_end() { return m_successor_list.end(); };
+
 private:
 
 	/// Pointer to the function which contains this block.
@@ -61,10 +72,10 @@ private:
 	long block_starting_line_in_src;
 
 	/// List of the function calls in this block.
-	std::vector< std::string > m_function_calls;
+	T_FUNCTION_CALL_LIST m_function_calls;
 
 	/// List of successors to this block.
-	std::vector< Successor * > m_successor_list;
+	T_BLOCK_SUCCESSOR_LIST m_successor_list;
 
 };
 

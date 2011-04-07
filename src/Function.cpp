@@ -20,6 +20,11 @@
 #include <typeinfo>
 
 #include <boost/foreach.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/graph/breadth_first_search.hpp>
 
 #include "Block.h"
 
@@ -58,18 +63,17 @@ void Function::LinkBlocks()
 		linkmap[bp->GetBlockNumber()] = bp;
 
 		// Collect all the blocks' Successors into a list.
-		long i;
-		Successor *s;
-		for(i=0; s = bp->GetSuccessorAtIndex(i), s != NULL; i++)
+		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
+		for(s = bp->successor_begin(); s != bp->successor_end(); s++)
 		{
-			if(NULL != dynamic_cast<SuccessorExit*>(s))
+			if(NULL != dynamic_cast<SuccessorExit*>(*s))
 			{
 				std::cout << "INFO: Found EXIT successor." << std::endl;
-				s->SetSuccessorBlockPtr(NULL);
+				(*s)->SetSuccessorBlockPtr(NULL);
 			}
 			else
 			{
-				successor_list.push_back(s);
+				successor_list.push_back(*s);
 			}
 		}
 	}
@@ -110,6 +114,33 @@ void Function::LinkBlocks()
 			(*it2)->SetSuccessorBlockPtr(linkmap_it->second);
 		}
 	}
+
+	LinkIntoGraph();
+}
+
+void Function::LinkIntoGraph()
+{
+	// Put the function blocks into a graph.
+	
+	// Iterate over each block.
+	BOOST_FOREACH(Block *bp, m_block_list)
+	{
+		long this_block = bp->GetBlockNumber();
+		long next_block;
+
+		// Go through all the successors.
+		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
+		for(s = bp->successor_begin(); s != bp->successor_end(); s++)
+		{
+			next_block = (*s)->GetSuccessorBlockNumber();
+			if(next_block != 0)
+			{
+				add_edge(this_block, next_block, m_block_graph);
+				//add_edge(bp, bp, m_block_graph);
+			}
+		}
+	}
+
 }
 
 void Function::Print()
@@ -117,6 +148,17 @@ void Function::Print()
 	// Print the function info.
 	std::cout << "Function Definition: " << m_function_id << std::endl;
 
+	/// \todo
+	write_graphviz(std::cout, m_block_graph);
+
+	typedef std::vector< T_VERTEX > T_SORTED_BLOCK_CONTAINER;
+	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
+	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
+	
 	// Print the function's blocks.
-	m_entry_block->PrintBlock(1);
+	BOOST_FOREACH(/*Block *bp*/ long i, topologically_sorted_blocks)
+	{
+		//bp->PrintBlock(1);
+		std::cout << i << std::endl;
+	}
 }
