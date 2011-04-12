@@ -120,45 +120,135 @@ void Function::LinkBlocks()
 
 void Function::LinkIntoGraph()
 {
-	// Put the function blocks into a graph.
+	// Block*->VertexID map.
+	typedef std::map< Block*, VertexID > T_BLOCK_MAP;
+	T_BLOCK_MAP block_map;	
 	
-	// Iterate over each block.
+	// Add the function blocks into the m_block_graph.	
 	BOOST_FOREACH(Block *bp, m_block_list)
 	{
-		long this_block = bp->GetBlockNumber();
-		long next_block;
+		// this_block_id is the new Vertex.
+		VertexID this_block_id = boost::add_vertex(m_block_graph);
+		m_block_graph[this_block_id].m_block = bp;
+		
+		// Add the block ID to a temporary map for use in linking below.
+		block_map[bp] = this_block_id;
+	}
+
+	// Iterate over each block again, this time adding the edges between blocks.
+	BOOST_FOREACH(Block *bp, m_block_list)
+	{
+		VertexID this_block = block_map[bp];
+		VertexID next_block;
 
 		// Go through all the successors.
 		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
 		for(s = bp->successor_begin(); s != bp->successor_end(); s++)
 		{
-			next_block = (*s)->GetSuccessorBlockNumber();
-			if(next_block != 0)
+			T_BLOCK_MAP::iterator it;
+			it = block_map.find((*s)->GetSuccessorBlockPtr());
+			if(it != block_map.end())
 			{
-				add_edge(this_block, next_block, m_block_graph);
-				//add_edge(bp, bp, m_block_graph);
+				// Found the next block.
+				next_block = it->second;
+				EdgeID edge;
+				bool ok;
+				boost::tie(edge, ok) = boost::add_edge(this_block, next_block, m_block_graph);
+				// Check if there's no error, then set up the edge properties.
+				if (ok)
+				{
+					m_block_graph[edge].m_edge_text = "TODO";
+				}
+			}
+			else
+			{
+				// Couldn't find the next block, it's probably EXIT.
+				std::cerr << "ERROR: Couldn't find next_block in block_map" << std::endl;
 			}
 		}
 	}
-
 }
 
+struct graph_property_writer
+{
+	void operator()(std::ostream& out) const
+	{
+		out << "graph [clusterrank=local]" << std::endl;
+		out << "node [shape=rectangle]" << std::endl;
+		out << "edge [style=solid]" << std::endl;
+	}
+};
+
+	// Class template of a vertex property writer
+template < typename Graph >
+class vertex_property_writer
+{
+public:
+	vertex_property_writer(Graph _g) : g(_g) {}
+	template <typename Vertex>
+	void operator()(std::ostream& out, const Vertex& v) 
+	{
+		out << "[label=\"";
+		if(g[v].m_block != NULL)
+		{
+			out << g[v].m_block->GetBlockNumber();
+		}
+		else
+		{
+			out << "UNKNOWN";
+		}
+		out << "\"]";
+	}
+private:
+	Graph& g;
+};
+	
 void Function::Print()
 {
+	long indent_level = 0;
+	
 	// Print the function info.
 	std::cout << "Function Definition: " << m_function_id << std::endl;
 
-	/// \todo
-	write_graphviz(std::cout, m_block_graph);
+	boost::write_graphviz(std::cout, m_block_graph,
+						 vertex_property_writer<T_BLOCK_GRAPH>(m_block_graph),
+						 boost::default_writer(),
+						 graph_property_writer());
 
-	typedef std::vector< T_VERTEX > T_SORTED_BLOCK_CONTAINER;
+	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
 	
 	// Print the function's blocks.
-	BOOST_FOREACH(/*Block *bp*/ long i, topologically_sorted_blocks)
+	for(T_SORTED_BLOCK_CONTAINER::reverse_iterator rit = topologically_sorted_blocks.rbegin();
+		rit != topologically_sorted_blocks.rend();
+		rit++)
 	{
-		//bp->PrintBlock(1);
-		std::cout << i << std::endl;
+		if(m_block_graph[*rit].m_block != NULL)
+		{
+			std::cout << m_block_graph[*rit].m_block->GetBlockNumber() << std::endl;
+
+			// If we have more than one in-edge, that means we're collapsing down
+			// from a higher level of branching, so decrese the indent.
+			if(boost::in_degree(*rit, m_block_graph) > 1)
+			{
+				indent_level--;
+			}
+			
+			// Print the block.
+			m_block_graph[*rit].m_block->PrintBlock(1+indent_level);
+			
+			// If we have more than one out-edge, that means this was a decision
+			// block of some sort, with multiple alternative outgoing control flow paths.
+			// Increase the indent level.
+			if(boost::out_degree(*rit, m_block_graph) > 1)
+			{
+				indent_level++;
+			}
+		}
+		else
+		{
+			std::cout << "INFO: m_block_graph[" << *rit << "].m_block == NULL" << std::endl;
+		}
 	}
 }
