@@ -108,18 +108,6 @@ void Block::AddSuccessors(std::string successors_string)
 	}
 }
 
-Successor* Block::GetSuccessorAtIndex(std::vector< Successor * >::size_type index) const
-{
-	if( index < m_successor_list.size())
-	{
-		return m_successor_list[index];
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
 void Block::PrintBlock(long indent_level)
 {
 	// Print out all function calls in this block.
@@ -127,7 +115,7 @@ void Block::PrintBlock(long indent_level)
 	{
 		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << fp << std::endl;
 	}
-
+return;
 	// Print successors.
 	BOOST_FOREACH(Successor *s, m_successor_list)
 	{

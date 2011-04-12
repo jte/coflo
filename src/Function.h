@@ -40,20 +40,30 @@ public:
 private:
 
 	/// Typedef for vertex properties.
-	typedef boost::property < boost::vertex_color_t, boost::default_color_type > T_VERTEX_PROPERTIES;
-	
+	//typedef boost::property < boost::vertex_color_t, boost::default_color_type > T_VERTEX_PROPERTIES;
+	struct Vertex
+	{
+		Block *m_block;
+	};
+	struct Edge
+	{
+		std::string m_edge_text;
+	};
+
 	/// Typedef for the block graph.
 	typedef boost::adjacency_list
 			<boost::vecS,
 			boost::vecS,
 			boost::bidirectionalS,
-			T_VERTEX_PROPERTIES
+			Vertex,
+			Edge
 			> T_BLOCK_GRAPH;
-
-	typedef boost::graph_traits<T_BLOCK_GRAPH>::vertex_descriptor T_VERTEX;
 
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;
+	
+	typedef T_BLOCK_GRAPH::vertex_descriptor VertexID;
+	typedef T_BLOCK_GRAPH::edge_descriptor EdgeID;
 
 	/// Function identifier.
 	std::string m_function_id;
@@ -63,8 +73,7 @@ private:
 	Block *m_entry_block;
 	
 	/// Block list.
-	std::vector < Block * > m_block_list;
-	
+	std::vector < Block * > m_block_list;	
 };
  
 #endif // FUNCTION_H

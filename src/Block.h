@@ -49,8 +49,6 @@ public:
 	 */
 	void AddSuccessors(std::string successors_string);
 
-	Successor* GetSuccessorAtIndex(std::vector< Successor * >::size_type index) const;
-
 	void PrintBlock(long indent_level);
 
 	/// \name Iterators.
