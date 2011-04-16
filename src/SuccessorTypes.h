@@ -21,7 +21,7 @@
 #include "Successor.h"
 
 /// Macro for easily declaring the multiple subclasses.
-#define M_DECLARE_SUCCESSOR_SUBCLASS(s, indent) \
+#define M_DECLARE_SUCCESSOR_SUBCLASS(s, indent, has_edge_label) \
 class Successor##s : public Successor \
 { \
 public: \
@@ -29,18 +29,20 @@ public: \
     Successor##s(const std::string &block_number_as_string) : Successor(block_number_as_string) {}; \
     Successor##s(const Successor##s& orig) : Successor(orig) {}; \
     virtual ~Successor##s() {}; \
+	/** Returns true if this edge has a label. */ \
+	virtual bool HasEdgeLabel() const { return has_edge_label; }; \
 	/** Returns text suitable for labelling the edge. */ \
-	virtual std::string GetSuccessorText() const { return std::string(#s); }; \
+	virtual std::string GetEdgeLabel() const { return std::string(#s); }; \
 	virtual bool GetIndent() const { return indent; }; \
 }
 
 /// \name The various types of successors
 //@{
-M_DECLARE_SUCCESSOR_SUBCLASS(Exit, false);
-M_DECLARE_SUCCESSOR_SUBCLASS(Fallthru, false);
-M_DECLARE_SUCCESSOR_SUBCLASS(True, true);
-M_DECLARE_SUCCESSOR_SUBCLASS(False, true);
-M_DECLARE_SUCCESSOR_SUBCLASS(Undecorated, true);
+M_DECLARE_SUCCESSOR_SUBCLASS(Exit, false, false);
+M_DECLARE_SUCCESSOR_SUBCLASS(Fallthru, false, false);
+M_DECLARE_SUCCESSOR_SUBCLASS(True, true, true);
+M_DECLARE_SUCCESSOR_SUBCLASS(False, true, true);
+M_DECLARE_SUCCESSOR_SUBCLASS(Undecorated, true, false);
 //@]
 
 #endif	/* SUCCESSORTYPES_H */

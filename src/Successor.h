@@ -30,7 +30,12 @@ public:
     Successor(const Successor& orig);
     virtual ~Successor();
 
-	virtual std::string GetSuccessorText() const = 0;
+	/** Returns true if this edge has a label. */
+	virtual bool HasEdgeLabel() const = 0;
+	
+	/** Returns text suitable for labelling the edge. */
+	virtual std::string GetEdgeLabel() const = 0;
+	
 	virtual bool GetIndent() const = 0;
 
 	long GetSuccessorBlockNumber() const { return m_block_number; };

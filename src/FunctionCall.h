@@ -18,17 +18,27 @@
 #ifndef FUNCTIONCALL_H
 #define	FUNCTIONCALL_H
 
+#include <string>
+
 class Function;
 
 class FunctionCall
 {
 public:
-	FunctionCall();
+	FunctionCall(std::string identifier);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
+	
+	std::string GetIdentifier() const;
 
 private:
 	
+	/// Identifier of the function we're calling.
+	std::string m_identifier;
+	
+	/// Pointer to the function we're calling.
+	/// Will be NULL at least until we've linked, and
+	/// may not be resolvable even then.
 	Function *m_function;
 };
 
