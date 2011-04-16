@@ -123,7 +123,7 @@ return;
 
 		bp = s->GetSuccessorBlockPtr();
 
-		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << s->GetSuccessorText() << std::endl;
+		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << s->GetEdgeLabel() << std::endl;
 
 		if(bp == NULL)
 		{

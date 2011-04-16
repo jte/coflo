@@ -35,6 +35,11 @@ int test_func(void)
 	return 1;
 }
 
+int predicate_1(void)
+{
+    return 1;
+}
+
 int main()
 {
 	int retval;
@@ -47,9 +52,12 @@ int main()
 	}
 	else
 	{
+            while(predicate_1())
+            {
 		retval = w();
 		retval = y();
 		retval = z();
+            }
 	}
 	
 	switch(1)

@@ -79,7 +79,7 @@ void Function::LinkBlocks()
 	}
 
 	// Block 2 appears to always be the entry block, set it.
-	/// \todo Check for "PRED: ENTRY" to make sure of this.
+	/// \todo We really should check for "PRED: ENTRY" to make sure of this.
 	T_LINK_MAP_ITERATOR lmit = linkmap.find(2);
 	if(lmit == linkmap.end())
 	{
@@ -157,7 +157,12 @@ void Function::LinkIntoGraph()
 				// Check if there's no error, then set up the edge properties.
 				if (ok)
 				{
-					m_block_graph[edge].m_edge_text = "TODO";
+					// Label the edge with whatever the Successor object has
+					// for a label.
+					if((*s)->HasEdgeLabel())
+					{
+						m_block_graph[edge].m_edge_text = (*s)->GetEdgeLabel();
+					}
 				}
 			}
 			else
@@ -179,7 +184,7 @@ struct graph_property_writer
 	}
 };
 
-	// Class template of a vertex property writer
+/// Class template of a vertex property writer, for use with write_graphviz().
 template < typename Graph >
 class vertex_property_writer
 {
@@ -202,6 +207,27 @@ public:
 private:
 	Graph& g;
 };
+
+/// Class template of an edge property writer, for use with write_graphviz().
+template < typename Graph >
+class edge_property_writer
+{
+public:
+	edge_property_writer(Graph _g) : g(_g) {}
+	template <typename Edge>
+	void operator()(std::ostream& out, const Edge& e) 
+	{
+		// Only label the edge if we have some text to label it with.
+		if(g[e].m_edge_text.empty() == false)
+		{
+			out << "[label=\"";
+			out << g[e].m_edge_text;
+			out << "\"]";
+		}
+	}
+private:
+	Graph& g;
+};
 	
 void Function::Print()
 {
@@ -212,7 +238,7 @@ void Function::Print()
 
 	boost::write_graphviz(std::cout, m_block_graph,
 						 vertex_property_writer<T_BLOCK_GRAPH>(m_block_graph),
-						 boost::default_writer(),
+						 edge_property_writer<T_BLOCK_GRAPH>(m_block_graph),
 						 graph_property_writer());
 
 	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;

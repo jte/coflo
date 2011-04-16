@@ -39,12 +39,13 @@ public:
 	
 private:
 
-	/// Typedef for vertex properties.
-	//typedef boost::property < boost::vertex_color_t, boost::default_color_type > T_VERTEX_PROPERTIES;
+	/// Vertex properties for the Block graph.
 	struct Vertex
 	{
 		Block *m_block;
 	};
+	
+	/// Edge properties for the Block graph.
 	struct Edge
 	{
 		std::string m_edge_text;
