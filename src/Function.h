@@ -38,6 +38,9 @@ public:
 	void Print();
 	
 private:
+	
+	/// Remove the back edges from the graph.
+	void RemoveBackEdges();
 
 	/// Vertex properties for the Block graph.
 	struct Vertex
@@ -49,6 +52,10 @@ private:
 	struct Edge
 	{
 		std::string m_edge_text;
+		
+		/// Indicates if this edge is a back edge, and thus should not be used
+		/// for algorithms which need to ignore cycles.
+		bool m_is_back_edge;
 	};
 
 	/// Typedef for the block graph.
@@ -63,6 +70,9 @@ private:
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;
 	
+	/// The block graph with all back edges removed.
+	T_BLOCK_GRAPH m_block_graph_no_back_edges;
+	
 	typedef T_BLOCK_GRAPH::vertex_descriptor VertexID;
 	typedef T_BLOCK_GRAPH::edge_descriptor EdgeID;
 
@@ -72,6 +82,10 @@ private:
 	/// Entry block.
 	/// Only valid after LinkBlocks() has been called.
 	Block *m_entry_block;
+	
+	/// Exit block.
+	/// Only valid after LinkBlocks() has been called.
+	Block *m_exit_block;
 	
 	/// Block list.
 	std::vector < Block * > m_block_list;	

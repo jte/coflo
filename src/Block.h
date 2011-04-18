@@ -36,6 +36,13 @@ public:
 	~Block();
 
 	long GetBlockNumber() const { return m_block_number; };
+	
+	/**
+	 * Returns text appropriate for labelling the block in a GraphViz dot graph.
+	 * 
+     * @return The appropriate block label text.
+     */
+	std::string GetBlockLabel() const { return m_block_label; };
 
 	void AddFunctionCall(const std::string &function_name);
 
@@ -51,13 +58,22 @@ public:
 
 	void PrintBlock(long indent_level);
 
-	/// \name Iterators.
+	/// @name Iterators.
+	//@{
+	
+	/// Returns the begin iterator for function calls.
 	T_FUNCTION_CALL_LIST_ITERATOR begin() { return m_function_calls.begin(); };
+	
+	/// Returns the end iterator for function calls.
 	T_FUNCTION_CALL_LIST_ITERATOR end() { return m_function_calls.end(); };
 
+	/// Returns the begin iterator for iterating through successors.
 	T_BLOCK_SUCCESSOR_ITERATOR successor_begin() { return m_successor_list.begin(); };
+	
+	/// Returns the begin iterator for iterating through successors.
 	T_BLOCK_SUCCESSOR_ITERATOR successor_end() { return m_successor_list.end(); };
-
+	
+	//@}
 private:
 
 	/// Pointer to the function which contains this block.
@@ -65,6 +81,8 @@ private:
 
 	/// The block number.
 	long m_block_number;
+	
+	std::string m_block_label;
 
 	/// The source line it starts on.
 	long block_starting_line_in_src;

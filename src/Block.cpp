@@ -19,6 +19,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 #include <boost/regex.hpp>
@@ -32,6 +33,30 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 {
 	m_parent_function = parent_function;
 	m_block_number = block_number;
+	
+	switch(block_number)
+	{
+		case 0:
+		{
+			// This is the entry block.
+			m_block_label = "ENTRY";
+			break;
+		}
+		case 1:
+		{
+			// This is the exit block.
+			m_block_label = "EXIT";
+			break;
+		}
+		default:
+		{
+			// Make the label the block number.
+			std::stringstream oss;
+			oss << m_block_number;
+			m_block_label = oss.str();
+			break;
+		}
+	}
 }
  
 Block::~Block()

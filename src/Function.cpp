@@ -39,6 +39,13 @@ Function::Function(const std::string &function_id)
 {
 	m_function_id = function_id;
 	m_entry_block = NULL;
+	m_exit_block = NULL;
+	
+	// Add the entry and exit blocks.
+	m_entry_block = new Block(this, 0, 0);
+	m_exit_block = new Block(this, 1, 0);
+	m_block_list.push_back(m_entry_block);
+	m_block_list.push_back(m_exit_block);
 }
  
 Function::~Function()
@@ -55,7 +62,7 @@ void Function::LinkBlocks()
 	// A map of the blocks constituting this function.
 	T_LINK_MAP linkmap;
 	std::vector< Successor* > successor_list;
-
+	
 	// Go through all the blocks and add them to the link map.
 	BOOST_FOREACH(Block *bp, m_block_list)
 	{
@@ -69,7 +76,7 @@ void Function::LinkBlocks()
 			if(NULL != dynamic_cast<SuccessorExit*>(*s))
 			{
 				std::cout << "INFO: Found EXIT successor." << std::endl;
-				(*s)->SetSuccessorBlockPtr(NULL);
+				(*s)->SetSuccessorBlockPtr(m_exit_block);
 			}
 			else
 			{
@@ -114,8 +121,6 @@ void Function::LinkBlocks()
 			(*it2)->SetSuccessorBlockPtr(linkmap_it->second);
 		}
 	}
-
-	LinkIntoGraph();
 }
 
 void Function::LinkIntoGraph()
@@ -196,7 +201,7 @@ public:
 		out << "[label=\"";
 		if(g[v].m_block != NULL)
 		{
-			out << g[v].m_block->GetBlockNumber();
+			out << g[v].m_block->GetBlockLabel();
 		}
 		else
 		{
@@ -228,7 +233,51 @@ public:
 private:
 	Graph& g;
 };
+
+template < typename Edge, typename Graph >
+class dfs_time_visitor : public boost::default_dfs_visitor
+{
+public:
+	dfs_time_visitor(std::vector< Edge > *back_edge_list) : boost::default_dfs_visitor()
+	{ 
+		// Save the pointer to the back edge list to put the results in.
+		m_back_edge_list = back_edge_list;
+	};
 	
+	void back_edge(Edge e, const Graph & g) const
+	{
+		std::cout << "Marking BackEdge" << std::endl;
+		
+		// Record this edge as a back edge.
+		m_back_edge_list->push_back(e);
+	}
+	
+private:
+	
+	/// Pointer to the edge list to 
+	std::vector< Edge > *m_back_edge_list;
+};
+
+
+void Function::RemoveBackEdges()
+{
+	// List of back edges that we'll delete.
+	std::vector< EdgeID > m_back_edge_list;
+	
+	// The instance of the DFS visitor which we'll pass to the DFS.
+	dfs_time_visitor<EdgeID, T_BLOCK_GRAPH> vis(&m_back_edge_list);
+	
+	// Find all the back edges.
+	boost::depth_first_search(m_block_graph, boost::visitor(vis));
+	
+	// Remove the back edges.
+	BOOST_FOREACH(EdgeID e, m_back_edge_list)
+	{
+		std::cerr << "Removing back edge." << std::endl;
+		remove_edge(e, m_block_graph);
+	}
+}
+
 void Function::Print()
 {
 	long indent_level = 0;
@@ -240,7 +289,11 @@ void Function::Print()
 						 vertex_property_writer<T_BLOCK_GRAPH>(m_block_graph),
 						 edge_property_writer<T_BLOCK_GRAPH>(m_block_graph),
 						 graph_property_writer());
-
+	
+	// Remove all back edges before we do the topological sort, since it can't
+	// handle cycles.
+	RemoveBackEdges();
+	
 	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));

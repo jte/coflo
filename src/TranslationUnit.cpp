@@ -183,6 +183,9 @@ bool TranslationUnit::LinkFunctionBlocks()
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		fp->LinkBlocks();
+		
+		/// Link the basic blocks into a BlockGraph.
+		fp->LinkIntoGraph();
 	}
 
 	return true;
@@ -191,6 +194,7 @@ bool TranslationUnit::LinkFunctionBlocks()
 void TranslationUnit::Print()
 {
 	std::cout << "Translation Unit Filename: " << m_filename << std::endl;
+	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
 
 	BOOST_FOREACH(Function* fp, m_function_defs)
