@@ -29,6 +29,7 @@ public:
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
 	
+	/// Returns the name of the function being called.
 	std::string GetIdentifier() const;
 
 private:
