@@ -52,12 +52,12 @@ int main()
 	}
 	else
 	{
-            while(predicate_1())
-            {
-		retval = w();
-		retval = y();
-		retval = z();
-            }
+        while(predicate_1())
+        {
+			retval = w();
+			retval = y();
+			retval = z();
+        }
 	}
 	
 	switch(1)

@@ -1,24 +1,24 @@
-# configure.ac for coflo
+# configure.ac for CoFlo
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
-# This file is part of coflo.
+# This file is part of CoFlo.
 #
-# coflo is free software: you can redistribute it and/or modify it under the
+# CoFlo is free software: you can redistribute it and/or modify it under the
 # terms of version 3 of the GNU General Public License as published by the Free
 # Software Foundation.
 #
-# coflo is distributed in the hope that it will be useful, but WITHOUT ANY
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License along with
-# coflo.  If not, see <http://www.gnu.org/licenses/>.
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.68)
-AC_INIT(coflo, 0.1, BUG-REPORT-ADDRESS)
+AC_INIT(CoFlo, m4_esyscmd([echo "0.0" | tr -d '\n']), BUG-REPORT-ADDRESS,,[http://coflo.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
 AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
