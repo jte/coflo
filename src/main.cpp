@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 
 #include "TranslationUnit.h"
@@ -91,30 +92,33 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
-	if(argc > 0)
+	if(vm.count("input-file")>0)
 	{
-		tu = new TranslationUnit();
-
-		// Parse this file.
-		std::cout << "Parsing \"" << argv[1] << "\"..." << std::endl;
-		bool retval = tu->ParseFile(argv[1]);
-		if(retval == false)
+		BOOST_FOREACH(std::string input_file, vm["input-file"].as< std::vector<std::string> >())
 		{
-			std::cerr << "ERROR: Couldn't parse \"" << argv[1] << "\"" << std::endl;
-			return 1;
-		}
+			tu = new TranslationUnit();
 
-		// Link the blocks in the functions in the file.
-		std::cout << "Linking function blocks..." << std::endl;
-		retval = tu->LinkFunctionBlocks();
-		if(retval == false)
-		{
-			std::cerr << "ERROR: Couldn't parse \"" << argv[1] << "\"" << std::endl;
-			return 1;
+			// Parse this file.
+			std::cout << "Parsing \"" << input_file << "\"..." << std::endl;
+			bool retval = tu->ParseFile(input_file);
+			if(retval == false)
+			{
+				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
+				return 1;
+			}
+
+			// Link the blocks in the functions in the file.
+			std::cout << "Linking function blocks..." << std::endl;
+			retval = tu->LinkFunctionBlocks();
+			if(retval == false)
+			{
+				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
+				return 1;
+			}
+	
+			tu->Print();
 		}
 	}
-
-	tu->Print();
 
 	return 0;
 }
