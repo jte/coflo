@@ -15,34 +15,15 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FunctionCall.h"
+#include "Switch.h"
 
-FunctionCall::FunctionCall(std::string identifier)
-{
-	m_identifier = identifier;
-	m_function = NULL;
-}
+Switch::Switch() { }
 
-FunctionCall::FunctionCall(const FunctionCall& orig)
-{
-	m_identifier = orig.m_identifier;
-	m_function = orig.m_function;
-}
+Switch::Switch(const Switch& orig) { }
 
-FunctionCall::~FunctionCall()
-{
-}
+Switch::~ Switch() { }
 
-std::string FunctionCall::GetIdentifier() const
+std::string Switch::GetStatementText() const
 {
-	if(m_function == NULL)
-	{
-		// Haven't linked yet, return the identifier we found.
-		return m_identifier;
-	}
-	else
-	{
-		/// \todo Not implemented.
-		return std::string("NOT YET IMPLEMENTED");
-	}
+	return "SWITCH";
 }

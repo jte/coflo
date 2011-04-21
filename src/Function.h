@@ -52,10 +52,6 @@ private:
 	struct Edge
 	{
 		std::string m_edge_text;
-		
-		/// Indicates if this edge is a back edge, and thus should not be used
-		/// for algorithms which need to ignore cycles.
-		bool m_is_back_edge;
 	};
 
 	/// Typedef for the block graph.
@@ -66,15 +62,18 @@ private:
 			Vertex,
 			Edge
 			> T_BLOCK_GRAPH;
-
+	
+	/// Typedef for the vertex_descriptors in the block graph.
+	typedef T_BLOCK_GRAPH::vertex_descriptor VertexID;
+	
+	/// Typedef for the edge_descriptors in the block graph.
+	typedef T_BLOCK_GRAPH::edge_descriptor EdgeID;
+	
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;
 	
 	/// The block graph with all back edges removed.
 	T_BLOCK_GRAPH m_block_graph_no_back_edges;
-	
-	typedef T_BLOCK_GRAPH::vertex_descriptor VertexID;
-	typedef T_BLOCK_GRAPH::edge_descriptor EdgeID;
 
 	/// Function identifier.
 	std::string m_function_id;

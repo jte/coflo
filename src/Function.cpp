@@ -63,6 +63,9 @@ void Function::LinkBlocks()
 	T_LINK_MAP linkmap;
 	std::vector< Successor* > successor_list;
 	
+	// Add the entry pseudoblock.
+	m_entry_block->AddSuccessors("2 (fallthru)");
+	
 	// Go through all the blocks and add them to the link map.
 	BOOST_FOREACH(Block *bp, m_block_list)
 	{
@@ -92,7 +95,7 @@ void Function::LinkBlocks()
 	{
 		std::cerr << "ERROR: Can't find Block 2." << std::endl;
 	}
-	m_entry_block = lmit->second;
+	// = lmit->second;
 
 	// Now go through all the Successors and link them to the Blocks they refer to.
 	std::vector< Successor* >::iterator it2;
@@ -274,7 +277,7 @@ void Function::RemoveBackEdges()
 	BOOST_FOREACH(EdgeID e, m_back_edge_list)
 	{
 		std::cerr << "Removing back edge." << std::endl;
-		remove_edge(e, m_block_graph);
+		boost::remove_edge(e, m_block_graph);
 	}
 }
 
@@ -298,6 +301,9 @@ void Function::Print()
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
 	
+	// Print the function identifier.
+	std::cout << m_function_id << "()" << std::endl;
+	
 	// Print the function's blocks.
 	for(T_SORTED_BLOCK_CONTAINER::reverse_iterator rit = topologically_sorted_blocks.rbegin();
 		rit != topologically_sorted_blocks.rend();
@@ -305,9 +311,7 @@ void Function::Print()
 	{
 		if(m_block_graph[*rit].m_block != NULL)
 		{
-			std::cout << m_block_graph[*rit].m_block->GetBlockNumber() << std::endl;
-
-			// If we have more than one in-edge, that means we're collapsing down
+			// If this block has more than one in-edge, that means we're collapsing down
 			// from a higher level of branching, so decrese the indent.
 			if(boost::in_degree(*rit, m_block_graph) > 1)
 			{
@@ -317,7 +321,7 @@ void Function::Print()
 			// Print the block.
 			m_block_graph[*rit].m_block->PrintBlock(1+indent_level);
 			
-			// If we have more than one out-edge, that means this was a decision
+			// If this block has more than one out-edge, that means this was a decision
 			// block of some sort, with multiple alternative outgoing control flow paths.
 			// Increase the indent level.
 			if(boost::out_degree(*rit, m_block_graph) > 1)

@@ -23,12 +23,17 @@
 
 class Function;
 class Successor;
+class Statement;
 
+/**
+ * Class encapsulating a basic block.
+ */
 class Block
 {
 public:
-	typedef std::vector< std::string > T_FUNCTION_CALL_LIST;
-	typedef T_FUNCTION_CALL_LIST::iterator T_FUNCTION_CALL_LIST_ITERATOR;
+	typedef std::vector< Statement* > T_STATEMENT_LIST;
+	typedef T_STATEMENT_LIST::iterator T_STATEMENT_LIST_ITERATOR;
+	
 	typedef std::vector< Successor * > T_BLOCK_SUCCESSOR_LIST;
 	typedef T_BLOCK_SUCCESSOR_LIST::iterator T_BLOCK_SUCCESSOR_ITERATOR;
 
@@ -44,7 +49,12 @@ public:
      */
 	std::string GetBlockLabel() const { return m_block_label; };
 
-	void AddFunctionCall(const std::string &function_name);
+	/**
+	 * Add the next statement to the block.
+	 * 
+     * @param statement Pointer to the Statement object to add.
+     */
+	void AddStatement(Statement *statement);
 
 	/**
 	 * Extract the successor block information from the passed string.  The
@@ -61,11 +71,11 @@ public:
 	/// @name Iterators.
 	//@{
 	
-	/// Returns the begin iterator for function calls.
-	T_FUNCTION_CALL_LIST_ITERATOR begin() { return m_function_calls.begin(); };
+	/// Returns the begin() iterator for statements in this function.
+	T_STATEMENT_LIST_ITERATOR begin() { return m_statement_list.begin(); };
 	
-	/// Returns the end iterator for function calls.
-	T_FUNCTION_CALL_LIST_ITERATOR end() { return m_function_calls.end(); };
+	/// Returns the end() iterator for statements in this function.
+	T_STATEMENT_LIST_ITERATOR end() { return m_statement_list.end(); };
 
 	/// Returns the begin iterator for iterating through successors.
 	T_BLOCK_SUCCESSOR_ITERATOR successor_begin() { return m_successor_list.begin(); };
@@ -87,8 +97,8 @@ private:
 	/// The source line it starts on.
 	long block_starting_line_in_src;
 
-	/// List of the function calls in this block.
-	T_FUNCTION_CALL_LIST m_function_calls;
+	/// List of the statements in this block.
+	T_STATEMENT_LIST m_statement_list;
 
 	/// List of successors to this block.
 	T_BLOCK_SUCCESSOR_LIST m_successor_list;
