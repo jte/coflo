@@ -18,10 +18,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "TranslationUnit.h"
-
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>
+// Tell <boost/filesystem.hpp> that we want the new interface.
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
@@ -29,9 +28,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
+#include "TranslationUnit.h"
 
 #include "Block.h"
+#include "If.h"
 #include "Function.h"
+#include "FunctionCall.h"
+#include "Switch.h"
 #include "TranslationUnit.h"
 
 using namespace boost;
@@ -45,11 +48,16 @@ static const boost::regex block_start_expression("[[:space:]]+# BLOCK ([[:digit:
 
 // Regex for finding a "# SUCC:" statement, which ends the current block.
 // Capture 1 is the string of successors, which will be further parsed by the Block object itself.
-static const boost::regex successor_expression("[[:space:]]+# SUCC\\: (.*)");
+static const boost::regex successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
 
 // Regex to find function calls. Capture 1 is the file/line no, 2 is the called function ID.
 static const boost::regex function_call_expression(".+?(\\[.+?\\]) ([[:alpha:]_][[:alnum:]_]*) \\(.*?\\);");
 
+// Regex to find if/else statements.  Capture 1 is the file/line no.
+static const boost::regex if_expression(".+?(\\[.+?\\]) if \\(.*?\\)");
+
+// Regex to find switch statements.  Capture 1 is the file/line no.
+static const boost::regex switch_expression(".+?(\\[.+?\\]) switch \\(.*?\\)");
 
 
 TranslationUnit::TranslationUnit()
@@ -91,7 +99,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 		// Get the next line of input.
 		std::getline(input_file, line);
 
-		boost::cmatch what;
+		boost::cmatch capture_results;
 
 		// Check for and ignore comments.
 		if(line[0] == ';')
@@ -100,9 +108,9 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 		}
 
 		// Look for function definitions.
-		if(regex_match(line.c_str(), what, function_def_expression))
+		if(regex_match(line.c_str(), capture_results, function_def_expression))
 		{
-			in_function_name = what[1];
+			in_function_name = capture_results[1];
 			std::cout << "Found function: " << in_function_name << std::endl;
 			current_function = new Function(in_function_name);
 
@@ -124,16 +132,16 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 			}
 
 			// Look for block starts.
-			if(regex_match(line.c_str(), what, block_start_expression))
+			if(regex_match(line.c_str(), capture_results, block_start_expression))
 			{
 				long block_start_line_no;
 
-				std::cout << "Found block: " << what[1] << std::endl;
+				std::cout << "Found block: " << capture_results[1] << std::endl;
 
 				// See if there was a starting line number for this block.
-				if(what[2].matched)
+				if(capture_results[2].matched)
 				{
-					block_start_line_no = atoi(what[2].str().c_str());
+					block_start_line_no = atoi(capture_results[2].str().c_str());
 				}
 				else
 				{
@@ -141,19 +149,19 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 				}
 
 				current_block = new Block(current_function,
-										 atoi(what[1].str().c_str()),
+										 atoi(capture_results[1].str().c_str()),
 										 block_start_line_no);
 				in_block = true;
 				continue;
 			}
 
 			// Look for block ends.
-			if(regex_match(line.c_str(), what, successor_expression))
+			if(regex_match(line.c_str(), capture_results, successor_expression))
 			{
-				std::cout << "Found SUCC:, ending block: " << what[1] << std::endl;
+				std::cout << "Found SUCC:, ending block: " << capture_results[1] << std::endl;
 
 				// Tell the Block what its successors are.
-				current_block->AddSuccessors(what[1]);
+				current_block->AddSuccessors(capture_results[1]);
 
 				// Add the block to the current function.
 				current_function->AddBlock(current_block);
@@ -163,11 +171,39 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 
 			if(in_block)
 			{
-				// Look for function calls.
-				if(regex_match(line.c_str(), what, function_call_expression))
+				// Look for if statements.
+				if(regex_match(line.c_str(), capture_results, if_expression))
 				{
-					std::cout << "Found call: " << what[2] << std::endl;
-					current_block->AddFunctionCall(what[2]);
+					std::cerr << "Found if at location: " << capture_results[1] << std::endl;
+					
+					// Add the if to the block.
+					If *if_stmnt = new If();
+					current_block->AddStatement(if_stmnt);
+					
+					continue;
+				}
+				
+				// Look for switch statements.
+				if(regex_match(line.c_str(), capture_results, switch_expression))
+				{
+					std::cerr << "Found switch at location: " << capture_results[1] << std::endl;
+					
+					// Add the switch to the block.
+					Switch *switch_stmnt = new Switch();
+					current_block->AddStatement(switch_stmnt);
+					
+					continue;
+				}
+				
+				// Look for function calls.
+				if(regex_match(line.c_str(), capture_results, function_call_expression))
+				{
+					std::cerr << "Found call: " << capture_results[2] << std::endl;
+					
+					// Add the call to the block.
+					FunctionCall *f = new FunctionCall(capture_results[2]);
+					current_block->AddStatement(f);
+					
 					continue;
 				}
 			}

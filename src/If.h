@@ -15,34 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FunctionCall.h"
+#ifndef IF_H
+#define	IF_H
 
-FunctionCall::FunctionCall(std::string identifier)
-{
-	m_identifier = identifier;
-	m_function = NULL;
-}
+#include "Statement.h"
 
-FunctionCall::FunctionCall(const FunctionCall& orig)
+class If : public Statement
 {
-	m_identifier = orig.m_identifier;
-	m_function = orig.m_function;
-}
+public:
+	If();
+	If(const If& orig);
+	virtual ~If();
+	
+	virtual std::string GetStatementText() const;
+	
+private:
 
-FunctionCall::~FunctionCall()
-{
-}
+};
 
-std::string FunctionCall::GetIdentifier() const
-{
-	if(m_function == NULL)
-	{
-		// Haven't linked yet, return the identifier we found.
-		return m_identifier;
-	}
-	else
-	{
-		/// \todo Not implemented.
-		return std::string("NOT YET IMPLEMENTED");
-	}
-}
+#endif	/* IF_H */
+

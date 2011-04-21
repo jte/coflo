@@ -20,14 +20,22 @@
 
 #include <string>
 
+#include "Statement.h"
+
 class Function;
 
-class FunctionCall
+/**
+ * Class representing a function call statement.
+ * @param identifier
+ */
+class FunctionCall : public Statement
 {
 public:
 	FunctionCall(std::string identifier);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
+	
+	virtual std::string GetStatementText() const { return m_identifier + "()"; };
 	
 	/// Returns the name of the function being called.
 	std::string GetIdentifier() const;

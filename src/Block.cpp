@@ -26,6 +26,7 @@
 #include <boost/foreach.hpp>
 
 #include "SuccessorTypes.h"
+#include "Statement.h"
 
 using namespace boost;
 
@@ -63,9 +64,9 @@ Block::~Block()
 {
 }
  
-void Block::AddFunctionCall(const std::string &function_name)
+void Block::AddStatement(Statement *statement)
 {
-	m_function_calls.push_back(function_name);
+	m_statement_list.push_back(statement);
 }
 
 void Block::AddSuccessors(std::string successors_string)
@@ -135,30 +136,12 @@ void Block::AddSuccessors(std::string successors_string)
 
 void Block::PrintBlock(long indent_level)
 {
+	// Print the block number.
+	std::cout << std::setfill('\t') << std::setw(indent_level)<< "\t" << m_block_number << std::endl;
+	
 	// Print out all function calls in this block.
-	BOOST_FOREACH(std::string fp, m_function_calls)
+	BOOST_FOREACH(Statement *sp, m_statement_list)
 	{
-		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << fp << std::endl;
-	}
-return;
-	// Print successors.
-	BOOST_FOREACH(Successor *s, m_successor_list)
-	{
-		Block *bp;
-
-		bp = s->GetSuccessorBlockPtr();
-
-		std::cout << std::setfill('-') << std::setw(indent_level)<< "-" << s->GetEdgeLabel() << std::endl;
-
-		if(bp == NULL)
-		{
-			//std::cerr << "ERROR: Found Successor with NULL BlockPtr." << std::endl;
-		}
-		else
-		{
-			//std::cerr << "INFO: Printing block " << bp->GetBlockNumber() << std::endl;
-			// See if we should indent.
-			bp->PrintBlock(indent_level + static_cast<long>(s->GetIndent()));
-		}
+		std::cout << std::setfill('\t') << std::setw(indent_level)<< "\t" << sp->GetStatementText() << std::endl;
 	}
 }

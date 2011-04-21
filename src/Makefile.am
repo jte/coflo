@@ -20,9 +20,12 @@ coflo_SOURCES = main.cpp \
 	Block.cpp Block.h \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \
+	If.cpp If.h \
 	Program.cpp Program.h \
+	Statement.cpp Statement.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
+	Switch.cpp Switch.h \
 	TranslationUnit.cpp Translation.h
 
 nobase_check_SCRIPTS = test1.sh
