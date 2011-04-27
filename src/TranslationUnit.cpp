@@ -72,11 +72,12 @@ TranslationUnit::~ TranslationUnit()
 {
 }
 
-bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
+bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool debug_parse /* = false */)
 {
 	// Save the filename.
 	m_filename = filename;
 	
+	// Try to open the file whose name we were passed.
 	std::ifstream input_file(filename.string().c_str(), std::ifstream::in);
 
 	// Check if we were able to open the file.
@@ -213,7 +214,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename)
 	return true;
 }
 
-bool TranslationUnit::LinkFunctionBlocks()
+bool TranslationUnit::LinkBasicBlocks()
 {
 	// Go through each function in the translation unit and do the block linking.
 	BOOST_FOREACH(Function* fp, m_function_defs)
@@ -232,6 +233,14 @@ void TranslationUnit::Print()
 	std::cout << "Translation Unit Filename: " << m_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
+	
+	// Print the identifiers of the functions defined in this translation unit.
+	BOOST_FOREACH(Function* fp, m_function_defs)
+	{
+		std::cout << "Function: " << fp->GetIdentifier() << std::endl;
+	}
+	
+	std::cout << std::endl;
 
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{

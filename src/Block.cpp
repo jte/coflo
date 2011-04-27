@@ -144,4 +144,16 @@ void Block::PrintBlock(long indent_level)
 	{
 		std::cout << std::setfill('\t') << std::setw(indent_level)<< "\t" << sp->GetStatementText() << std::endl;
 	}
+	
+#if 0
+	// Recurse into the next blocks.
+	if(m_successor_list.size()>1)
+	{
+		indent_level++;
+	}
+	BOOST_FOREACH(Successor *s, m_successor_list)
+	{
+		s->GetSuccessorBlockPtr()->PrintBlock(indent_level);
+	}
+#endif
 }
