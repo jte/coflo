@@ -30,9 +30,9 @@ public:
     TranslationUnit(const TranslationUnit& orig);
     virtual ~TranslationUnit();
 
-	bool ParseFile(const boost::filesystem::path &filename);
+	bool ParseFile(const boost::filesystem::path &filename, bool debug_parse = false);
 
-	bool LinkFunctionBlocks();
+	bool LinkBasicBlocks();
 
 	void Print();
 

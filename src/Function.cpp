@@ -30,6 +30,7 @@
 
 #include "Function.h"
 #include "SuccessorTypes.h"
+#include "Statement.h"
 
 typedef std::map< long, Block * > T_LINK_MAP;
 typedef T_LINK_MAP::iterator T_LINK_MAP_ITERATOR;
@@ -182,6 +183,7 @@ void Function::LinkIntoGraph()
 	}
 }
 
+/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
 struct graph_property_writer
 {
 	void operator()(std::ostream& out) const
@@ -205,6 +207,12 @@ public:
 		if(g[v].m_block != NULL)
 		{
 			out << g[v].m_block->GetBlockLabel();
+			
+			Block::T_STATEMENT_LIST_ITERATOR sit;
+			for(sit = g[v].m_block->begin(); sit != g[v].m_block->end(); sit++)
+			{
+				out << "\\n" << (*sit)->GetStatementText();
+			}
 		}
 		else
 		{
@@ -300,6 +308,10 @@ void Function::Print()
 	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
+	std::vector< int > indent_edge_count_stack;
+	
+	// Start with an indent level of 0.
+	indent_edge_count_stack.push_back(0);
 	
 	// Print the function identifier.
 	std::cout << m_function_id << "()" << std::endl;
@@ -312,20 +324,37 @@ void Function::Print()
 		if(m_block_graph[*rit].m_block != NULL)
 		{
 			// If this block has more than one in-edge, that means we're collapsing down
-			// from a higher level of branching, so decrese the indent.
-			if(boost::in_degree(*rit, m_block_graph) > 1)
+			// from a higher level of branching, so decrease the indent.
+			int in_degree = boost::in_degree(*rit, m_block_graph);
+			int out_degree = boost::out_degree(*rit, m_block_graph);
+			std::cout << "IO:" << in_degree << " " << out_degree << " " << indent_edge_count_stack.back() << std::endl;
+			if(in_degree > 1)
 			{
-				indent_level--;
+				while(indent_edge_count_stack.back() <= in_degree)
+				{
+					// We've reduced the number of edges below the next "reduce indent"
+					// level, so reduce the indent.
+					indent_level--;
+					in_degree -= indent_edge_count_stack.back();				
+					indent_edge_count_stack.pop_back();
+				}
+
+				if(in_degree > 0)
+				{
+					// There's a remainder left over, subtract it.
+					indent_edge_count_stack.back() -= in_degree;
+				}
 			}
 			
 			// Print the block.
-			m_block_graph[*rit].m_block->PrintBlock(1+indent_level);
+			m_block_graph[*rit].m_block->PrintBlock(indent_level);
 			
 			// If this block has more than one out-edge, that means this was a decision
 			// block of some sort, with multiple alternative outgoing control flow paths.
 			// Increase the indent level.
-			if(boost::out_degree(*rit, m_block_graph) > 1)
+			if(out_degree > 1)
 			{
+				indent_edge_count_stack.push_back(out_degree);
 				indent_level++;
 			}
 		}

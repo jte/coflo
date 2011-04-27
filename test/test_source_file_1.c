@@ -1,18 +1,18 @@
 /**
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
- * This file is part of coflo.
+ * This file is part of CoFlo.
  *
- * coflo is free software: you can redistribute it and/or modify it under the
+ * CoFlo is free software: you can redistribute it and/or modify it under the
  * terms of version 3 of the GNU General Public License as published by the Free
  * Software Foundation.
  *
- * coflo is distributed in the hope that it will be useful, but WITHOUT ANY
+ * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * coflo.  If not, see <http://www.gnu.org/licenses/>.
+ * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -21,12 +21,15 @@
 
 int x = 1;
 
-int a() {return 1;};
-int b() {return 2;};
-int c() {return 3;};
-int w() {return 4;};
-int y() {return 5;};
-int z() {return 6;};
+extern volatile int some_variable_set_by_an_isr;
+extern volatile int g_external_variable; 
+
+int function_a() {return 1;};
+int function_b() {return 2;};
+int function_c() {return 3;};
+int function_w() {return 4;};
+int function_y() {return 5;};
+int function_z() {return 6;};
 
 extern int calculate(int x);
 
@@ -35,46 +38,55 @@ int test_func(void)
 	return 1;
 }
 
-int predicate_1(void)
+int __attribute__ ((warn_unused_result)) predicate_1(void) 
 {
-    return 1;
+        return some_variable_set_by_an_isr;
 }
 
 int main()
 {
-	int retval;
+        int retval;
 	
-	if(test_func()+a()+calculate(w()))
+	if(test_func()+function_a()+calculate(function_w()))
 	{
-		retval = a();
-		retval = b();
-		retval = c();
+		retval = function_a();
+		retval = function_b();
+		retval = function_c();
 	}
 	else
 	{
-        while(predicate_1())
-        {
-			retval = w();
-			retval = y();
-			retval = z();
-        }
+		if(predicate_1())
+		{
+			retval = function_w();
+			retval = function_y();
+			retval = function_z();
+		}
+                
+                if(g_external_variable)
+                {
+                    do_this();
+                }
+                else
+                {
+                    do_that();
+                }
 	}
 	
 	switch(1)
 	{
 		case 1:
 		{
-			a();
+			function_a();
 			break;
 		}
 		case 2:
 		{
-			b();
+			function_b();
 			break;
 		}
 		case 3:
 		{
-			c();
+			function_c();
 			break;
 		}
 		default:

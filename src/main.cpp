@@ -51,8 +51,10 @@ int main(int argc, char* argv[])
 	
 	// Add the command-line options.
 	options.add_options()
-    ("help", "produce this help message")
-    ("version,v", "print version string")
+    ("help", "Produce this help message.")
+    ("version,v", "Print version string.")
+	("debug-parse", "Print debug info concerning the CFG parsing stage.")
+	("debug-link", "Print debug info concerning the CFG linking stage.")
 	;
 	hidden_options.add_options()
 	("input-file", po::value< std::vector<std::string> >(), "input file")
@@ -100,7 +102,7 @@ int main(int argc, char* argv[])
 
 			// Parse this file.
 			std::cout << "Parsing \"" << input_file << "\"..." << std::endl;
-			bool retval = tu->ParseFile(input_file);
+			bool retval = tu->ParseFile(input_file, static_cast<bool>(vm.count("debug-parse")));
 			if(retval == false)
 			{
 				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
@@ -108,8 +110,8 @@ int main(int argc, char* argv[])
 			}
 
 			// Link the blocks in the functions in the file.
-			std::cout << "Linking function blocks..." << std::endl;
-			retval = tu->LinkFunctionBlocks();
+			std::cout << "Linking basic blocks..." << std::endl;
+			retval = tu->LinkBasicBlocks();
 			if(retval == false)
 			{
 				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;

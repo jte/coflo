@@ -35,6 +35,8 @@ public:
 
 	void LinkIntoGraph();
 
+	std::string GetIdentifier() const { return m_function_id; };
+	
 	void Print();
 	
 private:
