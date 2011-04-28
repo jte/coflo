@@ -17,13 +17,14 @@
 
 #include "FunctionCall.h"
 
-FunctionCall::FunctionCall(std::string identifier)
+
+FunctionCall::FunctionCall(std::string identifier, Location *location) : Statement(location)
 {
 	m_identifier = identifier;
 	m_function = NULL;
 }
 
-FunctionCall::FunctionCall(const FunctionCall& orig)
+FunctionCall::FunctionCall(const FunctionCall& orig) : Statement(orig)
 {
 	m_identifier = orig.m_identifier;
 	m_function = orig.m_function;

@@ -23,6 +23,7 @@
 #include "Statement.h"
 
 class Function;
+class Location;
 
 /**
  * Class representing a function call statement.
@@ -31,7 +32,7 @@ class Function;
 class FunctionCall : public Statement
 {
 public:
-	FunctionCall(std::string identifier);
+	FunctionCall(std::string identifier, Location *location);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
 	

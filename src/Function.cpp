@@ -307,56 +307,54 @@ void Function::Print()
 	
 	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
-	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
-	std::vector< int > indent_edge_count_stack;
+	// vector for storing the indent level for each block.
+	std::vector< long > block_indent_level;
 	
-	// Start with an indent level of 0.
-	indent_edge_count_stack.push_back(0);
+	// Do a topological sort of the block graph, putting the results into topologically_sorted_blocks.
+	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
+	
+	// Start out at an indent level of 0 for every block.
+	block_indent_level.assign(topologically_sorted_blocks.size(), 0);
+	
+	// Figure out the indent level.
+	long this_parent = 0;
+	BOOST_REVERSE_FOREACH(VertexID vid, topologically_sorted_blocks)
+	{
+		if(boost::out_degree(vid, m_block_graph)>1)
+		{
+			// This is some sort of decision point, indent the children.
+			/// \todo Make this more efficient.
+			long this_child = 0;
+			BOOST_REVERSE_FOREACH(VertexID child, topologically_sorted_blocks)
+			{
+				EdgeID dummy;
+				bool is_child;
+				tie(dummy, is_child) = boost::edge(vid, child, m_block_graph);
+				if(is_child)
+				{
+					// This is a child, add up the indent level.
+					block_indent_level[this_child] = block_indent_level[this_parent] + 1;
+				}
+				this_child++;
+			}
+		}
+		this_parent++;
+	}
 	
 	// Print the function identifier.
 	std::cout << m_function_id << "()" << std::endl;
 	
 	// Print the function's blocks.
+	long indent_index = 0;
 	for(T_SORTED_BLOCK_CONTAINER::reverse_iterator rit = topologically_sorted_blocks.rbegin();
 		rit != topologically_sorted_blocks.rend();
 		rit++)
 	{
 		if(m_block_graph[*rit].m_block != NULL)
 		{
-			// If this block has more than one in-edge, that means we're collapsing down
-			// from a higher level of branching, so decrease the indent.
-			int in_degree = boost::in_degree(*rit, m_block_graph);
-			int out_degree = boost::out_degree(*rit, m_block_graph);
-			std::cout << "IO:" << in_degree << " " << out_degree << " " << indent_edge_count_stack.back() << std::endl;
-			if(in_degree > 1)
-			{
-				while(indent_edge_count_stack.back() <= in_degree)
-				{
-					// We've reduced the number of edges below the next "reduce indent"
-					// level, so reduce the indent.
-					indent_level--;
-					in_degree -= indent_edge_count_stack.back();				
-					indent_edge_count_stack.pop_back();
-				}
-
-				if(in_degree > 0)
-				{
-					// There's a remainder left over, subtract it.
-					indent_edge_count_stack.back() -= in_degree;
-				}
-			}
-			
 			// Print the block.
-			m_block_graph[*rit].m_block->PrintBlock(indent_level);
-			
-			// If this block has more than one out-edge, that means this was a decision
-			// block of some sort, with multiple alternative outgoing control flow paths.
-			// Increase the indent level.
-			if(out_degree > 1)
-			{
-				indent_edge_count_stack.push_back(out_degree);
-				indent_level++;
-			}
+			m_block_graph[*rit].m_block->PrintBlock(block_indent_level[indent_index]);
+			indent_index++;
 		}
 		else
 		{
