@@ -17,11 +17,15 @@
 
 #include "Switch.h"
 
-Switch::Switch() { }
+Switch::Switch(Location *location) : Statement(location)
+{
+}
 
-Switch::Switch(const Switch& orig) { }
+Switch::Switch(const Switch& orig) : Statement(orig)
+{
+}
 
-Switch::~ Switch() { }
+Switch::~Switch() { }
 
 std::string Switch::GetStatementText() const
 {

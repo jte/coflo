@@ -18,15 +18,22 @@
 #include <string>
 
 #include "Statement.h"
+#include "Location.h"
 
-Statement::Statement() 
+Statement::Statement(Location *location) 
 {
 }
 
 Statement::Statement(const Statement& orig) 
 {
+	m_location = orig.m_location;
 }
 
 Statement::~Statement()
 {
+}
+
+std::string Statement::GetLineNumber() const
+{
+	return m_location->GetLineNumber(); 
 }

@@ -23,7 +23,7 @@
 class If : public Statement
 {
 public:
-	If();
+	If(Location *location);
 	If(const If& orig);
 	virtual ~If();
 	

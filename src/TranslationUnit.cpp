@@ -30,6 +30,7 @@
 
 #include "TranslationUnit.h"
 
+#include "Location.h"
 #include "Block.h"
 #include "If.h"
 #include "Function.h"
@@ -40,24 +41,42 @@
 using namespace boost;
 using namespace boost::filesystem;
 
-// Regex for finding function definitions.
-static const boost::regex function_def_expression("^([[:alpha:]_][[:alnum:]_\\:<>]*) \\(.*?\\)");
+// Regex string for matching C and C++ identifiers.
+static const std::string f_identifier_expression("[[:alpha:]_][[:alnum:]_]*");
+
+static const std::string f_qualifiers("const|virtual|static");
+
+/// Regex string for matching and capturing locations.
+/// Capture 1 is the path, 2 is the line number.
+static const std::string f_location("\\[(.*) \\: ([[:digit:]]+)\\]");
+
+/// .+? is the filename.
+static const std::string f_static_destructors("\\(static destructors for .+?\\)");
+
+/// .+? is the filename.
+static const std::string f_static_initializers("\\(static initializers for .+?\\)");
+
+// Regex for finding C function definitions in gcc *.cfg output.
+static const boost::regex f_c_function_def_expression("^("+f_identifier_expression+") \\(.*?\\)");
+
+// Regex for finding C++ function definitions in gcc *.cfg output.
+static const boost::regex f_cpp_function_def_expression("^("+f_identifier_expression+") \\(.*?\\)");
 
 // Regex for finding block starts.  Capture 1 is the block number, 2 is the starting line in the file.
-static const boost::regex block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([[:digit:]]+))?");
+static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([[:digit:]]+))?");
 
 // Regex for finding a "# SUCC:" statement, which ends the current block.
 // Capture 1 is the string of successors, which will be further parsed by the Block object itself.
-static const boost::regex successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
+static const boost::regex f_successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
 
-// Regex to find function calls. Capture 1 is the file/line no, 2 is the called function ID.
-static const boost::regex function_call_expression(".+?(\\[.+?\\]) ([[:alpha:]_][[:alnum:]_]*) \\(.*?\\);");
+// Regex to find function calls. Capture 1 and 2 is the file/line no, 3 is the called function ID.
+static const boost::regex f_function_call_expression(".+?"+f_location+" ([[:alpha:]_][[:alnum:]_]*) \\(.*?\\);");
 
 // Regex to find if/else statements.  Capture 1 is the file/line no.
-static const boost::regex if_expression(".+?(\\[.+?\\]) if \\(.*?\\)");
+static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*?\\)");
 
-// Regex to find switch statements.  Capture 1 is the file/line no.
-static const boost::regex switch_expression(".+?(\\[.+?\\]) switch \\(.*?\\)");
+// Regex to find switch statements.  Capture 1 and 2 is the file/line no.
+static const boost::regex f_switch_expression(".+?"+f_location+" switch \\(.*?\\)");
 
 
 TranslationUnit::TranslationUnit()
@@ -109,7 +128,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 		}
 
 		// Look for function definitions.
-		if(regex_match(line.c_str(), capture_results, function_def_expression))
+		if(regex_match(line.c_str(), capture_results, f_c_function_def_expression))
 		{
 			in_function_name = capture_results[1];
 			std::cout << "Found function: " << in_function_name << std::endl;
@@ -133,7 +152,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 			}
 
 			// Look for block starts.
-			if(regex_match(line.c_str(), capture_results, block_start_expression))
+			if(regex_match(line.c_str(), capture_results, f_block_start_expression))
 			{
 				long block_start_line_no;
 
@@ -157,7 +176,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 			}
 
 			// Look for block ends.
-			if(regex_match(line.c_str(), capture_results, successor_expression))
+			if(regex_match(line.c_str(), capture_results, f_successor_expression))
 			{
 				std::cout << "Found SUCC:, ending block: " << capture_results[1] << std::endl;
 
@@ -173,36 +192,37 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 			if(in_block)
 			{
 				// Look for if statements.
-				if(regex_match(line.c_str(), capture_results, if_expression))
+				if(regex_match(line.c_str(), capture_results, f_if_expression))
 				{
-					std::cerr << "Found if at location: " << capture_results[1] << std::endl;
-					
 					// Add the if to the block.
-					If *if_stmnt = new If();
+					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
+					std::cerr << "Found if at location: " << *loc << std::endl;
+					If *if_stmnt = new If(loc);
 					current_block->AddStatement(if_stmnt);
 					
 					continue;
 				}
 				
 				// Look for switch statements.
-				if(regex_match(line.c_str(), capture_results, switch_expression))
+				if(regex_match(line.c_str(), capture_results, f_switch_expression))
 				{
-					std::cerr << "Found switch at location: " << capture_results[1] << std::endl;
-					
 					// Add the switch to the block.
-					Switch *switch_stmnt = new Switch();
+					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
+					std::cerr << "Found switch at location: " << *loc << std::endl;
+					Switch *switch_stmnt = new Switch(loc);
 					current_block->AddStatement(switch_stmnt);
 					
 					continue;
 				}
 				
 				// Look for function calls.
-				if(regex_match(line.c_str(), capture_results, function_call_expression))
+				if(regex_match(line.c_str(), capture_results, f_function_call_expression))
 				{
-					std::cerr << "Found call: " << capture_results[2] << std::endl;
+					std::cerr << "Found call: " << capture_results[3] << std::endl;
 					
 					// Add the call to the block.
-					FunctionCall *f = new FunctionCall(capture_results[2]);
+					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
+					FunctionCall *f = new FunctionCall(capture_results[3], loc);
 					current_block->AddStatement(f);
 					
 					continue;

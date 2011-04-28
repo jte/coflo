@@ -21,6 +21,7 @@ coflo_SOURCES = main.cpp \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \
 	If.cpp If.h \
+	Location.cpp Location.h \
 	Program.cpp Program.h \
 	Statement.cpp Statement.h \
 	Successor.cpp Successor.h \

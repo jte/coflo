@@ -20,17 +20,23 @@
 
 #include <string>
 
+class Location;
+
 class Statement
 {
 public:
-	Statement();
+	Statement(Location *location);
 	Statement(const Statement& orig);
 	virtual ~Statement();
 	
 	virtual std::string GetStatementText() const = 0;
 	
+	std::string GetLineNumber() const;
+	
 private:
 
+	/// The Location of this statement.
+	Location *m_location;
 };
 
 #endif	/* STATEMENT_H */

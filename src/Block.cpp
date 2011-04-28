@@ -134,15 +134,26 @@ void Block::AddSuccessors(std::string successors_string)
 	}
 }
 
+static void indent(int level)
+{
+	while(level > 0)
+	{
+		std::cout << "    ";
+		level--;
+	}
+}
+
 void Block::PrintBlock(long indent_level)
 {
 	// Print the block number.
-	std::cout << std::setfill('\t') << std::setw(indent_level)<< "\t" << m_block_number << std::endl;
+	indent(indent_level);
+	std::cout << m_block_number << std::endl;
 	
 	// Print out all function calls in this block.
 	BOOST_FOREACH(Statement *sp, m_statement_list)
 	{
-		std::cout << std::setfill('\t') << std::setw(indent_level)<< "\t" << sp->GetStatementText() << std::endl;
+		indent(indent_level);
+		std::cout << sp->GetStatementText() << std::endl;
 	}
 	
 #if 0
