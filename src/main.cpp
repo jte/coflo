@@ -25,6 +25,7 @@
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
+namespace bf = boost::filesystem;
 
 /**
  * Our entry point.
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
     ("version,v", "Print version string.")
 	("debug-parse", "Print debug info concerning the CFG parsing stage.")
 	("debug-link", "Print debug info concerning the CFG linking stage.")
+	("output-dir", po::value< std::string >(), "Put output in the given directory.")
 	;
 	hidden_options.add_options()
 	("input-file", po::value< std::vector<std::string> >(), "input file")
@@ -117,8 +119,15 @@ int main(int argc, char* argv[])
 				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
 				return 1;
 			}
+			
+			// Create the control-flow graphs.
+			std::cout << "Creating function control-flow graphs..." << std::endl;
+			tu->CreateControlFlowGraphs();
 	
-			tu->Print();
+			if(vm.count("output-dir"))
+			{
+				tu->Print(vm["output-dir"].as<std::string>());
+			}
 		}
 	}
 

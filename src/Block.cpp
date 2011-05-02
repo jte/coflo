@@ -27,6 +27,7 @@
 
 #include "SuccessorTypes.h"
 #include "Statement.h"
+#include "NoOp.h"
 
 using namespace boost;
 
@@ -41,12 +42,14 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 		{
 			// This is the entry block.
 			m_block_label = "ENTRY";
+			m_statement_list.push_back(new NoOp(NULL));
 			break;
 		}
 		case 1:
 		{
 			// This is the exit block.
 			m_block_label = "EXIT";
+			m_statement_list.push_back(new NoOp(NULL));
 			break;
 		}
 		default:
@@ -155,16 +158,4 @@ void Block::PrintBlock(long indent_level)
 		indent(indent_level);
 		std::cout << sp->GetStatementText() << std::endl;
 	}
-	
-#if 0
-	// Recurse into the next blocks.
-	if(m_successor_list.size()>1)
-	{
-		indent_level++;
-	}
-	BOOST_FOREACH(Successor *s, m_successor_list)
-	{
-		s->GetSuccessorBlockPtr()->PrintBlock(indent_level);
-	}
-#endif
 }

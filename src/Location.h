@@ -31,6 +31,7 @@
 class Location
 {
 public:
+	Location(const std::string &location_string);
 	Location(boost::filesystem::path path, long lineno, long column = 0);
 	Location(const Location& orig);
 	virtual ~Location();

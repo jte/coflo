@@ -16,8 +16,10 @@
  */
  
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <typeinfo>
+#include <cstdlib>
 
 #include <boost/foreach.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -224,6 +226,30 @@ private:
 	Graph& g;
 };
 
+/// Class template of a vertex property writer, for use with write_graphviz().
+template < typename Graph >
+class cfg_vertex_property_writer
+{
+public:
+	cfg_vertex_property_writer(Graph _g) : g(_g) {}
+	template <typename Vertex>
+	void operator()(std::ostream& out, const Vertex& v) 
+	{
+		out << "[label=\"";
+		if(g[v].m_statement != NULL)
+		{
+			out << g[v].m_statement->GetStatementText();
+		}
+		else
+		{
+			out << "NULL STMNT";
+		}
+		out << "\"]";
+	}
+private:
+	Graph& g;
+};
+
 /// Class template of an edge property writer, for use with write_graphviz().
 template < typename Graph >
 class edge_property_writer
@@ -246,10 +272,10 @@ private:
 };
 
 template < typename Edge, typename Graph >
-class dfs_time_visitor : public boost::default_dfs_visitor
+class dfs_back_edge_collector_visitor : public boost::default_dfs_visitor
 {
 public:
-	dfs_time_visitor(std::vector< Edge > *back_edge_list) : boost::default_dfs_visitor()
+	dfs_back_edge_collector_visitor(std::vector< Edge > *back_edge_list) : boost::default_dfs_visitor()
 	{ 
 		// Save the pointer to the back edge list to put the results in.
 		m_back_edge_list = back_edge_list;
@@ -264,8 +290,7 @@ public:
 	}
 	
 private:
-	
-	/// Pointer to the edge list to 
+	/// Pointer to the edge list we'll add any back edges to.
 	std::vector< Edge > *m_back_edge_list;
 };
 
@@ -276,7 +301,7 @@ void Function::RemoveBackEdges()
 	std::vector< EdgeID > m_back_edge_list;
 	
 	// The instance of the DFS visitor which we'll pass to the DFS.
-	dfs_time_visitor<EdgeID, T_BLOCK_GRAPH> vis(&m_back_edge_list);
+	dfs_back_edge_collector_visitor<EdgeID, T_BLOCK_GRAPH> vis(&m_back_edge_list);
 	
 	// Find all the back edges.
 	boost::depth_first_search(m_block_graph, boost::visitor(vis));
@@ -360,5 +385,109 @@ void Function::Print()
 		{
 			std::cout << "INFO: m_block_graph[" << *rit << "].m_block == NULL" << std::endl;
 		}
+	}
+}
+
+void Function::PrintDotCFG(const boost::filesystem::path& output_dir)
+{
+	std::string dot_filename;
+	
+	dot_filename = output_dir.string()+m_function_id+".dot";
+	
+	std::cerr << "Creating " << dot_filename << std::endl;
+	
+	std::ofstream outfile(dot_filename.c_str());
+	
+	boost::write_graphviz(outfile, m_cfg,
+						 cfg_vertex_property_writer<T_CFG>(m_cfg),
+						 boost::default_writer(), //edge_property_writer<T_CFG>(m_cfg),
+						 graph_property_writer());
+	
+	outfile.close();
+	
+	std::cerr << "Compiling " << dot_filename << std::endl;
+	system(("dot -O -Tpng "+dot_filename).c_str());
+}
+
+bool Function::CreateControlFlowGraph()
+{
+	// We create the Control Flow Graph in two stages:
+	// - First we go through each basic block and add all Statements to m_cfg,
+	//   adding an edge linking each to its predecessor as we go.  We exclude in-edges
+	//   and out-edges for the first and last Statement in each block, resp.
+	// - Second, we link the last Statement of each block to its Successors.
+	
+	std::map< T_BLOCK_GRAPH::vertex_descriptor, CFGVertexID > first_statement_of_block;
+	std::vector< CFGVertexID > last_statement_of_block;
+	bool ok;
+				
+	// Do the first step.
+	//BOOST_FOREACH(Block *bp, m_block_list)
+	T_BLOCK_GRAPH::vertex_iterator vit, vend;
+	for(boost::tie(vit,vend) = boost::vertices(m_block_graph); vit != vend; vit++)
+	{
+		Block::T_STATEMENT_LIST_ITERATOR sit;
+		CFGVertexID last_vid;
+		bool is_first = true;
+		
+		// Iterate over all Statements in this Block.
+		for(sit = m_block_graph[*vit].m_block->begin(); sit != m_block_graph[*vit].m_block->end(); sit++)
+		{
+			// Add this Statement to the Control Flow Graph.
+			CFGVertexID vid;
+			vid = boost::add_vertex(m_cfg);
+			m_cfg[vid].m_statement = *sit;
+			
+			if(!is_first)
+			{
+				// Add an edge to its predecessor.
+				CFGEdgeID eid;
+
+				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, m_cfg);
+			}
+			else
+			{
+				// This is the first statement from this block.  Save it for stage 2.
+				first_statement_of_block[*vit] = vid;
+				is_first = false;
+			}
+			
+			// It's OK to save the vertex descriptor for next time.  Per the Boost
+			// docs, neither add_vertex() nor add_edge() invalidate vertex or edge
+			// descriptors.
+			last_vid = vid;
+		}
+		
+		// Save the vertex descriptor of the last statement of this block for the next stage.
+		last_statement_of_block.push_back(last_vid);
+	}
+	
+	// Do the second step.
+	std::vector< CFGVertexID >::iterator last_statement_it;
+	std::map< T_BLOCK_GRAPH::vertex_descriptor, CFGVertexID >::iterator first_statement_it;
+	last_statement_it = last_statement_of_block.begin();
+	for(boost::tie(vit,vend) = boost::vertices(m_block_graph); vit != vend; vit++)
+	{
+		T_BLOCK_GRAPH::out_edge_iterator eit, eend;
+		for(boost::tie(eit, eend) = boost::out_edges(*vit, m_block_graph); eit != eend; eit++)
+		{
+			// Add an edge from the last statement of Block vit to the first statement
+			// of the Block pointed to by eit.
+			CFGVertexID target_vertex_descr = boost::target(*eit, m_block_graph);
+			std::cout << "Target: " << target_vertex_descr << std::endl;
+			first_statement_it = first_statement_of_block.find(target_vertex_descr);
+			
+			if(first_statement_it == first_statement_of_block.end())
+			{
+				std::cout << "ERROR: No first block statement found." << std::endl;
+			}
+			else
+			{
+				// Add the edge.
+				CFGEdgeID new_edge_desc;
+				boost::tie(new_edge_desc, ok) = boost::add_edge(*last_statement_it, first_statement_it->second, m_cfg);
+			}
+		}
+		last_statement_it++;
 	}
 }

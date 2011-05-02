@@ -17,6 +17,24 @@
 
 #include "Location.h"
 
+// Include the necessary Boost libraries.
+#include <boost/regex.hpp>
+
+/// Regex string for matching and capturing locations.
+/// Capture 1 is the path, 2 is the line number.
+static const boost::regex f_location_expression("\\[(.*) \\: ([[:digit:]]+)\\]");
+
+Location::Location(const std::string &location_string)
+{
+	boost::cmatch capture_results;
+	if(boost::regex_match(location_string.c_str(), capture_results, f_location_expression))
+	{
+		m_file_path = capture_results[1].str();
+		m_line_number = atoi(capture_results[2].str().c_str());
+		m_column = 0;
+	}
+}
+
 Location::Location(boost::filesystem::path path, long lineno, long column /* = 0 */)
 {
 	m_file_path = path;

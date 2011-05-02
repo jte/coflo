@@ -22,16 +22,19 @@
 Successor::Successor(long block_number)
 {
 	m_block_number = block_number;
+	m_block_ptr = NULL;
 }
 
 Successor::Successor(const std::string &block_number_as_string)
 {
 	m_block_number = atoi(block_number_as_string.c_str());
+	m_block_ptr = NULL;
 }
 
 Successor::Successor(const Successor& orig)
 {
 	m_block_number = orig.m_block_number;
+	m_block_ptr = NULL;
 }
 
 Successor::~ Successor()

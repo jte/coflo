@@ -22,6 +22,7 @@
 
 Statement::Statement(Location *location) 
 {
+	m_location = location;
 }
 
 Statement::Statement(const Statement& orig) 
@@ -35,5 +36,12 @@ Statement::~Statement()
 
 std::string Statement::GetLineNumber() const
 {
-	return m_location->GetLineNumber(); 
+	if(m_location == NULL)
+	{
+		return "UNKNOWN";
+	}
+	else
+	{
+		return m_location->GetLineNumber(); 
+	}
 }

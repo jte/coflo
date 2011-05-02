@@ -21,8 +21,11 @@
 #include <string>
 #include <vector>
 
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
+
 class Block;
- 
+
 class Function
 {
 public:
@@ -34,10 +37,14 @@ public:
 	void LinkBlocks();
 
 	void LinkIntoGraph();
+	
+	bool CreateControlFlowGraph();
 
 	std::string GetIdentifier() const { return m_function_id; };
 	
 	void Print();
+	
+	void PrintDotCFG(const boost::filesystem::path& output_dir);
 	
 private:
 	
@@ -89,7 +96,42 @@ private:
 	Block *m_exit_block;
 	
 	/// Block list.
-	std::vector < Block * > m_block_list;	
+	std::vector < Block * > m_block_list;
+	
+	/// \name Control Flow Graph definitions.
+	//@{
+	
+	/// Vertex properties for the CFG graph.
+	struct CFGVertexProperties
+	{
+		Statement *m_statement;
+	};
+	
+	/// Edge properties for the CFG graph.
+	struct CFGEdgeProperties
+	{
+		std::string m_edge_text;
+	};
+	
+	/// Typedef for the CFG graph.
+	typedef boost::adjacency_list
+			<boost::vecS,
+			boost::vecS,
+			boost::bidirectionalS,
+			CFGVertexProperties,
+			CFGEdgeProperties
+			> T_CFG;
+	
+	/// Typedef for the vertex_descriptors in the block graph.
+	typedef T_CFG::vertex_descriptor CFGVertexID;
+	
+	/// Typedef for the edge_descriptors in the block graph.
+	typedef T_CFG::edge_descriptor CFGEdgeID;
+	
+	/// The Control Flow Graph.
+	T_CFG m_cfg;
+	
+	//@}
 };
  
 #endif // FUNCTION_H

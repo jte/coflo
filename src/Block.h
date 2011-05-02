@@ -43,7 +43,7 @@ public:
 	long GetBlockNumber() const { return m_block_number; };
 	
 	/**
-	 * Returns text appropriate for labelling the block in a GraphViz dot graph.
+	 * Returns text appropriate for labeling the block in a GraphViz dot graph.
 	 * 
      * @return The appropriate block label text.
      */
@@ -55,6 +55,8 @@ public:
      * @param statement Pointer to the Statement object to add.
      */
 	void AddStatement(Statement *statement);
+	
+	T_STATEMENT_LIST::size_type NumberOfStatements() const { return m_statement_list.size(); };
 
 	/**
 	 * Extract the successor block information from the passed string.  The
@@ -71,10 +73,10 @@ public:
 	/// @name Iterators.
 	//@{
 	
-	/// Returns the begin() iterator for statements in this function.
+	/// Returns the begin() iterator for statements in this block.
 	T_STATEMENT_LIST_ITERATOR begin() { return m_statement_list.begin(); };
 	
-	/// Returns the end() iterator for statements in this function.
+	/// Returns the end() iterator for statements in this block.
 	T_STATEMENT_LIST_ITERATOR end() { return m_statement_list.end(); };
 
 	/// Returns the begin iterator for iterating through successors.
@@ -84,6 +86,7 @@ public:
 	T_BLOCK_SUCCESSOR_ITERATOR successor_end() { return m_successor_list.end(); };
 	
 	//@}
+	
 private:
 
 	/// Pointer to the function which contains this block.
