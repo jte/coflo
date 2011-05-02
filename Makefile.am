@@ -21,6 +21,9 @@ ACLOCAL_AMFLAGS = -I m4
 # The subdirectories containing the source code.
 SUBDIRS = src
 
+# Include additional automake fragments.
+include $(top_srcdir)/amlocal.am
+
 #DOXYGEN = "/cygdrive/c/Program Files/Doxygen/bin/doxygen.exe"
 
 #.PHONY: docs
