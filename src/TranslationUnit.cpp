@@ -17,6 +17,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>
@@ -35,6 +38,7 @@
 #include "If.h"
 #include "Function.h"
 #include "FunctionCall.h"
+#include "NoOp.h"
 #include "Switch.h"
 #include "TranslationUnit.h"
 
@@ -48,7 +52,7 @@ static const std::string f_qualifiers("const|virtual|static");
 
 /// Regex string for matching and capturing locations.
 /// Capture 1 is the path, 2 is the line number.
-static const std::string f_location("\\[(.*) \\: ([[:digit:]]+)\\]");
+static const std::string f_location("(\\[.* \\: [[:digit:]]+\\])");
 
 /// .+? is the filename.
 static const std::string f_static_destructors("\\(static destructors for .+?\\)");
@@ -179,6 +183,12 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 			if(regex_match(line.c_str(), capture_results, f_successor_expression))
 			{
 				std::cout << "Found SUCC:, ending block: " << capture_results[1] << std::endl;
+				
+				if(current_block->NumberOfStatements() == 0)
+				{
+					// Make sure every block has at least one statement.
+					current_block->AddStatement(new NoOp(NULL));
+				}
 
 				// Tell the Block what its successors are.
 				current_block->AddSuccessors(capture_results[1]);
@@ -195,7 +205,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 				if(regex_match(line.c_str(), capture_results, f_if_expression))
 				{
 					// Add the if to the block.
-					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
+					Location *loc = new Location(capture_results[1].str());
 					std::cerr << "Found if at location: " << *loc << std::endl;
 					If *if_stmnt = new If(loc);
 					current_block->AddStatement(if_stmnt);
@@ -207,7 +217,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 				if(regex_match(line.c_str(), capture_results, f_switch_expression))
 				{
 					// Add the switch to the block.
-					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
+					Location *loc = new Location(capture_results[1].str());
 					std::cerr << "Found switch at location: " << *loc << std::endl;
 					Switch *switch_stmnt = new Switch(loc);
 					current_block->AddStatement(switch_stmnt);
@@ -218,11 +228,11 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 				// Look for function calls.
 				if(regex_match(line.c_str(), capture_results, f_function_call_expression))
 				{
-					std::cerr << "Found call: " << capture_results[3] << std::endl;
+					std::cerr << "Found call: " << capture_results[2] << std::endl;
 					
 					// Add the call to the block.
-					Location *loc = new Location(capture_results[1].str(), atoi(capture_results[2].str().c_str()));
-					FunctionCall *f = new FunctionCall(capture_results[3], loc);
+					Location *loc = new Location(capture_results[1].str());
+					FunctionCall *f = new FunctionCall(capture_results[2], loc);
 					current_block->AddStatement(f);
 					
 					continue;
@@ -248,11 +258,22 @@ bool TranslationUnit::LinkBasicBlocks()
 	return true;
 }
 
-void TranslationUnit::Print()
+bool TranslationUnit::CreateControlFlowGraphs()
+{
+	BOOST_FOREACH(Function* fp, m_function_defs)
+	{
+		fp->CreateControlFlowGraph();
+	}
+}
+
+void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 {
 	std::cout << "Translation Unit Filename: " << m_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
+	
+	std::cout << "Creating output dir: " << output_dir << std::endl;
+	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	
 	// Print the identifiers of the functions defined in this translation unit.
 	BOOST_FOREACH(Function* fp, m_function_defs)
@@ -261,9 +282,40 @@ void TranslationUnit::Print()
 	}
 	
 	std::cout << std::endl;
+	
+	std::string index_html_filename = output_dir.string()+ "index.html";
+	std::ofstream index_html_out(index_html_filename.c_str());
 
+	index_html_out << \
+"\
+<!DOCTYPE html>\n\
+<html lang=\"en\">\n\
+<head>\n\
+	<meta charset=\"utf-8\">\n\
+	<title>CoFlo Analysis Results</title>\n\
+</head>\n\
+<body>\n\
+<h1>CoFlo Analysis Results</h1>\n\
+";
+	index_html_out << "<p>Filename: "+m_filename.string()+"</p>" << std::endl;
+	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
+	BOOST_FOREACH(Function* fp, m_function_defs)
+	{
+		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a></li>" << std::endl;
+	}
+	index_html_out << "</ul></p>" << std::endl;
+	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		fp->Print();
+		fp->PrintDotCFG(output_dir);
+		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"</a></h2>" << std::endl;
+		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}
+
+	index_html_out << \
+"\
+</body>\n\
+</html>\n\
+";
 }

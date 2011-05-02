@@ -19,17 +19,23 @@
  * This is a do-nothing sample C program used to test CoFlo.
  */
 
-int x = 1;
+int some_global_variable = 1;
 
 extern volatile int some_variable_set_by_an_isr;
 extern volatile int g_external_variable; 
 
+/**
+ * External function declarations.
+ */
+extern void do_this();
+extern void do_that();
+
 int function_a() {return 1;};
 int function_b() {return 2;};
 int function_c() {return 3;};
-int function_w() {return 4;};
+static int function_w() {return 4;};
 int function_y() {return 5;};
-int function_z() {return 6;};
+int function_z() {return some_global_variable;};
 
 extern int calculate(int x);
 

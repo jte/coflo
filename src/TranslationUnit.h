@@ -33,8 +33,10 @@ public:
 	bool ParseFile(const boost::filesystem::path &filename, bool debug_parse = false);
 
 	bool LinkBasicBlocks();
+	
+	bool CreateControlFlowGraphs();
 
-	void Print();
+	void Print(const boost::filesystem::path &output_dir);
 
 private:
 

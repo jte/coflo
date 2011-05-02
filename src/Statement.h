@@ -22,6 +22,9 @@
 
 class Location;
 
+/**
+ * Abstract base class for all statements in the control flow graph.
+ */
 class Statement
 {
 public:
