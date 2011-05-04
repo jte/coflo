@@ -25,7 +25,9 @@ Switch::Switch(const Switch& orig) : Statement(orig)
 {
 }
 
-Switch::~Switch() { }
+Switch::~Switch()
+{
+}
 
 std::string Switch::GetStatementTextDOT() const
 {

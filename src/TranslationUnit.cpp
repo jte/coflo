@@ -95,7 +95,7 @@ TranslationUnit::~TranslationUnit()
 {
 }
 
-bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, const std::string &the_filter, const std::string &the_gcc, bool debug_parse /* = false */)
+bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map, const std::string &the_filter, const std::string &the_gcc, bool debug_parse)
 {
 	std::string gcc_cfg_lineno_blocks_filename;
 	
@@ -145,6 +145,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, const s
 			in_function_name = capture_results[1];
 			std::cout << "Found function: " << in_function_name << std::endl;
 			current_function = new Function(in_function_name);
+			(*function_map)[in_function_name] = current_function;
 
 			// Add the new function to the list.
 			m_function_defs.push_back(current_function);
@@ -264,6 +265,14 @@ bool TranslationUnit::LinkBasicBlocks()
 	}
 
 	return true;
+}
+
+void TranslationUnit::Link(const std::map< std::string, Function* > &function_map)
+{
+	BOOST_FOREACH(Function* fp, m_function_defs)
+	{
+		fp->Link(function_map);
+	}
 }
 
 bool TranslationUnit::CreateControlFlowGraphs()

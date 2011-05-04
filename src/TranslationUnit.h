@@ -25,6 +25,8 @@
 
 class Function;
 
+typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
+
 class TranslationUnit
 {
 public:
@@ -35,9 +37,11 @@ public:
 	/**
 	 * Parse the given source file, extracting the basic blocks.
 	 */
-	bool ParseFile(const boost::filesystem::path &filename, const std::string &the_filter, const std::string &the_gcc, bool debug_parse = false);
+	bool ParseFile(const boost::filesystem::path &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map, const std::string &the_filter, const std::string &the_gcc, bool debug_parse = false);
 
 	bool LinkBasicBlocks();
+	
+	void Link(const std::map< std::string, Function* > &function_map);
 	
 	bool CreateControlFlowGraphs();
 

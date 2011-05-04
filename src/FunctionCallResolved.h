@@ -39,6 +39,8 @@ public:
      */
 	virtual std::string GetStatementTextDOT() const;
 	
+	virtual std::string GetIdentifier() const;
+	
 private:
 	
 	/// Pointer to the function we're calling.

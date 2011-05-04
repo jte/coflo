@@ -123,10 +123,11 @@ int main(int argc, char* argv[])
 		BOOST_FOREACH(std::string input_file, vm["input-file"].as< std::vector<std::string> >())
 		{
 			tu = new TranslationUnit();
+			T_ID_TO_FUNCTION_PTR_MAP function_map;
 
 			// Parse this file.
 			std::cout << "Parsing \"" << input_file << "\"..." << std::endl;
-			bool retval = tu->ParseFile(input_file,
+			bool retval = tu->ParseFile(input_file, &function_map,
 									 the_filter, the_gcc, static_cast<bool>(vm.count("debug-parse")));
 			if(retval == false)
 			{
@@ -142,6 +143,10 @@ int main(int argc, char* argv[])
 				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
 				return 1;
 			}
+			
+			// Linking the functions.
+			std::cout << "Linking function calls..." << std::endl;
+			tu->Link(function_map);
 			
 			// Create the control-flow graphs.
 			std::cout << "Creating function control-flow graphs..." << std::endl;
