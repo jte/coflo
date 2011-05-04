@@ -33,6 +33,8 @@
 #include "Function.h"
 #include "SuccessorTypes.h"
 #include "Statement.h"
+#include "FunctionCallUnresolved.h"
+#include "FunctionCallResolved.h"
 
 typedef std::map< long, Block * > T_LINK_MAP;
 typedef T_LINK_MAP::iterator T_LINK_MAP_ITERATOR;
@@ -180,6 +182,39 @@ void Function::LinkIntoGraph()
 			{
 				// Couldn't find the next block, it's probably EXIT.
 				std::cerr << "ERROR: Couldn't find next_block in block_map" << std::endl;
+			}
+		}
+	}
+}
+
+void Function::Link(const std::map< std::string, Function* > &function_map)
+{
+	BOOST_FOREACH(Block *bp, m_block_list)
+	{
+		Block::T_STATEMENT_LIST_ITERATOR sit;
+		for(sit = bp->begin(); sit != bp->end(); sit++)
+		{
+			FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*sit);
+			
+			if(fcu != NULL)
+			{
+				std::map< std::string, Function* >::const_iterator it;
+				
+				// We found an unresolved function call.  Try to resolve it.
+				it = function_map.find(fcu->GetIdentifier());
+				
+				if(it == function_map.end())
+				{
+					std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
+				}
+				else
+				{
+					// Found it.
+					// Now replace the Unresolved with the Resolved.
+					FunctionCallResolved *fcr = new FunctionCallResolved(it->second, NULL /** @todo FIXME, This should copy the Location.*/);
+					delete *sit;
+					*sit = fcr;
+				}
 			}
 		}
 	}

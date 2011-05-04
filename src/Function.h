@@ -40,6 +40,12 @@ public:
 
 	void LinkIntoGraph();
 	
+	/**
+	 * Link the unresolved function calls in this Function to the Functions
+	 * in the passed \a function_map.
+     */
+	void Link(const std::map< std::string, Function* > &function_map);
+	
 	bool CreateControlFlowGraph();
 
 	std::string GetIdentifier() const { return m_function_id; };
