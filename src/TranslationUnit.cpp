@@ -37,7 +37,7 @@
 #include "Block.h"
 #include "If.h"
 #include "Function.h"
-#include "FunctionCall.h"
+#include "FunctionCallUnresolved.h"
 #include "NoOp.h"
 #include "Switch.h"
 #include "TranslationUnit.h"
@@ -91,22 +91,30 @@ TranslationUnit::TranslationUnit(const TranslationUnit& orig)
 {
 }
 
-TranslationUnit::~ TranslationUnit()
+TranslationUnit::~TranslationUnit()
 {
 }
 
-bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool debug_parse /* = false */)
+bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, const std::string &the_filter, const std::string &the_gcc, bool debug_parse /* = false */)
 {
-	// Save the filename.
-	m_filename = filename;
+	std::string gcc_cfg_lineno_blocks_filename;
+	
+	// Save the source filename.
+	m_source_filename = filename;
+	
+	// Try to compile the source file.
+	CompileSourceFile(filename.string(), the_filter, the_gcc);
+	
+	// Construct the filename of the .cfg file gcc made for us.
+	gcc_cfg_lineno_blocks_filename = filename.string()+".013t.cfg";
 	
 	// Try to open the file whose name we were passed.
-	std::ifstream input_file(filename.string().c_str(), std::ifstream::in);
+	std::ifstream input_file(gcc_cfg_lineno_blocks_filename.c_str(), std::ifstream::in);
 
 	// Check if we were able to open the file.
 	if(input_file.fail())
 	{
-		std::cerr << "ERROR: Couldn't open file \"" << filename << "\"" << std::endl;
+		std::cerr << "ERROR: Couldn't open file \"" << gcc_cfg_lineno_blocks_filename << "\"" << std::endl;
 		return false;
 	}
 
@@ -232,7 +240,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, bool de
 					
 					// Add the call to the block.
 					Location *loc = new Location(capture_results[1].str());
-					FunctionCall *f = new FunctionCall(capture_results[2], loc);
+					FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc);
 					current_block->AddStatement(f);
 					
 					continue;
@@ -268,7 +276,7 @@ bool TranslationUnit::CreateControlFlowGraphs()
 
 void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 {
-	std::cout << "Translation Unit Filename: " << m_filename << std::endl;
+	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
 	
@@ -297,7 +305,7 @@ void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 <body>\n\
 <h1>CoFlo Analysis Results</h1>\n\
 ";
-	index_html_out << "<p>Filename: "+m_filename.string()+"</p>" << std::endl;
+	index_html_out << "<p>Filename: "+m_source_filename.string()+"</p>" << std::endl;
 	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
@@ -318,4 +326,27 @@ void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 </body>\n\
 </html>\n\
 ";
+}
+
+void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc)
+{
+	// Do the filter first.
+	/// \todo Add the prefilter functionality.
+	
+	// Create the compile command.
+	std::string compile_to_cfg_command;
+	
+	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
+	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
+	compile_to_cfg_command = the_gcc + " -S -fdump-tree-cfg-lineno-blocks " + file_path;
+	
+	// Do the compile.
+	std::cerr << "Compiling with " << compile_to_cfg_command << "..." << std::endl;
+	int compile_retval = ::system(compile_to_cfg_command.c_str());
+	
+	if(compile_retval != 0)
+	{
+		std::cerr << "ERROR: Compile string returned nonzero." << std::endl;
+		exit(1);
+	}
 }

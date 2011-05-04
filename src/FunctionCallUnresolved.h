@@ -15,23 +15,32 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#ifndef FUNCTIONCALLUNRESOLVED_H
+#define	FUNCTIONCALLUNRESOLVED_H
 
-#include "Statement.h"
+#include "FunctionCall.h"
 
-class If : public Statement
+class FunctionCallUnresolved : public FunctionCall
 {
+
 public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
+	FunctionCallUnresolved(std::string identifier, Location *location);
+	FunctionCallUnresolved(const FunctionCallUnresolved& orig);
+	virtual ~FunctionCallUnresolved();
 	
+	/**
+	 * Get text suitable for setting the statement's attributes in a dot file.
+     * @return 
+     */
 	virtual std::string GetStatementTextDOT() const;
 	
+	virtual std::string GetIdentifier() const { return m_identifier; };
+	
 private:
-
+	
+	/// Identifier of the function we're calling.
+	std::string m_identifier;
 };
 
-#endif	/* IF_H */
+#endif	/* FUNCTIONCALLUNRESOLVED_H */
 

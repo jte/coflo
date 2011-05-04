@@ -18,6 +18,8 @@
 #ifndef TRANSLATIONUNIT_H
 #define	TRANSLATIONUNIT_H
 
+#include <string>
+
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
@@ -30,7 +32,10 @@ public:
     TranslationUnit(const TranslationUnit& orig);
     virtual ~TranslationUnit();
 
-	bool ParseFile(const boost::filesystem::path &filename, bool debug_parse = false);
+	/**
+	 * Parse the given source file, extracting the basic blocks.
+	 */
+	bool ParseFile(const boost::filesystem::path &filename, const std::string &the_filter, const std::string &the_gcc, bool debug_parse = false);
 
 	bool LinkBasicBlocks();
 	
@@ -39,9 +44,16 @@ public:
 	void Print(const boost::filesystem::path &output_dir);
 
 private:
+	
+	/**
+	 * Compile the file with GCC to get the control flow decomposition we need.
+	 * 
+     * @param file_path
+     */
+	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc);
 
-	/// The filename.
-	boost::filesystem::path m_filename;
+	/// The source filename.
+	boost::filesystem::path m_source_filename;
 
 	/// List of function definitions in this file.
 	std::vector< Function * > m_function_defs;

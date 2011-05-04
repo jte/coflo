@@ -213,7 +213,7 @@ public:
 			Block::T_STATEMENT_LIST_ITERATOR sit;
 			for(sit = g[v].m_block->begin(); sit != g[v].m_block->end(); sit++)
 			{
-				out << "\\n" << (*sit)->GetStatementText();
+				out << "\\n" << (*sit)->GetStatementTextDOT();
 			}
 		}
 		else
@@ -235,16 +235,14 @@ public:
 	template <typename Vertex>
 	void operator()(std::ostream& out, const Vertex& v) 
 	{
-		out << "[label=\"";
 		if(g[v].m_statement != NULL)
 		{
-			out << g[v].m_statement->GetStatementText();
+			out << g[v].m_statement->GetStatementTextDOT();
 		}
 		else
 		{
-			out << "NULL STMNT";
+			out << "[label=\"NULL STMNT\"]";
 		}
-		out << "\"]";
 	}
 private:
 	Graph& g;
@@ -406,7 +404,7 @@ void Function::PrintDotCFG(const boost::filesystem::path& output_dir)
 	outfile.close();
 	
 	std::cerr << "Compiling " << dot_filename << std::endl;
-	system(("dot -O -Tpng "+dot_filename).c_str());
+	::system(("dot -O -Tpng "+dot_filename).c_str());
 }
 
 bool Function::CreateControlFlowGraph()

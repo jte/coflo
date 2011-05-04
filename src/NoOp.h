@@ -32,7 +32,7 @@ public:
 	NoOp(const NoOp& orig);
 	virtual ~NoOp();
 	
-	virtual std::string GetStatementText() const;
+	virtual std::string GetStatementTextDOT() const;
 
 private:
 

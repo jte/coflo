@@ -15,23 +15,26 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#include "FunctionCallResolved.h"
+#include "Function.h"
 
-#include "Statement.h"
-
-class If : public Statement
+FunctionCallResolved::FunctionCallResolved(Function *f, Location *location) : FunctionCall(location)
 {
-public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
-	
-	virtual std::string GetStatementTextDOT() const;
-	
-private:
+	m_function = f;
+}
 
-};
+FunctionCallResolved::FunctionCallResolved(const FunctionCallResolved& orig) : FunctionCall(static_cast<const FunctionCall&>(orig))
+{
+	m_function = orig.m_function;
+}
 
-#endif	/* IF_H */
+FunctionCallResolved::~FunctionCallResolved()
+{
+	// We don't own m_function, so don't delete it.
+}
+
+std::string FunctionCallResolved::GetStatementTextDOT() const
+{
+	return "[label=\""+m_function->GetIdentifier()+"()\"]";
+}
 

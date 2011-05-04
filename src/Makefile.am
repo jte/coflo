@@ -20,6 +20,8 @@ coflo_SOURCES = main.cpp \
 	Block.cpp Block.h \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \
+	FunctionCallResolved.cpp FunctionCallResolved.h \
+	FunctionCallUnresolved.cpp FunctionCallUnresolved.h \
 	If.cpp If.h \
 	Location.cpp Location.h \
 	NoOp.cpp NoOp.h \

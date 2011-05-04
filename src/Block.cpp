@@ -156,6 +156,6 @@ void Block::PrintBlock(long indent_level)
 	BOOST_FOREACH(Statement *sp, m_statement_list)
 	{
 		indent(indent_level);
-		std::cout << sp->GetStatementText() << std::endl;
+		std::cout << sp->GetStatementTextDOT() << std::endl;
 	}
 }

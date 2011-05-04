@@ -15,23 +15,35 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#ifndef FUNCTIONCALLRESOLVED_H
+#define	FUNCTIONCALLRESOLVED_H
 
-#include "Statement.h"
+#include "FunctionCall.h"
 
-class If : public Statement
+class Function;
+
+/**
+ * A resolved function call.
+ */
+class FunctionCallResolved : public FunctionCall
 {
+
 public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
+	FunctionCallResolved(Function *f, Location *location);
+	FunctionCallResolved(const FunctionCallResolved& orig);
+	virtual ~FunctionCallResolved();
 	
+	/**
+	 * Get text suitable for setting the statement's attributes in a dot file.
+     * @return 
+     */
 	virtual std::string GetStatementTextDOT() const;
 	
 private:
-
+	
+	/// Pointer to the function we're calling.
+	Function *m_function;
 };
 
-#endif	/* IF_H */
+#endif	/* FUNCTIONCALLRESOLVED_H */
 
