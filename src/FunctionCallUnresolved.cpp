@@ -15,23 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#include "FunctionCallUnresolved.h"
 
-#include "Statement.h"
-
-class If : public Statement
+FunctionCallUnresolved::FunctionCallUnresolved(std::string identifier, Location *location) : FunctionCall(location)
 {
-public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
-	
-	virtual std::string GetStatementTextDOT() const;
-	
-private:
+	m_identifier = identifier;
+}
 
-};
+FunctionCallUnresolved::FunctionCallUnresolved(const FunctionCallUnresolved& orig) : FunctionCall(orig)
+{
+	m_identifier = orig.m_identifier;
+}
 
-#endif	/* IF_H */
+FunctionCallUnresolved::~FunctionCallUnresolved()
+{
+}
 
+std::string FunctionCallUnresolved::GetStatementTextDOT() const
+{
+	return "[label=\""+m_identifier+"()\" color=red]";
+}

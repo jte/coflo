@@ -32,7 +32,11 @@ public:
 	Statement(const Statement& orig);
 	virtual ~Statement();
 	
-	virtual std::string GetStatementText() const = 0;
+	/**
+	 * Get text suitable for setting the statement's attributes in a dot file.
+     * @return 
+     */
+	virtual std::string GetStatementTextDOT() const = 0;
 	
 	std::string GetLineNumber() const;
 	

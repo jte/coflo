@@ -27,7 +27,7 @@ NoOp::NoOp(const NoOp& orig) : Statement(orig)
 
 NoOp::~ NoOp() { }
 
-std::string NoOp::GetStatementText() const
+std::string NoOp::GetStatementTextDOT() const
 {
-	return "NOOP";
+	return "[label=\"NOOP\"]";
 }

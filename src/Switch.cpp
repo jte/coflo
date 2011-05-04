@@ -27,7 +27,7 @@ Switch::Switch(const Switch& orig) : Statement(orig)
 
 Switch::~Switch() { }
 
-std::string Switch::GetStatementText() const
+std::string Switch::GetStatementTextDOT() const
 {
-	return "SWITCH";
+	return "[label=\"SWITCH\" shape=diamond]";
 }

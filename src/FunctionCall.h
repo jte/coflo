@@ -32,24 +32,14 @@ class Location;
 class FunctionCall : public Statement
 {
 public:
-	FunctionCall(std::string identifier, Location *location);
+	FunctionCall(Location *location);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
 	
-	virtual std::string GetStatementText() const { return m_identifier + "()"; };
-	
 	/// Returns the name of the function being called.
-	std::string GetIdentifier() const;
+	virtual std::string GetIdentifier() const = 0;
 
 private:
-	
-	/// Identifier of the function we're calling.
-	std::string m_identifier;
-	
-	/// Pointer to the function we're calling.
-	/// Will be NULL at least until we've linked, and
-	/// may not be resolvable even then.
-	Function *m_function;
 };
 
 #endif	/* FUNCTIONCALL_H */

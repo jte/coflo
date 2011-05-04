@@ -15,23 +15,16 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#include "RuleBase.h"
 
-#include "Statement.h"
-
-class If : public Statement
+RuleBase::RuleBase() 
 {
-public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
-	
-	virtual std::string GetStatementTextDOT() const;
-	
-private:
+}
 
-};
+RuleBase::RuleBase(const RuleBase& orig) 
+{
+}
 
-#endif	/* IF_H */
-
+RuleBase::~RuleBase()
+{
+}

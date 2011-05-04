@@ -27,7 +27,7 @@ public:
 	Switch(const Switch& orig);
 	virtual ~Switch();
 	
-	virtual std::string GetStatementText() const;
+	virtual std::string GetStatementTextDOT() const;
 	
 private:
 

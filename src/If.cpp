@@ -29,7 +29,7 @@ If::~ If()
 {
 }
 
-std::string If::GetStatementText() const
+std::string If::GetStatementTextDOT() const
 {
-	return "IF";
+	return "[label=\"IF\" shape=diamond]";
 }
