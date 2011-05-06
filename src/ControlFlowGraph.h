@@ -21,19 +21,26 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+#include "CFGEdgeTypeBase.h"
+
 /// \name Control Flow Graph definitions.
 //@{
 	
 /// Vertex properties for the CFG graph.
 struct CFGVertexProperties
 {
+	/// The Statement at this vertex of the CFG.
 	Statement *m_statement;
 };
 
 /// Edge properties for the CFG graph.
 struct CFGEdgeProperties
 {
-	std::string m_edge_text;
+	/// Edge Type info.
+	/// The FunctionCall which is either the source or sink (i.e. where the pointed-to function returns) of this edge.
+	/// @todo This should really be some sort of "EdgeType" covering not just function
+	/// calls, but things like fallthrough, gotos, etc.
+	CFGEdgeTypeBase *m_edge_type;
 };
 
 /// Typedef for the CFG graph.
@@ -54,4 +61,3 @@ typedef T_CFG::edge_descriptor CFGEdgeID;
 //@}
 
 #endif	/* CONTROLFLOWGRAPH_H */
-

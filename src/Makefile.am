@@ -18,6 +18,9 @@
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Block.cpp Block.h \
+	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
+	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
+	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \
 	FunctionCallResolved.cpp FunctionCallResolved.h \
@@ -26,6 +29,8 @@ coflo_SOURCES = main.cpp \
 	Location.cpp Location.h \
 	NoOp.cpp NoOp.h \
 	Program.cpp Program.h \
+	RuleBase.cpp RuleBase.h \
+	RuleReachability.cpp RuleReachability.h \
 	Statement.cpp Statement.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \

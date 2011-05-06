@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
 	std::string the_filter;
 	std::string the_gcc;
 	std::string the_dot;
+	std::string the_ctags;
 	
 	// Declare the supported options object.
 	po::options_description options("Options");
@@ -75,6 +76,7 @@ int main(int argc, char* argv[])
 	subprogram_options.add_options()
 	("use-filter", po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
 	("use-gcc", po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
+	("use-ctags", po::value< std::string >(&the_ctags)->default_value("ctags"), "The ctags program to invoke.")
 	("use-dot", po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 	;
 	hidden_options.add_options()
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
 			// Parse this file.
 			std::cout << "Parsing \"" << input_file << "\"..." << std::endl;
 			bool retval = tu->ParseFile(input_file, &function_map,
-									 the_filter, the_gcc, static_cast<bool>(vm.count("debug-parse")));
+									 the_filter, the_gcc, the_ctags, static_cast<bool>(vm.count("debug-parse")));
 			if(retval == false)
 			{
 				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;

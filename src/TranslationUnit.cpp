@@ -95,7 +95,12 @@ TranslationUnit::~TranslationUnit()
 {
 }
 
-bool TranslationUnit::ParseFile(const boost::filesystem::path &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map, const std::string &the_filter, const std::string &the_gcc, bool debug_parse)
+bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
+								T_ID_TO_FUNCTION_PTR_MAP *function_map,
+								const std::string &the_filter,
+								const std::string &the_gcc,
+								const std::string &the_ctags,
+								bool debug_parse)
 {
 	std::string gcc_cfg_lineno_blocks_filename;
 	
@@ -326,7 +331,7 @@ void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 	{
 		fp->Print();
 		fp->PrintDotCFG(output_dir);
-		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"</a></h2>" << std::endl;
+		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
 		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}
 
