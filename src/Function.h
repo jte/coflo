@@ -105,8 +105,14 @@ private:
 	
 	/// Block list.
 	std::vector < Block * > m_block_list;
+	
+	/// The first statement in the body of this function.
+	CFGVertexID m_first_statement;
+	
+	/// The last statement in the body of this function.
+	CFGVertexID m_last_statement;
 
-	/// The Control Flow Graph.
+	/// The Control Flow Graph for this Function.
 	T_CFG m_cfg;
 	
 };

@@ -226,7 +226,7 @@ struct graph_property_writer
 	void operator()(std::ostream& out) const
 	{
 		out << "graph [clusterrank=local]" << std::endl;
-		out << "node [shape=rectangle]" << std::endl;
+		out << "node [shape=rectangle fontname=\"Courier\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
 	}
 };
@@ -455,7 +455,6 @@ bool Function::CreateControlFlowGraph()
 	bool ok;
 				
 	// Do the first step.
-	//BOOST_FOREACH(Block *bp, m_block_list)
 	T_BLOCK_GRAPH::vertex_iterator vit, vend;
 	for(boost::tie(vit,vend) = boost::vertices(m_block_graph); vit != vend; vit++)
 	{
