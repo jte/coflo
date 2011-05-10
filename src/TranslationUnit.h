@@ -23,6 +23,8 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
+#include "ControlFlowGraph.h"
+
 class Function;
 
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
@@ -50,7 +52,7 @@ public:
 	
 	bool CreateControlFlowGraphs();
 
-	void Print(const boost::filesystem::path &output_dir);
+	void Print(const std::string &the_dot, const boost::filesystem::path &output_dir);
 
 private:
 	
@@ -66,7 +68,9 @@ private:
 
 	/// List of function definitions in this file.
 	std::vector< Function * > m_function_defs;
-
+	
+	/// The Control Flow Graph for this Function.
+	T_CFG m_cfg;
 };
 
 #endif	/* TRANSLATIONUNIT_H */

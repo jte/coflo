@@ -19,6 +19,10 @@
  * This is a do-nothing sample C program used to test CoFlo.
  */
 
+#include <pthread.h>
+
+static pthread_mutex_t f_mutex_protecting_thread_unsafe_function = PTHREAD_MUTEX_INITIALIZER;
+
 int some_global_variable = 1;
 
 extern volatile int some_variable_set_by_an_isr;
@@ -37,6 +41,20 @@ static int function_w() {return 4;};
 int function_y() {return 5;};
 int function_z() {return some_global_variable;};
 
+typedef double (*T_FUNCTION_PTR)(void);
+
+double function_that_we_will_call_through_a_ptr(void)
+{
+    return (some_variable_set_by_an_isr + g_external_variable);
+}
+
+long threadsafe_printf_wrapper(int which_thread)
+{
+    pthread_mutex_lock(&f_mutex_protecting_thread_unsafe_function);
+    print("Now printing from thread %d\n", which_thread);
+    pthread_mutex_unlock(&f_mutex_protecting_thread_unsafe_function);
+}
+
 extern int calculate(int x);
 
 int test_func(void)
@@ -46,12 +64,21 @@ int test_func(void)
 
 int __attribute__ ((warn_unused_result)) predicate_1(void) 
 {
-        return some_variable_set_by_an_isr;
+	return some_variable_set_by_an_isr;
+}
+
+void ISR1(void)
+{
+    // ERROR: This ISR shouldn't be calling any functions which try to lock mutexes
+    // or call printf().
+    threadsafe_printf_wrapper(9);
 }
 
 int main()
 {
-        int retval;
+	int retval;
+	double a_double_val;
+	T_FUNCTION_PTR a_function_ptr = function_that_we_will_call_through_a_ptr;
 	
 	if(test_func()+function_a()+calculate(function_w()))
 	{
@@ -78,6 +105,8 @@ int main()
                 }
 	}
 	
+Label1:
+
 	switch(1)
 	{
 		case 1:
@@ -97,6 +126,8 @@ int main()
 		}
 		default:
 		{
+			// Call a function through a pointer.
+			printf("Double value: %f", a_function_ptr());
 			break;
 		}
 	}

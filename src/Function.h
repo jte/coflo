@@ -46,13 +46,13 @@ public:
      */
 	void Link(const std::map< std::string, Function* > &function_map);
 	
-	bool CreateControlFlowGraph();
+	bool CreateControlFlowGraph(T_CFG & cfg);
 
 	std::string GetIdentifier() const { return m_function_id; };
 	
 	void Print();
 	
-	void PrintDotCFG(const boost::filesystem::path& output_dir);
+	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
 	
 private:
 	
@@ -111,10 +111,8 @@ private:
 	
 	/// The last statement in the body of this function.
 	CFGVertexID m_last_statement;
-
-	/// The Control Flow Graph for this Function.
-	T_CFG m_cfg;
 	
+	T_CFG *m_cfg;
 };
  
 #endif // FUNCTION_H

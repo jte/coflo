@@ -27,6 +27,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/filtered_graph.hpp>
 
 #include "Block.h"
 
@@ -35,6 +36,10 @@
 #include "Statement.h"
 #include "FunctionCallUnresolved.h"
 #include "FunctionCallResolved.h"
+
+#include "CFGEdgeTypeFallthrough.h"
+#include "CFGEdgeTypeFunctionCall.h"
+
 
 typedef std::map< long, Block * > T_LINK_MAP;
 typedef T_LINK_MAP::iterator T_LINK_MAP_ITERATOR;
@@ -421,34 +426,65 @@ void Function::Print()
 	}
 }
 
-void Function::PrintDotCFG(const boost::filesystem::path& output_dir)
+typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VertexPropertyMap;
+struct vertex_filter_functor
+{
+	vertex_filter_functor() { };
+	vertex_filter_functor(T_VertexPropertyMap vertex_prop_map, Function *parent_function)
+		: m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function) {};
+	bool operator()(const CFGVertexID& vid) const
+	{
+		if(m_parent_function == get(m_vertex_prop_map, vid))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+	
+	T_VertexPropertyMap m_vertex_prop_map;
+	Function *m_parent_function;
+};
+
+void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir)
 {
 	std::string dot_filename;
-	
+
+
+	T_VertexPropertyMap vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
+
+	vertex_filter_functor the_filter(vpm, this);
+	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_functor>
+		graph_of_this_function(*m_cfg, boost::keep_all(), the_filter);
+
 	dot_filename = output_dir.string()+m_function_id+".dot";
 	
 	std::cerr << "Creating " << dot_filename << std::endl;
 	
 	std::ofstream outfile(dot_filename.c_str());
 	
-	boost::write_graphviz(outfile, m_cfg,
-						 cfg_vertex_property_writer<T_CFG>(m_cfg),
+	boost::write_graphviz(outfile, graph_of_this_function,
+						 cfg_vertex_property_writer<T_CFG>(*m_cfg),
 						 boost::default_writer(), //edge_property_writer<T_CFG>(m_cfg),
 						 graph_property_writer());
 	
 	outfile.close();
 	
 	std::cerr << "Compiling " << dot_filename << std::endl;
-	::system(("dot -O -Tpng "+dot_filename).c_str());
+	::system((the_dot + " -O -Tpng "+dot_filename).c_str());
 }
 
-bool Function::CreateControlFlowGraph()
+bool Function::CreateControlFlowGraph(T_CFG & cfg)
 {
 	// We create the Control Flow Graph in two stages:
 	// - First we go through each basic block and add all Statements to m_cfg,
 	//   adding an edge linking each to its predecessor as we go.  We exclude in-edges
 	//   and out-edges for the first and last Statement in each block, resp.
 	// - Second, we link the last Statement of each block to its Successors.
+	
+	m_cfg = &cfg;
 	
 	std::map< T_BLOCK_GRAPH::vertex_descriptor, CFGVertexID > first_statement_of_block;
 	std::vector< CFGVertexID > last_statement_of_block;
@@ -467,21 +503,31 @@ bool Function::CreateControlFlowGraph()
 		{
 			// Add this Statement to the Control Flow Graph.
 			CFGVertexID vid;
-			vid = boost::add_vertex(m_cfg);
-			m_cfg[vid].m_statement = *sit;
+			vid = boost::add_vertex(*m_cfg);
+			(*m_cfg)[vid].m_statement = *sit;
+			(*m_cfg)[vid].m_containing_function = this;
 			
 			if(!is_first)
 			{
 				// Add an edge to its predecessor.
 				CFGEdgeID eid;
 
-				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, m_cfg);
+				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, *m_cfg);
+				// Since this edge is within the block, it is just a fallthrough.
+				(*m_cfg)[eid].m_edge_type = CFGEdgeTypeFallthrough::Factory();
 			}
 			else
 			{
 				// This is the first statement from this block.  Save it for stage 2.
 				first_statement_of_block[*vit] = vid;
 				is_first = false;
+				
+				if(m_block_graph[*vit].m_block->IsENTRY())
+				{
+					// This is the first statement of the ENTRY block.  Save the
+					// vertex_descriptor for use later.
+					m_first_statement = *vit;
+				}
 			}
 			
 			// It's OK to save the vertex descriptor for next time.  Per the Boost
@@ -492,6 +538,12 @@ bool Function::CreateControlFlowGraph()
 		
 		// Save the vertex descriptor of the last statement of this block for the next stage.
 		last_statement_of_block.push_back(last_vid);
+		
+		if(m_block_graph[*vit].m_block->IsEXIT())
+		{
+			// This is the last statement of the EXIT block.
+			m_last_statement = *vit;
+		}
 	}
 	
 	// Do the second step.
@@ -517,7 +569,7 @@ bool Function::CreateControlFlowGraph()
 			{
 				// Add the edge.
 				CFGEdgeID new_edge_desc;
-				boost::tie(new_edge_desc, ok) = boost::add_edge(*last_statement_it, first_statement_it->second, m_cfg);
+				boost::tie(new_edge_desc, ok) = boost::add_edge(*last_statement_it, first_statement_it->second, *m_cfg);
 			}
 		}
 		last_statement_it++;

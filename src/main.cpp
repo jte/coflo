@@ -27,11 +27,12 @@
 namespace po = boost::program_options;
 namespace bf = boost::filesystem;
 
+
 /**
  * CoFlo entry point.
  * 
- * @param argc
- * @param argv
+ * @param argc Number of command line arguments.
+ * @param argv Pointers to the command line strings.
  * @return 0 on success, non-zero on failure.
  */
 int main(int argc, char* argv[])
@@ -156,7 +157,7 @@ int main(int argc, char* argv[])
 	
 			if(vm.count("output-dir"))
 			{
-				tu->Print(vm["output-dir"].as<std::string>());
+				tu->Print(the_dot, vm["output-dir"].as<std::string>());
 			}
 		}
 	}
