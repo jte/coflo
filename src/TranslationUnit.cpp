@@ -284,11 +284,11 @@ bool TranslationUnit::CreateControlFlowGraphs()
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->CreateControlFlowGraph();
+		fp->CreateControlFlowGraph(m_cfg);
 	}
 }
 
-void TranslationUnit::Print(const boost::filesystem::path &output_dir)
+void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem::path &output_dir)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
@@ -330,7 +330,7 @@ void TranslationUnit::Print(const boost::filesystem::path &output_dir)
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		fp->Print();
-		fp->PrintDotCFG(output_dir);
+		fp->PrintDotCFG(the_dot, output_dir);
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
 		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}

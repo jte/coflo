@@ -21,7 +21,10 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+#include "Statement.h"
 #include "CFGEdgeTypeBase.h"
+
+class Function;
 
 /// \name Control Flow Graph definitions.
 //@{
@@ -31,6 +34,9 @@ struct CFGVertexProperties
 {
 	/// The Statement at this vertex of the CFG.
 	Statement *m_statement;
+	
+	/// The Function which contains this vertex.
+	Function *m_containing_function;
 };
 
 /// Edge properties for the CFG graph.
@@ -51,6 +57,16 @@ typedef boost::adjacency_list
 		CFGVertexProperties,
 		CFGEdgeProperties
 		> T_CFG;
+/*typedef boost::subgraph
+		<
+			boost::adjacency_list<
+				boost::vecS,
+				boost::vecS,
+				boost::directedS,
+				CFGVertexProperties,
+				boost::property< boost::edge_index_t, int >
+			>
+		> T_CFG;*/
 
 /// Typedef for the vertex_descriptors in the block graph.
 typedef T_CFG::vertex_descriptor CFGVertexID;

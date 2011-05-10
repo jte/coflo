@@ -15,8 +15,21 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
 #include "CFGEdgeTypeFallthrough.h"
 
+/// Definition of the single CFGEdgeTypeFallthrough instance.
+CFGEdgeTypeFallthrough *CFGEdgeTypeFallthrough::m_the_singleton = NULL;
+
+CFGEdgeTypeFallthrough* CFGEdgeTypeFallthrough::Factory()
+{
+	if(m_the_singleton == NULL)
+	{
+		m_the_singleton = new CFGEdgeTypeFallthrough();
+	}
+	
+	return m_the_singleton;
+}
 
 CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough() : CFGEdgeTypeBase()
 {
@@ -29,4 +42,3 @@ CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& ori
 CFGEdgeTypeFallthrough::~CFGEdgeTypeFallthrough()
 {
 }
-

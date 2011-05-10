@@ -22,14 +22,18 @@
 
 class CFGEdgeTypeFallthrough : public CFGEdgeTypeBase
 {
-
 public:
+	
+	/// Singleton factory.  We only need one of this class.
+	static CFGEdgeTypeFallthrough* Factory();
+	
 	CFGEdgeTypeFallthrough();
 	CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig);
 	virtual ~CFGEdgeTypeFallthrough();
 private:
-
+	
+	/// The singleton.
+	static CFGEdgeTypeFallthrough *m_the_singleton;
 };
 
 #endif	/* CFGEDGETYPEFALLTHROUGH_H */
-
