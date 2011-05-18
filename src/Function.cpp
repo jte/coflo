@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -57,9 +57,15 @@ Function::Function(const std::string &function_id)
 	m_block_list.push_back(m_entry_block);
 	m_block_list.push_back(m_exit_block);
 }
- 
+
 Function::~Function()
 {
+}
+
+bool Function::IsCalled() const
+{
+	// Determine if this function is ever called.
+	return boost::in_degree(m_first_statement, *m_cfg) > 0;
 }
  
 void Function::AddBlock(Block *block)
@@ -139,14 +145,14 @@ void Function::LinkBlocks()
 void Function::LinkIntoGraph()
 {
 	// Block*->VertexID map.
-	typedef std::map< Block*, VertexID > T_BLOCK_MAP;
+	typedef std::map< Block*, T_BLOCK_GRAPH_VERTEX_DESC > T_BLOCK_MAP;
 	T_BLOCK_MAP block_map;	
 	
 	// Add the function blocks into the m_block_graph.	
 	BOOST_FOREACH(Block *bp, m_block_list)
 	{
 		// this_block_id is the new Vertex.
-		VertexID this_block_id = boost::add_vertex(m_block_graph);
+		T_BLOCK_GRAPH_VERTEX_DESC this_block_id = boost::add_vertex(m_block_graph);
 		m_block_graph[this_block_id].m_block = bp;
 		
 		// Add the block ID to a temporary map for use in linking below.
@@ -156,8 +162,8 @@ void Function::LinkIntoGraph()
 	// Iterate over each block again, this time adding the edges between blocks.
 	BOOST_FOREACH(Block *bp, m_block_list)
 	{
-		VertexID this_block = block_map[bp];
-		VertexID next_block;
+		T_BLOCK_GRAPH_VERTEX_DESC this_block = block_map[bp];
+		T_BLOCK_GRAPH_VERTEX_DESC next_block;
 
 		// Go through all the successors.
 		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
@@ -169,7 +175,7 @@ void Function::LinkIntoGraph()
 			{
 				// Found the next block.
 				next_block = it->second;
-				EdgeID edge;
+				T_BLOCK_GRAPH_EDGE_DESC edge;
 				bool ok;
 				boost::tie(edge, ok) = boost::add_edge(this_block, next_block, m_block_graph);
 				// Check if there's no error, then set up the edge properties.
@@ -199,6 +205,7 @@ void Function::Link(const std::map< std::string, Function* > &function_map)
 		Block::T_STATEMENT_LIST_ITERATOR sit;
 		for(sit = bp->begin(); sit != bp->end(); sit++)
 		{
+			std::cout << "***SITTYPE:" << typeid(*(*sit)).name() << std::endl;
 			FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*sit);
 			
 			if(fcu != NULL)
@@ -216,8 +223,10 @@ void Function::Link(const std::map< std::string, Function* > &function_map)
 				{
 					// Found it.
 					// Now replace the Unresolved with the Resolved.
-					FunctionCallResolved *fcr = new FunctionCallResolved(it->second, NULL /** @todo FIXME, This should copy the Location.*/);
+					FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
+					// Delete the FunctionCallUnresolved object...
 					delete *sit;
+					// ...and replace it with the FunctionCallResolved object.
 					*sit = fcr;
 				}
 			}
@@ -231,7 +240,7 @@ struct graph_property_writer
 	void operator()(std::ostream& out) const
 	{
 		out << "graph [clusterrank=local]" << std::endl;
-		out << "node [shape=rectangle fontname=\"Courier\"]" << std::endl;
+		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
 	}
 };
@@ -277,7 +286,9 @@ public:
 	{
 		if(g[v].m_statement != NULL)
 		{
+			std::cout << "TYPE:" << typeid(*g[v].m_statement).name() << std::endl;
 			out << g[v].m_statement->GetStatementTextDOT();
+			//out << "[label=\"UNK\"]";
 		}
 		else
 		{
@@ -336,16 +347,16 @@ private:
 void Function::RemoveBackEdges()
 {
 	// List of back edges that we'll delete.
-	std::vector< EdgeID > m_back_edge_list;
+	std::vector< T_BLOCK_GRAPH_EDGE_DESC > m_back_edge_list;
 	
 	// The instance of the DFS visitor which we'll pass to the DFS.
-	dfs_back_edge_collector_visitor<EdgeID, T_BLOCK_GRAPH> vis(&m_back_edge_list);
+	dfs_back_edge_collector_visitor<T_BLOCK_GRAPH_EDGE_DESC, T_BLOCK_GRAPH> vis(&m_back_edge_list);
 	
 	// Find all the back edges.
 	boost::depth_first_search(m_block_graph, boost::visitor(vis));
 	
 	// Remove the back edges.
-	BOOST_FOREACH(EdgeID e, m_back_edge_list)
+	BOOST_FOREACH(T_BLOCK_GRAPH_EDGE_DESC e, m_back_edge_list)
 	{
 		std::cerr << "Removing back edge." << std::endl;
 		boost::remove_edge(e, m_block_graph);
@@ -368,7 +379,7 @@ void Function::Print()
 	// handle cycles.
 	RemoveBackEdges();
 	
-	typedef std::vector< VertexID > T_SORTED_BLOCK_CONTAINER;
+	typedef std::vector< T_BLOCK_GRAPH_VERTEX_DESC > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	// vector for storing the indent level for each block.
 	std::vector< long > block_indent_level;
@@ -381,18 +392,18 @@ void Function::Print()
 	
 	// Figure out the indent level.
 	long this_parent = 0;
-	BOOST_REVERSE_FOREACH(VertexID vid, topologically_sorted_blocks)
+	BOOST_REVERSE_FOREACH(T_BLOCK_GRAPH_VERTEX_DESC vid, topologically_sorted_blocks)
 	{
 		if(boost::out_degree(vid, m_block_graph)>1)
 		{
 			// This is some sort of decision point, indent the children.
 			/// \todo Make this more efficient.
 			long this_child = 0;
-			BOOST_REVERSE_FOREACH(VertexID child, topologically_sorted_blocks)
+			BOOST_REVERSE_FOREACH(T_BLOCK_GRAPH_VERTEX_DESC child, topologically_sorted_blocks)
 			{
-				EdgeID dummy;
+				T_BLOCK_GRAPH_EDGE_DESC dummy;
 				bool is_child;
-				tie(dummy, is_child) = boost::edge(vid, child, m_block_graph);
+				boost::tie(dummy, is_child) = boost::edge(vid, child, m_block_graph);
 				if(is_child)
 				{
 					// This is a child, add up the indent level.
@@ -432,10 +443,11 @@ struct vertex_filter_functor
 	vertex_filter_functor() { };
 	vertex_filter_functor(T_VertexPropertyMap vertex_prop_map, Function *parent_function)
 		: m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function) {};
-	bool operator()(const CFGVertexID& vid) const
+	bool operator()(const T_CFG_VERTEX_DESC& vid) const
 	{
 		if(m_parent_function == get(m_vertex_prop_map, vid))
 		{
+			// This vertex belongs to the function we're concerned with.
 			return true;
 		}
 		else
@@ -486,8 +498,8 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	
 	m_cfg = &cfg;
 	
-	std::map< T_BLOCK_GRAPH::vertex_descriptor, CFGVertexID > first_statement_of_block;
-	std::vector< CFGVertexID > last_statement_of_block;
+	std::map< T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC > first_statement_of_block;
+	std::vector< T_CFG_VERTEX_DESC > last_statement_of_block;
 	bool ok;
 				
 	// Do the first step.
@@ -495,14 +507,14 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	for(boost::tie(vit,vend) = boost::vertices(m_block_graph); vit != vend; vit++)
 	{
 		Block::T_STATEMENT_LIST_ITERATOR sit;
-		CFGVertexID last_vid;
+		T_CFG_VERTEX_DESC last_vid;
 		bool is_first = true;
 		
 		// Iterate over all Statements in this Block.
 		for(sit = m_block_graph[*vit].m_block->begin(); sit != m_block_graph[*vit].m_block->end(); sit++)
 		{
 			// Add this Statement to the Control Flow Graph.
-			CFGVertexID vid;
+			T_CFG_VERTEX_DESC vid;
 			vid = boost::add_vertex(*m_cfg);
 			(*m_cfg)[vid].m_statement = *sit;
 			(*m_cfg)[vid].m_containing_function = this;
@@ -510,7 +522,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			if(!is_first)
 			{
 				// Add an edge to its predecessor.
-				CFGEdgeID eid;
+				T_CFG_EDGE_DESC eid;
 
 				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, *m_cfg);
 				// Since this edge is within the block, it is just a fallthrough.
@@ -547,8 +559,8 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	}
 	
 	// Do the second step.
-	std::vector< CFGVertexID >::iterator last_statement_it;
-	std::map< T_BLOCK_GRAPH::vertex_descriptor, CFGVertexID >::iterator first_statement_it;
+	std::vector< T_CFG_VERTEX_DESC >::iterator last_statement_it;
+	std::map< T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC >::iterator first_statement_it;
 	last_statement_it = last_statement_of_block.begin();
 	for(boost::tie(vit,vend) = boost::vertices(m_block_graph); vit != vend; vit++)
 	{
@@ -557,7 +569,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		{
 			// Add an edge from the last statement of Block vit to the first statement
 			// of the Block pointed to by eit.
-			CFGVertexID target_vertex_descr = boost::target(*eit, m_block_graph);
+			T_CFG_VERTEX_DESC target_vertex_descr = boost::target(*eit, m_block_graph);
 			std::cout << "Target: " << target_vertex_descr << std::endl;
 			first_statement_it = first_statement_of_block.find(target_vertex_descr);
 			
@@ -568,7 +580,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			else
 			{
 				// Add the edge.
-				CFGEdgeID new_edge_desc;
+				T_CFG_EDGE_DESC new_edge_desc;
 				boost::tie(new_edge_desc, ok) = boost::add_edge(*last_statement_it, first_statement_it->second, *m_cfg);
 			}
 		}

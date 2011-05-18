@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,20 +15,22 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef NOOP_H
 #define	NOOP_H
 
-#include "Statement.h"
+#include "PseudoStatement.h"
 
 /**
  * NoOp statement.  Used primarily to give basic blocks which have no actual Statements
  * at least one Statement, so that graph manipulations can work while retaining these
  * "empty" blocks.
  */
-class NoOp : public Statement
+class NoOp : public PseudoStatement
 {
 public:
-	NoOp(Location *location);
+	NoOp(const Location *location);
 	NoOp(const NoOp& orig);
 	virtual ~NoOp();
 	

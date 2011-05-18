@@ -1,4 +1,4 @@
-/**
+/** \mainpage
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -147,14 +147,17 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 			
-			// Linking the functions.
+			// Link the function calls.
 			std::cout << "Linking function calls..." << std::endl;
 			tu->Link(function_map);
 			
 			// Create the control-flow graphs.
 			std::cout << "Creating function control-flow graphs..." << std::endl;
 			tu->CreateControlFlowGraphs();
-	
+			
+			// Link the function calls.
+			//std::cout << "Linking function calls..." << std::endl;
+			//tu->Link(function_map);	
 			if(vm.count("output-dir"))
 			{
 				tu->Print(the_dot, vm["output-dir"].as<std::string>());

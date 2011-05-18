@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -28,7 +28,7 @@ class Location;
 class Statement
 {
 public:
-	Statement(Location *location);
+	Statement(const Location *location);
 	Statement(const Statement& orig);
 	virtual ~Statement();
 	
@@ -38,7 +38,7 @@ public:
      */
 	virtual std::string GetStatementTextDOT() const = 0;
 	
-	std::string GetLineNumber() const;
+	const Location* GetLocation() const { return m_location; };
 	
 private:
 

@@ -150,17 +150,22 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			in_function_name = capture_results[1];
 			std::cout << "Found function: " << in_function_name << std::endl;
 			current_function = new Function(in_function_name);
-			(*function_map)[in_function_name] = current_function;
 
+			(*function_map)[in_function_name] = current_function;
+			std::cout << "***GOT HERE***" << std::endl;
+			
 			// Add the new function to the list.
 			m_function_defs.push_back(current_function);
 
 			in_function = true;
+
 			continue;
 		}
 
 		if(in_function)
 		{
+			// We're inside a function.
+			
 			if(line.compare("}") == 0)
 			{
 				// Found the end of the function.
@@ -201,7 +206,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				if(current_block->NumberOfStatements() == 0)
 				{
 					// Make sure every block has at least one statement.
-					current_block->AddStatement(new NoOp(NULL));
+					current_block->AddStatement(new NoOp(new Location("[UNKNOWN/file.c : 0]")));
 				}
 
 				// Tell the Block what its successors are.
@@ -245,8 +250,10 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 					std::cerr << "Found call: " << capture_results[2] << std::endl;
 					
 					// Add the call to the block.
-					Location *loc = new Location(capture_results[1].str());
-					FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc);
+					// Note that at this point, it's an Unresolved call, since we haven't
+					// linked yet.
+					Location loc(capture_results[1].str());
+					FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], &loc);
 					current_block->AddStatement(f);
 					
 					continue;
@@ -323,7 +330,13 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a></li>" << std::endl;
+		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
+		
+		if(!fp->IsCalled())
+		{
+			index_html_out << " (possible entry point)";
+		}
+		index_html_out << "</li>" << std::endl;
 	}
 	index_html_out << "</ul></p>" << std::endl;
 	

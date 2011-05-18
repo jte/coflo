@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,17 +15,20 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FunctionCallResolved.h"
 #include "Function.h"
+#include "FunctionCallResolved.h"
+#include "FunctionCallUnresolved.h"
+#include "Location.h"
 
-FunctionCallResolved::FunctionCallResolved(Function *f, Location *location) : FunctionCall(location)
+
+FunctionCallResolved::FunctionCallResolved(Function *f, FunctionCallUnresolved *fcu) : FunctionCall(fcu->GetLocation())
 {
-	m_function = f;
+	m_target_function = f;
 }
 
-FunctionCallResolved::FunctionCallResolved(const FunctionCallResolved& orig) : FunctionCall(static_cast<const FunctionCall&>(orig))
+FunctionCallResolved::FunctionCallResolved(const FunctionCallResolved& orig) : FunctionCall(orig)
 {
-	m_function = orig.m_function;
+	m_target_function = orig.m_target_function;
 }
 
 FunctionCallResolved::~FunctionCallResolved()
@@ -35,10 +38,10 @@ FunctionCallResolved::~FunctionCallResolved()
 
 std::string FunctionCallResolved::GetStatementTextDOT() const
 {
-	return "[label=\""+m_function->GetIdentifier()+"()\"]";
+	return "[label=\""+m_target_function->GetIdentifier()+"()\"]";
 }
 
 std::string FunctionCallResolved::GetIdentifier() const
 {
-	return m_function->GetIdentifier(); 
+	return m_target_function->GetIdentifier(); 
 }

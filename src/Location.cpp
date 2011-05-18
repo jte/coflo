@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -33,6 +33,10 @@ Location::Location(const std::string &location_string)
 		m_line_number = atoi(capture_results[2].str().c_str());
 		m_column = 0;
 	}
+	else
+	{
+		std::cerr << "WARNING: UNPARSABLE LOCATION" << std::endl;
+	}
 }
 
 Location::Location(boost::filesystem::path path, long lineno, long column /* = 0 */)
@@ -44,6 +48,9 @@ Location::Location(boost::filesystem::path path, long lineno, long column /* = 0
 
 Location::Location(const Location& orig)
 {
+	m_file_path = orig.m_file_path;
+	m_line_number = orig.m_line_number;
+	m_column = orig.m_column;
 }
 
 Location::~Location()

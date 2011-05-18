@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,31 +15,11 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FUNCTIONCALL_H
-#define	FUNCTIONCALL_H
+#include "CFGEdgeTypeReturn.h"
 
-#include <string>
+CFGEdgeTypeReturn::CFGEdgeTypeReturn() { }
 
-#include "Statement.h"
+CFGEdgeTypeReturn::CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig) { }
 
-class Function;
-class Location;
+CFGEdgeTypeReturn::~CFGEdgeTypeReturn() { }
 
-/**
- * Class representing a function call statement.
- * @param identifier
- */
-class FunctionCall : public Statement
-{
-public:
-	FunctionCall(const Location *location);
-	FunctionCall(const FunctionCall& orig);
-	virtual ~FunctionCall();
-	
-	/// Returns the name of the function being called.
-	virtual std::string GetIdentifier() const = 0;
-
-private:
-};
-
-#endif	/* FUNCTIONCALL_H */

@@ -25,9 +25,12 @@
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 
+#include "Location.h"
 #include "SuccessorTypes.h"
 #include "Statement.h"
 #include "NoOp.h"
+#include "Enter.h"
+#include "Exit.h"
 
 using namespace boost;
 
@@ -42,14 +45,14 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 		{
 			// This is the entry block.
 			m_block_label = "ENTRY";
-			m_statement_list.push_back(new NoOp(NULL));
+			m_statement_list.push_back(new Enter(new Location("[UNKNOWN/file.c : 0]")));
 			break;
 		}
 		case 1:
 		{
 			// This is the exit block.
 			m_block_label = "EXIT";
-			m_statement_list.push_back(new NoOp(NULL));
+			m_statement_list.push_back(new Exit(new Location("[UNKNOWN/file.c : 0]")));
 			break;
 		}
 		default:

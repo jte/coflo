@@ -18,7 +18,7 @@
 #include "FunctionCall.h"
 
 
-FunctionCall::FunctionCall(Location *location) : Statement(location)
+FunctionCall::FunctionCall(const Location *location) : Statement(location)
 {
 
 }
