@@ -21,6 +21,7 @@
 #include "FunctionCall.h"
 
 class Function;
+class FunctionCallUnresolved;
 
 /**
  * A resolved function call.
@@ -29,7 +30,7 @@ class FunctionCallResolved : public FunctionCall
 {
 
 public:
-	FunctionCallResolved(Function *f, Location *location);
+	FunctionCallResolved(Function *target_function, FunctionCallUnresolved *fcu);
 	FunctionCallResolved(const FunctionCallResolved& orig);
 	virtual ~FunctionCallResolved();
 	
@@ -44,7 +45,7 @@ public:
 private:
 	
 	/// Pointer to the function we're calling.
-	Function *m_function;
+	Function *m_target_function;
 };
 
 #endif	/* FUNCTIONCALLRESOLVED_H */

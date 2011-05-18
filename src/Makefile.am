@@ -17,10 +17,15 @@
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
+	BasicBlockGraph.h \
 	Block.cpp Block.h \
 	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
 	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
 	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
+	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
+	ControlFlowGraph.h \
+	Enter.cpp Enter.h \
+	Exit.cpp Exit.h \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \
 	FunctionCallResolved.cpp FunctionCallResolved.h \
@@ -29,6 +34,7 @@ coflo_SOURCES = main.cpp \
 	Location.cpp Location.h \
 	NoOp.cpp NoOp.h \
 	Program.cpp Program.h \
+	PseudoStatement.cpp PseudoStatement.h \
 	RuleBase.cpp RuleBase.h \
 	RuleReachability.cpp RuleReachability.h \
 	Statement.cpp Statement.h \

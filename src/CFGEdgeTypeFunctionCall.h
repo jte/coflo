@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,6 +15,8 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef CFGEDGETYPEFUNCTIONCALL_H
 #define	CFGEDGETYPEFUNCTIONCALL_H
 
@@ -22,6 +24,11 @@
 
 class FunctionCall;
 
+/**
+ * A function call edge.
+ * 
+ * @param function_call
+ */
 class CFGEdgeTypeFunctionCall : public CFGEdgeTypeBase
 {
 public:

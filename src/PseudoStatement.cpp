@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,31 +15,17 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FUNCTIONCALL_H
-#define	FUNCTIONCALL_H
+#include "PseudoStatement.h"
 
-#include <string>
-
-#include "Statement.h"
-
-class Function;
-class Location;
-
-/**
- * Class representing a function call statement.
- * @param identifier
- */
-class FunctionCall : public Statement
+PseudoStatement::PseudoStatement(const Location *location) : Statement(location)
 {
-public:
-	FunctionCall(const Location *location);
-	FunctionCall(const FunctionCall& orig);
-	virtual ~FunctionCall();
-	
-	/// Returns the name of the function being called.
-	virtual std::string GetIdentifier() const = 0;
+}
 
-private:
-};
+PseudoStatement::PseudoStatement(const PseudoStatement& orig) : Statement(orig)
+{
+}
 
-#endif	/* FUNCTIONCALL_H */
+PseudoStatement::~PseudoStatement()
+{
+}
+

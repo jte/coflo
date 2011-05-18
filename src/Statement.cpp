@@ -20,28 +20,18 @@
 #include "Statement.h"
 #include "Location.h"
 
-Statement::Statement(Location *location) 
+Statement::Statement(const Location *location) 
 {
-	m_location = location;
+	m_location = new Location(*location);
 }
 
 Statement::Statement(const Statement& orig) 
 {
-	m_location = orig.m_location;
+	// Do a deep copy of the Location object.
+	m_location = new Location(*orig.m_location);
 }
 
 Statement::~Statement()
 {
 }
 
-std::string Statement::GetLineNumber() const
-{
-	if(m_location == NULL)
-	{
-		return "UNKNOWN";
-	}
-	else
-	{
-		return m_location->GetLineNumber(); 
-	}
-}

@@ -24,6 +24,7 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
+#include "BasicBlockGraph.h"
 #include "ControlFlowGraph.h"
 
 class Block;
@@ -43,9 +44,18 @@ public:
 	/**
 	 * Link the unresolved function calls in this Function to the Functions
 	 * in the passed \a function_map.
+	 * 
+	 * @function_map The identifier->Function map to use to find the Functions to
+	 * link to.
      */
 	void Link(const std::map< std::string, Function* > &function_map);
 	
+	/**
+	 * Add the control flow graph of this Function to \a cfg.
+	 * 
+     * @param cfg The T_CFG to add this function's control-flow graph to.
+     * @return true on success, false on failure.
+     */
 	bool CreateControlFlowGraph(T_CFG & cfg);
 
 	std::string GetIdentifier() const { return m_function_id; };
@@ -54,37 +64,36 @@ public:
 	
 	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
 	
+	/// @name Function Properties
+	/// These are various properties of the function represented by this class instance.
+	/// They may have been determined by CoFlow analytically, stated by the user through
+	/// annotations or via other means, etc.
+	//@{
+	
+	/**
+	 * Determine if this Function is ever called.
+	 * 
+     * @return true if this Function is called.
+     */
+	bool IsCalled() const;
+	
+	/// \todo Probably should have the following:
+	/// IsPure()		(Has no side effects, but may read global memory)
+	/// IsConst()		(IsPure() but with the further restriction that it can't access global memory).
+	/// IsDeprecated()	(Shouldn't be used anymore.)
+	/// IsEntryPoint()	(is an entry point of the program, e.g. main(), an ISR, etc.
+	/// IsExitPoint()	(is an exit point.  Not sure of the semantics of this.)
+	/// GetComplexity()	(Big-O notation stuff, probably want time, space).
+	/// GetStackUsage()	(How much stack the function uses, whether it's bounded.)
+	
+	//@}
+	
 private:
 	
 	/// Remove the back edges from the graph.
 	void RemoveBackEdges();
 
-	/// Vertex properties for the Block graph.
-	struct Vertex
-	{
-		Block *m_block;
-	};
-	
-	/// Edge properties for the Block graph.
-	struct Edge
-	{
-		std::string m_edge_text;
-	};
 
-	/// Typedef for the block graph.
-	typedef boost::adjacency_list
-			<boost::vecS,
-			boost::vecS,
-			boost::bidirectionalS,
-			Vertex,
-			Edge
-			> T_BLOCK_GRAPH;
-	
-	/// Typedef for the vertex_descriptors in the block graph.
-	typedef T_BLOCK_GRAPH::vertex_descriptor VertexID;
-	
-	/// Typedef for the edge_descriptors in the block graph.
-	typedef T_BLOCK_GRAPH::edge_descriptor EdgeID;
 	
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;
@@ -107,10 +116,10 @@ private:
 	std::vector < Block * > m_block_list;
 	
 	/// The first statement in the body of this function.
-	CFGVertexID m_first_statement;
+	T_CFG_VERTEX_DESC m_first_statement;
 	
 	/// The last statement in the body of this function.
-	CFGVertexID m_last_statement;
+	T_CFG_VERTEX_DESC m_last_statement;
 	
 	T_CFG *m_cfg;
 };

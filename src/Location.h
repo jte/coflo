@@ -36,7 +36,7 @@ public:
 	Location(const Location& orig);
 	virtual ~Location();
 	
-	std::string GetLineNumber() const { std::stringstream ss; ss << m_line_number; return ss.str(); };
+	//std::string GetLineNumber() const { std::stringstream ss; ss << m_line_number; return ss.str(); };
 	
 	friend std::ostream& operator<<(std::ostream& os, const Location& loc);
 	

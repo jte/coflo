@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,31 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FUNCTIONCALL_H
-#define	FUNCTIONCALL_H
+#ifndef PSEUDOSTATEMENT_H
+#define	PSEUDOSTATEMENT_H
 
-#include <string>
+#include <boost/mpl/inherit.hpp>
 
 #include "Statement.h"
 
-class Function;
-class Location;
-
-/**
- * Class representing a function call statement.
- * @param identifier
- */
-class FunctionCall : public Statement
+class PseudoStatement : public Statement
 {
 public:
-	FunctionCall(const Location *location);
-	FunctionCall(const FunctionCall& orig);
-	virtual ~FunctionCall();
-	
-	/// Returns the name of the function being called.
-	virtual std::string GetIdentifier() const = 0;
-
+	PseudoStatement(const Location *location);
+	PseudoStatement(const PseudoStatement& orig);
+	virtual ~PseudoStatement();
 private:
+
 };
 
-#endif	/* FUNCTIONCALL_H */
+
+#endif	/* PSEUDOSTATEMENT_H */
+

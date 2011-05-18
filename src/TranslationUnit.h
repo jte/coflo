@@ -38,6 +38,16 @@ public:
 
 	/**
 	 * Parse the given source file, extracting the basic blocks.
+	 * 
+	 * @param filename The file to parse.
+	 * @param function_map Map of identifiers to Function pointers to which the
+	 *		functions found in this TranslationUnit are to be added.
+	 * @param the_filter The filter command to invoke.
+	 * @param the_gcc The compiler command to invoke.
+	 * @param the_ctags The ctags command to invoke.
+	 * @param debug_parse Whether to output debugging info during the parse stage.
+	 * 
+	 * @return true if the parse succeeded, false if it fails.
 	 */
 	bool ParseFile(const boost::filesystem::path &filename,
 		T_ID_TO_FUNCTION_PTR_MAP *function_map,

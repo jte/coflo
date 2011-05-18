@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,13 +15,15 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #include "NoOp.h"
 
-NoOp::NoOp(Location *location) : Statement (location)
+NoOp::NoOp(const Location *location) : PseudoStatement (location)
 {
 }
 
-NoOp::NoOp(const NoOp& orig) : Statement(orig)
+NoOp::NoOp(const NoOp& orig) : PseudoStatement(orig)
 {
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,9 +15,14 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CFGEDGETYPEBASE_H
-	#define	CFGEDGETYPEBASE_H
+/** @file */
 
+#ifndef CFGEDGETYPEBASE_H
+#define	CFGEDGETYPEBASE_H
+
+/**
+ * Base class for control flow graph edge types.
+ */
 class CFGEdgeTypeBase
 {
 

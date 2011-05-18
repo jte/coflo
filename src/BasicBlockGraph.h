@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -10,60 +10,45 @@
  * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
-
-#ifndef CONTROLFLOWGRAPH_H
-#define	CONTROLFLOWGRAPH_H
+#ifndef BASICBLOCKGRAPH_H
+#define	BASICBLOCKGRAPH_H
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "Statement.h"
-#include "CFGEdgeTypeBase.h"
+class Block;
 
-class Function;
-
-/// \name Control Flow Graph definitions.
-//@{
-	
-/// Vertex properties for the CFG graph.
-struct CFGVertexProperties
+/// Vertex properties for the Block graph.
+struct BasicBlockGraphVertexProperties
 {
-	/// The Statement at this vertex of the CFG.
-	Statement *m_statement;
-	
-	/// The Function which contains this vertex.
-	Function *m_containing_function;
+	Block *m_block;
 };
 
-/// Edge properties for the CFG graph.
-struct CFGEdgeProperties
+/// Edge properties for the Block graph.
+struct BasicBlockGraphEdgeProperties
 {
-	/// The Edge Type.
-	/// May be a FunctionCall, fallthrough, goto, etc.
-	CFGEdgeTypeBase *m_edge_type;
+	std::string m_edge_text;
 };
 
-/// Typedef for the CFG graph.
+/// Typedef for the block graph.
 typedef boost::adjacency_list
 		<boost::vecS,
 		boost::vecS,
 		boost::bidirectionalS,
-		CFGVertexProperties,
-		CFGEdgeProperties
-		> T_CFG;
+		BasicBlockGraphVertexProperties,
+		BasicBlockGraphEdgeProperties
+		> T_BLOCK_GRAPH;
 
 /// Typedef for the vertex_descriptors in the block graph.
-typedef T_CFG::vertex_descriptor T_CFG_VERTEX_DESC;
+typedef T_BLOCK_GRAPH::vertex_descriptor T_BLOCK_GRAPH_VERTEX_DESC;
 
 /// Typedef for the edge_descriptors in the block graph.
-typedef T_CFG::edge_descriptor T_CFG_EDGE_DESC;
+typedef T_BLOCK_GRAPH::edge_descriptor T_BLOCK_GRAPH_EDGE_DESC;
 
-//@}
+#endif	/* BASICBLOCKGRAPH_H */
 
-#endif	/* CONTROLFLOWGRAPH_H */
