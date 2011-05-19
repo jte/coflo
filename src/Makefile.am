@@ -24,7 +24,7 @@ coflo_SOURCES = main.cpp \
 	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
 	ControlFlowGraph.h \
-	Enter.cpp Enter.h \
+	Entry.cpp Entry.h \
 	Exit.cpp Exit.h \
 	Function.cpp Function.h \
 	FunctionCall.cpp FunctionCall.h \

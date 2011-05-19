@@ -156,8 +156,10 @@ int main(int argc, char* argv[])
 			tu->CreateControlFlowGraphs();
 			
 			// Link the function calls.
+			/// @todo Link doesn't work after CreateControlFlowGraphs() for some reason.
 			//std::cout << "Linking function calls..." << std::endl;
 			//tu->Link(function_map);	
+			
 			if(vm.count("output-dir"))
 			{
 				tu->Print(the_dot, vm["output-dir"].as<std::string>());
