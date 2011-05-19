@@ -29,7 +29,7 @@
 #include "SuccessorTypes.h"
 #include "Statement.h"
 #include "NoOp.h"
-#include "Enter.h"
+#include "Entry.h"
 #include "Exit.h"
 
 using namespace boost;
@@ -45,7 +45,7 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 		{
 			// This is the entry block.
 			m_block_label = "ENTRY";
-			m_statement_list.push_back(new Enter(new Location("[UNKNOWN/file.c : 0]")));
+			m_statement_list.push_back(new Entry(new Location("[UNKNOWN/file.c : 0]")));
 			break;
 		}
 		case 1:

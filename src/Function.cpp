@@ -111,7 +111,6 @@ void Function::LinkBlocks()
 	{
 		std::cerr << "ERROR: Can't find Block 2." << std::endl;
 	}
-	// = lmit->second;
 
 	// Now go through all the Successors and link them to the Blocks they refer to.
 	std::vector< Successor* >::iterator it2;
@@ -286,9 +285,7 @@ public:
 	{
 		if(g[v].m_statement != NULL)
 		{
-			std::cout << "TYPE:" << typeid(*g[v].m_statement).name() << std::endl;
 			out << g[v].m_statement->GetStatementTextDOT();
-			//out << "[label=\"UNK\"]";
 		}
 		else
 		{
