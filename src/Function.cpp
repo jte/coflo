@@ -44,6 +44,30 @@
 typedef std::map< long, Block * > T_LINK_MAP;
 typedef T_LINK_MAP::iterator T_LINK_MAP_ITERATOR;
 typedef T_LINK_MAP::value_type T_LINK_MAP_VALUE;
+
+typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VertexPropertyMap;
+
+struct vertex_filter_functor
+{
+	vertex_filter_functor() { };
+	vertex_filter_functor(T_VertexPropertyMap vertex_prop_map, Function *parent_function)
+		: m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function) {};
+	bool operator()(const T_CFG_VERTEX_DESC& vid) const
+	{
+		if(m_parent_function == get(m_vertex_prop_map, vid))
+		{
+			// This vertex belongs to the function we're concerned with.
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+	
+	T_VertexPropertyMap m_vertex_prop_map;
+	Function *m_parent_function;
+};
  
 Function::Function(const std::string &function_id)
 {
@@ -117,7 +141,6 @@ void Function::LinkBlocks()
 	for(it2 = successor_list.begin(); it2 != successor_list.end(); it2++)
 	{
 		long block_no;
-		Block *block_ptr;
 		T_LINK_MAP_ITERATOR linkmap_it;
 
 		block_no = (*it2)->GetSuccessorBlockNumber();
@@ -197,37 +220,40 @@ void Function::LinkIntoGraph()
 	}
 }
 
+
 void Function::Link(const std::map< std::string, Function* > &function_map)
 {
-	BOOST_FOREACH(Block *bp, m_block_list)
+	T_VertexPropertyMap vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
+
+	vertex_filter_functor the_filter(vpm, this);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_functor> T_FILTERED_CFG;
+	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(), the_filter);
+	
+	boost::graph_traits< T_FILTERED_CFG >::vertex_iterator vit, vend;
+	boost::tie(vit, vend) = boost::vertices(graph_of_this_function);
+	for(; vit != vend; vit++)
 	{
-		Block::T_STATEMENT_LIST_ITERATOR sit;
-		for(sit = bp->begin(); sit != bp->end(); sit++)
+		FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>((*m_cfg)[*vit].m_statement);
+		if(fcu != NULL)
 		{
-			std::cout << "***SITTYPE:" << typeid(*(*sit)).name() << std::endl;
-			FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*sit);
-			
-			if(fcu != NULL)
+			std::map< std::string, Function* >::const_iterator it;
+				
+			// We found an unresolved function call.  Try to resolve it.
+			it = function_map.find(fcu->GetIdentifier());
+
+			if(it == function_map.end())
 			{
-				std::map< std::string, Function* >::const_iterator it;
-				
-				// We found an unresolved function call.  Try to resolve it.
-				it = function_map.find(fcu->GetIdentifier());
-				
-				if(it == function_map.end())
-				{
-					std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
-				}
-				else
-				{
-					// Found it.
-					// Now replace the Unresolved with the Resolved.
-					FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
-					// Delete the FunctionCallUnresolved object...
-					delete *sit;
-					// ...and replace it with the FunctionCallResolved object.
-					*sit = fcr;
-				}
+				std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
+			}
+			else
+			{
+				// Found it.
+				// Now replace the Unresolved with the Resolved.
+				FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
+				// Delete the FunctionCallUnresolved object...
+				delete fcu;
+				// ...and replace it with the FunctionCallResolved object.
+				(*m_cfg)[*vit].m_statement = fcr;
 			}
 		}
 	}
@@ -275,16 +301,16 @@ private:
 };
 
 /// Class template of a vertex property writer, for use with write_graphviz().
-template < typename Graph >
 class cfg_vertex_property_writer
 {
 public:
-	cfg_vertex_property_writer(Graph _g) : g(_g) {}
-	template <typename Vertex>
-	void operator()(std::ostream& out, const Vertex& v) 
+	cfg_vertex_property_writer(T_CFG _g) : g(_g) {}
+
+	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v) 
 	{
 		if(g[v].m_statement != NULL)
 		{
+			//std::cout << "TYPE:" << typeid(*g[v].m_statement).name() << std::endl;
 			out << g[v].m_statement->GetStatementTextDOT();
 		}
 		else
@@ -293,7 +319,7 @@ public:
 		}
 	}
 private:
-	Graph& g;
+	T_CFG& g;
 };
 
 /// Class template of an edge property writer, for use with write_graphviz().
@@ -362,8 +388,6 @@ void Function::RemoveBackEdges()
 
 void Function::Print()
 {
-	long indent_level = 0;
-	
 	// Print the function info.
 	std::cout << "Function Definition: " << m_function_id << std::endl;
 
@@ -434,28 +458,6 @@ void Function::Print()
 	}
 }
 
-typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VertexPropertyMap;
-struct vertex_filter_functor
-{
-	vertex_filter_functor() { };
-	vertex_filter_functor(T_VertexPropertyMap vertex_prop_map, Function *parent_function)
-		: m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function) {};
-	bool operator()(const T_CFG_VERTEX_DESC& vid) const
-	{
-		if(m_parent_function == get(m_vertex_prop_map, vid))
-		{
-			// This vertex belongs to the function we're concerned with.
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	};
-	
-	T_VertexPropertyMap m_vertex_prop_map;
-	Function *m_parent_function;
-};
 
 void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir)
 {
@@ -475,7 +477,7 @@ void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::
 	std::ofstream outfile(dot_filename.c_str());
 	
 	boost::write_graphviz(outfile, graph_of_this_function,
-						 cfg_vertex_property_writer<T_CFG>(*m_cfg),
+						 cfg_vertex_property_writer(*m_cfg),
 						 boost::default_writer(), //edge_property_writer<T_CFG>(m_cfg),
 						 graph_property_writer());
 	
@@ -583,4 +585,6 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		}
 		last_statement_it++;
 	}
+	
+	return true;
 }

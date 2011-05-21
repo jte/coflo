@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -28,6 +28,8 @@
 class Function;
 
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
+
+typedef std::map< std::string, T_CFG_VERTEX_DESC > T_ID_TO_CFG_VERTEX_MAP;
 
 class TranslationUnit
 {
