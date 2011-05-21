@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -57,7 +57,7 @@ public:
      * @return true on success, false on failure.
      */
 	bool CreateControlFlowGraph(T_CFG & cfg);
-
+	
 	std::string GetIdentifier() const { return m_function_id; };
 	
 	void Print();

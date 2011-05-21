@@ -23,9 +23,3 @@ SUBDIRS = src
 
 # Include additional automake fragments.
 include $(top_srcdir)/amlocal.am
-
-#DOXYGEN = "/cygdrive/c/Program Files/Doxygen/bin/doxygen.exe"
-
-#.PHONY: docs
-#docs :
-#	$(DOXYGEN) Doxyfile

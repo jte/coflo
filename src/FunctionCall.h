@@ -27,7 +27,6 @@ class Location;
 
 /**
  * Class representing a function call statement.
- * @param identifier
  */
 class FunctionCall : public Statement
 {

@@ -152,7 +152,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			current_function = new Function(in_function_name);
 
 			(*function_map)[in_function_name] = current_function;
-			std::cout << "***GOT HERE***" << std::endl;
 			
 			// Add the new function to the list.
 			m_function_defs.push_back(current_function);
@@ -293,6 +292,8 @@ bool TranslationUnit::CreateControlFlowGraphs()
 	{
 		fp->CreateControlFlowGraph(m_cfg);
 	}
+	
+	return true;
 }
 
 void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem::path &output_dir)
@@ -342,7 +343,7 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->Print();
+		//fp->Print();
 		fp->PrintDotCFG(the_dot, output_dir);
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
 		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
