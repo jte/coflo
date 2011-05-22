@@ -88,6 +88,10 @@ public:
 	
 	//@}
 	
+protected:
+	
+	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_first_statement; };
+	
 private:
 	
 	/// Remove the back edges from the graph.

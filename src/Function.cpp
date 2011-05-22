@@ -248,12 +248,36 @@ void Function::Link(const std::map< std::string, Function* > &function_map)
 			else
 			{
 				// Found it.
-				// Now replace the Unresolved with the Resolved.
+				// Replace the FunctionCallUnresolved with a FunctionCallResolved.
 				FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
 				// Delete the FunctionCallUnresolved object...
 				delete fcu;
 				// ...and replace it with the FunctionCallResolved object.
 				(*m_cfg)[*vit].m_statement = fcr;
+				
+				// Now add the appropriate CFG edges.
+				// The FunctionCall->Function->entrypoint edge.
+				CFGEdgeTypeFunctionCall *call_edge = new CFGEdgeTypeFunctionCall(fcr);
+				T_CFG_EDGE_DESC new_edge_desc;
+				bool ok;
+				
+				boost::tie(new_edge_desc, ok) =	boost::add_edge(*vit, it->second->GetEntryVertexDescriptor(), *m_cfg);
+				if(ok)
+				{
+					// Edge was added OK, let's connect the edge properties.
+					std::cerr << "INFO: Adding FunctionCall edge from " 
+						<< GetIdentifier() << " to "
+						<< (*m_cfg)[it->second->GetEntryVertexDescriptor()].m_containing_function->GetIdentifier()
+						<< std::endl;
+					(*m_cfg)[new_edge_desc].m_edge_type = call_edge;
+					
+					/// @todo Add the return edge.
+				}
+				else
+				{
+					// We couldn't add the edge.  This should never happen.
+					std::cerr << "ERROR: Can't add edge." << std::endl;
+				}
 			}
 		}
 	}
@@ -537,7 +561,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 				{
 					// This is the first statement of the ENTRY block.  Save the
 					// vertex_descriptor for use later.
-					m_first_statement = *vit;
+					m_first_statement = vid;
 				}
 			}
 			
@@ -553,7 +577,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		if(m_block_graph[*vit].m_block->IsEXIT())
 		{
 			// This is the last statement of the EXIT block.
-			m_last_statement = *vit;
+			m_last_statement = last_vid;
 		}
 	}
 	

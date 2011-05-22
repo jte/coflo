@@ -59,10 +59,10 @@ typedef boost::adjacency_list
 		> T_CFG;
 
 /// Typedef for the vertex_descriptors in the block graph.
-typedef T_CFG::vertex_descriptor T_CFG_VERTEX_DESC;
+typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
 
 /// Typedef for the edge_descriptors in the block graph.
-typedef T_CFG::edge_descriptor T_CFG_EDGE_DESC;
+typedef boost::graph_traits<T_CFG>::edge_descriptor T_CFG_EDGE_DESC;
 
 //@}
 
