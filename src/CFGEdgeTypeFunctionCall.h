@@ -38,6 +38,7 @@ public:
 	
 private:
 	/// The FunctionCall instance which resulted in this edge.
+	/// We need this to determine e.g. what parameters were passed.
 	FunctionCall *m_function_call;
 };
 
