@@ -39,6 +39,7 @@
 
 #include "CFGEdgeTypeFallthrough.h"
 #include "CFGEdgeTypeFunctionCall.h"
+#include "CFGEdgeTypeReturn.h"
 
 
 typedef std::map< long, Block * > T_LINK_MAP;
@@ -220,7 +221,6 @@ void Function::LinkIntoGraph()
 	}
 }
 
-
 void Function::Link(const std::map< std::string, Function* > &function_map)
 {
 	T_VertexPropertyMap vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
@@ -276,7 +276,38 @@ void Function::Link(const std::map< std::string, Function* > &function_map)
 				else
 				{
 					// We couldn't add the edge.  This should never happen.
-					std::cerr << "ERROR: Can't add edge." << std::endl;
+					std::cerr << "ERROR: Can't add call edge." << std::endl;
+				}
+				
+				// Add the return edge.
+				// The return edge goes from the EXIT of the called function to
+				// the node in the CFG which is after the FunctionCall.  There is
+				// only ever one normal (i.e. fallthrough) edge from the FunctionCall
+				// to the next statement in its containing function.
+				CFGEdgeTypeReturn *return_edge = new CFGEdgeTypeReturn(fcr);
+				T_CFG_EDGE_DESC function_call_out_edge;
+				
+				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
+				if(!ok)
+				{
+					// Couldn't find the return.
+					std::cerr << "ERROR: COULDN'T FIND RETURN" << std::endl;
+				}
+				
+				boost::tie(new_edge_desc, ok) = boost::add_edge(it->second->GetExitVertexDescriptor(),
+					boost::target(function_call_out_edge, *m_cfg),
+					*m_cfg);
+				if(ok)
+				{
+					// Return edge was added OK.  Connect the edge's properties.
+					(*m_cfg)[new_edge_desc].m_edge_type = return_edge;
+					
+					/// @todo Change type of FunctionCall's out edge?
+				}
+				else
+				{
+					// We couldn't add the edge.  This should never happen.
+					std::cerr << "ERROR: Can't add return edge." << std::endl;
 				}
 			}
 		}
@@ -605,6 +636,9 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 				// Add the edge.
 				T_CFG_EDGE_DESC new_edge_desc;
 				boost::tie(new_edge_desc, ok) = boost::add_edge(*last_statement_it, first_statement_it->second, *m_cfg);
+				
+				/// @todo Stubbing in fallthrough type for now, change this to add the real type.
+				(*m_cfg)[new_edge_desc].m_edge_type = new CFGEdgeTypeFallthrough();
 			}
 		}
 		last_statement_it++;

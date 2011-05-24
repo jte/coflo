@@ -58,11 +58,39 @@ typedef boost::adjacency_list
 		CFGEdgeProperties
 		> T_CFG;
 
-/// Typedef for the vertex_descriptors in the block graph.
+/// Typedef for the vertex_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
 
-/// Typedef for the edge_descriptors in the block graph.
+/// Typedef for the edge_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::edge_descriptor T_CFG_EDGE_DESC;
+
+/// Typedef for vertex iterators for the CFG.
+typedef boost::graph_traits< T_CFG >::vertex_iterator T_CFG_VERTEX_ITERATOR;
+
+/// Typedef for vertex iterators for the CFG.
+typedef boost::graph_traits< T_CFG >::edge_iterator T_CFG_EDGE_ITERATOR;
+
+template < typename CFGEdgeType >
+boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
+{
+	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
+	boost::tuple<T_CFG_EDGE_DESC, bool> retval;
+	
+	boost::tie(eit, eend) = boost::out_edges(vdesc, cfg);
+	for(; eit != eend; eit++)
+	{
+		if(NULL != dynamic_cast<CFGEdgeType*>(cfg[*eit].m_edge_type))
+		{
+			// Found it.
+			retval = boost::make_tuple(*eit, true);
+			return retval;
+		}
+	}
+
+	// Couldn't find one.
+	retval = boost::make_tuple(*eit, false);
+	return retval;
+}
 
 //@}
 
