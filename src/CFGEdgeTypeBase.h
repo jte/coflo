@@ -29,7 +29,9 @@ class CFGEdgeTypeBase
 public:
 	CFGEdgeTypeBase();
 	CFGEdgeTypeBase(const CFGEdgeTypeBase& orig);
-	virtual ~CFGEdgeTypeBase();
+	/// Destructor pure virtual to force this to be an abstract base class.
+	virtual ~CFGEdgeTypeBase() = 0;
+
 private:
 
 };
