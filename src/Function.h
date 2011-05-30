@@ -28,6 +28,7 @@
 #include "ControlFlowGraph.h"
 
 class Block;
+class FunctionCall;
 
 class Function
 {
@@ -47,8 +48,10 @@ public:
 	 * 
 	 * @function_map The identifier->Function map to use to find the Functions to
 	 * link to.
+	 * @unresolved_function_calls List of function calls we weren't able to resolve.
      */
-	void Link(const std::map< std::string, Function* > &function_map);
+	void Link(const std::map< std::string, Function* > &function_map,
+		std::vector< FunctionCall* > *unresolved_function_calls);
 	
 	/**
 	 * Add the control flow graph of this Function to \a cfg.

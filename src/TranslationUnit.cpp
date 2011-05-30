@@ -52,7 +52,7 @@ static const std::string f_qualifiers("const|virtual|static");
 
 /// Regex string for matching and capturing locations.
 /// Capture 1 is the path, 2 is the line number.
-static const std::string f_location("(\\[.* \\: [[:digit:]]+\\])");
+static const std::string f_location("(\\[[^\\]]*?[[:space:]]\\:[[:space:]][[:digit:]]+\\])");
 
 /// .+? is the filename.
 static const std::string f_static_destructors("\\(static destructors for .+?\\)");
@@ -282,55 +282,38 @@ bool TranslationUnit::LinkBasicBlocks()
 	return true;
 }
 
-void TranslationUnit::Link(const std::map< std::string, Function* > &function_map)
+void TranslationUnit::Link(const std::map< std::string, Function* > &function_map,
+						  std::vector< FunctionCall* > *unresolved_function_calls)
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->Link(function_map);
+		fp->Link(function_map, unresolved_function_calls);
 	}
 }
 
-bool TranslationUnit::CreateControlFlowGraphs()
+bool TranslationUnit::CreateControlFlowGraphs(T_CFG * cfg)
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->CreateControlFlowGraph(m_cfg);
+		fp->CreateControlFlowGraph(*cfg);
 	}
 	
 	return true;
 }
 
-void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem::path &output_dir)
+void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
-	
-	std::cout << "Creating output dir: " << output_dir << std::endl;
-	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
-	
 	// Print the identifiers of the functions defined in this translation unit.
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		std::cout << "Function: " << fp->GetIdentifier() << std::endl;
 	}
 	
-	std::cout << std::endl;
-	
 	std::string index_html_filename = output_dir.string()+ "index.html";
-	std::ofstream index_html_out(index_html_filename.c_str());
-
-	index_html_out << \
-"\
-<!DOCTYPE html>\n\
-<html lang=\"en\">\n\
-<head>\n\
-	<meta charset=\"utf-8\">\n\
-	<title>CoFlo Analysis Results</title>\n\
-</head>\n\
-<body>\n\
-<h1>CoFlo Analysis Results</h1>\n\
-";
+	
 	index_html_out << "<p>Filename: "+m_source_filename.string()+"</p>" << std::endl;
 	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
 	BOOST_FOREACH(Function* fp, m_function_defs)
@@ -352,12 +335,6 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
 		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}
-
-	index_html_out << \
-"\
-</body>\n\
-</html>\n\
-";
 }
 
 void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc,
