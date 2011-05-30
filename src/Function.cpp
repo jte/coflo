@@ -42,9 +42,9 @@
 #include "CFGEdgeTypeReturn.h"
 
 
-typedef std::map< long, Block * > T_LINK_MAP;
-typedef T_LINK_MAP::iterator T_LINK_MAP_ITERATOR;
-typedef T_LINK_MAP::value_type T_LINK_MAP_VALUE;
+typedef std::map< long, Block * > T_BLOCK_LINK_MAP;
+typedef T_BLOCK_LINK_MAP::iterator T_BLOCK_LINK_MAP_ITERATOR;
+typedef T_BLOCK_LINK_MAP::value_type T_BLOCK_LINK_MAP_VALUE;
 
 typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VERTEX_PROPERTY_MAP;
 
@@ -101,7 +101,7 @@ void Function::AddBlock(Block *block)
 void Function::LinkBlocks()
 {
 	// A map of the blocks constituting this function.
-	T_LINK_MAP linkmap;
+	T_BLOCK_LINK_MAP linkmap;
 	std::vector< Successor* > successor_list;
 	
 	// Add the entry pseudoblock.
@@ -131,7 +131,7 @@ void Function::LinkBlocks()
 
 	// Block 2 appears to always be the entry block, set it.
 	/// \todo We really should check for "PRED: ENTRY" to make sure of this.
-	T_LINK_MAP_ITERATOR lmit = linkmap.find(2);
+	T_BLOCK_LINK_MAP_ITERATOR lmit = linkmap.find(2);
 	if(lmit == linkmap.end())
 	{
 		std::cerr << "ERROR: Can't find Block 2." << std::endl;
@@ -142,7 +142,7 @@ void Function::LinkBlocks()
 	for(it2 = successor_list.begin(); it2 != successor_list.end(); it2++)
 	{
 		long block_no;
-		T_LINK_MAP_ITERATOR linkmap_it;
+		T_BLOCK_LINK_MAP_ITERATOR linkmap_it;
 
 		block_no = (*it2)->GetSuccessorBlockNumber();
 
@@ -221,7 +221,8 @@ void Function::LinkIntoGraph()
 	}
 }
 
-void Function::Link(const std::map< std::string, Function* > &function_map)
+void Function::Link(const std::map< std::string, Function* > &function_map,
+		std::vector< FunctionCall* > *unresolved_function_calls)
 {
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 
@@ -243,7 +244,9 @@ void Function::Link(const std::map< std::string, Function* > &function_map)
 
 			if(it == function_map.end())
 			{
+				// Couldn't resolve it.  Let the caller know.
 				std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
+				unresolved_function_calls->push_back(fcu);
 			}
 			else
 			{
@@ -624,7 +627,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			// Add an edge from the last statement of Block vit to the first statement
 			// of the Block pointed to by eit.
 			T_CFG_VERTEX_DESC target_vertex_descr = boost::target(*eit, m_block_graph);
-			std::cout << "Target: " << target_vertex_descr << std::endl;
+
 			first_statement_it = first_statement_of_block.find(target_vertex_descr);
 			
 			if(first_statement_it == first_statement_of_block.end())

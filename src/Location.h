@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/** @file */
 
 #ifndef LOCATION_H
 #define	LOCATION_H
@@ -32,18 +34,24 @@ class Location
 {
 public:
 	Location(const std::string &location_string);
-	Location(boost::filesystem::path path, long lineno, long column = 0);
 	Location(const Location& orig);
 	virtual ~Location();
 	
-	//std::string GetLineNumber() const { std::stringstream ss; ss << m_line_number; return ss.str(); };
+	std::string GetPassedFilePath() const;
+	
+	std::string GetAbsoluteFilePath() const;
+	
+	long GetLineNumber() const { return m_line_number; };
 	
 	friend std::ostream& operator<<(std::ostream& os, const Location& loc);
 	
 private:
 	
-	/// The file containing the location.
-	boost::filesystem::path m_file_path;
+	/// The file path we were given on construction.
+	std::string m_passed_file_path;
+	
+	/// The absolute file path.
+	std::string m_absolute_file_path;
 	
 	/// The line number of the location.
 	long m_line_number;

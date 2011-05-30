@@ -23,8 +23,12 @@
 #include <vector>
 #include <string>
 
+#include "ControlFlowGraph.h"
+
 class TranslationUnit;
 class Function;
+
+typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
 
 /**
  * Encapsulates the concept of an entire program, consisting of one or more
@@ -67,6 +71,12 @@ private:
 	
 	/// The ctags program to use to extract further information on the source.
 	std::string m_the_ctags;
+	
+	/// The Control Flow Graph for the Program.
+	T_CFG m_cfg;
+	
+	/// The identifier string to Function* map.
+	T_ID_TO_FUNCTION_PTR_MAP m_function_map;
 };
 
 #endif	/* PROGRAM_H */

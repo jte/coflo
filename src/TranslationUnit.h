@@ -24,13 +24,16 @@
 #include <boost/filesystem.hpp>
 
 #include "ControlFlowGraph.h"
+#include "Program.h"
 
 class Function;
+class FunctionCall;
 
-typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
-
-typedef std::map< std::string, T_CFG_VERTEX_DESC > T_ID_TO_CFG_VERTEX_MAP;
-
+/**
+ * Class representing a single source file.
+ * 
+ * @param file_path
+ */
 class TranslationUnit
 {
 public:
@@ -62,13 +65,16 @@ public:
 
 	bool LinkBasicBlocks();
 	
-	void Link(const std::map< std::string, Function* > &function_map);
+	void Link(const std::map< std::string, Function* > &function_map,
+		std::vector< FunctionCall* > *unresolved_function_calls);
 	
-	bool CreateControlFlowGraphs();
+	bool CreateControlFlowGraphs(T_CFG * cfg);
 
-	void Print(const std::string &the_dot, const boost::filesystem::path &output_dir);
+	void Print(const std::string &the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
 	
 	std::string GetFilePath() const { return m_source_filename.string(); };
+	
+	long GetNumberOfFunctionDefinitions() const { return m_function_defs.size(); };
 
 private:
 	
@@ -85,11 +91,7 @@ private:
 	boost::filesystem::path m_source_filename;
 
 	/// List of function definitions in this file.
-	std::vector< Function * > m_function_defs;
-	
-public:
-	/// The Control Flow Graph for this Function.
-	T_CFG m_cfg;
+	std::vector< Function* > m_function_defs;
 };
 
 #endif	/* TRANSLATIONUNIT_H */

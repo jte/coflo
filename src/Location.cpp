@@ -29,7 +29,9 @@ Location::Location(const std::string &location_string)
 	boost::cmatch capture_results;
 	if(boost::regex_match(location_string.c_str(), capture_results, f_location_expression))
 	{
-		m_file_path = capture_results[1].str();
+		m_passed_file_path = capture_results[1].str();
+		/// @todo Make this really determine the abs path.
+		m_absolute_file_path = m_passed_file_path;
 		m_line_number = atoi(capture_results[2].str().c_str());
 		m_column = 0;
 	}
@@ -39,22 +41,26 @@ Location::Location(const std::string &location_string)
 	}
 }
 
-Location::Location(boost::filesystem::path path, long lineno, long column /* = 0 */)
-{
-	m_file_path = path;
-	m_line_number = lineno;
-	m_column = column;
-}
-
 Location::Location(const Location& orig)
 {
-	m_file_path = orig.m_file_path;
+	m_passed_file_path = orig.m_passed_file_path;
+	m_absolute_file_path = orig.m_absolute_file_path;
 	m_line_number = orig.m_line_number;
 	m_column = orig.m_column;
 }
 
 Location::~Location()
 {
+}
+
+std::string Location::GetPassedFilePath() const
+{
+	return m_passed_file_path;
+}
+
+std::string Location::GetAbsoluteFilePath() const
+{
+	return m_absolute_file_path;
 }
 
 /**
@@ -66,6 +72,6 @@ Location::~Location()
  */
 std::ostream& operator<<(std::ostream& os, const Location& loc)
 {
-    os << loc.m_file_path << ":" << loc.m_line_number;
+    os << loc.m_passed_file_path << ":" << loc.m_line_number;
     return os;
 }

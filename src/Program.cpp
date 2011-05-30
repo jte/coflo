@@ -17,11 +17,16 @@
 
 #include "Program.h"
 
+#include <fstream>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <boost/foreach.hpp>
 
 #include "TranslationUnit.h"
 #include "RuleReachability.h"
+#include "FunctionCall.h"
 
 Program::Program() { }
 
@@ -64,11 +69,9 @@ bool Program::Parse(const std::vector< std::string > &defines,
 {
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		T_ID_TO_FUNCTION_PTR_MAP function_map;
-
 		// Parse this file.
 		std::cout << "Parsing \"" << tu->GetFilePath() << "\"..." << std::endl;
-		bool retval = tu->ParseFile(tu->GetFilePath(), &function_map,
+		bool retval = tu->ParseFile(tu->GetFilePath(), &m_function_map,
 								 m_the_filter, m_the_gcc, m_the_ctags, 
 								 defines, include_paths, debug_parse);
 		if(retval == false)
@@ -88,29 +91,73 @@ bool Program::Parse(const std::vector< std::string > &defines,
 
 		// Create the control-flow graphs.
 		std::cout << "Creating function control-flow graphs..." << std::endl;
-		tu->CreateControlFlowGraphs();
-
-		// Link the function calls.
-		std::cout << "Linking function calls..." << std::endl;
-		tu->Link(function_map);	
+		tu->CreateControlFlowGraphs(&m_cfg);
+		
 #if 0
 
 
 		/// @todo This is a test.
 		Function *start, *stop;
-		start = function_map["main"];
-		stop = function_map["another_level_deep"];
-		//stop = function_map["ISR1"];
+		start = m_function_map["main"];
+		stop = m_function_map["another_level_deep"];
+		//stop = m_function_map["ISR1"];
 		RuleReachability rr(start, stop);
 		rr.RunRule(tu->m_cfg);
 #endif	
 	}
+	
+	// Link the function calls.
+	std::cout << "Linking function calls..." << std::endl;
+	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
+	{
+		std::vector< FunctionCall* > unlinkable_function_calls;
+		
+		tu->Link(m_function_map, &unlinkable_function_calls);
+		
+		if(unlinkable_function_calls.size() > 0)
+		{
+			// We couldn't link some function calls.
+			std::cout << "INFO: Couldn't link the following function calls in file "
+				<< tu->GetFilePath() << ":" << std::endl;
+			BOOST_FOREACH(FunctionCall *fc, unlinkable_function_calls)
+			{
+				std::cout << "[" << *(fc->GetLocation()) << "]: " << fc->GetIdentifier() << std::endl;
+			}
+		}
+	}
+	
+	// Parsing was successful.
+	return true;
 }
 
 void Program::Print(const std::string &the_dot, const std::string &output_path)
 {
+	boost::filesystem::path output_dir = output_path;
+	
+	std::cout << "Creating output dir: " << output_dir << std::endl;
+	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+	
+	std::string index_html_filename = output_dir.string()+ "index.html";
+	std::ofstream index_html_out(index_html_filename.c_str());
+
+	index_html_out << \
+"\
+<!DOCTYPE html>\n\
+<html lang=\"en\">\n\
+<head>\n\
+	<meta charset=\"utf-8\">\n\
+	<title>CoFlo Analysis Results</title>\n\
+</head>\n\
+<body>\n\
+<h1>CoFlo Analysis Results</h1>" << std::endl;
+	
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		tu->Print(m_the_dot, output_path);
+		tu->Print(m_the_dot, output_path, index_html_out);
 	}
+	
+	index_html_out << \
+"\
+</body>\n\
+</html>" << std::endl;
 }
