@@ -18,6 +18,8 @@
 #ifndef RULEBASE_H
 #define	RULEBASE_H
 
+#include "ControlFlowGraph.h"
+
 /**
  * Abstract base class for all rules.
  */
@@ -28,6 +30,9 @@ public:
 	RuleBase();
 	RuleBase(const RuleBase& orig);
 	virtual ~RuleBase();
+	
+	virtual bool RunRule(const T_CFG &cfg) = 0;
+	
 private:
 
 };

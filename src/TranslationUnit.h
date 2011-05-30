@@ -34,7 +34,7 @@ typedef std::map< std::string, T_CFG_VERTEX_DESC > T_ID_TO_CFG_VERTEX_MAP;
 class TranslationUnit
 {
 public:
-    TranslationUnit();
+    TranslationUnit(const std::string &file_path);
     TranslationUnit(const TranslationUnit& orig);
     virtual ~TranslationUnit();
 
@@ -56,6 +56,8 @@ public:
 		const std::string &the_filter,
 		const std::string &the_gcc,
 		const std::string &the_ctags,
+		const std::vector< std::string > &defines,
+		const std::vector< std::string > &include_paths,
 		bool debug_parse = false);
 
 	bool LinkBasicBlocks();
@@ -65,15 +67,19 @@ public:
 	bool CreateControlFlowGraphs();
 
 	void Print(const std::string &the_dot, const boost::filesystem::path &output_dir);
+	
+	std::string GetFilePath() const { return m_source_filename.string(); };
 
 private:
 	
 	/**
 	 * Compile the file with GCC to get the control flow decomposition we need.
 	 * 
-     * @param file_path
+     * @param file_path  Path to the source file to be compiled.
      */
-	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc);
+	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc,
+						 const std::vector< std::string > &defines,
+						const std::vector< std::string > &include_paths);
 
 	/// The source filename.
 	boost::filesystem::path m_source_filename;
@@ -81,6 +87,7 @@ private:
 	/// List of function definitions in this file.
 	std::vector< Function * > m_function_defs;
 	
+public:
 	/// The Control Flow Graph for this Function.
 	T_CFG m_cfg;
 };

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,18 +15,35 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef RULEREACHABILITY_H
 #define	RULEREACHABILITY_H
 
 #include "RuleBase.h"
 
+class Function;
+
 class RuleReachability : public RuleBase
 {
 public:
-	RuleReachability();
+	RuleReachability(const Function *source, const Function *sink);
 	RuleReachability(const RuleReachability& orig);
 	virtual ~RuleReachability();
+	
+	virtual bool RunRule(const T_CFG &cfg);
+	
+	void PrintCallChain(const T_CFG &cfg, T_CFG_VERTEX_DESC v) const;
+	
 private:
+
+	/// The function which must not call m_sink.
+	const Function *m_source;
+	
+	/// The function which must not be called from m_sink.
+	const Function *m_sink;
+	
+	std::vector<T_CFG_VERTEX_DESC> *m_p;
 
 };
 

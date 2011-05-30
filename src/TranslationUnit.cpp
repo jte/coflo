@@ -83,8 +83,9 @@ static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*?\\)");
 static const boost::regex f_switch_expression(".+?"+f_location+" switch \\(.*?\\)");
 
 
-TranslationUnit::TranslationUnit()
+TranslationUnit::TranslationUnit(const std::string &file_path)
 {
+	m_source_filename = file_path;
 }
 
 TranslationUnit::TranslationUnit(const TranslationUnit& orig)
@@ -100,6 +101,8 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 								const std::string &the_filter,
 								const std::string &the_gcc,
 								const std::string &the_ctags,
+								const std::vector< std::string > &defines,
+								const std::vector< std::string > &include_paths,
 								bool debug_parse)
 {
 	std::string gcc_cfg_lineno_blocks_filename;
@@ -108,10 +111,11 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	m_source_filename = filename;
 	
 	// Try to compile the source file.
-	CompileSourceFile(filename.string(), the_filter, the_gcc);
+	CompileSourceFile(filename.string(), the_filter, the_gcc, defines, include_paths);
 	
 	// Construct the filename of the .cfg file gcc made for us.
-	gcc_cfg_lineno_blocks_filename = filename.string()+".013t.cfg";
+	// gcc puts this file in the directory it's running in.
+	gcc_cfg_lineno_blocks_filename = filename.filename().string()+".013t.cfg";
 	
 	// Try to open the file whose name we were passed.
 	std::ifstream input_file(gcc_cfg_lineno_blocks_filename.c_str(), std::ifstream::in);
@@ -356,7 +360,9 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 ";
 }
 
-void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc)
+void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc,
+										const std::vector< std::string > &defines,
+										const std::vector< std::string > &include_paths)
 {
 	// Do the filter first.
 	/// \todo Add the prefilter functionality.
@@ -366,10 +372,21 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	
 	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
 	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
-	compile_to_cfg_command = the_gcc + " -S -fdump-tree-cfg-lineno-blocks " + file_path;
+	compile_to_cfg_command = the_gcc + " -S -fdump-tree-cfg-lineno-blocks";
+	BOOST_FOREACH(std::string d, defines)
+	{
+		compile_to_cfg_command += " -D \"" + d + "\"";
+	}
+	BOOST_FOREACH(std::string ip, include_paths)
+	{
+		compile_to_cfg_command += " -I \"" + ip + "\"";
+	}
+	compile_to_cfg_command += " \"" + file_path + "\"";
 	
 	// Do the compile.
-	std::cerr << "Compiling with " << compile_to_cfg_command << "..." << std::endl;
+	std::cout << "######################################" << std::endl;
+	std::cout << "Compiling with " << compile_to_cfg_command << "..." << std::endl;
+	std::cout << "######################################" << std::endl;
 	int compile_retval = ::system(compile_to_cfg_command.c_str());
 	
 	if(compile_retval != 0)

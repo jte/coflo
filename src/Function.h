@@ -88,7 +88,7 @@ public:
 	
 	//@}
 	
-protected:
+//protected:
 	
 	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_first_statement; };
 	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_last_statement; };
