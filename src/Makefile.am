@@ -17,6 +17,7 @@
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
+	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
 	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \

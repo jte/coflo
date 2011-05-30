@@ -34,7 +34,8 @@ extern volatile int g_external_variable;
 extern void do_this();
 extern void do_that();
 
-int function_a() {return 1;};
+int another_level_deep() { return 1; };
+int function_a() { another_level_deep();};
 int function_b() {return 2;};
 int function_c() {return 3;};
 static int function_w() {return 4;};
@@ -117,7 +118,7 @@ Label1:
 		case 2:
 		{
 			function_b();
-			break;
+			exit(0);
 		}
 		case 3:
 		{

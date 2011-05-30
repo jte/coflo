@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/** @file */
 
 #ifndef BASICBLOCKGRAPH_H
 #define	BASICBLOCKGRAPH_H

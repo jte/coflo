@@ -18,14 +18,13 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <boost/foreach.hpp>
+
 #include <boost/program_options.hpp>
 
-#include "TranslationUnit.h"
+#include "Program.h"
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
-namespace bf = boost::filesystem;
 
 
 /**
@@ -37,7 +36,7 @@ namespace bf = boost::filesystem;
  */
 int main(int argc, char* argv[])
 {
-	TranslationUnit *tu;
+	Program *the_program;
 	std::string the_filter;
 	std::string the_gcc;
 	std::string the_dot;
@@ -121,51 +120,43 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
+	the_program = new Program();
+	
 	if(vm.count("input-file")>0)
 	{
-		BOOST_FOREACH(std::string input_file, vm["input-file"].as< std::vector<std::string> >())
+		const std::vector<std::string> *defines, *includes;
+		if(vm.count("define")>0)
 		{
-			tu = new TranslationUnit();
-			T_ID_TO_FUNCTION_PTR_MAP function_map;
-
-			// Parse this file.
-			std::cout << "Parsing \"" << input_file << "\"..." << std::endl;
-			bool retval = tu->ParseFile(input_file, &function_map,
-									 the_filter, the_gcc, the_ctags, static_cast<bool>(vm.count("debug-parse")));
-			if(retval == false)
-			{
-				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
-				return 1;
-			}
-
-			// Link the blocks in the functions in the file.
-			std::cout << "Linking basic blocks..." << std::endl;
-			retval = tu->LinkBasicBlocks();
-			if(retval == false)
-			{
-				std::cerr << "ERROR: Couldn't parse \"" << input_file << "\"" << std::endl;
-				return 1;
-			}
-			
-			// Link the function calls.
-			//std::cout << "Linking function calls..." << std::endl;
-			//tu->Link(function_map);
-			
-			// Create the control-flow graphs.
-			std::cout << "Creating function control-flow graphs..." << std::endl;
-			tu->CreateControlFlowGraphs();
-			
-			// Link the function calls.
-			/// @todo Link doesn't work after CreateControlFlowGraphs() for some reason.
-			std::cout << "Linking function calls..." << std::endl;
-			tu->Link(function_map);	
-			
-			if(vm.count("output-dir"))
-			{
-				tu->Print(the_dot, vm["output-dir"].as<std::string>());
-			}
+			defines = &(vm["define"].as< std::vector<std::string> >());
 		}
+		else
+		{
+			defines = new std::vector<std::string>();
+		}
+		if(vm.count("include-dir")>0)
+		{
+			includes = &(vm["include-dir"].as< std::vector<std::string> >());
+		}
+		else
+		{
+			includes = new std::vector<std::string>();
+		}
+		
+		the_program->SetTheCtags(the_ctags);
+		the_program->SetTheDot(the_dot);
+		the_program->SetTheFilter(the_filter);
+		the_program->SetTheGcc(the_gcc);
+		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());
+		the_program->Parse(
+			*defines,
+			*includes,
+			static_cast<bool>(vm.count("debug-parse")));
 	}
-
+	
+	if(vm.count("output-dir"))
+	{
+		the_program->Print(the_dot, vm["output-dir"].as<std::string>());
+	}
+	
 	return 0;
 }
