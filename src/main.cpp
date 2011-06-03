@@ -15,6 +15,11 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @mainpage
+ * @verbinclude ../COPYING
+ */
+
 #include <string>
 #include <vector>
 #include <iostream>

@@ -74,7 +74,7 @@ static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digi
 static const boost::regex f_successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
 
 // Regex to find function calls. Capture 1 and 2 is the file/line no, 3 is the called function ID.
-static const boost::regex f_function_call_expression(".+?"+f_location+" ([[:alpha:]_][[:alnum:]_]*) \\(.*?\\);");
+static const boost::regex f_function_call_expression(".+?"+f_location+" ([[:alpha:]_][[:alnum:]_]*) \\(.*\\);");
 
 // Regex to find if/else statements.  Capture 1 is the file/line no.
 static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*?\\)");
@@ -361,9 +361,7 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	compile_to_cfg_command += " \"" + file_path + "\"";
 	
 	// Do the compile.
-	std::cout << "######################################" << std::endl;
 	std::cout << "Compiling with " << compile_to_cfg_command << "..." << std::endl;
-	std::cout << "######################################" << std::endl;
 	int compile_retval = ::system(compile_to_cfg_command.c_str());
 	
 	if(compile_retval != 0)
