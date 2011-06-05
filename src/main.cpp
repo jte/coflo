@@ -27,6 +27,7 @@
 #include <boost/program_options.hpp>
 
 #include "Program.h"
+#include "libexttools/ToolCompiler.h"
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
@@ -53,6 +54,8 @@ int main(int argc, char* argv[])
 	po::options_description preproc_options("Preprocessing Options");
 	// Declare subprograms to use.
 	po::options_description subprogram_options("Subprogram Options");
+	// Rules to check.
+	po::options_description rule_options("Rule Options");
 	// Declare options_description object for options which won't be shown to
 	// the user in the help message.
 	po::options_description hidden_options("Hidden options");
@@ -84,11 +87,14 @@ int main(int argc, char* argv[])
 	("use-ctags", po::value< std::string >(&the_ctags)->default_value("ctags"), "The ctags program to invoke.")
 	("use-dot", po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 	;
+	rule_options.add_options()
+	("constraint-reachability", po::value< std::string >(), "\"f1()-xf2()\" : Warn if f1 can reach f2")
+	;
 	hidden_options.add_options()
 	("input-file", po::value< std::vector<std::string> >(), "input file")
 	;
 	positional_options.add("input-file", -1);
-	non_hidden_cmdline_options.add(options).add(preproc_options).add(subprogram_options);
+	non_hidden_cmdline_options.add(options).add(preproc_options).add(subprogram_options).add(rule_options);
 	cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
 
 	// Parse the command line.
@@ -151,6 +157,8 @@ int main(int argc, char* argv[])
 		the_program->SetTheDot(the_dot);
 		the_program->SetTheFilter(the_filter);
 		the_program->SetTheGcc(the_gcc);
+		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
+		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
 		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());
 		the_program->Parse(
 			*defines,

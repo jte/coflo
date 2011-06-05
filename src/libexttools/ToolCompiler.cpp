@@ -17,11 +17,59 @@
 
 /** @file */
 
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+
+#include <boost/regex.hpp>
+
 #include "ToolCompiler.h"
 
-ToolCompiler::ToolCompiler() { }
+/// Regex for extracting the version string.
+static const boost::regex f_version_regex("[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+)");
 
-ToolCompiler::ToolCompiler(const ToolCompiler& orig) { }
+ToolCompiler::ToolCompiler(const std::string &cmd) 
+{
+	SetCommand(cmd);
+}
+
+ToolCompiler::ToolCompiler(const ToolCompiler& orig) 
+{
+	m_cmd = orig.m_cmd;
+}
 
 ToolCompiler::~ToolCompiler() { }
 
+std::string ToolCompiler::GetVersion() const
+{
+	// Create a temp file to dump the version info into.
+	char temp_filename[] = "/tmp/fileXXXXXX";
+	int fd;
+	std::ifstream input_file;
+	std::string line;
+	std::string retval("UNKNOWN");
+
+	fd = mkstemp(temp_filename);
+	
+	// Invoke the compiler and redirect the version info to the file.
+	::system((m_cmd + " --version > " + temp_filename).c_str());
+	
+	input_file.open(temp_filename, std::ifstream::in);
+	if(input_file.good())
+	{
+		// Only need the first line of the file.
+		std::getline(input_file, line);
+
+		boost::cmatch capture_results;
+		
+		// Extract the version text.
+		if(boost::regex_match(line.c_str(), capture_results, f_version_regex))
+		{
+			retval = capture_results[1];
+		}
+	}
+	
+	close(fd);
+
+	return retval;
+}
