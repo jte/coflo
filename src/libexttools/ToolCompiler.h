@@ -26,9 +26,12 @@ class ToolCompiler : public ToolBase
 {
 
 public:
-	ToolCompiler();
+	ToolCompiler(const std::string &cmd);
 	ToolCompiler(const ToolCompiler& orig);
 	virtual ~ToolCompiler();
+	
+	virtual std::string GetVersion() const;
+	
 private:
 
 };

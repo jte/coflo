@@ -20,6 +20,8 @@
  */
 
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static pthread_mutex_t f_mutex_protecting_thread_unsafe_function = PTHREAD_MUTEX_INITIALIZER;
 
@@ -52,7 +54,7 @@ double function_that_we_will_call_through_a_ptr(void)
 long threadsafe_printf_wrapper(int which_thread)
 {
     pthread_mutex_lock(&f_mutex_protecting_thread_unsafe_function);
-    print("Now printing from thread %d\n", which_thread);
+    printf("Now printing from thread %d\n", which_thread);
     pthread_mutex_unlock(&f_mutex_protecting_thread_unsafe_function);
 }
 
@@ -68,7 +70,7 @@ int __attribute__ ((warn_unused_result)) predicate_1(void)
 	return some_variable_set_by_an_isr;
 }
 
-void ISR1(void)
+void _Pragma("is_an_isr") /*is_an_isr*/ ISR1(void)
 {
     // ERROR: This ISR shouldn't be calling any functions which try to lock mutexes
     // or call printf().

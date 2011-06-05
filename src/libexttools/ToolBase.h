@@ -33,9 +33,13 @@ public:
 	ToolBase(const ToolBase& orig);
 	virtual ~ToolBase();
 	
-	std::string GetVersion() const = 0;
+	void SetCommand(const std::string &cmd) { m_cmd = cmd; };
 	
-private:
+	virtual std::string GetVersion() const = 0;
+	
+protected:
+	
+	std::string m_cmd;
 
 };
 
