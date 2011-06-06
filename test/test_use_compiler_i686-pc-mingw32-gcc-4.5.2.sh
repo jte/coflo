@@ -1,5 +1,5 @@
-# Top-level Makefile.am for CoFlo
-#
+#!/bin/sh
+# 
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
@@ -11,15 +11,22 @@
 # CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory.
-ACLOCAL_AMFLAGS = -I m4
+#
+# Created on Apr 3, 2011, 2:02:20 AM
+#
 
-# The subdirectories containing the source code and tests.
-SUBDIRS = src test
+# Abort if there are any errors.
+set -e
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
+#USE_GCC=i686-w64-mingw32-gcc.exe
+USE_GCC=i686-pc-mingw32-gcc-4.5.2.exe
+
+# Run CoFlo on some test code.
+TEST_SOURCE="test_source_file_1.c test_source_file_2.c"
+#TEST_SOURCE=bzip2.c
+#TEST_SOURCE=../src/main.cpp
+cd ../test/ && ../src/coflo --use-gcc=${USE_GCC} ${TEST_SOURCE} --output-dir=../test_html/

@@ -1,4 +1,4 @@
-# Top-level Makefile.am for CoFlo
+# Makefile.am for CoFlo's Test directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -15,11 +15,18 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory.
-ACLOCAL_AMFLAGS = -I m4
+## Process this file with automake to produce Makefile.in.
 
-# The subdirectories containing the source code and tests.
-SUBDIRS = src test
+#AUTOMAKE_OPTIONS = parallel-tests
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
+check_SCRIPTS = test1.sh test_use_compiler_i686-pc-mingw32-gcc-4.5.2.sh
+#EXTRA_PROGRAMS = test1.sh
+#EXTRA_DIST = test1.sh test_use_compiler_i686-pc-mingw32-gcc-4.5.2.sh
+
+# Tests to run for "make check".
+#TESTS_ENVIRONMENT = export "TEST_CPPFLAGS=$(CPPFLAGS)" && export "TEST_CXXFLAGS=$(CXXFLAGS)" && $(SHELL) -x
+TESTS = test1.sh test_use_compiler_i686-pc-mingw32-gcc-4.5.2.sh
+TEST_EXTENSIONS = .sh
+
+SH_LOG_COMPILER = $(SHELL)
+AM_SH_LOG_FLAGS =
