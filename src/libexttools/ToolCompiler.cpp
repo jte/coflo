@@ -26,7 +26,7 @@
 #include "ToolCompiler.h"
 
 /// Regex for extracting the version string.
-static const boost::regex f_version_regex("[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+)");
+static const boost::regex f_version_regex("[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+).*");
 
 ToolCompiler::ToolCompiler(const std::string &cmd) 
 {

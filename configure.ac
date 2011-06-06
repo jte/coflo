@@ -29,7 +29,12 @@ AC_CONFIG_AUX_DIR([./build-aux])
 # Additional Autoconf macros are in ./m4.
 AC_CONFIG_MACRO_DIR([./m4])
 
-AM_INIT_AUTOMAKE([color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([check-news
+    color-tests
+    dist-bzip2
+    parallel-tests
+    1.11.1
+])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -55,5 +60,5 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile test/Makefile])
 AC_OUTPUT

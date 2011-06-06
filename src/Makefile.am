@@ -46,12 +46,6 @@ coflo_SOURCES = main.cpp \
 	Switch.cpp Switch.h \
 	TranslationUnit.cpp Translation.h
 	
-nobase_check_SCRIPTS = test1.sh
-
-# Tests to run for "make check".
-TESTS_ENVIRONMENT = export "TEST_CPPFLAGS=$(CPPFLAGS)" && export "TEST_CXXFLAGS=$(CXXFLAGS)" && $(SHELL) -x
-TESTS = test1.sh
-
 coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS) -Wl,--enable-auto-import
 coflo_LDADD = ./libexttools/libexttools.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
