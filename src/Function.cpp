@@ -42,16 +42,12 @@
 #include "CFGEdgeTypeReturn.h"
 
 
-typedef std::map< long, Block * > T_BLOCK_LINK_MAP;
-typedef T_BLOCK_LINK_MAP::iterator T_BLOCK_LINK_MAP_ITERATOR;
-typedef T_BLOCK_LINK_MAP::value_type T_BLOCK_LINK_MAP_VALUE;
-
 typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VERTEX_PROPERTY_MAP;
 
-struct vertex_filter_functor
+struct vertex_filter_predicate
 {
-	vertex_filter_functor() { };
-	vertex_filter_functor(T_VERTEX_PROPERTY_MAP vertex_prop_map, Function *parent_function)
+	vertex_filter_predicate() { };
+	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map, Function *parent_function)
 		: m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function) {};
 	bool operator()(const T_CFG_VERTEX_DESC& vid) const
 	{
@@ -226,8 +222,8 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 {
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 
-	vertex_filter_functor the_filter(vpm, this);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_functor> T_FILTERED_CFG;
+	vertex_filter_predicate the_filter(vpm, this);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> T_FILTERED_CFG;
 	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(), the_filter);
 	
 	boost::graph_traits< T_FILTERED_CFG >::vertex_iterator vit, vend;
@@ -524,8 +520,8 @@ void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::
 
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 
-	vertex_filter_functor the_filter(vpm, this);
-	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_functor>
+	vertex_filter_predicate the_filter(vpm, this);
+	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate>
 		graph_of_this_function(*m_cfg, boost::keep_all(), the_filter);
 
 	dot_filename = output_dir.string()+m_function_id+".dot";

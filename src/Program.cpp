@@ -45,9 +45,9 @@ void Program::SetTheDot(std::string the_dot)
 	m_the_dot = the_dot;
 }
 
-void Program::SetTheGcc(std::string the_gcc)
+void Program::SetTheGcc(ToolCompiler *the_compiler)
 {
-	m_the_gcc = the_gcc;
+	m_compiler = the_compiler;
 }
 
 void Program::SetTheFilter(std::string the_filter)
@@ -72,7 +72,7 @@ bool Program::Parse(const std::vector< std::string > &defines,
 		// Parse this file.
 		std::cout << "Parsing \"" << tu->GetFilePath() << "\"..." << std::endl;
 		bool retval = tu->ParseFile(tu->GetFilePath(), &m_function_map,
-								 m_the_filter, m_the_gcc, m_the_ctags, 
+								 m_the_filter, m_compiler, m_the_ctags, 
 								 defines, include_paths, debug_parse);
 		if(retval == false)
 		{
@@ -130,6 +130,25 @@ bool Program::Parse(const std::vector< std::string > &defines,
 	return true;
 }
 
+Function *Program::LookupFunction(const std::string &function_id)
+{
+	T_ID_TO_FUNCTION_PTR_MAP::iterator fit;
+	
+	// Look up the function by name.
+	fit = m_function_map.find(function_id);
+	
+	if(fit == m_function_map.end())
+	{
+		// Couldn't find the function.
+		return NULL;
+	}
+	else
+	{
+		// Found it.
+		return fit->second;
+	}
+}
+
 void Program::Print(const std::string &the_dot, const std::string &output_path)
 {
 	boost::filesystem::path output_dir = output_path;
@@ -160,4 +179,20 @@ void Program::Print(const std::string &the_dot, const std::string &output_path)
 "\
 </body>\n\
 </html>" << std::endl;
+}
+
+bool Program::PrintFunctionCFG(const std::string &function_identifier)
+{
+	Function *function;
+		
+	function = LookupFunction(function_identifier);
+	
+	if(function == NULL)
+	{
+		// Couldn't find the function.
+		std::cerr << "ERROR: Couldn't find function: "+function_identifier << std::endl;
+		return false;
+	}
+	
+	// Found it, now let's print its control-flow graph.
 }

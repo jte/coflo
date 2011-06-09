@@ -39,6 +39,7 @@ coflo_SOURCES = main.cpp \
 	Program.cpp Program.h \
 	PseudoStatement.cpp PseudoStatement.h \
 	RuleBase.cpp RuleBase.h \
+	RuleDFSBase.cpp RuleDFSBase.h \
 	RuleReachability.cpp RuleReachability.h \
 	Statement.cpp Statement.h \
 	Successor.cpp Successor.h \

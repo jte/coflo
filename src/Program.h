@@ -27,6 +27,7 @@
 
 class TranslationUnit;
 class Function;
+class ToolCompiler;
 
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
 
@@ -43,7 +44,7 @@ public:
 	
     void SetTheCtags(std::string the_ctags);
     void SetTheDot(std::string the_dot);
-    void SetTheGcc(std::string the_gcc);
+    void SetTheGcc(ToolCompiler *the_compiler);
     void SetTheFilter(std::string the_filter);
 
 	void AddSourceFiles(const std::vector< std::string > &file_paths);
@@ -52,7 +53,11 @@ public:
 		const std::vector< std::string > &include_paths,
 		bool debug_parse = 0);
 	
+	Function *LookupFunction(const std::string &function_id);
+	
 	void Print(const std::string &the_dot, const std::string &output_path);
+	
+	bool PrintFunctionCFG(const std::string &function_identifier);
 	
 private:
 
@@ -63,7 +68,7 @@ private:
 	std::string m_the_filter;
 	
 	/// The gcc to use to get the actual CFG.
-	std::string m_the_gcc;
+	ToolCompiler *m_compiler;
 	
 	/// The dot program from the GraphViz program to use for generating
 	/// the graph drawings.

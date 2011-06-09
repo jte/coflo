@@ -57,7 +57,7 @@ public:
 	bool ParseFile(const boost::filesystem::path &filename,
 		T_ID_TO_FUNCTION_PTR_MAP *function_map,
 		const std::string &the_filter,
-		const std::string &the_gcc,
+		ToolCompiler *compiler,
 		const std::string &the_ctags,
 		const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
@@ -83,7 +83,7 @@ private:
 	 * 
      * @param file_path  Path to the source file to be compiled.
      */
-	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc,
+	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,
 						 const std::vector< std::string > &defines,
 						const std::vector< std::string > &include_paths);
 
