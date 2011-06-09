@@ -32,6 +32,8 @@ public:
 	
 	virtual std::string GetVersion() const;
 	
+	int GenerateCFG(const std::string &params);
+	
 private:
 
 };

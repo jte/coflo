@@ -39,7 +39,17 @@ public:
 	
 protected:
 	
+	/// The filename of the program.
 	std::string m_cmd;
+		
+	/**
+	 * Wrapper around the system() call.
+	 * 
+     * @param params Parameters to give the command.  Note that you should not
+	 *	specify the command itself - m_cmd will be prepended automatically.
+     * @return 
+     */
+	int System(const std::string &params) const;
 
 };
 

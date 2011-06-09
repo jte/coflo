@@ -17,7 +17,6 @@
 
 /** @file */
 
-#include <cstdlib>
 #include <iostream>
 #include <fstream>
 
@@ -52,7 +51,7 @@ std::string ToolCompiler::GetVersion() const
 	fd = mkstemp(temp_filename);
 	
 	// Invoke the compiler and redirect the version info to the file.
-	::system((m_cmd + " --version > " + temp_filename).c_str());
+	System(std::string("--version > ") + temp_filename);
 	
 	input_file.open(temp_filename, std::ifstream::in);
 	if(input_file.good())
@@ -72,4 +71,18 @@ std::string ToolCompiler::GetVersion() const
 	close(fd);
 
 	return retval;
+}
+
+int ToolCompiler::GenerateCFG(const std::string &params)
+{
+	// Create the compile command.
+	std::string compile_to_cfg_command;
+	
+	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
+	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
+	compile_to_cfg_command = " -S -fdump-tree-cfg-lineno-blocks";
+	
+	std::cout << "Compiling with " << params << "..." << std::endl;
+	
+	return System(compile_to_cfg_command+params);
 }

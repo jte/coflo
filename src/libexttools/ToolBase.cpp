@@ -17,6 +17,8 @@
 
 /** @file */
 
+#include <cstdlib>
+
 #include "ToolBase.h"
 
 ToolBase::ToolBase() { }
@@ -25,3 +27,7 @@ ToolBase::ToolBase(const ToolBase& orig) { }
 
 ToolBase::~ToolBase() { }
 
+int ToolBase::System(const std::string &params) const
+{
+	return ::system((m_cmd + " " + params).c_str());
+}

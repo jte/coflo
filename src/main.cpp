@@ -15,11 +15,6 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @mainpage
- * @verbinclude ../COPYING
- */
-
 #include <string>
 #include <vector>
 #include <iostream>
@@ -55,7 +50,7 @@ int main(int argc, char* argv[])
 	// Declare subprograms to use.
 	po::options_description subprogram_options("Subprogram Options");
 	// Rules to check.
-	po::options_description rule_options("Rule Options");
+	po::options_description rule_options("Analysis Options");
 	// Declare options_description object for options which won't be shown to
 	// the user in the help message.
 	po::options_description hidden_options("Hidden options");
@@ -88,7 +83,8 @@ int main(int argc, char* argv[])
 	("use-dot", po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 	;
 	rule_options.add_options()
-	("constraint-reachability", po::value< std::string >(), "\"f1()-xf2()\" : Warn if f1 can reach f2")
+	("print-function-cfg", po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
+	("constraint-reachability", po::value< std::string >(), "\"f1()-xf2()\" : Warn if f1 can reach f2.")
 	;
 	hidden_options.add_options()
 	("input-file", po::value< std::vector<std::string> >(), "input file")
@@ -156,14 +152,28 @@ int main(int argc, char* argv[])
 		the_program->SetTheCtags(the_ctags);
 		the_program->SetTheDot(the_dot);
 		the_program->SetTheFilter(the_filter);
-		the_program->SetTheGcc(the_gcc);
 		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
 		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
+		the_program->SetTheGcc(tool_compiler);
 		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());
-		the_program->Parse(
+		if(!the_program->Parse(
 			*defines,
 			*includes,
-			static_cast<bool>(vm.count("debug-parse")));
+			static_cast<bool>(vm.count("debug-parse"))))
+		{
+			// Parse failed.
+			return 1;
+		}
+	}
+	
+	if(vm.count("print-function-cfg"))
+	{
+		// User wants a control flow graph.
+		if(!the_program->PrintFunctionCFG(vm["print-function-cfg"].as<std::string>()))
+		{
+			// Something went wrong.
+			return 1;
+		}
 	}
 	
 	if(vm.count("output-dir"))

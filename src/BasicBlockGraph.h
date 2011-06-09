@@ -52,5 +52,9 @@ typedef T_BLOCK_GRAPH::vertex_descriptor T_BLOCK_GRAPH_VERTEX_DESC;
 /// Typedef for the edge_descriptors in the block graph.
 typedef T_BLOCK_GRAPH::edge_descriptor T_BLOCK_GRAPH_EDGE_DESC;
 
+typedef std::map< long, Block * > T_BLOCK_LINK_MAP;
+typedef T_BLOCK_LINK_MAP::iterator T_BLOCK_LINK_MAP_ITERATOR;
+typedef T_BLOCK_LINK_MAP::value_type T_BLOCK_LINK_MAP_VALUE;
+
 #endif	/* BASICBLOCKGRAPH_H */
 

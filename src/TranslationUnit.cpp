@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/** @file */
 
 #include <iostream>
 #include <fstream>
@@ -41,11 +43,12 @@
 #include "NoOp.h"
 #include "Switch.h"
 #include "TranslationUnit.h"
+#include "libexttools/ToolCompiler.h"
 
 using namespace boost;
 using namespace boost::filesystem;
 
-// Regex string for matching C and C++ identifiers.
+/// Regex string for matching C and C++ identifiers.
 static const std::string f_identifier_expression("[[:alpha:]_][[:alnum:]_]*");
 
 static const std::string f_qualifiers("const|virtual|static");
@@ -60,11 +63,15 @@ static const std::string f_static_destructors("\\(static destructors for .+?\\)"
 /// .+? is the filename.
 static const std::string f_static_initializers("\\(static initializers for .+?\\)");
 
-// Regex for finding C function definitions in gcc *.cfg output.
+/// Regex for finding C function definitions in gcc *.cfg output.
 static const boost::regex f_c_function_def_expression("^("+f_identifier_expression+") \\(.*?\\)");
 
-// Regex for finding C++ function definitions in gcc *.cfg output.
-static const boost::regex f_cpp_function_def_expression("^("+f_identifier_expression+") \\(.*?\\)");
+/// Regex for finding C++ function definitions in gcc *.cfg output.
+/// - Capture 1 is everything before the function name (i.e. return type, qualifiers, etc.).
+/// - Capture 2 is the function identifier itself.
+/// - Capture 3 is the formal parameter list, just the types.
+/// - Capture 4 is the formal maramter list, just the names.
+static const boost::regex f_cpp_function_def_expression("^([^;]*)[[:space:]]("+f_identifier_expression+")\\(.*\\)[[:space:]]\\(.*\\)");
 
 // Regex for finding block starts.  Capture 1 is the block number, 2 is the starting line in the file.
 static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([[:digit:]]+))?");
@@ -99,19 +106,27 @@ TranslationUnit::~TranslationUnit()
 bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 								T_ID_TO_FUNCTION_PTR_MAP *function_map,
 								const std::string &the_filter,
-								const std::string &the_gcc,
+								ToolCompiler *compiler,
 								const std::string &the_ctags,
 								const std::vector< std::string > &defines,
 								const std::vector< std::string > &include_paths,
 								bool debug_parse)
 {
 	std::string gcc_cfg_lineno_blocks_filename;
+	bool file_is_cpp = false;
 	
 	// Save the source filename.
 	m_source_filename = filename;
 	
+	// Check if it's a C++ file.
+	if(filename.extension() == ".cpp")
+	{
+		std::cout << "File is C++" << std::endl;
+		file_is_cpp = true;
+	}
+	
 	// Try to compile the source file.
-	CompileSourceFile(filename.string(), the_filter, the_gcc, defines, include_paths);
+	CompileSourceFile(filename.string(), the_filter, compiler, defines, include_paths);
 	
 	// Construct the filename of the .cfg file gcc made for us.
 	// gcc puts this file in the directory it's running in.
@@ -148,10 +163,28 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			continue;
 		}
 
-		// Look for function definitions.
-		if(regex_match(line.c_str(), capture_results, f_c_function_def_expression))
+		static const boost::regex *function_regex;
+		int function_id_offset;
+		
+		// GCC outputs a different function signature depending on file type.
+		// Switch which regex we're using according to the source file's language.
+		if(file_is_cpp)
 		{
-			in_function_name = capture_results[1];
+			// This is a C++ file, use the appropriate regex.
+			function_regex = &f_cpp_function_def_expression;
+			function_id_offset = 2;
+		}
+		else
+		{
+			// It's C.
+			function_regex = &f_c_function_def_expression;
+			function_id_offset = 1;
+		}
+		
+		// Look for function definitions.
+		if(regex_match(line.c_str(), capture_results, *function_regex))
+		{
+			in_function_name = capture_results[function_id_offset];
 			std::cout << "Found function: " << in_function_name << std::endl;
 			current_function = new Function(in_function_name);
 
@@ -337,7 +370,7 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 	}
 }
 
-void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, const std::string &the_gcc,
+void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,
 										const std::vector< std::string > &defines,
 										const std::vector< std::string > &include_paths)
 {
@@ -345,24 +378,23 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	/// \todo Add the prefilter functionality.
 	
 	// Create the compile command.
-	std::string compile_to_cfg_command;
+	std::string params;
 	
-	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
-	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
-	compile_to_cfg_command = the_gcc + " -S -fdump-tree-cfg-lineno-blocks";
+	// Add the defines.
+	/// @todo Make the -D's and -I's obey the ordering given on the initial command line.
 	BOOST_FOREACH(std::string d, defines)
 	{
-		compile_to_cfg_command += " -D \"" + d + "\"";
+		params += " -D \"" + d + "\"";
 	}
+	// Add the includes.
 	BOOST_FOREACH(std::string ip, include_paths)
 	{
-		compile_to_cfg_command += " -I \"" + ip + "\"";
+		params += " -I \"" + ip + "\"";
 	}
-	compile_to_cfg_command += " \"" + file_path + "\"";
+	params += " \"" + file_path + "\"";
 	
 	// Do the compile.
-	std::cout << "Compiling with " << compile_to_cfg_command << "..." << std::endl;
-	int compile_retval = ::system(compile_to_cfg_command.c_str());
+	int compile_retval = compiler->GenerateCFG(params.c_str());
 	
 	if(compile_retval != 0)
 	{
