@@ -26,7 +26,9 @@
 
 #include "TranslationUnit.h"
 #include "RuleReachability.h"
+#include "RulePrintFunctionCFG.h"
 #include "FunctionCall.h"
+#include "Function.h"
 
 Program::Program() { }
 
@@ -195,4 +197,9 @@ bool Program::PrintFunctionCFG(const std::string &function_identifier)
 	}
 	
 	// Found it, now let's print its control-flow graph.
+	std::cout << "Control Flow Graph of function " << function->GetIdentifier() << ":" << std::endl;
+	RulePrintFunctionCFG *printer = new RulePrintFunctionCFG(m_cfg, function);
+	
+	// Find and print the CFG.
+	return printer->RunRule();
 }

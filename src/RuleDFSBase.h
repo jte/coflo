@@ -22,22 +22,24 @@
 
 #include "RuleBase.h"
 
-class RuleDFSBase : RuleBase
+class RuleDFSBase : public RuleBase
 {
 public:
 	RuleDFSBase(const T_CFG &cfg);
 	RuleDFSBase(const RuleDFSBase& orig);
 	virtual ~RuleDFSBase();
 	
-	void SetSourceVertex(T_CFG_VERTEX_DESC source);
+	void SetSourceVertex(T_CFG_VERTEX_DESC source) { m_source = source; };
 	
-	void SetSinkVertex(T_CFG_VERTEX_DESC sink);
+	void SetSinkVertex(T_CFG_VERTEX_DESC sink) { m_sink = sink; };
 	
 	bool RunRule();
 	
 	virtual bool TerminatorFunction(T_CFG_VERTEX_DESC v);
 	
 	virtual void WalkPredecessorList(T_CFG_VERTEX_DESC v);
+
+protected:
 	
 	virtual void WalkPredecessorListAction(T_CFG_VERTEX_DESC v) = 0;
 
@@ -53,11 +55,11 @@ protected:
 	
 	/// The color map to use for the search.
 	std::vector<boost::default_color_type> m_color_vec;
-	
-private:
 
 	/// The control flow graph we'll run our depth-first search on.
-	const T_CFG &m_cfg;	
+	const T_CFG &m_cfg;
+	
+private:
 	
 	/// Flag which we'll set when we find m_sink.
 	bool m_found_sink;

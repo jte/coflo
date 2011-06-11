@@ -20,22 +20,32 @@
 #ifndef RULEREACHABILITY_H
 #define	RULEREACHABILITY_H
 
-#include "RuleBase.h"
+#include "RuleDFSBase.h"
 
 class Function;
 
-class RuleReachability : public RuleBase
+class RuleReachability : public RuleDFSBase
 {
 public:
-	RuleReachability(const Function *source, const Function *sink);
+	RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink);
 	RuleReachability(const RuleReachability& orig);
 	virtual ~RuleReachability();
 	
-	virtual bool RunRule(const T_CFG &cfg);
+	virtual bool RunRule();
 	
 	void PrintCallChain(const T_CFG &cfg, T_CFG_VERTEX_DESC v) const;
 	
+	virtual bool TerminatorFunction(T_CFG_VERTEX_DESC v);
+	
+protected:
+	
+	/// \todo I think we probably don't need this.
+	virtual void WalkPredecessorListAction(T_CFG_VERTEX_DESC v) {};
+	
 private:
+	
+	/// Flag which we'll set when we find m_sink to stop the search.
+	bool m_found_sink;
 
 	/// The function which must not call m_sink.
 	const Function *m_source;

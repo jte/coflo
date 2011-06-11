@@ -25,13 +25,13 @@
 #include "RuleReachability.h"
 #include "Entry.h"
 
-RuleReachability::RuleReachability(const Function *source, const Function *sink)
+RuleReachability::RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {
 	m_source = source;
 	m_sink = sink;
 }
 
-RuleReachability::RuleReachability(const RuleReachability& orig)
+RuleReachability::RuleReachability(const RuleReachability& orig) : RuleDFSBase(orig)
 {
 	m_source = orig.m_source;
 	m_sink = orig.m_sink;
@@ -74,32 +74,45 @@ private:
 	RuleReachability *m_reachability;
 };
 
-bool RuleReachability::RunRule(const T_CFG &cfg)
+bool RuleReachability::TerminatorFunction(T_CFG_VERTEX_DESC v)
+{
+	//if(v == sink)
+	if(m_found_sink)
+	{
+		// We found the sink vertex we were looking for, so always terminate any new
+		// searches down any paths.
+		return true;
+	}
+	
+	return false;
+}
+
+bool RuleReachability::RunRule()
 {
 	T_CFG_VERTEX_DESC starting_vertex_desc;
-	reachability_visitor v(cfg, m_sink->GetEntryVertexDescriptor(), this);
+	reachability_visitor v(m_cfg, m_sink->GetEntryVertexDescriptor(), this);
 	// Array to store predecessor (parent) of each visited vertex.
-	std::vector<T_CFG_VERTEX_DESC> p(boost::num_vertices(cfg));
+	std::vector<T_CFG_VERTEX_DESC> p(boost::num_vertices(m_cfg));
 	m_p = &p;
 	
 	// Point each vertex to itself.
-	for(long i = 0; i<boost::num_vertices(cfg); i++)
+	for(size_t i = 0; i<boost::num_vertices(m_cfg); i++)
 	{
 		p[i] = i;
 	}
 	
 	// The color map to use for the search.
-	std::vector<boost::default_color_type> color_vec(boost::num_vertices(cfg));
+	std::vector<boost::default_color_type> color_vec(boost::num_vertices(m_cfg));
 
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
 	
-	boost::depth_first_visit(cfg, starting_vertex_desc,
+	boost::depth_first_visit(m_cfg, starting_vertex_desc,
 		boost::make_dfs_visitor(
 			std::make_pair(
 				v, boost::record_predecessors(&p[0], boost::on_tree_edge())
 			)
 		),
-		boost::make_iterator_property_map(color_vec.begin(), boost::get(boost::vertex_index, cfg))
+		boost::make_iterator_property_map(color_vec.begin(), boost::get(boost::vertex_index, m_cfg))
 	);
 
 	return true;
