@@ -28,9 +28,13 @@ class RulePrintFunctionCFG : public RuleDFSBase
 {
 
 public:
-	RulePrintFunctionCFG(Function *f);
+	RulePrintFunctionCFG(const T_CFG &cfg, Function *f);
 	RulePrintFunctionCFG(const RulePrintFunctionCFG& orig);
 	virtual ~RulePrintFunctionCFG();
+	
+protected:
+	virtual void WalkPredecessorListAction(T_CFG_VERTEX_DESC v);
+	
 private:
 
 };

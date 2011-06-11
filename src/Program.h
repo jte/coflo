@@ -59,6 +59,8 @@ public:
 	
 	bool PrintFunctionCFG(const std::string &function_identifier);
 	
+	T_CFG& GetControlFlowGraph() { return m_cfg; };
+	
 private:
 
 	/// The TranslationUnits which make up this Program.

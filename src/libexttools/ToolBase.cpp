@@ -21,13 +21,35 @@
 
 #include "ToolBase.h"
 
-ToolBase::ToolBase() { }
+ToolBase::ToolBase()
+{
+}
 
-ToolBase::ToolBase(const ToolBase& orig) { }
+ToolBase::ToolBase(const ToolBase& orig)
+{
+}
 
-ToolBase::~ToolBase() { }
+ToolBase::~ToolBase()
+{
+}
 
 int ToolBase::System(const std::string &params) const
 {
-	return ::system((m_cmd + " " + params).c_str());
+	std::string cwd_cmd;
+	
+	// Were we given a working directory?
+	if(!m_working_directory.empty())
+	{
+		// We were, create a "cd" commnad to switch to it.
+		cwd_cmd = "cd " + m_working_directory + " && ";
+	}
+	
+	// Invoke the command processor, which will invoke the command.
+	return ::system((cwd_cmd + m_cmd + " " + params).c_str());
+}
+
+void ToolBase::SetWorkingDirectory(const std::string &working_directory)
+{
+	// Save the working directory for use later.
+	m_working_directory = working_directory;
 }

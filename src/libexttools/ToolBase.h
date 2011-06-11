@@ -35,19 +35,24 @@ public:
 	
 	void SetCommand(const std::string &cmd) { m_cmd = cmd; };
 	
+	void SetWorkingDirectory(const std::string &working_directory);
+	
 	virtual std::string GetVersion() const = 0;
 	
 protected:
 	
-	/// The filename of the program.
+	/// The filename of the command.
 	std::string m_cmd;
+	
+	/// The working directory in which to invoke the command.
+	std::string m_working_directory;
 		
 	/**
 	 * Wrapper around the system() call.
 	 * 
      * @param params Parameters to give the command.  Note that you should not
 	 *	specify the command itself - m_cmd will be prepended automatically.
-     * @return 
+     * @return Return value of the command.
      */
 	int System(const std::string &params) const;
 

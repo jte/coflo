@@ -23,6 +23,7 @@
 
 #include "Program.h"
 #include "libexttools/ToolCompiler.h"
+#include "Analyzer.h"
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
@@ -38,6 +39,7 @@ namespace po = boost::program_options;
 int main(int argc, char* argv[])
 {
 	Program *the_program;
+	Analyzer *the_analyzer;
 	std::string the_filter;
 	std::string the_gcc;
 	std::string the_dot;
@@ -84,7 +86,7 @@ int main(int argc, char* argv[])
 	;
 	rule_options.add_options()
 	("print-function-cfg", po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
-	("constraint-reachability", po::value< std::string >(), "\"f1()-xf2()\" : Warn if f1 can reach f2.")
+	("constraint", po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
 	;
 	hidden_options.add_options()
 	("input-file", po::value< std::vector<std::string> >(), "input file")
@@ -128,6 +130,7 @@ int main(int argc, char* argv[])
 	}
 	
 	the_program = new Program();
+	the_analyzer = new Analyzer();
 	
 	if(vm.count("input-file")>0)
 	{
@@ -175,6 +178,17 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 	}
+	
+	the_analyzer->AttachToProgram(the_program);
+	
+	if(vm.count("constraint") > 0)
+	{
+		// Add the given constraints to the analysis.
+		the_analyzer->AddConstraints(vm["constraint"].as< std::vector<std::string> >());
+	}
+	
+	// Perform the analysis.
+	the_analyzer->Analyze();
 	
 	if(vm.count("output-dir"))
 	{

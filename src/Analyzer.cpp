@@ -17,9 +17,16 @@
 
 /** @file */
 
+#include <boost/foreach.hpp>
+#include <boost/regex.hpp>
+
 #include "Analyzer.h"
+#include "Program.h"
 #include "RuleBase.h"
 #include "RuleReachability.h"
+
+/// Regex for function-calls-function constraint "f1() -x f2()".
+static const boost::regex f_fxf_regex("([[:alpha:]_][[:alnum:]_]+)\\(\\) -x ([[:alpha:]_][[:alnum:]_]+)\\(\\)");
 
 Analyzer::Analyzer() { }
 
@@ -27,7 +34,50 @@ Analyzer::Analyzer(const Analyzer& orig) { }
 
 Analyzer::~Analyzer() { }
 
-bool Analyzer::Analyze(const T_CFG &cfg)
+void Analyzer::AddConstraints(const std::vector< std::string > &vector_of_constraint_strings)
 {
+	boost::cmatch capture_results;
 	
+	std::cerr << "INFO: Adding constraints..." << std::endl;
+	BOOST_FOREACH(std::string s, vector_of_constraint_strings)
+	{
+		// Parse the next constraint.
+		if(boost::regex_match(s.c_str(), capture_results, f_fxf_regex))
+		{
+			Function *f1, *f2;
+			
+			// Look up the functions.
+			f1 = m_program->LookupFunction(capture_results[1]);
+			f2 = m_program->LookupFunction(capture_results[2]);
+			
+			if(f1 == NULL)
+			{
+				std::cerr << "ERROR: Can't find function: " << capture_results[1] << std::endl;
+			}
+			else if(f2 == NULL)
+			{
+				std::cerr << "ERROR: Can't find function: " << capture_results[2] << std::endl;
+			}
+			else
+			{
+				std::cerr << "INFO: Adding constraint: fxf." << std::endl;
+				RuleReachability *rule = new RuleReachability(m_program->GetControlFlowGraph(),
+															 f1, f2);
+				m_constraints.push_back(rule);
+			}
+		}
+		else
+		{
+			std::cerr << "ERROR: Can't parse constraint: " << s << std::endl;
+		}
+	}
 }
+
+bool Analyzer::Analyze()
+{
+	BOOST_FOREACH(RuleBase *constraint, m_constraints)
+	{
+		constraint->RunRule();
+	}
+}
+

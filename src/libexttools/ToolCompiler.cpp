@@ -32,9 +32,8 @@ ToolCompiler::ToolCompiler(const std::string &cmd)
 	SetCommand(cmd);
 }
 
-ToolCompiler::ToolCompiler(const ToolCompiler& orig) 
+ToolCompiler::ToolCompiler(const ToolCompiler& orig) : ToolBase(orig)
 {
-	m_cmd = orig.m_cmd;
 }
 
 ToolCompiler::~ToolCompiler() { }

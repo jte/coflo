@@ -31,7 +31,7 @@ public:
 	RuleBase(const RuleBase& orig);
 	virtual ~RuleBase();
 	
-	virtual bool RunRule(const T_CFG &cfg) = 0;
+	virtual bool RunRule() = 0;
 	
 private:
 

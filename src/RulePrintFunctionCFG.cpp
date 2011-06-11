@@ -17,11 +17,32 @@
 
 /** @file */
 
+#include <iostream>
+
 #include "RulePrintFunctionCFG.h"
+#include "Function.h"
+#include "Entry.h"
 
-RulePrintFunctionCFG::RulePrintFunctionCFG() { }
+RulePrintFunctionCFG::RulePrintFunctionCFG(const T_CFG &cfg, Function *f) : RuleDFSBase(cfg)
+{
+	SetSourceVertex(f->GetEntryVertexDescriptor());
+	SetSinkVertex(f->GetExitVertexDescriptor());
+}
 
-RulePrintFunctionCFG::RulePrintFunctionCFG(const RulePrintFunctionCFG& orig) { }
+RulePrintFunctionCFG::RulePrintFunctionCFG(const RulePrintFunctionCFG& orig) : RuleDFSBase(orig)
+{
+}
 
-RulePrintFunctionCFG::~RulePrintFunctionCFG() { }
+RulePrintFunctionCFG::~RulePrintFunctionCFG()
+{
+}
 
+void RulePrintFunctionCFG::WalkPredecessorListAction(T_CFG_VERTEX_DESC v)
+{
+	// For this DFS, we only want to print out Entry predecessors.
+	//if(NULL != dynamic_cast<Entry*>(m_cfg[v].m_statement))
+	{
+		std::cout << "Function Entry: " << m_cfg[v].m_containing_function->GetIdentifier() << std::endl;
+		std::cout << " statement = " << m_cfg[v].m_statement->GetStatementTextDOT() << std::endl;
+	}
+}

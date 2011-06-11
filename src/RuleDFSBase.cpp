@@ -99,10 +99,10 @@ bool RuleDFSBase::TerminatorFunction(T_CFG_VERTEX_DESC v)
 	{
 		// We found the vertex we were looking for, so always terminate any new
 		// searches down any paths.
-		return false;
+		return true;
 	}
 	
-	return true;
+	return false;
 }
 
 bool RuleDFSBase::RunRule()
@@ -148,11 +148,6 @@ void RuleDFSBase::WalkPredecessorList(T_CFG_VERTEX_DESC v)
 	// When it is, we know we reached the top of the list.
 	while(parent != v)
 	{
-		/*if(NULL != dynamic_cast<Entry*>(cfg[v].m_statement))
-		{
-			std::cout << "Function Entry: " << cfg[v].m_containing_function->GetIdentifier() << std::endl;
-		}*/
-		
 		// Do whatever action the derived class wants to do at this vertex.
 		WalkPredecessorListAction(v);
 		
