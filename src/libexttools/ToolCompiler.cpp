@@ -17,6 +17,17 @@
 
 /** @file */
 
+/*
+ * GCC file paths for "gcc -S -fdump-tree-cfg-lineno-blocks <file>.c":
+ * - Source path: relative to working directory.
+ * - Output <file>.c.013t.cfg:
+ *		- 4.3.4: Always in working directory.
+ *		- i686-w64-mingw32-gcc (GCC) 4.5.2: In same directory as <file>.s
+ * - Output <file>.s:
+ *		- In working directory by default.
+ *		- If "-o file.s", then relative to working directory.
+ */
+
 #include <iostream>
 #include <fstream>
 

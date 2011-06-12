@@ -23,5 +23,9 @@ USE_GCC=@gcc@
 # Run CoFlo on some test code.
 TEST_SOURCE=@test_source@
 
+# ${srcdir} is set to the source "test/" directory.
+echo "SRCDIR = "${srcdir}
+echo "PWD = "$(pwd)
+
 # Run CoFlo on the code.
 cd ../test/ && ../src/coflo --use-gcc=${USE_GCC} ${TEST_SOURCE} --output-dir=../test_html/
