@@ -21,8 +21,8 @@
 #include <boost/regex.hpp>
 
 /// Regex string for matching and capturing locations.
-/// Capture 1 is the path, 2 is the line number.
-static const boost::regex f_location_expression("\\[(.*) \\: ([[:digit:]]+)\\]");
+/// Capture 1 is the path, 2 is the line number, and 3 is the possibly-missing column number.
+static const boost::regex f_location_expression("\\[(.*) \\: ([[:digit:]]+)\\:?([[:digit:]])?\\]");
 
 Location::Location(const std::string &location_string)
 {
