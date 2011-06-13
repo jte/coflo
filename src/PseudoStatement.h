@@ -18,8 +18,6 @@
 #ifndef PSEUDOSTATEMENT_H
 #define	PSEUDOSTATEMENT_H
 
-#include <boost/mpl/inherit.hpp>
-
 #include "Statement.h"
 
 class PseudoStatement : public Statement

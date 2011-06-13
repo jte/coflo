@@ -37,6 +37,8 @@ public:
 	
 	/// Returns the name of the function being called.
 	virtual std::string GetIdentifier() const = 0;
+	
+	virtual std::string GetIdentifierCFG() const;
 
 private:
 };

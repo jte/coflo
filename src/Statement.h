@@ -39,6 +39,13 @@ public:
      */
 	virtual std::string GetStatementTextDOT() const = 0;
 	
+	/**
+	 * Get text suitable for a text-based CFG printout.
+	 * 
+     * @return 
+     */
+	virtual std::string GetIdentifierCFG() const = 0;
+	
 	const Location* GetLocation() const { return m_location; };
 	
 private:

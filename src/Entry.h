@@ -30,6 +30,8 @@ public:
 	
 	virtual std::string GetStatementTextDOT() const;
 	
+	virtual std::string GetIdentifierCFG() const { return "ENTRY"; };
+	
 private:
 
 };

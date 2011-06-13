@@ -496,6 +496,44 @@ void indent(long i)
 	};
 }
 
+class IndentLevelTracker
+{
+public:
+	IndentLevelTracker() {};
+	~IndentLevelTracker() {};
+	
+	void FoundBranchStatement(long num_nondegenerate_branches)
+	{
+		indent_level.push(num_nondegenerate_branches);
+	}
+	
+	void BranchEnded()
+	{
+		while(indent_level.size()>0)
+		{
+			indent_level.top()--;
+
+			if(indent_level.top() == 0)
+			{
+				// All branches eminating from the current branching statement
+				// have ended, pop it off the stack.
+				indent_level.pop();
+			}
+			else
+			{
+				// 
+				break;
+			}
+		}
+	};
+	
+	long GetIndentLevel() const { return indent_level.size(); };
+	
+private:
+	
+	std::stack< long > indent_level;
+};
+
 void Function::Print()
 {
 	T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
@@ -508,10 +546,10 @@ void Function::Print()
 	vertex_filter_predicate the_vertex_filter(vpm, this);
 	typedef boost::filtered_graph <T_CFG, back_edge_filter_predicate, vertex_filter_predicate> T_FUNCTION_CFG;
 	T_FUNCTION_CFG graph_of_this_function(*m_cfg, the_edge_filter, the_vertex_filter);
+	boost::graph_traits< T_FUNCTION_CFG >::out_edge_iterator out_edge_begin, out_edge_end;
 	
 	typedef std::vector< T_CFG_VERTEX_DESC > T_SORTED_CFG_VERTEX_CONTAINER;
 	T_SORTED_CFG_VERTEX_CONTAINER topologically_sorted_vertices;
-	std::stack< size_t > indent_level;
 	
 	// Do a topological sort of this function's control-flow graph, putting the results into topologically_sorted_vertices.
 	boost::topological_sort(graph_of_this_function, std::back_inserter(topologically_sorted_vertices));
@@ -523,8 +561,7 @@ void Function::Print()
 	std::cout << m_function_id << "()" << std::endl;
 	
 	// Print the function's blocks.
-	// Start out with no indent.
-	indent_level.push(0);
+	IndentLevelTracker indent_tracker;
 	for(T_SORTED_CFG_VERTEX_CONTAINER::reverse_iterator rit = topologically_sorted_vertices.rbegin();
 		rit != topologically_sorted_vertices.rend();
 		rit++)
@@ -532,11 +569,11 @@ void Function::Print()
 		if(graph_of_this_function[*rit].m_statement != NULL)
 		{
 			// Get the current indentation level.
-			long current_indent_level = indent_level.top();
+			long current_indent_level = indent_tracker.GetIndentLevel();
 			
 			// Print the block.
 			indent(current_indent_level);
-			std::cout << graph_of_this_function[*rit].m_statement->GetStatementTextDOT() << std::endl;
+			std::cout << graph_of_this_function[*rit].m_statement->GetIdentifierCFG() << std::endl;
 			
 			// Get the out-degree of the node we just printed.
 			long this_out_degree = boost::out_degree(*rit, graph_of_this_function);
@@ -545,33 +582,38 @@ void Function::Print()
 			{
 				// This node splits the incoming control flow into two or more branches.
 				// Add another level of indentation for each branch.
-				std::cout << "---PUSH " << this_out_degree << "---" << std::endl;
-				for(long i = 0; i!=this_out_degree; i++)
+				long num_branches = 0;
+				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(*rit, graph_of_this_function);
+				for(; out_edge_begin != out_edge_end; ++out_edge_begin)
 				{
-					indent_level.push(current_indent_level+1);
+					T_CFG_VERTEX_DESC next_vertex_desc = boost::target(*out_edge_begin, graph_of_this_function);
+					if(boost::in_degree(next_vertex_desc, graph_of_this_function) == 1)
+					{
+						// This branch hasn't ended, so push another indent-level onto the stack.
+						num_branches++;
+					}
+
 				}
+				indent_tracker.FoundBranchStatement(num_branches);			
 			}
 			else if(this_out_degree == 0)
 			{
 				// This is either the EXIT vertex or a does-not-return vertex.
 				// Regardless, it terminates this branch, so pop the indentation
 				// stack.
-				std::cout << "---EXIT---" << std::endl;
-				indent_level.pop();
+				indent_tracker.BranchEnded();
 			}
 			else
 			{
 				// Out degree is == 1.  If the next vertex has an in_degree > 1,
 				// that means that this branch of the CFG ends at this vertex, so
 				// we'll pop an entry off the indent-level stack.
-				boost::graph_traits< T_FUNCTION_CFG >::out_edge_iterator out_edge_begin, out_edge_end;
 				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(*rit, graph_of_this_function);
 				T_CFG_VERTEX_DESC next_vertex_desc = boost::target(*out_edge_begin, graph_of_this_function);
 				if(boost::in_degree(next_vertex_desc, graph_of_this_function) > 1)
 				{
 					// This branch has ended.
-					std::cout << "---BRANCH-END---" << std::endl;
-					indent_level.pop();
+					indent_tracker.BranchEnded();
 				}
 			}
 		}
@@ -580,75 +622,6 @@ void Function::Print()
 			std::cout << "INFO: (*m_cfg)[" << *rit << "].m_block == NULL" << std::endl;
 		}
 	}
-	
-#if 0
-	boost::write_graphviz(std::cout, m_block_graph,
-						 vertex_property_writer<T_BLOCK_GRAPH>(m_block_graph),
-						 edge_property_writer<T_BLOCK_GRAPH>(m_block_graph),
-						 graph_property_writer());
-
-	
-	// Remove all back edges before we do the topological sort, since it can't
-	// handle cycles.
-	RemoveBackEdges();
-
-	typedef std::vector< T_BLOCK_GRAPH_VERTEX_DESC > T_SORTED_BLOCK_CONTAINER;
-	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
-	// vector for storing the indent level for each block.
-	std::vector< long > block_indent_level;
-	
-	// Do a topological sort of the block graph, putting the results into topologically_sorted_blocks.
-	boost::topological_sort(m_block_graph, std::back_inserter(topologically_sorted_blocks));
-	
-	// Start out at an indent level of 0 for every block.
-	block_indent_level.assign(topologically_sorted_blocks.size(), 0);
-	
-	// Figure out the indent level.
-	long this_parent = 0;
-	BOOST_REVERSE_FOREACH(T_BLOCK_GRAPH_VERTEX_DESC vid, topologically_sorted_blocks)
-	{
-		if(boost::out_degree(vid, m_block_graph)>1)
-		{
-			// This is some sort of decision point, indent the children.
-			/// \todo Make this more efficient.
-			long this_child = 0;
-			BOOST_REVERSE_FOREACH(T_BLOCK_GRAPH_VERTEX_DESC child, topologically_sorted_blocks)
-			{
-				T_BLOCK_GRAPH_EDGE_DESC dummy;
-				bool is_child;
-				boost::tie(dummy, is_child) = boost::edge(vid, child, m_block_graph);
-				if(is_child)
-				{
-					// This is a child, add up the indent level.
-					block_indent_level[this_child] = block_indent_level[this_parent] + 1;
-				}
-				this_child++;
-			}
-		}
-		this_parent++;
-	}
-	
-	// Print the function identifier.
-	std::cout << m_function_id << "()" << std::endl;
-	
-	// Print the function's blocks.
-	long indent_index = 0;
-	for(T_SORTED_BLOCK_CONTAINER::reverse_iterator rit = topologically_sorted_blocks.rbegin();
-		rit != topologically_sorted_blocks.rend();
-		rit++)
-	{
-		if(m_block_graph[*rit].m_block != NULL)
-		{
-			// Print the block.
-			m_block_graph[*rit].m_block->PrintBlock(block_indent_level[indent_index]);
-			indent_index++;
-		}
-		else
-		{
-			std::cout << "INFO: m_block_graph[" << *rit << "].m_block == NULL" << std::endl;
-		}
-	}
-#endif	
 }
 
 

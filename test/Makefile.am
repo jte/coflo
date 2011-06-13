@@ -17,10 +17,9 @@
 
 ## Process this file with automake to produce Makefile.in.
 
-#AUTOMAKE_OPTIONS = parallel-tests
-VERBOSE = 1
-
-C_TEST_SOURCE = $(addprefix $(srcdir)/,test_source_file_1.c test_source_file_2.c)
+# The C test file.
+C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c
+# The built C++ test files.
 CPP_TEST_SOURCE = test_source_file_1.cpp test_source_file_2.cpp
 CLEANFILES = $(CPP_TEST_SOURCE)
 
@@ -52,6 +51,14 @@ test_gcc.sh test_i686-w64-mingw32-gcc.sh test_i686-pc-mingw32-gcc-4.5.2.sh: test
 	cat $(srcdir)/test_template.sh | sed -e 's,[@]gcc[@],$*,g' \
 	    -e 's,[@]test_source[@],\"${C_TEST_SOURCE}\",g' \
 	> $@
+# TODO This is test, trying to enumerate PATH paths to search for gcc's.
+#echo "${PATH}" | awk -v RS=: 1
+	(\
+	 IFS=:;\
+	 set -f;\
+	 printf "%s\n" "${PATH}" ;\
+	 )
+
 
 # Tests to run for "make check".
 #TESTS_ENVIRONMENT = export "TEST_CPPFLAGS=$(CPPFLAGS)" && export "TEST_CXXFLAGS=$(CXXFLAGS)" && $(SHELL) -x
