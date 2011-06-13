@@ -29,12 +29,19 @@ class CFGEdgeTypeBase
 public:
 	CFGEdgeTypeBase();
 	CFGEdgeTypeBase(const CFGEdgeTypeBase& orig);
-	/// Destructor pure virtual to force this to be an abstract base class.
+	/// Destructor made pure virtual to force this to be an abstract base class.
 	virtual ~CFGEdgeTypeBase() = 0;
+	
+	/**
+	 * Indicates if this is a back edge in the control flow graph, as would be
+	 * caused by a loop.
+	 * 
+     * @return true if this is a back-edge, false if it isn't.
+     */
+	virtual bool IsBackEdge() const { return false; };
 
 private:
 
 };
 
 #endif	/* CFGEDGETYPEBASE_H */
-
