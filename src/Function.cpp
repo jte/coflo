@@ -29,6 +29,7 @@
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
+
 #include "Block.h"
 
 #include "Function.h"
@@ -39,10 +40,16 @@
 
 #include "CFGEdgeTypeFallthrough.h"
 #include "CFGEdgeTypeFunctionCall.h"
+#include "CFGEdgeTypeGotoBackEdge.h"
 #include "CFGEdgeTypeReturn.h"
 
-
+/// Property map typedef which allows us to get at the function pointer stored at
+/// CFGVertexProperties::m_containing_function in the T_CFG.
 typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VERTEX_PROPERTY_MAP;
+
+/// Property map typedef which allows us to get at the edge type pointer stored at
+/// CFGEdgeProperties::m_edge_type in the T_CFG.
+typedef boost::property_map< T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::* >::type T_EDGE_TYPE_PROPERTY_MAP;
 
 struct vertex_filter_predicate
 {
@@ -440,20 +447,122 @@ void Function::RemoveBackEdges()
 	}
 }
 
+class dfs_back_edge_finder_visitor : public boost::default_dfs_visitor
+{
+public:
+	dfs_back_edge_finder_visitor(std::vector<T_CFG_EDGE_DESC> &back_edges) : boost::default_dfs_visitor(), m_back_edges(back_edges)
+	{ };
+	
+	void back_edge(T_CFG_EDGE_DESC e, const T_CFG &g) const
+	{
+		std::cout << "INFO: Found BackEdge, marking." << std::endl;
+		
+		m_back_edges.push_back(e);
+	}
+private:
+	/// External vector where we'll store the edges we'll mark later.
+	std::vector<T_CFG_EDGE_DESC> &m_back_edges;
+};
+
+struct back_edge_filter_predicate
+{
+	/// Must be default constructable because such predicates are stored by-value.
+	back_edge_filter_predicate() {};
+	back_edge_filter_predicate(T_EDGE_TYPE_PROPERTY_MAP &edge_type_property_map) : m_edge_type_property_map(edge_type_property_map) 
+	{};
+	bool operator()(const T_CFG_EDGE_DESC& eid) const
+	{
+		if(get(m_edge_type_property_map, eid)->IsBackEdge())
+		{
+			// This is a back edge, filter it out.
+			return false;
+		}
+		else
+		{
+			// This is not a back edge.
+			return true;
+		}
+	};
+	
+	T_EDGE_TYPE_PROPERTY_MAP m_edge_type_property_map;
+};
+
+void indent(long i)
+{
+	while(i>0)
+	{
+		std::cout << " ";
+		i--;
+	};
+}
+
 void Function::Print()
 {
+	T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
+	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
+	
+	// Define a filtered view of this function's CFG, which hides the back-edges
+	// so that we can produce a topological sort.
+	back_edge_filter_predicate the_edge_filter(edge_type_property_map);
+
+	vertex_filter_predicate the_vertex_filter(vpm, this);
+	boost::filtered_graph <T_CFG, back_edge_filter_predicate, vertex_filter_predicate>
+		graph_of_this_function(*m_cfg, the_edge_filter, the_vertex_filter);
+	
+	typedef std::vector< T_CFG_VERTEX_DESC > T_SORTED_CFG_VERTEX_CONTAINER;
+	T_SORTED_CFG_VERTEX_CONTAINER topologically_sorted_vertices;
+	
+	// Do a topological sort of the block graph, putting the results into topologically_sorted_blocks.
+	boost::topological_sort(graph_of_this_function, std::back_inserter(topologically_sorted_vertices));
+	
 	// Print the function info.
 	std::cout << "Function Definition: " << m_function_id << std::endl;
-
+	
+		// Print the function identifier.
+	std::cout << m_function_id << "()" << std::endl;
+	
+	// Print the function's blocks.
+	long indent_index = 0;
+	for(T_SORTED_CFG_VERTEX_CONTAINER::reverse_iterator rit = topologically_sorted_vertices.rbegin();
+		rit != topologically_sorted_vertices.rend();
+		rit++)
+	{
+		if((*m_cfg)[*rit].m_statement != NULL)
+		{
+			if(boost::in_degree(*rit, *m_cfg) > 1)
+			{
+				indent_index--;				
+			}
+			// Print the block.
+			indent(indent_index);
+			std::cout << (*m_cfg)[*rit].m_statement->GetStatementTextDOT() << std::endl;
+				//m_block->PrintBlock(block_indent_level[indent_index]);
+			if(boost::out_degree(*rit, *m_cfg) > 1)
+			{
+				indent_index++;				
+			}
+			else if(boost::out_degree(*rit, *m_cfg) == 0)
+			{
+				indent_index--;
+			}
+		}
+		else
+		{
+			std::cout << "INFO: (*m_cfg)[" << *rit << "].m_block == NULL" << std::endl;
+		}
+	}
+	
+#if 0
 	boost::write_graphviz(std::cout, m_block_graph,
 						 vertex_property_writer<T_BLOCK_GRAPH>(m_block_graph),
 						 edge_property_writer<T_BLOCK_GRAPH>(m_block_graph),
 						 graph_property_writer());
+
 	
 	// Remove all back edges before we do the topological sort, since it can't
 	// handle cycles.
 	RemoveBackEdges();
-	
+
 	typedef std::vector< T_BLOCK_GRAPH_VERTEX_DESC > T_SORTED_BLOCK_CONTAINER;
 	T_SORTED_BLOCK_CONTAINER topologically_sorted_blocks;
 	// vector for storing the indent level for each block.
@@ -510,13 +619,13 @@ void Function::Print()
 			std::cout << "INFO: m_block_graph[" << *rit << "].m_block == NULL" << std::endl;
 		}
 	}
+#endif	
 }
 
 
 void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir)
 {
 	std::string dot_filename;
-
 
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 
@@ -641,6 +750,31 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			}
 		}
 		last_statement_it++;
+	}
+	
+	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
+	// Property map for getting at the edge types in the CFG.
+	//T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
+	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
+	std::vector<T_CFG_EDGE_DESC> back_edges;
+	
+	// Define a filtered view of this function's CFG, which hides the back-edges
+	// so that we can produce a topological sort.
+	dfs_back_edge_finder_visitor back_edge_finder(back_edges);
+
+	vertex_filter_predicate the_vertex_filter(vpm, this);
+	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate>
+		graph_of_this_function(*m_cfg, boost::keep_all(), the_vertex_filter);
+	
+	// Find all the back edges.
+	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
+	
+	// Change their types.
+	BOOST_FOREACH(T_CFG_EDGE_DESC e, back_edges)
+	{
+		// Change this edge type to a back edge.
+		delete (*m_cfg)[e].m_edge_type;
+		(*m_cfg)[e].m_edge_type = new CFGEdgeTypeGotoBackEdge();
 	}
 	
 	return true;

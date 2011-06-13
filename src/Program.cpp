@@ -94,18 +94,6 @@ bool Program::Parse(const std::vector< std::string > &defines,
 		// Create the control-flow graphs.
 		std::cout << "Creating function control-flow graphs..." << std::endl;
 		tu->CreateControlFlowGraphs(&m_cfg);
-		
-#if 0
-
-
-		/// @todo This is a test.
-		Function *start, *stop;
-		start = m_function_map["main"];
-		stop = m_function_map["another_level_deep"];
-		//stop = m_function_map["ISR1"];
-		RuleReachability rr(start, stop);
-		rr.RunRule(tu->m_cfg);
-#endif	
 	}
 	
 	// Link the function calls.
@@ -198,8 +186,11 @@ bool Program::PrintFunctionCFG(const std::string &function_identifier)
 	
 	// Found it, now let's print its control-flow graph.
 	std::cout << "Control Flow Graph of function " << function->GetIdentifier() << ":" << std::endl;
-	RulePrintFunctionCFG *printer = new RulePrintFunctionCFG(m_cfg, function);
+	//RulePrintFunctionCFG *printer = new RulePrintFunctionCFG(m_cfg, function);
 	
 	// Find and print the CFG.
-	return printer->RunRule();
+	//return printer->RunRule();
+	function->Print();
+	
+	return true;
 }
