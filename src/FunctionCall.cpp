@@ -31,3 +31,8 @@ FunctionCall::FunctionCall(const FunctionCall& orig) : Statement(orig)
 FunctionCall::~FunctionCall()
 {
 }
+
+std::string FunctionCall::GetIdentifierCFG() const
+{
+	return GetIdentifier() + "()";
+}
