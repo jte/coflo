@@ -68,7 +68,7 @@ typedef boost::graph_traits<T_CFG>::edge_descriptor T_CFG_EDGE_DESC;
 typedef boost::graph_traits< T_CFG >::vertex_iterator T_CFG_VERTEX_ITERATOR;
 
 /// Typedef for vertex iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::edge_iterator T_CFG_EDGE_ITERATOR;
+typedef boost::graph_traits< T_CFG >::out_edge_iterator T_CFG_OUT_EDGE_ITERATOR;
 
 template < typename CFGEdgeType >
 boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)

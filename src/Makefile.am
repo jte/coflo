@@ -29,6 +29,7 @@ coflo_SOURCES = main.cpp \
 	CFGEdgeTypeGotoBackEdge.cpp CFGEdgeTypeGotoBackEdge.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
 	ControlFlowGraph.h \
+	controlflowgraph/CFGEdgeTypeFunctionCallBypass.cpp controlflowgraph/CFGEdgeTypeFunctionCallBypass.h \
 	Entry.cpp Entry.h \
 	Exit.cpp Exit.h \
 	Function.cpp Function.h \

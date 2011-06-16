@@ -10,31 +10,26 @@
  * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CFGEDGETYPEFALLTHROUGH_H
-#define	CFGEDGETYPEFALLTHROUGH_H
+#ifndef CFGEDGETYPEFUNCTIONCALLBYPASS_H
+#define	CFGEDGETYPEFUNCTIONCALLBYPASS_H
 
-#include "CFGEdgeTypeBase.h"
+#include "../CFGEdgeTypeBase.h"
 
-class CFGEdgeTypeFallthrough : public CFGEdgeTypeBase
+class CFGEdgeTypeFunctionCallBypass : public CFGEdgeTypeBase
 {
-public:
-	
-	/// Singleton factory.  We only need one of this class.
-	static CFGEdgeTypeFallthrough* Factory();
-	
-	CFGEdgeTypeFallthrough();
-	CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig);
-	virtual ~CFGEdgeTypeFallthrough();
 
+public:
+	CFGEdgeTypeFunctionCallBypass();
+	CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFunctionCallBypass& orig);
+	virtual ~CFGEdgeTypeFunctionCallBypass();
 private:
-	
-	/// The singleton.
-	static void *m_the_singleton;
+
 };
 
-#endif	/* CFGEDGETYPEFALLTHROUGH_H */
+#endif	/* CFGEDGETYPEFUNCTIONCALLBYPASS_H */
+
