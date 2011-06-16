@@ -24,7 +24,7 @@
 #include <boost/graph/adjacency_list.hpp>
 
 #include "Statement.h"
-#include "CFGEdgeTypeBase.h"
+#include "controlflowgraph/CFGEdgeTypeBase.h"
 
 class Function;
 

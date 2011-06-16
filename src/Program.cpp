@@ -190,7 +190,7 @@ bool Program::PrintFunctionCFG(const std::string &function_identifier)
 	
 	// Find and print the CFG.
 	//return printer->RunRule();
-	function->Print();
+	function->PrintControlFlowGraph();
 	
 	return true;
 }
