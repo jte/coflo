@@ -63,7 +63,7 @@ public:
 	
 	std::string GetIdentifier() const { return m_function_id; };
 	
-	void Print();
+	void PrintControlFlowGraph();
 	
 	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
 	

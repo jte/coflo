@@ -18,7 +18,7 @@
 #ifndef CFGEDGETYPEFUNCTIONCALLBYPASS_H
 #define	CFGEDGETYPEFUNCTIONCALLBYPASS_H
 
-#include "../CFGEdgeTypeBase.h"
+#include "CFGEdgeTypeBase.h"
 
 class CFGEdgeTypeFunctionCallBypass : public CFGEdgeTypeBase
 {

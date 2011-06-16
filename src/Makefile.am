@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+# Subdirectories with their own Makefile{.am}'s.
+# @todo Do we need something like the nobase_ stuff here: <http://sources.redhat.com/automake/automake.html#Alternative>
+# for the controlflowgraph directory?
 SUBDIRS = libexttools
 
 bin_PROGRAMS = coflo
@@ -22,14 +25,14 @@ coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
-	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
-	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
-	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
-	CFGEdgeTypeGoto.cpp CFGEdgeTypeGoto.h \
-	CFGEdgeTypeGotoBackEdge.cpp CFGEdgeTypeGotoBackEdge.h \
-	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
 	ControlFlowGraph.h \
+	controlflowgraph/CFGEdgeTypeBase.cpp controlflowgraph/CFGEdgeTypeBase.h \
 	controlflowgraph/CFGEdgeTypeFunctionCallBypass.cpp controlflowgraph/CFGEdgeTypeFunctionCallBypass.h \
+	controlflowgraph/CFGEdgeTypeFallthrough.cpp controlflowgraph/CFGEdgeTypeFallthrough.h \
+	controlflowgraph/CFGEdgeTypeFunctionCall.cpp controlflowgraph/CFGEdgeTypeFunctionCall.h \
+	controlflowgraph/CFGEdgeTypeGoto.cpp controlflowgraph/CFGEdgeTypeGoto.h \
+	controlflowgraph/CFGEdgeTypeGotoBackEdge.cpp controlflowgraph/CFGEdgeTypeGotoBackEdge.h \
+	controlflowgraph/CFGEdgeTypeReturn.cpp controlflowgraph/CFGEdgeTypeReturn.h \
 	Entry.cpp Entry.h \
 	Exit.cpp Exit.h \
 	Function.cpp Function.h \

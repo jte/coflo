@@ -39,10 +39,10 @@
 #include "FunctionCallUnresolved.h"
 #include "FunctionCallResolved.h"
 
-#include "CFGEdgeTypeFallthrough.h"
-#include "CFGEdgeTypeFunctionCall.h"
-#include "CFGEdgeTypeGotoBackEdge.h"
-#include "CFGEdgeTypeReturn.h"
+#include "controlflowgraph/CFGEdgeTypeFallthrough.h"
+#include "controlflowgraph/CFGEdgeTypeFunctionCall.h"
+#include "controlflowgraph/CFGEdgeTypeGotoBackEdge.h"
+#include "controlflowgraph/CFGEdgeTypeReturn.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
 
 /// Property map typedef which allows us to get at the function pointer stored at
@@ -592,96 +592,8 @@ long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	return i;
 }
 
-void Function::Print()
+void Function::PrintControlFlowGraph()
 {
-#if 0
-	T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
-	
-	// Define a filtered view of this function's CFG, which hides the back-edges
-	// so that we can produce a topological sort.
-	back_edge_filter_predicate the_edge_filter(edge_type_property_map);
-
-	vertex_filter_predicate the_vertex_filter(vpm, this);
-	typedef boost::filtered_graph <T_CFG, back_edge_filter_predicate, vertex_filter_predicate> T_FUNCTION_CFG;
-	T_FUNCTION_CFG graph_of_this_function(*m_cfg, the_edge_filter, the_vertex_filter);
-	boost::graph_traits< T_FUNCTION_CFG >::out_edge_iterator out_edge_begin, out_edge_end;
-	
-	typedef std::vector< T_CFG_VERTEX_DESC > T_SORTED_CFG_VERTEX_CONTAINER;
-	T_SORTED_CFG_VERTEX_CONTAINER topologically_sorted_vertices;
-	
-	// Do a topological sort of this function's control-flow graph, putting the results into topologically_sorted_vertices.
-	boost::topological_sort(graph_of_this_function, std::back_inserter(topologically_sorted_vertices));
-	
-	// Print the function info.
-	std::cout << "Function Definition: " << m_function_id << std::endl;
-	
-		// Print the function identifier.
-	std::cout << m_function_id << "()" << std::endl;
-	
-	// Print the function's blocks.
-	IndentLevelTracker indent_tracker;
-	for(T_SORTED_CFG_VERTEX_CONTAINER::reverse_iterator rit = topologically_sorted_vertices.rbegin();
-		rit != topologically_sorted_vertices.rend();
-		rit++)
-	{
-		if(graph_of_this_function[*rit].m_statement != NULL)
-		{
-			// Get the current indentation level.
-			long current_indent_level = indent_tracker.GetIndentLevel();
-			
-			// Print the block.
-			indent(current_indent_level);
-			std::cout << graph_of_this_function[*rit].m_statement->GetIdentifierCFG() << std::endl;
-			
-			// Get the out-degree of the node we just printed.
-			long this_out_degree = boost::out_degree(*rit, graph_of_this_function);
-			
-			if(this_out_degree > 1)
-			{
-				// This node splits the incoming control flow into two or more branches.
-				// Add another level of indentation for each branch.
-				long num_branches = 0;
-				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(*rit, graph_of_this_function);
-				for(; out_edge_begin != out_edge_end; ++out_edge_begin)
-				{
-					T_CFG_VERTEX_DESC next_vertex_desc = boost::target(*out_edge_begin, graph_of_this_function);
-					if(boost::in_degree(next_vertex_desc, graph_of_this_function) == 1)
-					{
-						// This branch hasn't ended, so push another indent-level onto the stack.
-						num_branches++;
-					}
-
-				}
-				indent_tracker.FoundBranchStatement(num_branches);			
-			}
-			else if(this_out_degree == 0)
-			{
-				// This is either the EXIT vertex or a does-not-return vertex.
-				// Regardless, it terminates this branch, so pop the indentation
-				// stack.
-				indent_tracker.BranchEnded();
-			}
-			else
-			{
-				// Out degree is == 1.  If the next vertex has an in_degree > 1,
-				// that means that this branch of the CFG ends at this vertex, so
-				// we'll pop an entry off the indent-level stack.
-				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(*rit, graph_of_this_function);
-				T_CFG_VERTEX_DESC next_vertex_desc = boost::target(*out_edge_begin, graph_of_this_function);
-				if(boost::in_degree(next_vertex_desc, graph_of_this_function) > 1)
-				{
-					// This branch has ended.
-					indent_tracker.BranchEnded();
-				}
-			}
-		}
-		else
-		{
-			std::cout << "INFO: (*m_cfg)[" << *rit << "].m_block == NULL" << std::endl;
-		}
-	}
-#endif
 	long current_indent_level = 0;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 	//boost::vector_property_map<boost::default_color_type> color_map;
