@@ -29,7 +29,7 @@ public:
 	
 	virtual std::string GetStatementTextDOT() const;
 	
-	virtual std::string GetIdentifierCFG() const { return "ENTRY"; };
+	virtual std::string GetIdentifierCFG() const { return "EXIT"; };
 	
 private:
 

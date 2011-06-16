@@ -26,7 +26,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
 
@@ -35,6 +34,8 @@
 #include "Function.h"
 #include "SuccessorTypes.h"
 #include "Statement.h"
+#include "If.h"
+#include "Switch.h"
 #include "FunctionCallUnresolved.h"
 #include "FunctionCallResolved.h"
 
@@ -42,6 +43,7 @@
 #include "CFGEdgeTypeFunctionCall.h"
 #include "CFGEdgeTypeGotoBackEdge.h"
 #include "CFGEdgeTypeReturn.h"
+#include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
 
 /// Property map typedef which allows us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
@@ -224,6 +226,19 @@ void Function::LinkIntoGraph()
 	}
 }
 
+
+void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
+{
+	T_CFG_OUT_EDGE_ITERATOR ei, eend;
+	
+	boost::tie(ei, eend) = boost::out_edges(vdesc, cfg);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*(cfg[*ei].m_edge_type)).name() << std::endl;
+	}
+}
+
+
 void Function::Link(const std::map< std::string, Function* > &function_map,
 		std::vector< FunctionCall* > *unresolved_function_calls)
 {
@@ -263,7 +278,7 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				
 				// Now add the appropriate CFG edges.
 				// The FunctionCall->Function->entrypoint edge.
-				CFGEdgeTypeFunctionCall *call_edge = new CFGEdgeTypeFunctionCall(fcr);
+				CFGEdgeTypeFunctionCall *call_edge_type = new CFGEdgeTypeFunctionCall(fcr);
 				T_CFG_EDGE_DESC new_edge_desc;
 				bool ok;
 				
@@ -272,12 +287,10 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				{
 					// Edge was added OK, let's connect the edge properties.
 					std::cerr << "INFO: Adding FunctionCall edge from " 
-						<< GetIdentifier() << " to "
+						<< GetIdentifier() << " [" << *fcr->GetLocation() << "] to "
 						<< (*m_cfg)[it->second->GetEntryVertexDescriptor()].m_containing_function->GetIdentifier()
 						<< std::endl;
-					(*m_cfg)[new_edge_desc].m_edge_type = call_edge;
-					
-					/// @todo Add the return edge.
+					(*m_cfg)[new_edge_desc].m_edge_type = call_edge_type;
 				}
 				else
 				{
@@ -290,14 +303,16 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				// the node in the CFG which is after the FunctionCall.  There is
 				// only ever one normal (i.e. fallthrough) edge from the FunctionCall
 				// to the next statement in its containing function.
-				CFGEdgeTypeReturn *return_edge = new CFGEdgeTypeReturn(fcr);
+				CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
 				T_CFG_EDGE_DESC function_call_out_edge;
 				
 				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
+				PrintOutEdgeTypes(*vit, *m_cfg);
 				if(!ok)
 				{
 					// Couldn't find the return.
 					std::cerr << "ERROR: COULDN'T FIND RETURN" << std::endl;
+					
 				}
 				
 				boost::tie(new_edge_desc, ok) = boost::add_edge(it->second->GetExitVertexDescriptor(),
@@ -306,9 +321,11 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				if(ok)
 				{
 					// Return edge was added OK.  Connect the edge's properties.
-					(*m_cfg)[new_edge_desc].m_edge_type = return_edge;
+					(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
 					
 					/// @todo Change type of FunctionCall's out edge?
+					delete (*m_cfg)[function_call_out_edge].m_edge_type;
+					(*m_cfg)[function_call_out_edge].m_edge_type = new CFGEdgeTypeFunctionCallBypass();
 				}
 				else
 				{
@@ -534,8 +551,17 @@ private:
 	std::stack< long > indent_level;
 };
 
+
+struct VertexInfo
+{
+	T_CFG_VERTEX_DESC m_v;
+	boost::graph_traits< T_CFG >::out_edge_iterator m_ei;
+	boost::graph_traits< T_CFG >::out_edge_iterator m_eend;
+} vertex_info;
+
 void Function::Print()
 {
+#if 0
 	T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 	
@@ -622,6 +648,107 @@ void Function::Print()
 			std::cout << "INFO: (*m_cfg)[" << *rit << "].m_block == NULL" << std::endl;
 		}
 	}
+#endif
+	long current_indent_level = 0;
+	typedef boost::color_traits<boost::default_color_type> T_COLOR;
+	//boost::vector_property_map<boost::default_color_type> color_map;
+	typedef std::map< T_CFG_VERTEX_DESC,  boost::default_color_type > T_COLOR_MAP;
+	T_COLOR_MAP color_map;
+	T_CFG_VERTEX_DESC v;
+	boost::graph_traits< T_CFG >::out_edge_iterator out_edge_begin, out_edge_end;
+
+	std::vector<VertexInfo> dfs_stack;
+	
+	v = m_first_statement;
+	
+	// Mark this vertex as explored.
+	color_map[v] = T_COLOR::gray();
+	
+	// Get iterators to the out edges.
+	boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
+	
+	// Push the first vertex onto the stack and we're ready to go.
+	vertex_info.m_v = v;
+	vertex_info.m_ei = out_edge_begin;
+	vertex_info.m_eend = out_edge_end;
+	dfs_stack.push_back(vertex_info);
+	
+	while(!dfs_stack.empty())
+	{
+		// Pop the context off the top of the stack.
+		v = dfs_stack.back().m_v;
+		out_edge_begin = dfs_stack.back().m_ei;
+		out_edge_end = dfs_stack.back().m_eend;
+		dfs_stack.pop_back();
+		
+		// Now iterate over the out_edges.
+		while(out_edge_begin != out_edge_end)
+		{
+			T_CFG_VERTEX_DESC target_v;
+			
+			target_v = boost::target(*out_edge_begin, *m_cfg);
+			T_COLOR_MAP::iterator cmi;
+			boost::default_color_type target_v_color;
+			cmi = color_map.find(target_v);
+			if(cmi == color_map.end())
+			{
+				// Wasn't in the map already, add it with the default color (white).
+				color_map[target_v] = T_COLOR::white();
+				target_v_color = T_COLOR::white();
+			}
+			else
+			{
+				target_v_color = cmi->second;
+			}
+			if(target_v_color == T_COLOR::white())
+			{
+				// Unexplored edge.
+				
+				indent(current_indent_level);
+				std::cout << (*m_cfg)[target_v].m_statement->GetIdentifierCFG() << std::endl;
+				Statement *p = (*m_cfg)[target_v].m_statement;
+				if((dynamic_cast<If*>(p) != NULL) || (dynamic_cast<Switch*>(p) != NULL))
+				{
+					current_indent_level++;
+				}
+				
+				++out_edge_begin;
+				vertex_info.m_v = v;
+				vertex_info.m_ei = out_edge_begin;
+				vertex_info.m_eend = out_edge_end;
+				dfs_stack.push_back(vertex_info);
+				
+				v = target_v;
+				color_map[v] = T_COLOR::gray();
+
+				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
+				if((v == m_last_statement) ||
+				((*m_cfg)[v].m_containing_function != this))
+				{
+				 out_edge_begin = out_edge_end;
+				 std::cout << "INFO: Found last statement" << std::endl;
+				 //push_back();
+				}		
+			}
+			else if(target_v_color == T_COLOR::gray())
+			{
+				// A back edge, skip it.
+				std::cout << "INFO: Found back edge" << std::endl;
+				++out_edge_begin;
+			}
+			else
+			{
+				// A forward or cross edge.
+				std::cout << "INFO: Found fwd/cross statement" << std::endl;
+				++out_edge_begin;
+			}
+		}
+		
+		// Finish the vertex.
+
+		// Visited, so mark the vertex black.
+		color_map[v] = T_COLOR::black();
+	}
 }
 
 
@@ -690,7 +817,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 
 				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, *m_cfg);
 				// Since this edge is within the block, it is just a fallthrough.
-				(*m_cfg)[eid].m_edge_type = CFGEdgeTypeFallthrough::Factory();
+				(*m_cfg)[eid].m_edge_type = new CFGEdgeTypeFallthrough();
 			}
 			else
 			{
