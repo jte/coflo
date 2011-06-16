@@ -554,10 +554,43 @@ private:
 
 struct VertexInfo
 {
+	/**
+	 * Set the VertexInfo's members to the given values.
+     */
+	void Set(T_CFG_VERTEX_DESC v,
+		T_CFG_OUT_EDGE_ITERATOR ei,
+		T_CFG_OUT_EDGE_ITERATOR eend,
+		long indent_level
+		)
+	{
+		m_v = v;
+		m_ei = ei;
+		m_eend = eend;
+		m_indent_level = indent_level;
+	};
+	
 	T_CFG_VERTEX_DESC m_v;
-	boost::graph_traits< T_CFG >::out_edge_iterator m_ei;
-	boost::graph_traits< T_CFG >::out_edge_iterator m_eend;
+	T_CFG_OUT_EDGE_ITERATOR m_ei;
+	T_CFG_OUT_EDGE_ITERATOR m_eend;
+	long m_indent_level;
 } vertex_info;
+
+long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+{
+	boost::graph_traits< T_CFG >::in_edge_iterator ieit, ieend;
+	
+	boost::tie(ieit, ieend) = boost::in_edges(v, cfg);
+	
+	long i = 0;
+	for(; ieit!=ieend; ++ieit)
+	{
+		if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(cfg[*ieit].m_edge_type) == NULL)
+		{
+			i++;
+		}
+	}
+	return i;
+}
 
 void Function::Print()
 {
@@ -668,9 +701,7 @@ void Function::Print()
 	boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
 	
 	// Push the first vertex onto the stack and we're ready to go.
-	vertex_info.m_v = v;
-	vertex_info.m_ei = out_edge_begin;
-	vertex_info.m_eend = out_edge_end;
+	vertex_info.Set(v, out_edge_begin, out_edge_end, current_indent_level);
 	dfs_stack.push_back(vertex_info);
 	
 	while(!dfs_stack.empty())
@@ -679,16 +710,31 @@ void Function::Print()
 		v = dfs_stack.back().m_v;
 		out_edge_begin = dfs_stack.back().m_ei;
 		out_edge_end = dfs_stack.back().m_eend;
+		current_indent_level = dfs_stack.back().m_indent_level;
 		dfs_stack.pop_back();
+
+		//std::cout << "INFO: Out edge types:" << std::endl;
+		//PrintOutEdgeTypes(v, *m_cfg);
 		
 		// Now iterate over the out_edges.
 		while(out_edge_begin != out_edge_end)
 		{
 			T_CFG_VERTEX_DESC target_v;
-			
-			target_v = boost::target(*out_edge_begin, *m_cfg);
-			T_COLOR_MAP::iterator cmi;
 			boost::default_color_type target_v_color;
+		
+			// Filter out any edges that we want to pretend aren't even part of the
+			// graph we're looking at.
+			if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>((*m_cfg)[*out_edge_begin].m_edge_type) != NULL)
+			{
+				++out_edge_begin;
+				continue;
+			}
+			
+			// Get the target vertex of the current edge.
+			target_v = boost::target(*out_edge_begin, *m_cfg);
+
+			// Get the target vertex's color.
+			T_COLOR_MAP::iterator cmi;
 			cmi = color_map.find(target_v);
 			if(cmi == color_map.end())
 			{
@@ -700,46 +746,65 @@ void Function::Print()
 			{
 				target_v_color = cmi->second;
 			}
+			
 			if(target_v_color == T_COLOR::white())
 			{
-				// Unexplored edge.
+				// This is a tree edge.
 				
+				// Indent and print the statement.
 				indent(current_indent_level);
-				std::cout << (*m_cfg)[target_v].m_statement->GetIdentifierCFG() << std::endl;
+				std::cout << (*m_cfg)[target_v].m_statement->GetIdentifierCFG()
+					<< " <"
+					<< *(*m_cfg)[target_v].m_statement->GetLocation()
+					<< "> FROM:" << (*m_cfg)[boost::source(*out_edge_begin, *m_cfg)].m_statement->GetIdentifierCFG()
+					<< std::endl;
+				
+				// If the target node results in a branch of the CFG, 
 				Statement *p = (*m_cfg)[target_v].m_statement;
 				if((dynamic_cast<If*>(p) != NULL) || (dynamic_cast<Switch*>(p) != NULL))
 				{
 					current_indent_level++;
 				}
 				
+				// Go to the next out-edge.
 				++out_edge_begin;
-				vertex_info.m_v = v;
-				vertex_info.m_ei = out_edge_begin;
-				vertex_info.m_eend = out_edge_end;
+				vertex_info.Set(v, out_edge_begin, out_edge_end, current_indent_level);
 				dfs_stack.push_back(vertex_info);
 				
 				v = target_v;
 				color_map[v] = T_COLOR::gray();
 
 				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
-				if((v == m_last_statement) ||
-				((*m_cfg)[v].m_containing_function != this))
+				if(v == m_last_statement)
 				{
-				 out_edge_begin = out_edge_end;
-				 std::cout << "INFO: Found last statement" << std::endl;
-				 //push_back();
-				}		
+					std::cout << "INFO: Found last statement of function" << std::endl;
+					out_edge_begin = out_edge_end;				
+				}
+				else if((*m_cfg)[v].m_containing_function != this)
+				{
+					//std::cout << "INFO: Moving to new function: " << (*m_cfg)[v].m_containing_function->GetIdentifier() << std::endl;
+					//push_back();
+				}
+				else if(filtered_in_degree(v, *m_cfg) > 1)
+				{
+					// This is a vertex where two or more flows converge.
+					// Make it terminate this sub-DFS, and push it on the
+					// stack for the next one.
+					out_edge_begin = out_edge_end;
+					// push_back().
+					std::cout << "INFO: Converging" << std::endl;
+				}
 			}
 			else if(target_v_color == T_COLOR::gray())
 			{
 				// A back edge, skip it.
-				std::cout << "INFO: Found back edge" << std::endl;
+				//std::cout << "INFO: Found back edge" << std::endl;
 				++out_edge_begin;
 			}
 			else
 			{
-				// A forward or cross edge.
-				std::cout << "INFO: Found fwd/cross statement" << std::endl;
+				// A forward or cross edge, skip it.
+				//std::cout << "INFO: Found fwd/cross statement" << std::endl;
 				++out_edge_begin;
 			}
 		}
