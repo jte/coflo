@@ -27,6 +27,11 @@ public:
 	CFGEdgeTypeFunctionCallBypass();
 	CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFunctionCallBypass& orig);
 	virtual ~CFGEdgeTypeFunctionCallBypass();
+	
+	virtual std::string GetDotLabel() const { return "CallBypass"; };
+	
+	virtual std::string GetDotSVGColor() const { return "blue"; };
+	
 private:
 
 };

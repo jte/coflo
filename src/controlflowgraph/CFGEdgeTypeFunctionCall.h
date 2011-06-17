@@ -22,7 +22,7 @@
 
 #include "CFGEdgeTypeBase.h"
 
-class FunctionCall;
+class FunctionCallResolved;
 
 /**
  * A function call edge.
@@ -32,14 +32,14 @@ class FunctionCall;
 class CFGEdgeTypeFunctionCall : public CFGEdgeTypeBase
 {
 public:
-	CFGEdgeTypeFunctionCall(FunctionCall *function_call);
+	CFGEdgeTypeFunctionCall(FunctionCallResolved *function_call);
 	CFGEdgeTypeFunctionCall(const CFGEdgeTypeFunctionCall& orig);
 	virtual ~CFGEdgeTypeFunctionCall();
 	
-private:
+//private:
 	/// The FunctionCall instance which resulted in this edge.
 	/// We need this to determine e.g. what parameters were passed.
-	FunctionCall *m_function_call;
+	FunctionCallResolved *m_function_call;
 };
 
 #endif	/* CFGEDGETYPEFUNCTIONCALL_H */

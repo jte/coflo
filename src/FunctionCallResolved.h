@@ -42,7 +42,7 @@ public:
 	
 	virtual std::string GetIdentifier() const;
 	
-private:
+//private:
 	
 	/// Pointer to the function we're calling.
 	Function *m_target_function;

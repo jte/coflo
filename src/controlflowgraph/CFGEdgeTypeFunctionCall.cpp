@@ -17,7 +17,7 @@
 
 #include "CFGEdgeTypeFunctionCall.h"
 
-CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(FunctionCall *function_call) : CFGEdgeTypeBase()
+CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(FunctionCallResolved *function_call) : CFGEdgeTypeBase()
 {
 	m_function_call = function_call;
 }
