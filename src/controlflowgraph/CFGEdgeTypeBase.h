@@ -20,6 +20,8 @@
 #ifndef CFGEDGETYPEBASE_H
 #define	CFGEDGETYPEBASE_H
 
+#include <string>
+
 /**
  * Base class for control flow graph edge types.
  */
@@ -39,6 +41,25 @@ public:
      * @return true if this is a back-edge, false if it isn't.
      */
 	virtual bool IsBackEdge() const { return false; };
+	
+	/**
+	 * Returns a string suitable for use as an edge label in a Dot graph.
+	 * 
+	 * Unless overridden in derived classes, returns an empty string.
+	 * 
+     * @return A string suitable for use as an edge label in a Dot graph.
+     */
+	virtual std::string GetDotLabel() const { return std::string(); };
+	
+	/**
+	 * Returns a string suitable for use in a Dot "color=" edge attribute.
+	 * 
+	 * The SVG color scheme is assumed.  Defaults to "black" if this function
+	 * is not overridden in derived classes.
+	 * 
+     * @return 
+     */
+	virtual std::string GetDotSVGColor() const { return "black"; };
 
 private:
 

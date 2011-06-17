@@ -63,7 +63,7 @@ public:
 	
 	std::string GetIdentifier() const { return m_function_id; };
 	
-	void PrintControlFlowGraph();
+	void PrintControlFlowGraph(FunctionCall *the_calling_function = NULL, long current_indent_level = 0);
 	
 	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
 	
@@ -97,11 +97,6 @@ public:
 	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_last_statement; };
 	
 private:
-	
-	/// Remove the back edges from the graph.
-	void RemoveBackEdges();
-
-
 	
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;

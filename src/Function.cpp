@@ -311,8 +311,7 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				if(!ok)
 				{
 					// Couldn't find the return.
-					std::cerr << "ERROR: COULDN'T FIND RETURN" << std::endl;
-					
+					std::cerr << "ERROR: COULDN'T FIND RETURN" << std::endl;			
 				}
 				
 				boost::tie(new_edge_desc, ok) = boost::add_edge(it->second->GetExitVertexDescriptor(),
@@ -323,7 +322,9 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 					// Return edge was added OK.  Connect the edge's properties.
 					(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
 					
-					/// @todo Change type of FunctionCall's out edge?
+					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
+					// For graphing just the function itself, we'll look at these edges and not the
+					// call/return edges.
 					delete (*m_cfg)[function_call_out_edge].m_edge_type;
 					(*m_cfg)[function_call_out_edge].m_edge_type = new CFGEdgeTypeFunctionCallBypass();
 				}
@@ -342,7 +343,7 @@ struct graph_property_writer
 {
 	void operator()(std::ostream& out) const
 	{
-		out << "graph [clusterrank=local]" << std::endl;
+		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
 	}
@@ -378,7 +379,7 @@ private:
 	Graph& g;
 };
 
-/// Class template of a vertex property writer, for use with write_graphviz().
+/// Class for a vertex property writer, for use with write_graphviz().
 class cfg_vertex_property_writer
 {
 public:
@@ -400,25 +401,21 @@ private:
 	T_CFG& g;
 };
 
-/// Class template of an edge property writer, for use with write_graphviz().
-template < typename Graph >
-class edge_property_writer
+/// Class for an edge property writer, for use with write_graphviz().
+class cfg_edge_property_writer
 {
 public:
-	edge_property_writer(Graph _g) : g(_g) {}
-	template <typename Edge>
-	void operator()(std::ostream& out, const Edge& e) 
+	cfg_edge_property_writer(T_CFG _g) : g(_g) {}
+	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e) 
 	{
-		// Only label the edge if we have some text to label it with.
-		if(g[e].m_edge_text.empty() == false)
-		{
-			out << "[label=\"";
-			out << g[e].m_edge_text;
-			out << "\"]";
-		}
-	}
+		// Set the edge attributes.
+		out << "[";
+		out << "label=\"" << g[e].m_edge_type->GetDotLabel() << "\"";
+		out << ", color=" << g[e].m_edge_type->GetDotSVGColor();
+		out << "]";
+	};
 private:
-	Graph& g;
+	T_CFG& g;
 };
 
 template < typename Edge, typename Graph >
@@ -443,26 +440,6 @@ private:
 	/// Pointer to the edge list we'll add any back edges to.
 	std::vector< Edge > *m_back_edge_list;
 };
-
-
-void Function::RemoveBackEdges()
-{
-	// List of back edges that we'll delete.
-	std::vector< T_BLOCK_GRAPH_EDGE_DESC > m_back_edge_list;
-	
-	// The instance of the DFS visitor which we'll pass to the DFS.
-	dfs_back_edge_collector_visitor<T_BLOCK_GRAPH_EDGE_DESC, T_BLOCK_GRAPH> vis(&m_back_edge_list);
-	
-	// Find all the back edges.
-	boost::depth_first_search(m_block_graph, boost::visitor(vis));
-	
-	// Remove the back edges.
-	BOOST_FOREACH(T_BLOCK_GRAPH_EDGE_DESC e, m_back_edge_list)
-	{
-		std::cerr << "Removing back edge." << std::endl;
-		boost::remove_edge(e, m_block_graph);
-	}
-}
 
 class dfs_back_edge_finder_visitor : public boost::default_dfs_visitor
 {
@@ -582,46 +559,63 @@ long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	boost::tie(ieit, ieend) = boost::in_edges(v, cfg);
 	
 	long i = 0;
+	bool saw_function_call_already = false;
 	for(; ieit!=ieend; ++ieit)
 	{
-		if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(cfg[*ieit].m_edge_type) == NULL)
+		if((dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(cfg[*ieit].m_edge_type) == NULL) &&
+		 (saw_function_call_already == false))
 		{
 			i++;
+		}
+		
+		if(dynamic_cast<CFGEdgeTypeFunctionCall*>(cfg[*ieit].m_edge_type) != NULL)
+		{
+			// Multiple incoming function calls only count as one for convergence purposes.
+			saw_function_call_already = true;
 		}
 	}
 	return i;
 }
 
-void Function::PrintControlFlowGraph()
+void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long current_indent_level)
 {
-	long current_indent_level = 0;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 	//boost::vector_property_map<boost::default_color_type> color_map;
 	typedef std::map< T_CFG_VERTEX_DESC,  boost::default_color_type > T_COLOR_MAP;
-	T_COLOR_MAP color_map;
-	T_CFG_VERTEX_DESC v;
-	boost::graph_traits< T_CFG >::out_edge_iterator out_edge_begin, out_edge_end;
+	//T_COLOR_MAP color_map;
+	T_CFG_VERTEX_DESC u;
+	boost::graph_traits< T_CFG >::out_edge_iterator ei, eend;
 
+	// The vertex "context" stack.
 	std::vector<VertexInfo> dfs_stack;
 	
-	v = m_first_statement;
+	// The call stack.
+	std::vector<FunctionCall*> call_stack;
+	std::vector< T_COLOR_MAP* > color_map_stack;
+	color_map_stack.push_back(new T_COLOR_MAP);
+	
+	// Start at the first known vertex of this Function's CFG.
+	u = m_first_statement;
 	
 	// Mark this vertex as explored.
-	color_map[v] = T_COLOR::gray();
+	(*color_map_stack.back())[u] = T_COLOR::gray();
+	
+	// Boost puts a discover_vertex() here.
+	// tbd???
 	
 	// Get iterators to the out edges.
-	boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
+	boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
 	
 	// Push the first vertex onto the stack and we're ready to go.
-	vertex_info.Set(v, out_edge_begin, out_edge_end, current_indent_level);
+	vertex_info.Set(u, ei, eend, current_indent_level);
 	dfs_stack.push_back(vertex_info);
 	
 	while(!dfs_stack.empty())
 	{
 		// Pop the context off the top of the stack.
-		v = dfs_stack.back().m_v;
-		out_edge_begin = dfs_stack.back().m_ei;
-		out_edge_end = dfs_stack.back().m_eend;
+		u = dfs_stack.back().m_v;
+		ei = dfs_stack.back().m_ei;
+		eend = dfs_stack.back().m_eend;
 		current_indent_level = dfs_stack.back().m_indent_level;
 		dfs_stack.pop_back();
 
@@ -629,102 +623,142 @@ void Function::PrintControlFlowGraph()
 		//PrintOutEdgeTypes(v, *m_cfg);
 		
 		// Now iterate over the out_edges.
-		while(out_edge_begin != out_edge_end)
+		while(ei != eend)
 		{
-			T_CFG_VERTEX_DESC target_v;
-			boost::default_color_type target_v_color;
+			T_CFG_VERTEX_DESC v;
+			boost::default_color_type v_color;
 		
 			// Filter out any edges that we want to pretend aren't even part of the
 			// graph we're looking at.
-			if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>((*m_cfg)[*out_edge_begin].m_edge_type) != NULL)
+			if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>((*m_cfg)[*ei].m_edge_type) != NULL)
 			{
-				++out_edge_begin;
+				// Skip FunctionCallBypasses entirely.
+				++ei;
+				continue;
+			}
+			
+			CFGEdgeTypeReturn *ret;
+			ret = dynamic_cast<CFGEdgeTypeReturn*>((*m_cfg)[*ei].m_edge_type);
+			if((ret != NULL) && (ret->m_function_call != call_stack.back()))
+			{
+				// This is a return edge, but for a different call than the one
+				// that brought us here.  Skip it.
+				++ei;
 				continue;
 			}
 			
 			// Get the target vertex of the current edge.
-			target_v = boost::target(*out_edge_begin, *m_cfg);
+			v = boost::target(*ei, *m_cfg);
+			
+			// Boost does a examine_edge of *ei here.
+			// tbd???
 
 			// Get the target vertex's color.
 			T_COLOR_MAP::iterator cmi;
-			cmi = color_map.find(target_v);
-			if(cmi == color_map.end())
+			cmi = (*color_map_stack.back()).find(v);
+			if(cmi == (*color_map_stack.back()).end())
 			{
 				// Wasn't in the map already, add it with the default color (white).
-				color_map[target_v] = T_COLOR::white();
-				target_v_color = T_COLOR::white();
+				(*color_map_stack.back())[v] = T_COLOR::white();
+				v_color = T_COLOR::white();
 			}
 			else
 			{
-				target_v_color = cmi->second;
+				// Vertex was in the map, get the color.
+				v_color = cmi->second;
 			}
 			
-			if(target_v_color == T_COLOR::white())
+			if(v_color == T_COLOR::white())
 			{
 				// This is a tree edge.
 				
-				// Indent and print the statement.
-				indent(current_indent_level);
-				std::cout << (*m_cfg)[target_v].m_statement->GetIdentifierCFG()
-					<< " <"
-					<< *(*m_cfg)[target_v].m_statement->GetLocation()
-					<< "> FROM:" << (*m_cfg)[boost::source(*out_edge_begin, *m_cfg)].m_statement->GetIdentifierCFG()
-					<< std::endl;
-				
-				// If the target node results in a branch of the CFG, 
-				Statement *p = (*m_cfg)[target_v].m_statement;
-				if((dynamic_cast<If*>(p) != NULL) || (dynamic_cast<Switch*>(p) != NULL))
+				// Boost does a tree_edge() visit of *ei here.
 				{
-					current_indent_level++;
+					CFGEdgeTypeBase *et;
+					CFGEdgeTypeFunctionCall *fc;
+					et = (*m_cfg)[*ei].m_edge_type;
+					fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(et);
+					// If this edge is a function call, indent another level.
+					if(fc != NULL)
+					{
+						current_indent_level++;
+						//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
+						call_stack.push_back(fc->m_function_call);
+						color_map_stack.push_back(new T_COLOR_MAP);
+					}
+					else if(ret != NULL)
+					{
+						//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
+						delete color_map_stack.back();
+						color_map_stack.pop_back();
+						call_stack.pop_back();
+						current_indent_level--;
+					}
+
+					// Indent and print the target statement.
+					indent(current_indent_level);
+					std::cout << (*m_cfg)[v].m_statement->GetIdentifierCFG()
+						<< " <"
+						<< *(*m_cfg)[v].m_statement->GetLocation()
+						<< "> FROM:" << (*m_cfg)[boost::source(*ei, *m_cfg)].m_statement->GetIdentifierCFG()
+						<< " OutDegree=" << boost::out_degree(v, *m_cfg)
+						<< std::endl;
+
+					// If the target node results in a branch of the CFG (including
+					// resolved function calls), indent the subsequent nodes another level.
+					Statement *p = (*m_cfg)[v].m_statement;
+					if((dynamic_cast<If*>(p) != NULL) ||
+					 (dynamic_cast<Switch*>(p) != NULL))
+					{
+						current_indent_level++;
+					}
 				}
 				
 				// Go to the next out-edge.
-				++out_edge_begin;
-				vertex_info.Set(v, out_edge_begin, out_edge_end, current_indent_level);
+				++ei;
+				vertex_info.Set(u, ei, eend, current_indent_level);
 				dfs_stack.push_back(vertex_info);
 				
-				v = target_v;
-				color_map[v] = T_COLOR::gray();
+				u = v;
+				(*color_map_stack.back())[u] = T_COLOR::gray();
+				
+				// Boost does a discover_vertex(u) here.
 
-				boost::tie(out_edge_begin, out_edge_end) = boost::out_edges(v, *m_cfg);
-				if(v == m_last_statement)
+				boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
+				if(u == m_last_statement)
 				{
 					std::cout << "INFO: Found last statement of function" << std::endl;
-					out_edge_begin = out_edge_end;				
+					ei = eend;				
 				}
-				else if((*m_cfg)[v].m_containing_function != this)
-				{
-					//std::cout << "INFO: Moving to new function: " << (*m_cfg)[v].m_containing_function->GetIdentifier() << std::endl;
-					//push_back();
-				}
-				else if(filtered_in_degree(v, *m_cfg) > 1)
+				else if(filtered_in_degree(u, *m_cfg) > 1)
 				{
 					// This is a vertex where two or more flows converge.
 					// Make it terminate this sub-DFS, and push it on the
 					// stack for the next one.
-					out_edge_begin = out_edge_end;
+					ei = eend;
 					// push_back().
 					std::cout << "INFO: Converging" << std::endl;
 				}
 			}
-			else if(target_v_color == T_COLOR::gray())
+			else if(v_color == T_COLOR::gray())
 			{
 				// A back edge, skip it.
 				//std::cout << "INFO: Found back edge" << std::endl;
-				++out_edge_begin;
+				++ei;
 			}
 			else
 			{
 				// A forward or cross edge, skip it.
 				//std::cout << "INFO: Found fwd/cross statement" << std::endl;
-				++out_edge_begin;
+				++ei;
 			}
 		}
-		
-		// Finish the vertex.
 
 		// Visited, so mark the vertex black.
-		color_map[v] = T_COLOR::black();
+		(*color_map_stack.back())[u] = T_COLOR::black();
+		
+		// Finish the vertex.
+		// tbd???
 	}
 }
 
@@ -747,7 +781,7 @@ void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::
 	
 	boost::write_graphviz(outfile, graph_of_this_function,
 						 cfg_vertex_property_writer(*m_cfg),
-						 boost::default_writer(), //edge_property_writer<T_CFG>(m_cfg),
+						 /*boost::default_writer(),*/ cfg_edge_property_writer(*m_cfg),
 						 graph_property_writer());
 	
 	outfile.close();
