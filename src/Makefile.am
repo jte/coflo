@@ -55,6 +55,5 @@ coflo_SOURCES = main.cpp \
 	TranslationUnit.cpp Translation.h
 	
 coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
-#coflo_LDFLAGS = $(BOOST_LDFLAGS) -Wl,--enable-auto-import
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
 coflo_LDADD = ./libexttools/libexttools.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
