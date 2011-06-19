@@ -22,6 +22,7 @@
 #include <cstdlib>
 
 #include <boost/foreach.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
@@ -44,6 +45,7 @@
 #include "controlflowgraph/CFGEdgeTypeGotoBackEdge.h"
 #include "controlflowgraph/CFGEdgeTypeReturn.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
+#include "ControlFlowGraph.h"
 
 /// Property map typedef which allows us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
@@ -389,7 +391,6 @@ public:
 	{
 		if(g[v].m_statement != NULL)
 		{
-			//std::cout << "TYPE:" << typeid(*g[v].m_statement).name() << std::endl;
 			out << g[v].m_statement->GetStatementTextDOT();
 		}
 		else
@@ -538,8 +539,9 @@ long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	return i;
 }
 
-void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long current_indent_level)
+void Function::PrintControlFlowGraph()
 {
+	long current_indent_level = 0;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 	typedef std::map< T_CFG_VERTEX_DESC,  boost::default_color_type > T_COLOR_MAP;
 	T_CFG_VERTEX_DESC u;
@@ -554,17 +556,20 @@ void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long cu
 	color_map_stack.push_back(new T_COLOR_MAP);
 	
 	// The converging node stack.
-	std::vector< T_CFG_VERTEX_DESC > converging_node_stack;
+	typedef boost::tuple < T_CFG_VERTEX_DESC, long > T_CONVERGENCE_NODE;
+	std::vector< T_CONVERGENCE_NODE > converging_node_stack;
 	
 	// Start at the first known vertex of this Function's CFG.
 	u = m_first_statement;
-	
-	converging_node_stack.push_back(u);
+
+	converging_node_stack.push_back(boost::tie(u, current_indent_level));
 	
 	while(!converging_node_stack.empty())
 	{
 		// Pop the next vertex off the converging node stack.
-		u = converging_node_stack.back();
+		u = converging_node_stack.back().get<0>();
+		current_indent_level = converging_node_stack.back().get<1>();
+		
 		converging_node_stack.pop_back();
 		
 		std::cout << "POPPED CONVERGING EDGE: " << (*m_cfg)[u].m_statement->GetIdentifierCFG() << std::endl;
@@ -711,7 +716,7 @@ void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long cu
 						ei = eend;
 						// push_back().
 						std::cout << "INFO: Converging" << std::endl;
-						converging_node_stack.push_back(u);
+						converging_node_stack.push_back(boost::tie(u, current_indent_level));
 					}
 				}
 				else if(v_color == T_COLOR::gray())
@@ -756,7 +761,7 @@ void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::
 	
 	boost::write_graphviz(outfile, graph_of_this_function,
 						 cfg_vertex_property_writer(*m_cfg),
-						 /*boost::default_writer(),*/ cfg_edge_property_writer(*m_cfg),
+						 cfg_edge_property_writer(*m_cfg),
 						 graph_property_writer());
 	
 	outfile.close();
