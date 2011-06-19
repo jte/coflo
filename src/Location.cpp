@@ -33,7 +33,14 @@ Location::Location(const std::string &location_string)
 		/// @todo Make this really determine the abs path.
 		m_absolute_file_path = m_passed_file_path;
 		m_line_number = atoi(capture_results[2].str().c_str());
-		m_column = 0;
+		if(capture_results[3].matched)
+		{
+			m_column = atoi(capture_results[2].str().c_str());
+		}
+		else
+		{
+			m_column = 0;
+		}
 	}
 	else
 	{
