@@ -35,11 +35,11 @@ Location::Location(const std::string &location_string)
 		m_line_number = atoi(capture_results[2].str().c_str());
 		if(capture_results[3].matched)
 		{
-			m_column = atoi(capture_results[2].str().c_str());
+			m_column = atoi(capture_results[3].str().c_str());
 		}
 		else
 		{
-			m_column = 0;
+			m_column = -1;
 		}
 	}
 	else
@@ -73,12 +73,16 @@ std::string Location::GetAbsoluteFilePath() const
 /**
  * Insertion operator for Location.
  * 
- * @param os
- * @param dt
+ * @param os  Stream to insert location info into.
+ * @param loc Reference to the Location object.
  * @return 
  */
 std::ostream& operator<<(std::ostream& os, const Location& loc)
 {
-    os << loc.m_passed_file_path << ":" << loc.m_line_number;
+    os << loc.m_passed_file_path << ":" << loc.m_line_number << ":";
+	if(loc.m_column != -1)
+	{
+		os << loc.m_column;
+	}
     return os;
 }

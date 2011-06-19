@@ -63,7 +63,7 @@ public:
 	
 	std::string GetIdentifier() const { return m_function_id; };
 	
-	void PrintControlFlowGraph(FunctionCall *the_calling_function = NULL, long current_indent_level = 0);
+	void PrintControlFlowGraph();
 	
 	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
 	
