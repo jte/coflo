@@ -490,45 +490,6 @@ void indent(long i)
 	};
 }
 
-class IndentLevelTracker
-{
-public:
-	IndentLevelTracker() {};
-	~IndentLevelTracker() {};
-	
-	void FoundBranchStatement(long num_nondegenerate_branches)
-	{
-		indent_level.push(num_nondegenerate_branches);
-	}
-	
-	void BranchEnded()
-	{
-		while(indent_level.size()>0)
-		{
-			indent_level.top()--;
-
-			if(indent_level.top() == 0)
-			{
-				// All branches eminating from the current branching statement
-				// have ended, pop it off the stack.
-				indent_level.pop();
-			}
-			else
-			{
-				// 
-				break;
-			}
-		}
-	};
-	
-	long GetIndentLevel() const { return indent_level.size(); };
-	
-private:
-	
-	std::stack< long > indent_level;
-};
-
-
 struct VertexInfo
 {
 	/**
@@ -580,9 +541,7 @@ long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long current_indent_level)
 {
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
-	//boost::vector_property_map<boost::default_color_type> color_map;
 	typedef std::map< T_CFG_VERTEX_DESC,  boost::default_color_type > T_COLOR_MAP;
-	//T_COLOR_MAP color_map;
 	T_CFG_VERTEX_DESC u;
 	boost::graph_traits< T_CFG >::out_edge_iterator ei, eend;
 
@@ -594,171 +553,187 @@ void Function::PrintControlFlowGraph(FunctionCall *the_calling_function, long cu
 	std::vector< T_COLOR_MAP* > color_map_stack;
 	color_map_stack.push_back(new T_COLOR_MAP);
 	
+	// The converging node stack.
+	std::vector< T_CFG_VERTEX_DESC > converging_node_stack;
+	
 	// Start at the first known vertex of this Function's CFG.
 	u = m_first_statement;
 	
-	// Mark this vertex as explored.
-	(*color_map_stack.back())[u] = T_COLOR::gray();
+	converging_node_stack.push_back(u);
 	
-	// Boost puts a discover_vertex() here.
-	// tbd???
-	
-	// Get iterators to the out edges.
-	boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
-	
-	// Push the first vertex onto the stack and we're ready to go.
-	vertex_info.Set(u, ei, eend, current_indent_level);
-	dfs_stack.push_back(vertex_info);
-	
-	while(!dfs_stack.empty())
+	while(!converging_node_stack.empty())
 	{
-		// Pop the context off the top of the stack.
-		u = dfs_stack.back().m_v;
-		ei = dfs_stack.back().m_ei;
-		eend = dfs_stack.back().m_eend;
-		current_indent_level = dfs_stack.back().m_indent_level;
-		dfs_stack.pop_back();
-
-		//std::cout << "INFO: Out edge types:" << std::endl;
-		//PrintOutEdgeTypes(v, *m_cfg);
+		// Pop the next vertex off the converging node stack.
+		u = converging_node_stack.back();
+		converging_node_stack.pop_back();
 		
-		// Now iterate over the out_edges.
-		while(ei != eend)
-		{
-			T_CFG_VERTEX_DESC v;
-			boost::default_color_type v_color;
+		std::cout << "POPPED CONVERGING EDGE: " << (*m_cfg)[u].m_statement->GetIdentifierCFG() << std::endl;
 		
-			// Filter out any edges that we want to pretend aren't even part of the
-			// graph we're looking at.
-			if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>((*m_cfg)[*ei].m_edge_type) != NULL)
-			{
-				// Skip FunctionCallBypasses entirely.
-				++ei;
-				continue;
-			}
-			
-			CFGEdgeTypeReturn *ret;
-			ret = dynamic_cast<CFGEdgeTypeReturn*>((*m_cfg)[*ei].m_edge_type);
-			if((ret != NULL) && (ret->m_function_call != call_stack.back()))
-			{
-				// This is a return edge, but for a different call than the one
-				// that brought us here.  Skip it.
-				++ei;
-				continue;
-			}
-			
-			// Get the target vertex of the current edge.
-			v = boost::target(*ei, *m_cfg);
-			
-			// Boost does a examine_edge of *ei here.
-			// tbd???
+		// Mark this vertex as explored.
+		(*color_map_stack.back())[u] = T_COLOR::gray();
 
-			// Get the target vertex's color.
-			T_COLOR_MAP::iterator cmi;
-			cmi = (*color_map_stack.back()).find(v);
-			if(cmi == (*color_map_stack.back()).end())
-			{
-				// Wasn't in the map already, add it with the default color (white).
-				(*color_map_stack.back())[v] = T_COLOR::white();
-				v_color = T_COLOR::white();
-			}
-			else
-			{
-				// Vertex was in the map, get the color.
-				v_color = cmi->second;
-			}
-			
-			if(v_color == T_COLOR::white())
-			{
-				// This is a tree edge.
-				
-				// Boost does a tree_edge() visit of *ei here.
-				{
-					CFGEdgeTypeBase *et;
-					CFGEdgeTypeFunctionCall *fc;
-					et = (*m_cfg)[*ei].m_edge_type;
-					fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(et);
-					// If this edge is a function call, indent another level.
-					if(fc != NULL)
-					{
-						current_indent_level++;
-						//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
-						call_stack.push_back(fc->m_function_call);
-						color_map_stack.push_back(new T_COLOR_MAP);
-					}
-					else if(ret != NULL)
-					{
-						//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
-						delete color_map_stack.back();
-						color_map_stack.pop_back();
-						call_stack.pop_back();
-						current_indent_level--;
-					}
-
-					// Indent and print the target statement.
-					indent(current_indent_level);
-					std::cout << (*m_cfg)[v].m_statement->GetIdentifierCFG()
-						<< " <"
-						<< *(*m_cfg)[v].m_statement->GetLocation()
-						<< "> FROM:" << (*m_cfg)[boost::source(*ei, *m_cfg)].m_statement->GetIdentifierCFG()
-						<< " OutDegree=" << boost::out_degree(v, *m_cfg)
-						<< std::endl;
-
-					// If the target node results in a branch of the CFG (including
-					// resolved function calls), indent the subsequent nodes another level.
-					Statement *p = (*m_cfg)[v].m_statement;
-					if((dynamic_cast<If*>(p) != NULL) ||
-					 (dynamic_cast<Switch*>(p) != NULL))
-					{
-						current_indent_level++;
-					}
-				}
-				
-				// Go to the next out-edge.
-				++ei;
-				vertex_info.Set(u, ei, eend, current_indent_level);
-				dfs_stack.push_back(vertex_info);
-				
-				u = v;
-				(*color_map_stack.back())[u] = T_COLOR::gray();
-				
-				// Boost does a discover_vertex(u) here.
-
-				boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
-				if(u == m_last_statement)
-				{
-					std::cout << "INFO: Found last statement of function" << std::endl;
-					ei = eend;				
-				}
-				else if(filtered_in_degree(u, *m_cfg) > 1)
-				{
-					// This is a vertex where two or more flows converge.
-					// Make it terminate this sub-DFS, and push it on the
-					// stack for the next one.
-					ei = eend;
-					// push_back().
-					std::cout << "INFO: Converging" << std::endl;
-				}
-			}
-			else if(v_color == T_COLOR::gray())
-			{
-				// A back edge, skip it.
-				//std::cout << "INFO: Found back edge" << std::endl;
-				++ei;
-			}
-			else
-			{
-				// A forward or cross edge, skip it.
-				//std::cout << "INFO: Found fwd/cross statement" << std::endl;
-				++ei;
-			}
-		}
-
-		// Visited, so mark the vertex black.
-		(*color_map_stack.back())[u] = T_COLOR::black();
-		
-		// Finish the vertex.
+		// Boost puts a discover_vertex() here.
 		// tbd???
+
+		// Get iterators to the out edges.
+		boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
+
+		// Push the first vertex onto the stack and we're ready to go.
+		vertex_info.Set(u, ei, eend, current_indent_level);
+		dfs_stack.push_back(vertex_info);
+
+		while(!dfs_stack.empty())
+		{
+			// Pop the context off the top of the stack.
+			u = dfs_stack.back().m_v;
+			ei = dfs_stack.back().m_ei;
+			eend = dfs_stack.back().m_eend;
+			current_indent_level = dfs_stack.back().m_indent_level;
+			dfs_stack.pop_back();
+
+			//std::cout << "INFO: Out edge types:" << std::endl;
+			//PrintOutEdgeTypes(v, *m_cfg);
+
+			// Now iterate over the out_edges.
+			while(ei != eend)
+			{
+				T_CFG_VERTEX_DESC v;
+				boost::default_color_type v_color;
+
+				// Filter out any edges that we want to pretend aren't even part of the
+				// graph we're looking at.
+				if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>((*m_cfg)[*ei].m_edge_type) != NULL)
+				{
+					// Skip FunctionCallBypasses entirely.
+					++ei;
+					continue;
+				}
+
+				CFGEdgeTypeReturn *ret;
+				ret = dynamic_cast<CFGEdgeTypeReturn*>((*m_cfg)[*ei].m_edge_type);
+				if((ret != NULL) && (ret->m_function_call != call_stack.back()))
+				{
+					// This is a return edge, but for a different call than the one
+					// that brought us here.  Skip it.
+					++ei;
+					continue;
+				}
+
+				// Get the target vertex of the current edge.
+				v = boost::target(*ei, *m_cfg);
+
+				// Boost does a examine_edge of *ei here.
+				// tbd???
+
+				// Get the target vertex's color.
+				T_COLOR_MAP::iterator cmi;
+				cmi = (*color_map_stack.back()).find(v);
+				if(cmi == (*color_map_stack.back()).end())
+				{
+					// Wasn't in the map already, add it with the default color (white).
+					(*color_map_stack.back())[v] = T_COLOR::white();
+					v_color = T_COLOR::white();
+				}
+				else
+				{
+					// Vertex was in the map, get the color.
+					v_color = cmi->second;
+				}
+
+				if(v_color == T_COLOR::white())
+				{
+					// This is a tree edge.
+
+					// Boost does a tree_edge() visit of *ei here.
+					{
+						CFGEdgeTypeBase *et;
+						CFGEdgeTypeFunctionCall *fc;
+						et = (*m_cfg)[*ei].m_edge_type;
+						fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(et);
+						// If this edge is a function call, indent another level.
+						if(fc != NULL)
+						{
+							current_indent_level++;
+							//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
+							call_stack.push_back(fc->m_function_call);
+							color_map_stack.push_back(new T_COLOR_MAP);
+						}
+						else if(ret != NULL)
+						{
+							// This edge is a function return.
+							//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
+							delete color_map_stack.back();
+							color_map_stack.pop_back();
+							call_stack.pop_back();
+							current_indent_level--;
+						}
+
+						// Indent and print the target statement.
+						indent(current_indent_level);
+						std::cout << (*m_cfg)[v].m_statement->GetIdentifierCFG()
+							<< " <"
+							<< *(*m_cfg)[v].m_statement->GetLocation()
+							<< "> FROM:" << (*m_cfg)[boost::source(*ei, *m_cfg)].m_statement->GetIdentifierCFG()
+							<< " OutDegree=" << boost::out_degree(v, *m_cfg)
+							<< std::endl;
+
+						// If the target node results in a branch of the CFG (including
+						// resolved function calls), indent the subsequent nodes another level.
+						Statement *p = (*m_cfg)[v].m_statement;
+						if((dynamic_cast<If*>(p) != NULL) ||
+						 (dynamic_cast<Switch*>(p) != NULL))
+						{
+							current_indent_level++;
+						}
+					}
+
+					// Go to the next out-edge.
+					++ei;
+					vertex_info.Set(u, ei, eend, current_indent_level);
+					dfs_stack.push_back(vertex_info);
+
+					u = v;
+					(*color_map_stack.back())[u] = T_COLOR::gray();
+
+					// Boost does a discover_vertex(u) here.
+
+					boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
+					if(u == m_last_statement)
+					{
+						std::cout << "INFO: Found last statement of function" << std::endl;
+						ei = eend;				
+					}
+					else if(filtered_in_degree(u, *m_cfg) > 1)
+					{
+						// This is a vertex where two or more flows converge.
+						// Make it terminate this sub-DFS, and push it on the
+						// stack for the next one.
+						ei = eend;
+						// push_back().
+						std::cout << "INFO: Converging" << std::endl;
+						converging_node_stack.push_back(u);
+					}
+				}
+				else if(v_color == T_COLOR::gray())
+				{
+					// A back edge, skip it.
+					//std::cout << "INFO: Found back edge" << std::endl;
+					++ei;
+				}
+				else
+				{
+					// A forward or cross edge, skip it.
+					//std::cout << "INFO: Found fwd/cross statement" << std::endl;
+					++ei;
+				}
+			}
+
+			// Visited, so mark the vertex black.
+			(*color_map_stack.back())[u] = T_COLOR::black();
+
+			// Finish the vertex.
+			// tbd???
+		}
 	}
 }
 
