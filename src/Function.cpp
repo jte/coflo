@@ -34,11 +34,12 @@
 
 #include "Function.h"
 #include "SuccessorTypes.h"
-#include "Statement.h"
-#include "If.h"
-#include "Switch.h"
-#include "FunctionCallUnresolved.h"
-#include "FunctionCallResolved.h"
+
+#include "statements/Statement.h"
+#include "statements/If.h"
+#include "statements/Switch.h"
+#include "statements/FunctionCallUnresolved.h"
+#include "statements/FunctionCallResolved.h"
 
 #include "controlflowgraph/CFGEdgeTypeFallthrough.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCall.h"

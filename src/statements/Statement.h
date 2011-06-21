@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include "Location.h"
+#include "../Location.h"
 
 /**
  * Abstract base class for all statements in the control flow graph.
