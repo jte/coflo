@@ -27,7 +27,7 @@
 #include "TranslationUnit.h"
 #include "RuleReachability.h"
 #include "RulePrintFunctionCFG.h"
-#include "FunctionCall.h"
+#include "statements/FunctionCall.h"
 #include "Function.h"
 
 Program::Program() { }

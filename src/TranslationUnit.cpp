@@ -37,12 +37,13 @@
 
 #include "Location.h"
 #include "Block.h"
-#include "If.h"
 #include "Function.h"
-#include "FunctionCallUnresolved.h"
-#include "NoOp.h"
-#include "Switch.h"
-#include "TranslationUnit.h"
+
+#include "statements/If.h"
+#include "statements/FunctionCallUnresolved.h"
+#include "statements/NoOp.h"
+#include "statements/Switch.h"
+
 #include "libexttools/ToolCompiler.h"
 
 using namespace boost;

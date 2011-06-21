@@ -43,6 +43,7 @@ M_DECLARE_SUCCESSOR_SUBCLASS(Fallthru, false, false);
 M_DECLARE_SUCCESSOR_SUBCLASS(True, true, true);
 M_DECLARE_SUCCESSOR_SUBCLASS(False, true, true);
 M_DECLARE_SUCCESSOR_SUBCLASS(Undecorated, true, false);
+M_DECLARE_SUCCESSOR_SUBCLASS(NoReturn, false, true);
 //@]
 
 #endif	/* SUCCESSORTYPES_H */

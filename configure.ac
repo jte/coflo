@@ -60,5 +60,5 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile])
 AC_OUTPUT

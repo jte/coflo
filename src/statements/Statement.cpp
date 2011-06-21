@@ -18,7 +18,7 @@
 #include <string>
 
 #include "Statement.h"
-#include "Location.h"
+#include "../Location.h"
 
 Statement::Statement(const Location *location) 
 {

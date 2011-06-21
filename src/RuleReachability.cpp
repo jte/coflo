@@ -23,7 +23,7 @@
 #include "ControlFlowGraph.h"
 #include "Function.h"
 #include "RuleReachability.h"
-#include "Entry.h"
+#include "statements/Entry.h"
 
 RuleReachability::RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {

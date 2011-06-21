@@ -27,10 +27,10 @@
 
 #include "Location.h"
 #include "SuccessorTypes.h"
-#include "Statement.h"
-#include "NoOp.h"
-#include "Entry.h"
-#include "Exit.h"
+#include "statements/Statement.h"
+#include "statements/NoOp.h"
+#include "statements/Entry.h"
+#include "statements/Exit.h"
 
 using namespace boost;
 
@@ -84,7 +84,14 @@ void Block::AddSuccessors(std::string successors_string)
 	static const boost::regex is_undecorated("([[:digit:]]+)[[:space:]]*(.*)");
 
 	boost::cmatch match_results;
-	 
+	
+	if(successors_string.empty())
+	{
+		// There are no successors listed.  This means that this is a No-Return block.
+		// Add a NoReturn edge to the EXIT block.
+		m_successor_list.push_back(new SuccessorNoReturn(1));
+	}
+	
 	while(!successors_string.empty())
 	{
 		// Pick out the successor entries.
