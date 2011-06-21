@@ -15,21 +15,29 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Exit.h"
+/** @file */
 
-Exit::Exit(const Location *location) : PseudoStatement (location)
-{
-}
+#ifndef IF_H
+#define	IF_H
 
-Exit::Exit(const Exit& orig) : PseudoStatement(orig)
-{
-}
+#include "Statement.h"
 
-Exit::~Exit()
+class If : public Statement
 {
-}
+public:
+	If(Location *location);
+	If(const If& orig);
+	virtual ~If();
+	
+	virtual std::string GetStatementTextDOT() const { return "IF"; };
+	
+	virtual std::string GetIdentifierCFG() const { return "IF"; };
+	
+	virtual std::string GetShapeTextDOT() const { return "diamond"; };
+	
+private:
 
-std::string Exit::GetStatementTextDOT() const
-{
-	return "[label=\"EXIT\"]";
-}
+};
+
+#endif	/* IF_H */
+

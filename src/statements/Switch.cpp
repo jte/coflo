@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,21 +15,17 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Entry.h"
+#include "Switch.h"
 
-Entry::Entry(const Location *location) : PseudoStatement (location)
+Switch::Switch(Location *location) : Statement(location)
 {
 }
 
-Entry::Entry(const Entry& orig) : PseudoStatement(orig)
+Switch::Switch(const Switch& orig) : Statement(orig)
 {
 }
 
-Entry::~Entry()
+Switch::~Switch()
 {
 }
 
-std::string Entry::GetStatementTextDOT() const
-{
-	return "[label=\"ENTRY\"]";
-}

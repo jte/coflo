@@ -15,21 +15,21 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+#include "Entry.h"
 
-#include "NoOp.h"
-
-NoOp::NoOp(const Location *location) : PseudoStatement (location)
+Entry::Entry(const Location *location) : PseudoStatement (location)
 {
 }
 
-NoOp::NoOp(const NoOp& orig) : PseudoStatement(orig)
+Entry::Entry(const Entry& orig) : PseudoStatement(orig)
 {
 }
 
-NoOp::~ NoOp() { }
-
-std::string NoOp::GetStatementTextDOT() const
+Entry::~Entry()
 {
-	return "[label=\"NOOP\"]";
+}
+
+std::string Entry::GetStatementTextDOT() const
+{
+	return "ENTRY";
 }

@@ -15,25 +15,17 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IF_H
-#define	IF_H
+#include "If.h"
 
-#include "Statement.h"
-
-class If : public Statement
+If::If(Location *location) : Statement(location)
 {
-public:
-	If(Location *location);
-	If(const If& orig);
-	virtual ~If();
-	
-	virtual std::string GetStatementTextDOT() const;
-	
-	virtual std::string GetIdentifierCFG() const { return "IF"; };
-	
-private:
+}
 
-};
+If::If(const If& orig) : Statement(orig)
+{
+}
 
-#endif	/* IF_H */
+If::~ If() 
+{
+}
 

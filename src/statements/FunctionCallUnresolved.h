@@ -34,6 +34,13 @@ public:
      */
 	virtual std::string GetStatementTextDOT() const;
 	
+	/**
+	 * Draw this node with a red border to indicate that it hasn't been resolved.
+	 * 
+     * @return 
+     */
+	virtual std::string GetDotSVGColor() const { return "red"; };
+	
 	virtual std::string GetIdentifier() const { return m_identifier; };
 	
 private:

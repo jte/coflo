@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,21 +15,21 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "If.h"
+#include "Exit.h"
 
-If::If(Location *location) : Statement(location)
+Exit::Exit(const Location *location) : PseudoStatement (location)
 {
 }
 
-If::If(const If& orig) : Statement(orig)
+Exit::Exit(const Exit& orig) : PseudoStatement(orig)
 {
 }
 
-If::~ If() 
+Exit::~Exit()
 {
 }
 
-std::string If::GetStatementTextDOT() const
+std::string Exit::GetStatementTextDOT() const
 {
-	return "[label=\"IF\" shape=diamond]";
+	return "EXIT";
 }

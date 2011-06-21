@@ -121,7 +121,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// Check if it's a C++ file.
 	if(filename.extension() == ".cpp")
 	{
-		std::cout << "File is C++" << std::endl;
+		std::cerr << "File is C++" << std::endl;
 		file_is_cpp = true;
 	}
 	
@@ -131,6 +131,8 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// Construct the filename of the .cfg file gcc made for us.
 	// gcc puts this file in the directory it's running in.
 	gcc_cfg_lineno_blocks_filename = filename.filename().string();
+	
+	/// @todo The "013" in here is not guaranteed.
 	gcc_cfg_lineno_blocks_filename += ".013t.cfg";
 	
 	// Try to open the file whose name we were passed.
