@@ -391,7 +391,12 @@ public:
 	{
 		if(g[v].m_statement != NULL)
 		{
+			out << "[label=\"";
 			out << g[v].m_statement->GetStatementTextDOT();
+			out << "\\n" << *(g[v].m_statement->GetLocation()) << "\"";
+			out << ", color=" << g[v].m_statement->GetDotSVGColor();
+			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
+			out << "]";
 		}
 		else
 		{
@@ -674,6 +679,12 @@ void Function::PrintControlFlowGraph()
 						}
 
 						// Indent and print the target statement.
+
+						if(
+							(dynamic_cast<FunctionCall*>((*m_cfg)[v].m_statement) != NULL) ||
+							 (dynamic_cast<If*>((*m_cfg)[v].m_statement) != NULL) ||
+							 (dynamic_cast<Switch*>((*m_cfg)[v].m_statement) != NULL))
+						{
 						indent(current_indent_level);
 						std::cout << (*m_cfg)[v].m_statement->GetIdentifierCFG()
 							<< " <"
@@ -681,9 +692,9 @@ void Function::PrintControlFlowGraph()
 							<< "> FROM:" << (*m_cfg)[boost::source(*ei, *m_cfg)].m_statement->GetIdentifierCFG()
 							<< " OutDegree=" << boost::out_degree(v, *m_cfg)
 							<< std::endl;
-
-						// If the target node results in a branch of the CFG (including
-						// resolved function calls), indent the subsequent nodes another level.
+						}
+						// If the target node results in a branch of the CFG,
+						// indent the subsequent nodes another level.
 						Statement *p = (*m_cfg)[v].m_statement;
 						if((dynamic_cast<If*>(p) != NULL) ||
 						 (dynamic_cast<Switch*>(p) != NULL))

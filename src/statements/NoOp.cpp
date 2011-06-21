@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,25 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SWITCH_H
-#define	SWITCH_H
+/** @file */
 
-#include "Statement.h"
+#include "NoOp.h"
 
-class Switch : public Statement
+NoOp::NoOp(const Location *location) : PseudoStatement (location)
 {
-public:
-	Switch(Location *location);
-	Switch(const Switch& orig);
-	virtual ~Switch();
-	
-	virtual std::string GetStatementTextDOT() const;
-	
-	virtual std::string GetIdentifierCFG() const { return "SWITCH"; };
-	
-private:
+}
 
-};
+NoOp::NoOp(const NoOp& orig) : PseudoStatement(orig)
+{
+}
 
-#endif	/* SWITCH_H */
+NoOp::~ NoOp()
+{
+}
 
+std::string NoOp::GetStatementTextDOT() const
+{
+	return "UNKNOWN";
+}

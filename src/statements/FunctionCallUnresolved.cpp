@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -15,21 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Switch.h"
+#include "FunctionCallUnresolved.h"
 
-Switch::Switch(Location *location) : Statement(location)
+FunctionCallUnresolved::FunctionCallUnresolved(std::string identifier, Location *location) : FunctionCall(location)
+{
+	m_identifier = identifier;
+}
+
+FunctionCallUnresolved::FunctionCallUnresolved(const FunctionCallUnresolved& orig) : FunctionCall(orig)
+{
+	m_identifier = orig.m_identifier;
+}
+
+FunctionCallUnresolved::~FunctionCallUnresolved()
 {
 }
 
-Switch::Switch(const Switch& orig) : Statement(orig)
+std::string FunctionCallUnresolved::GetStatementTextDOT() const
 {
-}
-
-Switch::~Switch()
-{
-}
-
-std::string Switch::GetStatementTextDOT() const
-{
-	return "[label=\"SWITCH\" shape=diamond]";
+	return m_identifier+"()";
 }

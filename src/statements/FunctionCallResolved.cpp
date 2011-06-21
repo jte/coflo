@@ -38,7 +38,7 @@ FunctionCallResolved::~FunctionCallResolved()
 
 std::string FunctionCallResolved::GetStatementTextDOT() const
 {
-	return "[label=\""+m_target_function->GetIdentifier()+"()\"]";
+	return m_target_function->GetIdentifier()+"()";
 }
 
 std::string FunctionCallResolved::GetIdentifier() const

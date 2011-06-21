@@ -20,7 +20,6 @@
 
 #include <string>
 
-//class Location;
 #include "Location.h"
 
 /**
@@ -46,7 +45,19 @@ public:
      */
 	virtual std::string GetIdentifierCFG() const = 0;
 	
+	/**
+	 * Returns a string suitable for use in a Dot "color=" node border attribute.
+	 * 
+	 * The SVG color scheme is assumed.  Defaults to "black" if this function
+	 * is not overridden in derived classes.
+	 * 
+     * @return A DOT color for the node's border.
+     */
+	virtual std::string GetDotSVGColor() const { return "black"; };
+	
 	const Location* GetLocation() const { return m_location; };
+	
+	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
 	
 private:
 
