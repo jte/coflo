@@ -30,14 +30,6 @@ public:
 	CFGEdgeTypeGotoBackEdge(const CFGEdgeTypeGotoBackEdge& orig);
 	virtual ~CFGEdgeTypeGotoBackEdge();
 	
-	/**
-	 * Indicates if this is a back edge in the control flow graph, as would be
-	 * caused by a loop.
-	 * 
-     * @return true if this is a back-edge, false if it isn't.
-     */
-	virtual bool IsBackEdge() const { return true; };
-	
 private:
 
 };
