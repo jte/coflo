@@ -47,3 +47,6 @@ coflo_SOURCES = main.cpp \
 coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
 coflo_LDADD = ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+
+# Include additional automake fragments.
+include $(top_srcdir)/amlocal.am

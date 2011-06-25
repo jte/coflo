@@ -16,7 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make sure autotools pick up the M4 macros in the ./m4 directory.
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 --install
 
 # The subdirectories containing the source code and tests.
 SUBDIRS = src . test

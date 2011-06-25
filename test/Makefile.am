@@ -17,6 +17,25 @@
 
 ## Process this file with automake to produce Makefile.in.
 
+# Include additional automake fragments.
+include $(top_srcdir)/amlocal.am
+
+# Get s list of all the GCC's installed in the system.
+GCC_LIST := $(wildcard /usr/bin/*-*-*-gcc$(EXEEXT)) $(wildcard /usr/bin/*-*-*-gcc-*$(EXEEXT))
+# Strip off directory and any extension.
+#GCC_LIST_BASENAMES := $(basename $(notdir $(GCC_LIST)))
+#GCC_LIST_BASENAMES_2 := $(addprefix test_,$(GCC_LIST_BASENAMES))
+#GCC_TEST_SCRIPT_TARGETS := $(addsuffix .sh,$(GCC_LIST_BASENAMES_2))
+###GCC_TEST_SCRIPT_TARGETS := $(shell echo "$(GCC_LIST_BASENAMES)" | sed -r 's/([^ ]+)/test_\1\.sh/g')
+GCC_TEST_SCRIPT_TARGETS := test_i686-pc-cygwin-gcc-3.4.4.sh \
+    test_i686-pc-cygwin-gcc-4.3.4.sh \
+    test_i686-pc-cygwin-gcc-4.sh \
+    test_i686-pc-mingw32-gcc-4.5.2.sh \
+    test_i686-w64-mingw32-gcc-4.5.3.sh \
+    test_x86_64-w64-mingw32-gcc-4.5.3.sh
+
+$(info The list $(GCC_TEST_SCRIPT_TARGETS))
+
 # The C test file.
 C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c
 # The built C++ test files.
@@ -29,7 +48,7 @@ dist_check_SCRIPTS = test_template.sh
 
 # List of scripts that will be use during "make check" and are built.  Note that scripts are not
 # distributed by default.
-check_SCRIPTS = test_cpp1.sh test_gcc.sh test_i686-w64-mingw32-gcc.sh test_i686-pc-mingw32-gcc-4.5.2.sh
+check_SCRIPTS := test_cpp1.sh
 CLEANFILES += $(check_SCRIPTS)
 
 test_source_file_1.cpp: test_source_file_1.c
@@ -45,24 +64,16 @@ test_cpp1.sh: test_template.sh Makefile $(CPP_TEST_SOURCE)
 	    -e 's,[@]test_source[@],\"${CPP_TEST_SOURCE}\",g' \
 	> $@
 
-# Static pattern rule for generating test scripts for testing various compilers.
-# Try the i686-w64-mingw32-gcc compiler.
-test_gcc.sh test_i686-w64-mingw32-gcc.sh test_i686-pc-mingw32-gcc-4.5.2.sh: test_%.sh: test_template.sh Makefile
-	cat $(srcdir)/test_template.sh | sed -e 's,[@]gcc[@],$*,g' \
+# Static pattern rule for generating test scripts for testing coflo with all
+# gcc versions found on the build system.
+$(GCC_TEST_SCRIPT_TARGETS): test_%.sh: test_template.sh Makefile
+	cat $(srcdir)/test_template.sh | "$(SED)" -e 's,[@]gcc[@],$*,g' \
 	    -e 's,[@]test_source[@],\"${C_TEST_SOURCE}\",g' \
 	> $@
-# TODO This is test, trying to enumerate PATH paths to search for gcc's.
-#echo "${PATH}" | awk -v RS=: 1
-	(\
-	 IFS=:;\
-	 set -f;\
-	 printf "%s\n" "${PATH}" ;\
-	 )
-
 
 # Tests to run for "make check".
 #TESTS_ENVIRONMENT = export "TEST_CPPFLAGS=$(CPPFLAGS)" && export "TEST_CXXFLAGS=$(CXXFLAGS)" && $(SHELL) -x
-TESTS = $(check_SCRIPTS)
+TESTS = $(check_SCRIPTS) $(GCC_TEST_SCRIPT_TARGETS)
 TEST_EXTENSIONS = .sh
 
 SH_LOG_COMPILER = $(SHELL)

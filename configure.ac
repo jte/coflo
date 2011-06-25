@@ -40,6 +40,9 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
+# Some other tools we'll need.
+AC_PROG_SED
+
 # Look for Doxygen.
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(ON)
