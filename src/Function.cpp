@@ -306,7 +306,6 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				// the node in the CFG which is after the FunctionCall.  There is
 				// only ever one normal (i.e. fallthrough) edge from the FunctionCall
 				// to the next statement in its containing function.
-				CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
 				T_CFG_EDGE_DESC function_call_out_edge;
 				
 				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
@@ -314,7 +313,7 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				if(!ok)
 				{
 					// Couldn't find the return.
-					std::cerr << "ERROR: COULDN'T FIND RETURN" << std::endl;			
+					std::cerr << "ERROR: COULDN'T FIND OUT EDGE OF TYPE CFGEdgeTypeFallthrough" << std::endl;			
 				}
 				
 				boost::tie(new_edge_desc, ok) = boost::add_edge(it->second->GetExitVertexDescriptor(),
@@ -322,7 +321,8 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 					*m_cfg);
 				if(ok)
 				{
-					// Return edge was added OK.  Connect the edge's properties.
+					// Return edge was added OK.  Create and connect the edge's properties.
+					CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
 					(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
 					
 					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
@@ -437,8 +437,6 @@ public:
 	
 	void back_edge(Edge e, const Graph & g) const
 	{
-		std::cout << "Marking BackEdge" << std::endl;
-		
 		// Record this edge as a back edge.
 		m_back_edge_list->push_back(e);
 	}
@@ -456,8 +454,6 @@ public:
 	
 	void back_edge(T_CFG_EDGE_DESC e, const T_CFG &g) const
 	{
-		std::cout << "INFO: Found BackEdge, marking." << std::endl;
-		
 		m_back_edges.push_back(e);
 	}
 private:
@@ -905,8 +901,8 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	BOOST_FOREACH(T_CFG_EDGE_DESC e, back_edges)
 	{
 		// Change this edge type to a back edge.
-		delete (*m_cfg)[e].m_edge_type;
-		(*m_cfg)[e].m_edge_type = new CFGEdgeTypeGotoBackEdge();
+		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
+		/// @todo Remove this: (*m_cfg)[e].m_edge_type = new CFGEdgeTypeGotoBackEdge();
 	}
 	
 	return true;
