@@ -1,0 +1,43 @@
+# testsuite.at for CoFlo
+#
+# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+#
+# This file is part of CoFlo.
+#
+# CoFlo is free software: you can redistribute it and/or modify it under the
+# terms of version 3 of the GNU General Public License as published by the Free
+# Software Foundation.
+#
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+# A basic test suite for CoFlo.
+
+AT_INIT([[CoFlo Test Suite]])
+AT_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
+AT_COLOR_TESTS
+
+AT_TESTED([../src/coflo.exe])
+
+# Start a test category.
+AT_BANNER([[Compiler Compatibility Tests]])
+
+# Start a test group.
+AT_SETUP([[Using default GCC against C code]])
+
+AT_CHECK([${abs_top_builddir}/src/coflo.exe ${abs_top_srcdir}/test/test_source_file_1.c ${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main],
+	0,
+	ignore,
+	ignore)
+
+# End this test group.
+AT_CLEANUP
+
+# Include the compiler compatibility test script.
+# This is automatically generated at "make check" time, and tests CoFlo paired with
+# every instance of GCC we can find on the system.
+m4_include([generated_tests.at])
