@@ -93,7 +93,7 @@ generated_tests.at: Makefile
 	:; { echo "" && echo "# GENERATION COMPLETE."; } >> $@
 
 ###
-### testsuite.at isn't build, but it does include generated_tests.at,
+### testsuite.at isn't built, but it does include generated_tests.at,
 ### so we'll let make know about this dependency.
 ###
 $(srcdir)/testsuite.at: generated_tests.at
