@@ -25,6 +25,7 @@ coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
+	CFGDFSVisitor.cpp CFGDFSVisitor.h \
 	ControlFlowGraph.h \
 	controlflowgraph/CFGEdgeTypeBase.cpp controlflowgraph/CFGEdgeTypeBase.h \
 	controlflowgraph/CFGEdgeTypeFunctionCallBypass.cpp controlflowgraph/CFGEdgeTypeFunctionCallBypass.h \
@@ -34,6 +35,7 @@ coflo_SOURCES = main.cpp \
 	controlflowgraph/CFGEdgeTypeGotoBackEdge.cpp controlflowgraph/CFGEdgeTypeGotoBackEdge.h \
 	controlflowgraph/CFGEdgeTypeReturn.cpp controlflowgraph/CFGEdgeTypeReturn.h \
 	Function.cpp Function.h \
+	ImprovedDFSVisitorBase.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	RuleBase.cpp RuleBase.h \

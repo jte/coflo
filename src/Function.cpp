@@ -352,35 +352,6 @@ struct graph_property_writer
 	}
 };
 
-/// Class template of a vertex property writer, for use with write_graphviz().
-template < typename Graph >
-class vertex_property_writer
-{
-public:
-	vertex_property_writer(Graph _g) : g(_g) {}
-	template <typename Vertex>
-	void operator()(std::ostream& out, const Vertex& v) 
-	{
-		out << "[label=\"";
-		if(g[v].m_block != NULL)
-		{
-			out << g[v].m_block->GetBlockLabel();
-			
-			Block::T_STATEMENT_LIST_ITERATOR sit;
-			for(sit = g[v].m_block->begin(); sit != g[v].m_block->end(); sit++)
-			{
-				out << "\\n" << (*sit)->GetStatementTextDOT();
-			}
-		}
-		else
-		{
-			out << "UNKNOWN";
-		}
-		out << "\"]";
-	}
-private:
-	Graph& g;
-};
 
 /// Class for a vertex property writer, for use with write_graphviz().
 class cfg_vertex_property_writer
@@ -425,26 +396,6 @@ private:
 	T_CFG& g;
 };
 
-template < typename Edge, typename Graph >
-class dfs_back_edge_collector_visitor : public boost::default_dfs_visitor
-{
-public:
-	dfs_back_edge_collector_visitor(std::vector< Edge > *back_edge_list) : boost::default_dfs_visitor()
-	{ 
-		// Save the pointer to the back edge list to put the results in.
-		m_back_edge_list = back_edge_list;
-	};
-	
-	void back_edge(Edge e, const Graph & g) const
-	{
-		// Record this edge as a back edge.
-		m_back_edge_list->push_back(e);
-	}
-	
-private:
-	/// Pointer to the edge list we'll add any back edges to.
-	std::vector< Edge > *m_back_edge_list;
-};
 
 class dfs_back_edge_finder_visitor : public boost::default_dfs_visitor
 {
@@ -573,14 +524,16 @@ void Function::PrintControlFlowGraph()
 		current_indent_level = converging_node_stack.back().get<1>();
 		
 		converging_node_stack.pop_back();
-		
+		indent(current_indent_level);
 		std::cout << "POPPED CONVERGING EDGE: " << (*m_cfg)[u].m_statement->GetIdentifierCFG() << std::endl;
 		
 		// Mark this vertex as explored.
 		(*color_map_stack.back())[u] = T_COLOR::gray();
 
 		// Boost puts a discover_vertex() here.
-		// tbd???
+		{
+			
+		}
 
 		// Get iterators to the out edges.
 		boost::tie(ei, eend) = boost::out_edges(u, *m_cfg);
@@ -668,7 +621,7 @@ void Function::PrintControlFlowGraph()
 						else if(ret != NULL)
 						{
 							// This edge is a function return.
-							//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
+							// Pop the call off the call_stack and outdent a level.
 							delete color_map_stack.back();
 							color_map_stack.pop_back();
 							call_stack.pop_back();
@@ -696,6 +649,8 @@ void Function::PrintControlFlowGraph()
 						if((dynamic_cast<If*>(p) != NULL) ||
 						 (dynamic_cast<Switch*>(p) != NULL))
 						{
+							indent(current_indent_level);
+							std::cout << "{" << std::endl;
 							current_indent_level++;
 						}
 					}
@@ -719,11 +674,11 @@ void Function::PrintControlFlowGraph()
 					else if(filtered_in_degree(u, *m_cfg) > 1)
 					{
 						// This is a vertex where two or more flows converge.
-						// Make it terminate this sub-DFS, and push it on the
+						// Make it terminate this path of the DFS, and push it on the
 						// stack for the next one.
 						ei = eend;
-						// push_back().
-						std::cout << "INFO: Converging" << std::endl;
+						indent(current_indent_level);
+						std::cout << "}" << std::endl;
 						converging_node_stack.push_back(boost::tie(u, current_indent_level));
 					}
 				}
@@ -897,12 +852,11 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	// Find all the back edges.
 	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
 	
-	// Change their types.
+	// Mark them as back edges.
 	BOOST_FOREACH(T_CFG_EDGE_DESC e, back_edges)
 	{
 		// Change this edge type to a back edge.
 		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
-		/// @todo Remove this: (*m_cfg)[e].m_edge_type = new CFGEdgeTypeGotoBackEdge();
 	}
 	
 	return true;

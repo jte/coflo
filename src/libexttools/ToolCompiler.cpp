@@ -23,11 +23,14 @@
  * - Output <file>.c.013t.cfg:
  *		- 4.3.4: Always in working directory.
  *		- i686-w64-mingw32-gcc (GCC) 4.5.2: In same directory as <file>.s
+ * - Output <file>.c.012t.cfg:
+ *		- 4.5.2: In same directory as <file>.s (i.e. follows -o).
  * - Output <file>.s:
  *		- In working directory by default.
  *		- If "-o file.s", then relative to working directory.
  */
 
+#include <glob.h>
 #include <iostream>
 #include <fstream>
 

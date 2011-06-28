@@ -21,6 +21,7 @@
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <glob.h>
 
 
 // Include the necessary Boost libraries.
@@ -133,8 +134,50 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// gcc puts this file in the directory it's running in.
 	gcc_cfg_lineno_blocks_filename = filename.filename().string();
 	
-	/// @todo The "013" in here is not guaranteed.
-	gcc_cfg_lineno_blocks_filename += ".013t.cfg";
+	// The "*" has so far been observed to be either 012 or 013, depending on the version
+	// of gcc.
+	gcc_cfg_lineno_blocks_filename += ".*t.cfg";
+		
+	// Find the actual file name.	
+	{
+		// Buffer to store the globbing results.
+		glob_t globbuf;
+		int retval;
+		
+		retval = glob(gcc_cfg_lineno_blocks_filename.c_str(), GLOB_NOSORT, NULL, &globbuf);
+		switch(retval)
+		{
+			case 0:
+				// Found something.
+				if(globbuf.gl_pathc > 1)
+				{
+					// More than one match, that shouldn't be.
+					std::cerr << "ERROR: More than one match to file \""
+						<< gcc_cfg_lineno_blocks_filename
+						<< "\"" << std::endl;
+				}
+				// Otherwise everything is OK, get the real filename.
+				gcc_cfg_lineno_blocks_filename.assign(globbuf.gl_pathv[0]);
+				std::cerr << "INFO: Successfully matched \""
+					<< gcc_cfg_lineno_blocks_filename << "\" with \""
+					<< globbuf.gl_pathv[0] << "\"" << std::endl;
+				break;
+			case GLOB_NOMATCH:
+				std::cerr << "ERROR: No match to file \""
+						<< gcc_cfg_lineno_blocks_filename
+						<< "\"" << std::endl;
+				break;
+			case GLOB_NOSPACE:
+			case GLOB_ABORTED:
+			default:
+				std::cerr << "ERROR: glob() failed attempting to match \""
+						<< gcc_cfg_lineno_blocks_filename
+						<< "\"" << std::endl;
+				break;
+
+		}
+		globfree(&globbuf);
+	}
 	
 	// Try to open the file whose name we were passed.
 	std::ifstream input_file(gcc_cfg_lineno_blocks_filename.c_str(), std::ifstream::in);
