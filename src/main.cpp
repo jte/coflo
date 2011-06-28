@@ -20,6 +20,8 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+#include <boost/tokenizer.hpp>
+
 
 #include "Program.h"
 #include "libexttools/ToolCompiler.h"
@@ -27,6 +29,24 @@
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
+
+/**
+ * Additional command-line parser for the '@file' response file specification.
+ * 
+ * @param s
+ * @return 
+ */
+std::pair<std::string, std::string> at_option_parser(const std::string &s)
+{
+    if ('@' == s[0])
+	{
+        return std::make_pair(std::string("response-file"), s.substr(1));
+	}
+    else
+	{
+        return std::pair<std::string, std::string>();
+	}
+}
 
 
 /**
@@ -45,8 +65,9 @@ int main(int argc, char* argv[])
 	std::string the_dot;
 	std::string the_ctags;
 	
-	// Declare the supported options object.
-	po::options_description options("Options");
+	// Declare the objects that will describe the supported options.
+	// Declare general options.
+	po::options_description general_options("General Options");
 	// Declare preprocessing-related options.
 	po::options_description preproc_options("Preprocessing Options");
 	// Declare subprograms to use.
@@ -67,9 +88,10 @@ int main(int argc, char* argv[])
 	po::variables_map vm;
 	
 	// Add the command-line options.
-	options.add_options()
+	general_options.add_options()
     ("help", "Produce this help message.")
     ("version,v", "Print version string.")
+	("response-file", po::value<std::string>(), "Read command line options from file. Can also be specified with '@name'.")
 	("debug-parse", "Print debug info concerning the CFG parsing stage.")
 	("debug-link", "Print debug info concerning the CFG linking stage.")
 	("output-dir", po::value< std::string >(), "Put output in the given directory.")
@@ -92,17 +114,41 @@ int main(int argc, char* argv[])
 	("input-file", po::value< std::vector<std::string> >(), "input file")
 	;
 	positional_options.add("input-file", -1);
-	non_hidden_cmdline_options.add(options).add(preproc_options).add(subprogram_options).add(rule_options);
+	non_hidden_cmdline_options.add(general_options).add(preproc_options).add(subprogram_options).add(rule_options);
 	cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
 
 	// Parse the command line.
 	po::store(po::command_line_parser(argc, argv).
 		options(cmdline_options).
+		extra_parser(at_option_parser).
 		positional(positional_options).run(), vm);
-
-	/// \todo Add response file (@file) parsing, maybe parse_environment(), parse_config_file().
-	po::notify(vm);    
-
+	
+	// Parse any response files.
+	if (vm.count("response-file"))
+	{
+		 // Load the file and tokenize it
+		 std::ifstream ifs(vm["response-file"].as<std::string>().c_str());
+		 if (!ifs)
+		 {
+			 std::cout << "Could not open the response file\n";
+			 return 1;
+		 }
+		 // Read the whole file into a string
+		 std::stringstream ss;
+		 ss << ifs.rdbuf();
+		 // Split the file content
+		 boost::char_separator<char> sep(" \n\r");
+		 std::string ResponsefileContents( ss.str() );
+		 boost::tokenizer<boost::char_separator<char> > tok(ResponsefileContents, sep);
+		 std::vector<std::string> args;
+		 copy(tok.begin(), tok.end(), back_inserter(args));
+		 // Parse the file and store the options
+		 po::store(po::command_line_parser(args).options(cmdline_options).positional(positional_options).run(), vm);     
+	}
+	
+	// Call the notify() functions for any options.
+	po::notify(vm);
+	
 	// See if the user is asking for help.
 	if (vm.count("help")) 
 	{

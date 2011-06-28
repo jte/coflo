@@ -26,20 +26,20 @@
 
 #include "RuleDFSBase.h"
 
-class CFGDFSVisitor : public boost::default_dfs_visitor
+class OldCFGDFSVisitor : public boost::default_dfs_visitor
 {
 public:
 	typedef boost::on_discover_vertex event_filter;
-	CFGDFSVisitor(const T_CFG &cfg, RuleDFSBase *dfs_base)
+	OldCFGDFSVisitor(const T_CFG &cfg, RuleDFSBase *dfs_base)
 		: m_cfg(cfg)
 	{
 		m_dfs_base = dfs_base;
 	};
-	CFGDFSVisitor(const CFGDFSVisitor &other) : boost::default_dfs_visitor(other), m_cfg(other.m_cfg)
+	OldCFGDFSVisitor(const OldCFGDFSVisitor &other) : boost::default_dfs_visitor(other), m_cfg(other.m_cfg)
 	{
 		m_dfs_base = other.m_dfs_base;
 	};
-	virtual ~CFGDFSVisitor() {};
+	virtual ~OldCFGDFSVisitor() {};
 	
 	//void discover_vertex(T_CFG_VERTEX_DESC v, const T_CFG &cfg)	
 	void operator()(T_CFG_VERTEX_DESC v, const T_CFG &cfg) 
@@ -108,7 +108,7 @@ bool RuleDFSBase::TerminatorFunction(T_CFG_VERTEX_DESC v)
 bool RuleDFSBase::RunRule()
 {
 	// Create the visitor object.
-	CFGDFSVisitor v(m_cfg, this);
+	OldCFGDFSVisitor v(m_cfg, this);
 	
 	// Define a function object to terminate the search down a particular branch.
 	// We need to do this functor stuff because for some reason
