@@ -19,7 +19,7 @@
 ACLOCAL_AMFLAGS = -I m4 --install
 
 # The subdirectories containing the source code and tests.
-SUBDIRS = src . test
+SUBDIRS = src test
 
 # Include additional automake fragments.
 include $(top_srcdir)/amlocal.am

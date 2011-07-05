@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
 			 return 1;
 		 }
 		 // Read the whole file into a string
+		 /// @todo Possibly lock the file as FILE_SHARE_READ while doing this.
 		 std::stringstream ss;
 		 ss << ifs.rdbuf();
 		 // Split the file content

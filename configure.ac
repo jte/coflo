@@ -17,17 +17,24 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.68)
-AC_INIT(CoFlo, m4_esyscmd([echo "0.0" | tr -d '\n']), BUG-REPORT-ADDRESS,,[http://coflo.sourceforge.net/])
+AC_PREREQ([2.68])
+AC_INIT([[CoFlo]], m4_esyscmd([echo "0.0" | tr -d '\n']), [[BUG-REPORT-ADDRESS]],,[[http://coflo.sourceforge.net/]])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
-AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
+AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
 AC_CONFIG_AUX_DIR([./build-aux])
+AC_REQUIRE_AUX_FILE([install-sh])
+AC_REQUIRE_AUX_FILE([missing])
+AC_REQUIRE_AUX_FILE([depcomp])
+# Don't think I need config.guess or config.sub, not using AC_CANONICAL_BUILD/HOST/TARGET
 
 # Additional Autoconf macros are in ./m4.
 AC_CONFIG_MACRO_DIR([./m4])
+
+# Autoconf-supported test directory.
+AC_CONFIG_TESTDIR([./test])
 
 AM_INIT_AUTOMAKE([check-news
     color-tests
@@ -62,6 +69,9 @@ AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
+
+# Check for come functions we need.
+AC_CHECK_FUNC(glob)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile])
 AC_OUTPUT
