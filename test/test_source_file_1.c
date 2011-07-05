@@ -97,15 +97,15 @@ int main()
 			retval = function_y();
 			retval = function_z();
 		}
-                
-                if(g_external_variable)
-                {
-                    do_this();
-                }
-                else
-                {
-                    do_that();
-                }
+
+		if(g_external_variable)
+		{
+			do_this();
+		}
+		else
+		{
+			do_that();
+		}
 	}
 	
 Label1:

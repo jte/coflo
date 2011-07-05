@@ -37,20 +37,54 @@ public:
 	 *	- terminate_branch = Stop traversing this branch of the tree.
 	 *  - terminate_search = Stop the traversal entirely.
 	 */
-	enum return_value_t {ok, terminate_branch, terminate_search};
+	enum return_value_t {ok, terminate_branch, terminate_search, push_color_context,
+		pop_color_context};
 	
 	return_value_t initialize_vertex(Vertex u) { return ok; };
 	return_value_t start_vertex(Vertex u) { return ok; };
+	
+	return_value_t start_subgraph_vertex(Vertex u) { return ok; };
+	
+	/**
+	 * Called when Vertex u is seen for the first time.
+	 * 
+     * @param u
+     * @return 
+     */
 	return_value_t discover_vertex(Vertex u) { return ok; };
+	
+	/**
+	 * Invoked on every out-edge of each vertex after that vertex has been discovered.
+	 * 
+     * @param u
+     * @return 
+     */
 	return_value_t examine_edge(Edge u) { return ok; };
+	
+	/**
+	 * The Edge u has been determined to be part of the DFS tree.
+	 * 
+     * @param u
+     * @return 
+     */
 	return_value_t tree_edge(Edge u) { return ok; };
+	
 	return_value_t back_edge(Edge u) { return ok; };
 	return_value_t forward_or_cross_edge(Edge u) { return ok; };
+	
+	/**
+	 * Called on each Vertex u only after it has been called on any child vertices
+	 * of u in its DFS tree.
+	 * 
+     * @param u
+     * @return 
+     */
 	return_value_t finish_vertex(Vertex u) { return ok; };
 	
 	
-private:
+protected:
 	
+	/// The Graph we'll be visiting.
 	Graph &m_graph;
 };
 
