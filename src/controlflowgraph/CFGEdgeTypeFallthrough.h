@@ -30,6 +30,8 @@ public:
 	CFGEdgeTypeFallthrough();
 	CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig);
 	virtual ~CFGEdgeTypeFallthrough();
+	
+	virtual std::string GetDotLabel() const { return "Fallthrough"; };
 
 private:
 	

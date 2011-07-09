@@ -28,6 +28,8 @@ public:
 	CFGEdgeTypeReturn(FunctionCall *function_call);
 	CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig);
 	virtual ~CFGEdgeTypeReturn();
+	
+	virtual std::string GetDotLabel() const { return "Return"; };
 
 //private:
 	

@@ -30,14 +30,14 @@ public:
 	CFGDFSVisitor(const CFGDFSVisitor& orig);
 	virtual ~CFGDFSVisitor();
 	
-	return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
-	return_value_t start_vertex(T_CFG_VERTEX_DESC u);
-	return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	return_value_t examine_edge(T_CFG_EDGE_DESC u);
-	return_value_t tree_edge(T_CFG_EDGE_DESC u);
-	return_value_t back_edge(T_CFG_EDGE_DESC u);
-	return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
-	return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
+	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 private:
 

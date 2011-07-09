@@ -31,42 +31,42 @@ CFGDFSVisitor::~CFGDFSVisitor()
 {
 }
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::initialize_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t CFGDFSVisitor::initialize_vertex(T_CFG_VERTEX_DESC u)
 {
-	return ok; 
+	return vertex_return_value_t::ok; 
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::start_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t CFGDFSVisitor::start_vertex(T_CFG_VERTEX_DESC u)
 {
-	return ok;
+	return vertex_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t CFGDFSVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 {
-	return ok;
+	return vertex_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::examine_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t CFGDFSVisitor::examine_edge(T_CFG_EDGE_DESC u)
 {
-	return ok;
+	return edge_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::tree_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t CFGDFSVisitor::tree_edge(T_CFG_EDGE_DESC u)
 {
-	return ok;
+	return edge_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::back_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t CFGDFSVisitor::back_edge(T_CFG_EDGE_DESC u)
 {
-	return ok;
+	return edge_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::forward_or_cross_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t CFGDFSVisitor::forward_or_cross_edge(T_CFG_EDGE_DESC u)
 {
-	return ok;
+	return edge_return_value_t::ok;
 };
 
-CFGDFSVisitor::return_value_t CFGDFSVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t CFGDFSVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
 {
-	return ok;
+	return vertex_return_value_t::ok;
 };

@@ -20,6 +20,32 @@
 #ifndef IMPROVEDDFSVISITORBASE_H
 #define	IMPROVEDDFSVISITORBASE_H
 
+#include "safe_enum.h"
+
+/**
+ * The return value type for the visitor's *_vertex() member functions, indicating to the
+ * DFS algorithm whether to continue searching or not.
+ * 
+ * Definitions:
+ *	- ok = Continue the graph traversal.
+ *	- terminate_branch = Stop traversing this branch of the graph.  Do not visit any out-edges
+ *		of the vertex.
+ *  - terminate_search = Stop the traversal entirely.
+ */
+DECLARE_ENUM_CLASS(vertex_return_value_t, ok, terminate_branch, terminate_search)
+
+/**
+ * The return value type for the visitor's *_edge() member functions, indicating to the
+ * DFS algorithm whether to continue searching or not.
+ * 
+ * Definitions:
+ *	- ok = Continue the graph traversal.
+ *	- terminate_branch = Stop traversing this branch of the graph.
+ *  - terminate_search = Stop the traversal entirely.
+ */
+DECLARE_ENUM_CLASS(edge_return_value_t, ok, terminate_branch, terminate_search,
+				   push_color_context, pop_color_context)
+
 template <typename Vertex, typename Edge, typename Graph>
 class ImprovedDFSVisitorBase
 {
@@ -28,58 +54,53 @@ public:
 	ImprovedDFSVisitorBase(const ImprovedDFSVisitorBase &orig) : m_graph(orig.m_graph) {};
 	virtual ~ImprovedDFSVisitorBase() {};
 	
-	/**
-	 * The return value type for the visitor's member functions, indicating to the
-	 * DFS algorithm whether to continue searching or not.
-	 * 
-	 * Definitions:
-	 *	- ok = Continue the graph traversal.
-	 *	- terminate_branch = Stop traversing this branch of the tree.
-	 *  - terminate_search = Stop the traversal entirely.
-	 */
-	enum return_value_t {ok, terminate_branch, terminate_search, push_color_context,
-		pop_color_context};
+	vertex_return_value_t initialize_vertex(Vertex u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t start_vertex(Vertex u) { return vertex_return_value_t::ok; };
 	
-	return_value_t initialize_vertex(Vertex u) { return ok; };
-	return_value_t start_vertex(Vertex u) { return ok; };
-	
-	return_value_t start_subgraph_vertex(Vertex u) { return ok; };
+	vertex_return_value_t start_subgraph_vertex(Vertex u) { return vertex_return_value_t::ok; };
 	
 	/**
-	 * Called when Vertex u is seen for the first time.
+	 * Called when Vertex u is seen for the first time.  Vertex u will have already been
+	 * colored gray at the time this member is invoked.
 	 * 
      * @param u
      * @return 
      */
-	return_value_t discover_vertex(Vertex u) { return ok; };
+	vertex_return_value_t discover_vertex(Vertex u) { return vertex_return_value_t::ok; };
 	
 	/**
 	 * Invoked on every out-edge of each vertex after that vertex has been discovered.
+	 * At the time this member is invoked, the source vertex will have been colored gray, but
+	 * the target vertex will not have been colored by this iteration of the graph traversal.
+	 * However, the target vertex may have already been colored by a previous iteration,
+	 * so the color is not known a priori.
 	 * 
      * @param u
      * @return 
      */
-	return_value_t examine_edge(Edge u) { return ok; };
+	edge_return_value_t examine_edge(Edge u) { return edge_return_value_t::ok; };
 	
 	/**
-	 * The Edge u has been determined to be part of the DFS tree.
+	 * The Edge u has been determined to be part of the DFS tree.  This means that
+	 * the target vertex has been discovered to be white.  This member is called
+	 * before the target vertex is colored gray.
 	 * 
      * @param u
      * @return 
      */
-	return_value_t tree_edge(Edge u) { return ok; };
+	edge_return_value_t tree_edge(Edge u) { return edge_return_value_t::ok; };
 	
-	return_value_t back_edge(Edge u) { return ok; };
-	return_value_t forward_or_cross_edge(Edge u) { return ok; };
+	edge_return_value_t back_edge(Edge u) { return edge_return_value_t::ok; };
+	edge_return_value_t forward_or_cross_edge(Edge u) { return edge_return_value_t::ok; };
 	
 	/**
-	 * Called on each Vertex u only after it has been called on any child vertices
+	 * Called on each Vertex u only after it has been called on all child vertices
 	 * of u in its DFS tree.
 	 * 
      * @param u
      * @return 
      */
-	return_value_t finish_vertex(Vertex u) { return ok; };
+	vertex_return_value_t finish_vertex(Vertex u) { return vertex_return_value_t::ok; };
 	
 	
 protected:

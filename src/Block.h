@@ -46,6 +46,8 @@ public:
 	
 	long GetBlockNumber() const { return m_block_number; };
 	
+	long GetBlockStartingLineNo() const { return m_block_starting_line_in_src; };
+	
 	/**
 	 * Returns text appropriate for labeling the block in a GraphViz dot graph.
 	 * 
@@ -102,7 +104,7 @@ private:
 	std::string m_block_label;
 
 	/// The source line it starts on.
-	long block_starting_line_in_src;
+	long m_block_starting_line_in_src;
 
 	/// List of the statements in this block.
 	T_STATEMENT_LIST m_statement_list;
