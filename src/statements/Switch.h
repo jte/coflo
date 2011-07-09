@@ -27,9 +27,9 @@ public:
 	Switch(const Switch& orig);
 	virtual ~Switch();
 	
-	virtual std::string GetStatementTextDOT() const { return "SWITCH"; };
+	virtual std::string GetStatementTextDOT() const { return "switch()"; };
 	
-	virtual std::string GetIdentifierCFG() const { return "SWITCH"; };
+	virtual std::string GetIdentifierCFG() const { return "switch()"; };
 	
 	virtual std::string GetShapeTextDOT() const { return "diamond"; };
 	

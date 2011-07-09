@@ -28,7 +28,7 @@
 #include <boost/filesystem.hpp>
 
 /**
- * Class which encapsulates a location in a source file, generally an identifier.
+ * Class which encapsulates a location of something in a source file.
  */
 class Location
 {

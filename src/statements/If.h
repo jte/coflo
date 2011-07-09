@@ -29,9 +29,9 @@ public:
 	If(const If& orig);
 	virtual ~If();
 	
-	virtual std::string GetStatementTextDOT() const { return "IF"; };
+	virtual std::string GetStatementTextDOT() const { return "if()"; };
 	
-	virtual std::string GetIdentifierCFG() const { return "IF"; };
+	virtual std::string GetIdentifierCFG() const { return "if()"; };
 	
 	virtual std::string GetShapeTextDOT() const { return "diamond"; };
 	

@@ -38,7 +38,13 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 {
 	m_parent_function = parent_function;
 	m_block_number = block_number;
+	m_block_starting_line_in_src = block_starting_line_in_src;
 	
+	// Blocks 0 and 1 are special cases: the ENTRY and EXIT blocks, resp.
+	// We have to treat them a bit differently than the other blocks.
+	// Both are not actually created from text in the source file, but are implicit.
+	// Therefore there are no actual blocks they're created from, so things like the
+	// line number have to be stubbed in.
 	switch(block_number)
 	{
 		case 0:
@@ -57,8 +63,8 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 		}
 		default:
 		{
-			// Make the label the block number.
 			std::stringstream oss;
+			// Make the label the block number.
 			oss << m_block_number;
 			m_block_label = oss.str();
 			break;
@@ -89,6 +95,7 @@ void Block::AddSuccessors(std::string successors_string)
 	{
 		// There are no successors listed.  This means that this is a No-Return block.
 		// Add a NoReturn edge to the EXIT block.
+		std::cout << "WARNING: EMPTY SUCCESSOR LIST" << std::endl;
 		m_successor_list.push_back(new SuccessorNoReturn(1));
 	}
 	

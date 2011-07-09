@@ -267,13 +267,14 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				// See if there was a starting line number for this block.
 				if(capture_results[2].matched)
 				{
+					// There was, pass it to the Block() constructor.
 					block_start_line_no = atoi(capture_results[2].str().c_str());
 				}
 				else
 				{
 					block_start_line_no = 0;
 				}
-
+				std::cout << "BLOCK LINE NO: " << block_start_line_no << std::endl;
 				current_block = new Block(current_function,
 										 atoi(capture_results[1].str().c_str()),
 										 block_start_line_no);
@@ -284,12 +285,16 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			// Look for block ends.
 			if(regex_match(line.c_str(), capture_results, f_successor_expression))
 			{
-				std::cout << "Found SUCC:, ending block: " << capture_results[1] << std::endl;
+				std::cout << "Found \"SUCC:\" line: \"" << capture_results[1] << "\", ending block "
+					<< current_block->GetBlockNumber() << ", with " 
+					<< current_block->NumberOfStatements() << " statements." << std::endl;
 				
 				if(current_block->NumberOfStatements() == 0)
 				{
 					// Make sure every block has at least one statement.
-					current_block->AddStatement(new NoOp(new Location("[UNKNOWN/file.c : 0]")));
+					std::stringstream oss;
+					oss << "[UNKNOWN/file.c : " << current_block->GetBlockStartingLineNo() << "]";
+					current_block->AddStatement(new NoOp(new Location(oss.str())));
 				}
 
 				// Tell the Block what its successors are.
