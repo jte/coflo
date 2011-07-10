@@ -478,7 +478,7 @@ struct VertexInfo
 	T_CFG_OUT_EDGE_ITERATOR m_eend;
 };
 
-long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
 	boost::graph_traits< T_CFG >::in_edge_iterator ieit, ieend;
 	
@@ -510,8 +510,6 @@ public:
 	{
 		m_last_statement = last_statement;
 		m_current_indent_level = 0;
-		/// @todo do this somewhere else?
-		m_indent_level_stack.push(0);
 	};
 	function_control_flow_graph_visitor(function_control_flow_graph_visitor &original) : CFGDFSVisitor(original)  {};
 	virtual ~function_control_flow_graph_visitor() {};
@@ -522,8 +520,8 @@ public:
 		// Pop the corresponding indent level.
 		std::cout << m_graph[u].m_statement->GetIdentifierCFG() << " = POPPED CONVERGING NODE" << std::endl;
 		m_current_subgraph_root = u;
-		m_current_indent_level = m_indent_level_stack.top();
-		m_indent_level_stack.pop();
+		
+		m_indent_level_map[u] = m_current_indent_level;
 		
 		return vertex_return_value_t::ok; 
 	};
@@ -531,23 +529,10 @@ public:
 	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u)
 	{
 		// We found a new vertex.  Let's see if we need to do anything special.
-#if 0
-		if((m_current_subgraph_root != u) && (filtered_in_degree(u, m_graph) > 1))
-		{
-			// This isn't the root of the current subgraph, and is a vertex where two or more flows converge.
-			// Make it terminate this path of the DFS, and push it on the
-			// converging_node_stack for the next sub-search.
-			indent(m_current_indent_level-1);
-			std::cout << "}" << std::endl;
-			std::cout << "TERMINATING BRANCH WITH: " 
-				<< m_graph[u].m_statement->GetIdentifierCFG()
-				<< " FID=" << filtered_in_degree(u, m_graph)
-				<< std::endl;
-			m_indent_level_stack.push(m_current_indent_level);
-			return vertex_return_value_t::terminate_branch;
-		}
-		
+
 		// Print the statement corresponding to this vertex.
+		m_current_indent_level = m_indent_level_map[u];
+		//m_indent_level_stack.pop();
 		indent(m_current_indent_level);
 		std::cout << m_graph[u].m_statement->GetIdentifierCFG()
 			<< " <"
@@ -572,15 +557,8 @@ public:
 			std::cout << "{" << std::endl;
 			m_current_indent_level++;
 		}
-#endif
-		return vertex_return_value_t::ok;
-	}
-	
-	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
-	{
-		edge_return_value_t retval=edge_return_value_t::ok;
 
-		return retval;
+		return vertex_return_value_t::ok;
 	}
 	
 	edge_return_value_t examine_edge(T_CFG_EDGE_DESC ed)
@@ -644,13 +622,37 @@ public:
 		return edge_return_value_t::ok;
 	}
 	
-	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u)
+		
+	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
 	{
-		std::cout << "FINISH: " << m_graph[u].m_statement->GetIdentifierCFG()
-			<< " <"
-			<< *m_graph[u].m_statement->GetLocation()
-			<< ">"
-			<< std::endl;
+		T_CFG_VERTEX_DESC v;
+		edge_return_value_t retval=edge_return_value_t::ok;
+		
+
+		/*v = boost::target(ed, m_graph);
+		
+		if(filtered_in_degree(v, m_graph) > 1)
+		{
+			// This edge terminates a branch.  Decrement the current indent level counter.
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}" << std::endl;
+		}*/
+
+		return retval;
+	}
+	
+	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u)
+	{
+		if(filtered_in_degree(u, m_graph) > 1)
+		{
+			// This edge terminates a branch.  Decrement the current indent level counter.
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}" << std::endl;
+		}
+		
+		m_indent_level_map[u] = m_current_indent_level;
 		return vertex_return_value_t::ok;
 	}
 	
@@ -669,7 +671,7 @@ private:
 	/// The FunctionCall call stack.
 	std::vector<FunctionCall*> m_call_stack;
 	
-	std::stack< long > m_indent_level_stack;
+	std::map< T_CFG_VERTEX_DESC, long > m_indent_level_map;
 };
 
 template <class IncidenceGraph, class ImprovedDFSVisitor, class ColorMapStack>
@@ -901,17 +903,17 @@ void improved_depth_first_visit(IncidenceGraph &graph,
  * Kahn's algorithm for topologically sorting (in this case visiting the nodes of) a graph.
  * 
  * @param graph
- * @param source
+ * @param source The vertex to start the graph traversal from.
  * @param visitor
  */
-template <class IncidenceGraph, class ImprovedDFSVisitor>
-void topological_visit_kahn(IncidenceGraph &graph,
-	typename boost::graph_traits<IncidenceGraph>::vertex_descriptor source,
+template <typename Graph, class ImprovedDFSVisitor>
+void topological_visit_kahn(Graph &graph,
+	typename boost::graph_traits<Graph>::vertex_descriptor source,
 	ImprovedDFSVisitor &visitor)
 {
 	// Some convenience typedefs.
-	typedef typename boost::graph_traits<IncidenceGraph>::vertex_descriptor T_VERTEX_DESC;
-	typedef typename boost::graph_traits<IncidenceGraph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
+	typedef typename boost::graph_traits<Graph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
 	
 	// The local variables.
 	T_VERTEX_DESC u, v;
@@ -920,26 +922,30 @@ void topological_visit_kahn(IncidenceGraph &graph,
 	edge_return_value_t visitor_edge_return_value;
 
 	// The set of all vertices with no incoming edges.
-	std::stack<T_VERTEX_DESC> dfs_stack;
+	std::stack<T_VERTEX_DESC> no_remaining_in_edges_set;
 	
 	// Map of in-degrees.
 	typedef std::map< T_VERTEX_DESC, long> T_IN_DEGREE_MAP;
 	T_IN_DEGREE_MAP in_degree_map;
 	
 	// Start at the source vertex.
-	dfs_stack.push(source);
+	visitor.prior_to_push(source);
+	no_remaining_in_edges_set.push(source);
 	visitor.start_subgraph_vertex(source);
 	
-	while(!dfs_stack.empty())
+	while(!no_remaining_in_edges_set.empty())
 	{
 		// Remove a vertex from the set of in-degree == 0 vertices.
-		u = dfs_stack.top();
-		dfs_stack.pop();
+		u = no_remaining_in_edges_set.top();
+		no_remaining_in_edges_set.pop();
 		
-		// Insert u into the output list.  These will come out in the correct order.
-		visitor_vertex_return_value = visitor.finish_vertex(u);
+		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
+		visitor_vertex_return_value = visitor.discover_vertex(u);
 		
-		// Decrement the in-degrees of all vertices that are descendants of vertex u.
+		//
+		// Decrement the in-degrees of all vertices that are immediate descendants of vertex u.
+		//
+		
 		// Get iterators to the out edges of vertex u.
 		boost::tie(ei, eend) = boost::out_edges(u, graph);
 		
@@ -967,9 +973,18 @@ void topological_visit_kahn(IncidenceGraph &graph,
 					break;
 			}
 			
-			// Look up the current in-degree of the target node of *ei in the
-			// in-degree map.
+			// If the examine_edge() call didn't skip this edge or terminate the
+			// graph traversal entirely, the edge is now part of
+			// the topologically sorted search graph.  Let the visitor know.
+			visitor_edge_return_value = visitor.tree_edge(*ei);
+			/// @todo Handle return value.
 			
+			//
+			// Look up the current in-degree of the target vertex of *ei in the
+			// in-degree map.
+			//
+			
+			// First let's get the target vertex.
 			v = boost::target(*ei, graph);
 			
 			long id;
@@ -978,8 +993,9 @@ void topological_visit_kahn(IncidenceGraph &graph,
 			it = in_degree_map.find(v);
 			if(it == in_degree_map.end())
 			{
-				// Wasn't in the map, must not have seen it before.
-				// Pretend it was and add it with it's starting in-degree.
+				// The target vertex wasn't in the map, which means we haven't
+				// encountered it before now.
+				// Pretend it was in the map and add it with its original in-degree.
 				id = filtered_in_degree(v, graph);
 				in_degree_map[v] = id;
 				it = in_degree_map.find(v);
@@ -998,7 +1014,8 @@ void topological_visit_kahn(IncidenceGraph &graph,
 			{
 				// This vertex now has an in-degree of zero, push it into the
 				// input set.
-				dfs_stack.push(v);
+				no_remaining_in_edges_set.push(v);
+				visitor.prior_to_push(v);
 				in_degree_map.erase(it);
 			}
 			else
