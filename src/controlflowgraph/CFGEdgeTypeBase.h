@@ -34,15 +34,22 @@ public:
 	/// Destructor made pure virtual to force this to be an abstract base class.
 	virtual ~CFGEdgeTypeBase() = 0;
 	
+	/**
+	 * Mark the edge as a back edge.  We keep this info around because we need it
+	 * for doing certain operations such as topological sorting, and for efficiency
+	 * reasons - both design and run-rime - we want to just determine this once.
+	 * 
+     * @param is_back_edge true if the edge has been determined to be a back edge.
+     */
 	void MarkAsBackEdge(bool is_back_edge) { m_is_back_edge = is_back_edge; };
 	
 	/**
 	 * Indicates if this is a back edge in the control flow graph, as would be
 	 * caused by a loop.
 	 * 
-     * @return true if this is a back-edge, false if it isn't.
+     * @return true if this is a back edge, false if it isn't.
      */
-	virtual bool IsBackEdge() const { return m_is_back_edge; };
+	bool IsBackEdge() const { return m_is_back_edge; };
 	
 	/**
 	 * Returns a string suitable for use as an edge label in a Dot graph.
@@ -62,9 +69,17 @@ public:
      * @return 
      */
 	virtual std::string GetDotSVGColor() const { return "black"; };
+	
+	/**
+	 * Returns a string suitable for use in a Dot "style=" edge attribute.
+	 * 
+     * @return 
+     */
+	std::string GetDotStyle() const;
 
 private:
 	
+	/// Flag indicating whether this edge has been determined to be a back edge or not.
 	bool m_is_back_edge;
 
 };
