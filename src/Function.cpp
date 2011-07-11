@@ -316,11 +316,12 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 				T_CFG_EDGE_DESC function_call_out_edge;
 				
 				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
-				PrintOutEdgeTypes(*vit, *m_cfg);
 				if(!ok)
 				{
 					// Couldn't find the return.
-					std::cerr << "ERROR: COULDN'T FIND OUT EDGE OF TYPE CFGEdgeTypeFallthrough" << std::endl;			
+					std::cerr << "ERROR: COULDN'T FIND OUT EDGE OF TYPE CFGEdgeTypeFallthrough" << std::endl;
+					std::cerr << "Edges found are:" << std::endl;
+					PrintOutEdgeTypes(*vit, *m_cfg);
 				}
 				
 				boost::tie(new_edge_desc, ok) = boost::add_edge(it->second->GetExitVertexDescriptor(),
@@ -331,12 +332,19 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 					// Return edge was added OK.  Create and connect the edge's properties.
 					CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
 					(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
+					// Copy the fallthrough edge's properties to the newly-added return edge.
+					/// @todo Find a cleaner way to do this.
+					return_edge_type->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
 					
 					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
 					// For graphing just the function itself, we'll look at these edges and not the
 					// call/return edges.
+					CFGEdgeTypeFunctionCallBypass *fcbp = new CFGEdgeTypeFunctionCallBypass();
+					// Copy the fallthrough edge's properties to its replacement.
+					/// @todo Find a cleaner way to do this.
+					fcbp->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
 					delete (*m_cfg)[function_call_out_edge].m_edge_type;
-					(*m_cfg)[function_call_out_edge].m_edge_type = new CFGEdgeTypeFunctionCallBypass();
+					(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
 				}
 				else
 				{
@@ -397,6 +405,7 @@ public:
 		out << "[";
 		out << "label=\"" << g[e].m_edge_type->GetDotLabel() << "\"";
 		out << ", color=" << g[e].m_edge_type->GetDotSVGColor();
+		out << ", style=" << g[e].m_edge_type->GetDotStyle();
 		out << "]";
 	};
 private:
@@ -488,6 +497,11 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	bool saw_function_call_already = false;
 	for(; ieit!=ieend; ++ieit)
 	{
+		if(cfg[*ieit].m_edge_type->IsBackEdge())
+		{
+			// Skip anything marked as a back edge.
+			continue;
+		}
 		if((dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(cfg[*ieit].m_edge_type) == NULL) &&
 		 (saw_function_call_already == false))
 		{
@@ -499,6 +513,25 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 			// Multiple incoming function calls only count as one for convergence purposes.
 			saw_function_call_already = true;
 		}
+	}
+	return i;
+}
+
+static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+{
+	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
+	
+	boost::tie(eit, eend) = boost::out_edges(v, cfg);
+	
+	long i = 0;
+	for(; eit!=eend; ++eit)
+	{
+		if(cfg[*eit].m_edge_type->IsBackEdge())
+		{
+			// Skip anything marked as a back edge.
+			continue;
+		}
+		i++;
 	}
 	return i;
 }
@@ -571,7 +604,12 @@ public:
 		edge_type = m_graph[ed].m_edge_type;
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 		
-		if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type) != NULL)
+		if(edge_type->IsBackEdge())
+		{
+			// Skip all back edges.
+			return edge_return_value_t::terminate_branch;
+		}
+		else if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type) != NULL)
 		{
 			// Skip FunctionCallBypasses entirely.
 			return edge_return_value_t::terminate_branch;
@@ -582,7 +620,6 @@ public:
 			// that brought us here.  Skip it.
 			return edge_return_value_t::terminate_branch;
 		}
-
 		
 		// Check if this edge is a function call or return.  If it is, tell the
 		// DFS to push/pop a new color context.
@@ -644,6 +681,7 @@ public:
 	
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u)
 	{
+		// Check if this vertex terminates more than one branch of the graph.
 		if(filtered_in_degree(u, m_graph) > 1)
 		{
 			// This edge terminates a branch.  Decrement the current indent level counter.
@@ -675,8 +713,6 @@ private:
 };
 
 template <class IncidenceGraph, class ImprovedDFSVisitor, class ColorMapStack>
-//BOOST_CONCEPT_REQUIRES((IncidenceGraphConcept<IncidenceGraph>), (void))
-//BOOST_CONCEPT_REQUIRES(((IncidenceGraphConcept<IncidenceGraph>)), (void))
 void improved_depth_first_visit(IncidenceGraph &graph,
 	typename boost::graph_traits<IncidenceGraph>::vertex_descriptor source,
 	ImprovedDFSVisitor &visitor,
@@ -1084,7 +1120,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	// - First we go through each basic block and add all Statements to m_cfg,
 	//   adding an edge linking each to its predecessor as we go.  We exclude in-edges
 	//   and out-edges for the first and last Statement in each block, resp.
-	// - Second, we link the last Statement of each block to its Successors.
+	// - Second, we link the last Statement of each block to the first Statement(s) of its Successor(s).
 	//
 	// A third step is performed to mark all back-edges in the graph, so we can easily
 	// identify them during traversals later.
@@ -1168,7 +1204,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			
 			if(first_statement_it == first_statement_of_block.end())
 			{
-				std::cout << "ERROR: No first block statement found." << std::endl;
+				std::cerr << "ERROR: No first block statement found." << std::endl;
 			}
 			else
 			{
@@ -1185,7 +1221,6 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
 	// Property map for getting at the edge types in the CFG.
-	//T_EDGE_TYPE_PROPERTY_MAP edge_type_property_map = boost::get(&CFGEdgeProperties::m_edge_type, *m_cfg);
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 	std::vector<T_CFG_EDGE_DESC> back_edges;
 	
@@ -1204,6 +1239,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	BOOST_FOREACH(T_CFG_EDGE_DESC e, back_edges)
 	{
 		// Change this edge type to a back edge.
+		std::clog << "Marking back edge: " << e << std::endl;
 		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
 	}
 	

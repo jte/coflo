@@ -19,7 +19,7 @@
 #include "CFGEdgeTypeFallthrough.h"
 
 /// Definition of the single CFGEdgeTypeFallthrough instance.
-void* CFGEdgeTypeFallthrough::m_the_singleton = NULL;
+//void* CFGEdgeTypeFallthrough::m_the_singleton = NULL;
 
 CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough() : CFGEdgeTypeBase()
 {
