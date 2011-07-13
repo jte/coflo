@@ -653,6 +653,10 @@ public:
 		if(edge_type->IsBackEdge())
 		{
 			// Skip all back edges.
+			/// @todo We need to do something about vertices where the only out-edge
+			/// is a back edge.  In these cases, the vertex looks like a second EXIT
+			/// to the topological sort algorithm.  Maybe add a fake edge to the real
+			/// EXIT node, which is ignored for everything but topological sort purposes?
 			return edge_return_value_t::terminate_branch;
 		}
 		else if((ret != NULL) && (ret->m_function_call != m_call_stack.back()))
@@ -678,12 +682,21 @@ public:
 			return edge_return_value_t::terminate_branch;
 		}	
 		
-		// Check if this edge is a function call or return.  If it is, tell the
-		// traversal to push/pop a new color context.
-		T_CFG_VERTEX_DESC v;
+		return edge_return_value_t::ok;
+	}
+	
+	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
+	{
+		edge_return_value_t retval = edge_return_value_t::ok;
 		
-		// Get the target vertex.
-		v = boost::target(ed, m_graph);
+		// Attempt dynamic casts to call/return types to see if we need to handle
+		// these specially.
+		CFGEdgeTypeBase *edge_type;
+		CFGEdgeTypeFunctionCall *fc;
+		CFGEdgeTypeReturn *ret;
+		edge_type = m_graph[ed].m_edge_type;
+		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
+		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 		
 		// If the edge is a function call or return, we have to:
 		// - Indent/Outdent another level.
@@ -694,25 +707,7 @@ public:
 		if(fc != NULL)
 		{
 			// This edge is a function call.
-#if 0
-			FunctionCallResolved *fcr;
-			
-			fcr = dynamic_cast<FunctionCallResolved*>(m_graph[v].m_statement);
-			if(fcr != NULL)
-			{
-				// Are we already within the calling context of the called Function?
-				// I.e., are we recursing?
-				bool wasnt_already_there;
 
-				boost::tie(boost::tuples::ignore, wasnt_already_there) = m_call_set.insert(fcr->m_target_function);
-				if(!wasnt_already_there)
-				{
-					// We're recursing, terminate the branch.
-					std::cout << "RECURSION DETECTED" << std::endl;
-					return edge_return_value_t::terminate_branch;
-				}
-			}
-#endif
 			// Indent another level.
 			m_current_indent_level++;
 			//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
@@ -724,30 +719,6 @@ public:
 			// This edge is a function return.
 			// Pop the call off the m_call_stack and outdent a level.
 			//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
-			/// @todo FINISH RECURSION DETECTION.
-			m_call_stack.pop_back();
-			m_current_indent_level--;
-			return edge_return_value_t::pop_color_context;
-		}
-		return edge_return_value_t::ok;
-	}
-	
-	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
-	{
-		edge_return_value_t retval = edge_return_value_t::ok;
-		
-		// Attempt dynamic casts to call/return types to see if we need to handle
-		// these specially.
-		CFGEdgeTypeBase *edge_type;
-		CFGEdgeTypeReturn *ret;
-		edge_type = m_graph[ed].m_edge_type;
-		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
-		
-		if(ret != NULL)
-		{
-			// We're returning from a FunctionCall.
-			// Remove the Function from m_call_set, so we know we're no longer in
-			// its calling context and aren't going recursive.
 			FunctionCallResolved *fcr;
 			fcr = dynamic_cast<FunctionCallResolved*>(ret->m_function_call);
 			if(fcr == NULL)
@@ -756,6 +727,9 @@ public:
 				std::cerr << "ERROR: Return from unresolved function call." << std::endl;
 			}
 			m_call_set.erase(fcr->m_target_function);
+			m_call_stack.pop_back();
+			m_current_indent_level--;
+			return edge_return_value_t::pop_color_context;
 		}
 		
 		return retval;
@@ -1316,6 +1290,11 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	}
 	
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
+	/// @todo We need to do something about vertices where the only out-edge
+	/// is a back edge.  In these cases, the vertex looks like a second EXIT
+	/// to the topological sort algorithm.  Maybe add a fake edge to the real
+	/// EXIT node, which is ignored for everything but topological sort purposes?
+	
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 	std::vector<T_CFG_EDGE_DESC> back_edges;
