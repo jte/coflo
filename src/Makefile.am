@@ -26,7 +26,7 @@ coflo_SOURCES = main.cpp \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
 	CFGDFSVisitor.cpp CFGDFSVisitor.h \
-	ControlFlowGraph.h \
+	ControlFlowGraph.cpp ControlFlowGraph.h \
 	controlflowgraph/CFGEdgeTypeBase.cpp controlflowgraph/CFGEdgeTypeBase.h \
 	controlflowgraph/CFGEdgeTypeFunctionCallBypass.cpp controlflowgraph/CFGEdgeTypeFunctionCallBypass.h \
 	controlflowgraph/CFGEdgeTypeFallthrough.cpp controlflowgraph/CFGEdgeTypeFallthrough.h \

@@ -33,6 +33,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/unordered_set.hpp>
 
 
 #include "Block.h"
@@ -62,6 +63,9 @@ typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_V
 /// CFGEdgeProperties::m_edge_type in the T_CFG.
 typedef boost::property_map< T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::* >::type T_EDGE_TYPE_PROPERTY_MAP;
 
+/**
+ * Predicate for filtering the CFG for only the vertices of the given function.
+ */
 struct vertex_filter_predicate
 {
 	vertex_filter_predicate() { };
@@ -104,6 +108,8 @@ Function::~Function()
 bool Function::IsCalled() const
 {
 	// Determine if this function is ever called.
+	// If the first statement (the ENTRY block) has any in-edges,
+	// it's called by something.
 	return boost::in_degree(m_first_statement, *m_cfg) > 0;
 }
  
@@ -149,7 +155,7 @@ void Function::LinkBlocks()
 	}
 
 	// Block 2 appears to always be the first block, start with it.
-	/// \todo We really should check for "PRED: ENTRY" to make sure of this.
+	/// @todo We really should check for "PRED: ENTRY" to make sure of this.
 	T_BLOCK_LINK_MAP_ITERATOR lmit = linkmap.find(2);
 	if(lmit == linkmap.end())
 	{
@@ -239,19 +245,6 @@ void Function::LinkIntoGraph()
 		}
 	}
 }
-
-
-void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
-{
-	T_CFG_OUT_EDGE_ITERATOR ei, eend;
-	
-	boost::tie(ei, eend) = boost::out_edges(vdesc, cfg);
-	for(;ei!=eend; ++ei)
-	{
-		std::cout << typeid(*(cfg[*ei].m_edge_type)).name() << std::endl;
-	}
-}
-
 
 void Function::Link(const std::map< std::string, Function* > &function_map,
 		std::vector< FunctionCall* > *unresolved_function_calls)
@@ -368,7 +361,9 @@ struct graph_property_writer
 };
 
 
-/// Class for a vertex property writer, for use with write_graphviz().
+/**
+ * Class for a vertex property writer, for use with write_graphviz().
+ */ 
 class cfg_vertex_property_writer
 {
 public:
@@ -391,10 +386,14 @@ public:
 		}
 	}
 private:
+	
+	/// The graph whose vertices we're writing the properties of.
 	T_CFG& g;
 };
 
-/// Class for an edge property writer, for use with write_graphviz().
+/**
+ * Class for an edge property writer, for use with write_graphviz().
+ */ 
 class cfg_edge_property_writer
 {
 public:
@@ -409,6 +408,8 @@ public:
 		out << "]";
 	};
 private:
+	
+	/// The graph whose edges we're writing the properties of.
 	T_CFG& g;
 };
 
@@ -430,7 +431,7 @@ private:
 
 struct back_edge_filter_predicate
 {
-	/// Must be default constructable because such predicates are stored by-value.
+	/// Must be default constructible because such predicates are stored by-value.
 	back_edge_filter_predicate() {};
 	back_edge_filter_predicate(T_EDGE_TYPE_PROPERTY_MAP &edge_type_property_map) : m_edge_type_property_map(edge_type_property_map) 
 	{};
@@ -499,11 +500,19 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	{
 		if(cfg[*ieit].m_edge_type->IsBackEdge())
 		{
-			// Skip anything marked as a back edge.
+			// Always skip anything marked as a back edge.
 			continue;
 		}
-		if((dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(cfg[*ieit].m_edge_type) == NULL) &&
-		 (saw_function_call_already == false))
+		
+		// Count up all the incoming edges, with two exceptions:
+		// - Ignore Return edges.  They will always have exactly one matching FunctionCallBypass, which
+		//   is what we'll count instead.
+		// - Ignore all but the first CFGEdgeTypeFunctionCall.  The situation here is that we'd be
+		//   looking at a vertex v that's an ENTRY statement, with a predecessor of type FunctionCallResolved.
+		//   Any particular instance of an ENTRY has at most only one valid FunctionCall edge.
+		//   For our current purposes, we only care about this one.
+		if((dynamic_cast<CFGEdgeTypeReturn*>(cfg[*ieit].m_edge_type) == NULL)
+		 && (saw_function_call_already == false))
 		{
 			i++;
 		}
@@ -514,6 +523,7 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 			saw_function_call_already = true;
 		}
 	}
+
 	return i;
 }
 
@@ -543,6 +553,7 @@ public:
 	{
 		m_last_statement = last_statement;
 		m_current_indent_level = 0;
+		m_last_discovered_vertex_is_recursive = false;
 	};
 	function_control_flow_graph_visitor(function_control_flow_graph_visitor &original) : CFGDFSVisitor(original)  {};
 	virtual ~function_control_flow_graph_visitor() {};
@@ -552,7 +563,6 @@ public:
 		// Either the very first vertex or a converging vertex has been popped.
 		// Pop the corresponding indent level.
 		std::cout << m_graph[u].m_statement->GetIdentifierCFG() << " = POPPED CONVERGING NODE" << std::endl;
-		m_current_subgraph_root = u;
 		
 		m_indent_level_map[u] = m_current_indent_level;
 		
@@ -561,34 +571,63 @@ public:
 	
 	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u)
 	{
-		// We found a new vertex.  Let's see if we need to do anything special.
+		// We found a new vertex.
 
-		// Print the statement corresponding to this vertex.
+		// Get the current indentation level of the vertex.
 		m_current_indent_level = m_indent_level_map[u];
-		//m_indent_level_stack.pop();
+	
+		// Indent and print the statement corresponding to this vertex.
 		indent(m_current_indent_level);
-		std::cout << m_graph[u].m_statement->GetIdentifierCFG()
+		Statement *p = m_graph[u].m_statement;
+		std::cout << p->GetIdentifierCFG()
 			<< " <"
-			<< *m_graph[u].m_statement->GetLocation()
+			<< *(p->GetLocation())
 			<< ">"
 			<< std::endl;
+		//PrintInEdgeTypes(u, m_graph);
 		
 		if(u == m_last_statement)
 		{
 			std::cout << "INFO: Found last statement of function" << std::endl;
 			// We've reached the end of the function, terminate the search.
+			// We should never have to do this, the topological search should always
+			// terminate on the EXIT vertex unless there is a branch which erroneously terminates.
 			//return terminate_search;				
 		}
 		
 		// If this vertex results in a branch of the CFG,
 		// indent the subsequent vertices another level.
-		Statement *p = m_graph[u].m_statement;
 		if((dynamic_cast<If*>(p) != NULL) ||
 		 (dynamic_cast<Switch*>(p) != NULL))
 		{
 			indent(m_current_indent_level);
 			std::cout << "{" << std::endl;
 			m_current_indent_level++;
+		}
+		else if(dynamic_cast<FunctionCallResolved*>(p) != NULL)
+		{
+			// This is a function call which has been resolved (i.e. has a link to the
+			// actual Function that's being called).  Track the call context, and 
+			// check if we're going recursive.
+			FunctionCallResolved *fcr;
+			
+			fcr = dynamic_cast<FunctionCallResolved*>(p);
+
+			// Are we already within the calling context of the called Function?
+			// I.e., are we recursing?
+			bool wasnt_already_there;
+			
+			// Assume we're not.
+			m_last_discovered_vertex_is_recursive = false;
+
+			boost::tie(boost::tuples::ignore, wasnt_already_there) = m_call_set.insert(fcr->m_target_function);
+			if(!wasnt_already_there)
+			{
+				// We're recursing, we need to treat this vertex as if it were a FunctionCallUnresolved.
+				std::cout << "RECURSION DETECTED" << std::endl;
+				m_last_discovered_vertex_is_recursive = true;
+				//return vertex_return_value_t::terminate_branch;
+			}
 		}
 
 		return vertex_return_value_t::ok;
@@ -599,19 +638,21 @@ public:
 		// Filter out any edges that we want to pretend aren't even part of the
 		// graph we're looking at.
 		CFGEdgeTypeBase *edge_type;
+		CFGEdgeTypeFunctionCall *fc;
 		CFGEdgeTypeReturn *ret;
+		CFGEdgeTypeFunctionCallBypass *fcb;
 		
 		edge_type = m_graph[ed].m_edge_type;
+				
+		// Attempt dynamic casts to call/return types to see if we need to handle
+		// these specially.
+		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
+		fcb = dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type);
 		
 		if(edge_type->IsBackEdge())
 		{
 			// Skip all back edges.
-			return edge_return_value_t::terminate_branch;
-		}
-		else if(dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type) != NULL)
-		{
-			// Skip FunctionCallBypasses entirely.
 			return edge_return_value_t::terminate_branch;
 		}
 		else if((ret != NULL) && (ret->m_function_call != m_call_stack.back()))
@@ -621,14 +662,25 @@ public:
 			return edge_return_value_t::terminate_branch;
 		}
 		
-		// Check if this edge is a function call or return.  If it is, tell the
-		// DFS to push/pop a new color context.
-		T_CFG_VERTEX_DESC v;
-		CFGEdgeTypeFunctionCall *fc;
+		// Handle recursion.
+		// We deal with recursion by deciding here which path to take out of a FunctionCallResolved vertex.
+		// Note that this is currently the only vertex type which can result in recursion.
+		if((fcb != NULL) && (m_last_discovered_vertex_is_recursive == false))
+		{
+			// If we're not in danger of infinite recursion,
+			// skip FunctionCallBypasses entirely.  Otherwise take them.
+			return edge_return_value_t::terminate_branch;
+		}
+		else if((fc != NULL) && (m_last_discovered_vertex_is_recursive == true))
+		{
+			// If we are in danger of infinite recursion,
+			// skip FunctionCalls entirely.  Otherwise take them.
+			return edge_return_value_t::terminate_branch;
+		}	
 		
-		// Attempt dynamic casts to call/return types to see if we need to handle
-		// these specially.
-		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
+		// Check if this edge is a function call or return.  If it is, tell the
+		// traversal to push/pop a new color context.
+		T_CFG_VERTEX_DESC v;
 		
 		// Get the target vertex.
 		v = boost::target(ed, m_graph);
@@ -641,7 +693,27 @@ public:
 		//   to have clear color maps for each call.
 		if(fc != NULL)
 		{
-			// This edge is a function call, indent another level.
+			// This edge is a function call.
+#if 0
+			FunctionCallResolved *fcr;
+			
+			fcr = dynamic_cast<FunctionCallResolved*>(m_graph[v].m_statement);
+			if(fcr != NULL)
+			{
+				// Are we already within the calling context of the called Function?
+				// I.e., are we recursing?
+				bool wasnt_already_there;
+
+				boost::tie(boost::tuples::ignore, wasnt_already_there) = m_call_set.insert(fcr->m_target_function);
+				if(!wasnt_already_there)
+				{
+					// We're recursing, terminate the branch.
+					std::cout << "RECURSION DETECTED" << std::endl;
+					return edge_return_value_t::terminate_branch;
+				}
+			}
+#endif
+			// Indent another level.
 			m_current_indent_level++;
 			//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
 			m_call_stack.push_back(fc->m_function_call);
@@ -652,6 +724,7 @@ public:
 			// This edge is a function return.
 			// Pop the call off the m_call_stack and outdent a level.
 			//std::cout << "POPPING CALL: " << ret->m_function_call->GetIdentifier() << std::endl;
+			/// @todo FINISH RECURSION DETECTION.
 			m_call_stack.pop_back();
 			m_current_indent_level--;
 			return edge_return_value_t::pop_color_context;
@@ -659,26 +732,35 @@ public:
 		return edge_return_value_t::ok;
 	}
 	
-		
 	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
 	{
-		T_CFG_VERTEX_DESC v;
-		edge_return_value_t retval=edge_return_value_t::ok;
+		edge_return_value_t retval = edge_return_value_t::ok;
 		
-
-		/*v = boost::target(ed, m_graph);
+		// Attempt dynamic casts to call/return types to see if we need to handle
+		// these specially.
+		CFGEdgeTypeBase *edge_type;
+		CFGEdgeTypeReturn *ret;
+		edge_type = m_graph[ed].m_edge_type;
+		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 		
-		if(filtered_in_degree(v, m_graph) > 1)
+		if(ret != NULL)
 		{
-			// This edge terminates a branch.  Decrement the current indent level counter.
-			m_current_indent_level--;
-			indent(m_current_indent_level);
-			std::cout << "}" << std::endl;
-		}*/
-
+			// We're returning from a FunctionCall.
+			// Remove the Function from m_call_set, so we know we're no longer in
+			// its calling context and aren't going recursive.
+			FunctionCallResolved *fcr;
+			fcr = dynamic_cast<FunctionCallResolved*>(ret->m_function_call);
+			if(fcr == NULL)
+			{
+				// Should never happen.
+				std::cerr << "ERROR: Return from unresolved function call." << std::endl;
+			}
+			m_call_set.erase(fcr->m_target_function);
+		}
+		
 		return retval;
 	}
-	
+		
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u)
 	{
 		// Check if this vertex terminates more than one branch of the graph.
@@ -700,14 +782,19 @@ private:
 	/// We'll terminate the search when we find this.
 	T_CFG_VERTEX_DESC m_last_statement;
 	
-	T_CFG_VERTEX_DESC m_current_subgraph_root;
-	
 	/// The indent level.  This corresponds to the number of branching statements
 	/// with unterminated branches between the starting node and the current node.
 	long m_current_indent_level;
 	
 	/// The FunctionCall call stack.
 	std::vector<FunctionCall*> m_call_stack;
+	
+	/// The Function call set.
+	/// This is used only to determine if our call stack has gone recursive.
+	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
+	T_FUNCTION_CALL_SET m_call_set;
+	
+	bool m_last_discovered_vertex_is_recursive;
 	
 	std::map< T_CFG_VERTEX_DESC, long > m_indent_level_map;
 };
@@ -977,6 +1064,11 @@ void topological_visit_kahn(Graph &graph,
 		
 		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
 		visitor_vertex_return_value = visitor.discover_vertex(u);
+		if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
+		{
+			// Visitor wants us to not explore the children of this vertex.
+			continue;
+		}
 		
 		//
 		// Decrement the in-degrees of all vertices that are immediate descendants of vertex u.
@@ -1033,6 +1125,8 @@ void topological_visit_kahn(Graph &graph,
 				// encountered it before now.
 				// Pretend it was in the map and add it with its original in-degree.
 				id = filtered_in_degree(v, graph);
+				//std::cout << "Start IND: " << id << " " << v << std::endl;
+				//PrintInEdgeTypes(v, graph);
 				in_degree_map[v] = id;
 				it = in_degree_map.find(v);
 			}
@@ -1053,6 +1147,8 @@ void topological_visit_kahn(Graph &graph,
 				no_remaining_in_edges_set.push(v);
 				visitor.prior_to_push(v);
 				in_degree_map.erase(it);
+				//std::cout << "Pushed: " << v << std::endl;
+				//PrintInEdgeTypes(v, graph);
 			}
 			else
 			{
