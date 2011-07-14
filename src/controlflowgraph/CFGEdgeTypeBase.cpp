@@ -37,7 +37,7 @@ std::string CFGEdgeTypeBase::GetDotStyle() const
 {
 	if(m_is_back_edge)
 	{
-		// This is a back edge, make it a dotted line.
+		// This is a back edge, make it a dashed line.
 		return "dashed";
 	}
 	else
