@@ -49,7 +49,7 @@
 
 #include "controlflowgraph/CFGEdgeTypeFallthrough.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCall.h"
-#include "controlflowgraph/CFGEdgeTypeGotoBackEdge.h"
+#include "controlflowgraph/CFGEdgeTypeFalseExit.h"
 #include "controlflowgraph/CFGEdgeTypeReturn.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
 #include "ControlFlowGraph.h"
