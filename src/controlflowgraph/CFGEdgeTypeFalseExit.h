@@ -17,22 +17,32 @@
 
 /** @file */
 
-#ifndef CFGEDGETYPEGOTOBACKEDGE_H
-#define	CFGEDGETYPEGOTOBACKEDGE_H
+#ifndef CFGEDGETYPEFALSEEXIT_H
+#define	CFGEDGETYPEFALSEEXIT_H
 
-#include "CFGEdgeTypeGoto.h"
+#include <string>
 
-class CFGEdgeTypeGotoBackEdge : public CFGEdgeTypeGoto
+#include "CFGEdgeTypeBase.h"
+
+/**
+ * Edge type representing CFG edges from vertices with an out-degree of zero
+ * to a Function's EXIT vertex.  These are used to ensure that certain algorithms
+ * such as topological traversals operate correctly.
+ * Vertices which need an edge of this type added are e.g. the last statement of
+ * a loop, which results in a back edge, which then gets ignored by a topological sort.
+ */
+class CFGEdgeTypeFalseExit : public CFGEdgeTypeBase
 {
-
 public:
-	CFGEdgeTypeGotoBackEdge();
-	CFGEdgeTypeGotoBackEdge(const CFGEdgeTypeGotoBackEdge& orig);
-	virtual ~CFGEdgeTypeGotoBackEdge();
+	CFGEdgeTypeFalseExit();
+	CFGEdgeTypeFalseExit(const CFGEdgeTypeFalseExit& orig);
+	virtual ~CFGEdgeTypeFalseExit();
+	
+	virtual std::string GetDotLabel() const { return "FalseExit"; };
 	
 private:
 
 };
 
-#endif	/* CFGEDGETYPEGOTOBACKEDGE_H */
+#endif	/* CFGEDGETYPEFALSEEXIT_H */
 

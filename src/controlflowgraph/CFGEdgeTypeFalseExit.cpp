@@ -17,11 +17,11 @@
 
 /** @file */
 
-#include "CFGEdgeTypeGotoBackEdge.h"
+#include "CFGEdgeTypeFalseExit.h"
 
-CFGEdgeTypeGotoBackEdge::CFGEdgeTypeGotoBackEdge() { }
+CFGEdgeTypeFalseExit::CFGEdgeTypeFalseExit() { }
 
-CFGEdgeTypeGotoBackEdge::CFGEdgeTypeGotoBackEdge(const CFGEdgeTypeGotoBackEdge& orig) { }
+CFGEdgeTypeFalseExit::CFGEdgeTypeFalseExit(const CFGEdgeTypeFalseExit& orig) { }
 
-CFGEdgeTypeGotoBackEdge::~CFGEdgeTypeGotoBackEdge() { }
+CFGEdgeTypeFalseExit::~CFGEdgeTypeFalseExit() { }
 

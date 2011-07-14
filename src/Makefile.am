@@ -32,7 +32,7 @@ coflo_SOURCES = main.cpp \
 	controlflowgraph/CFGEdgeTypeFallthrough.cpp controlflowgraph/CFGEdgeTypeFallthrough.h \
 	controlflowgraph/CFGEdgeTypeFunctionCall.cpp controlflowgraph/CFGEdgeTypeFunctionCall.h \
 	controlflowgraph/CFGEdgeTypeGoto.cpp controlflowgraph/CFGEdgeTypeGoto.h \
-	controlflowgraph/CFGEdgeTypeGotoBackEdge.cpp controlflowgraph/CFGEdgeTypeGotoBackEdge.h \
+	controlflowgraph/CFGEdgeTypeFalseExit.cpp controlflowgraph/CFGEdgeTypeFalseExit.h \
 	controlflowgraph/CFGEdgeTypeReturn.cpp controlflowgraph/CFGEdgeTypeReturn.h \
 	Function.cpp Function.h \
 	ImprovedDFSVisitorBase.h \

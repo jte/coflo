@@ -1316,6 +1316,17 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		// Change this edge type to a back edge.
 		std::clog << "Marking back edge: " << e << std::endl;
 		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
+		
+		// If the source node of this back edge now has no out-edges,
+		// add a FalseExit edge to it, so topological sorting works correctly.
+		T_CFG_VERTEX_DESC src;
+		src = boost::source(e, *m_cfg);
+		if(boost::out_degree(src, *m_cfg) == 1)
+		{
+			T_CFG_EDGE_DESC newedge;
+			boost::tie(newedge, boost::tuples::ignore) = boost::add_edge(src, m_last_statement, *m_cfg);
+			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeFalseExit;
+		}
 	}
 	
 	return true;
