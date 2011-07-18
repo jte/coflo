@@ -96,6 +96,7 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 }
 
 void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
+
 void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
 
 //@}

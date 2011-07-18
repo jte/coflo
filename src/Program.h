@@ -28,6 +28,7 @@
 class TranslationUnit;
 class Function;
 class ToolCompiler;
+class ToolDot;
 
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
 
@@ -43,7 +44,7 @@ public:
 	virtual ~Program();
 	
     void SetTheCtags(std::string the_ctags);
-    void SetTheDot(std::string the_dot);
+    void SetTheDot(ToolDot *the_dot);
     void SetTheGcc(ToolCompiler *the_compiler);
     void SetTheFilter(std::string the_filter);
 
@@ -74,7 +75,7 @@ private:
 	
 	/// The dot program from the GraphViz program to use for generating
 	/// the graph drawings.
-	std::string m_the_dot;
+	ToolDot *m_the_dot;
 	
 	/// The ctags program to use to extract further information on the source.
 	std::string m_the_ctags;

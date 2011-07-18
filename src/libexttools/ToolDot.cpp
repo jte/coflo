@@ -17,29 +17,24 @@
 
 /** @file */
 
-#ifndef TOOLCOMPILER_H
-#define	TOOLCOMPILER_H
+#include <iostream>
+#include <sstream>
 
-#include "ToolBase.h"
+#include "ToolDot.h"
 
-class ToolCompiler : public ToolBase
+ToolDot::ToolDot(const std::string &cmd)
 {
+	SetCommand(cmd);
+}
 
-public:
-	ToolCompiler(const std::string &cmd);
-	ToolCompiler(const ToolCompiler& orig);
-	virtual ~ToolCompiler();
-	
-	int GenerateCFG(const std::string &params);
-	
-protected:
-	
-	virtual std::string GetVersionOptionString() const { return "--version"; };
-	virtual std::string GetVersionExtractionRegex() const { return "[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+).*"; };
-	
-private:
+ToolDot::ToolDot(const ToolDot& orig) : ToolBase(orig) { }
 
-};
+ToolDot::~ToolDot() { }
 
-#endif	/* TOOLCOMPILER_H */
-
+bool ToolDot::CompileDotToPNG(const std::string &dot_filename) const
+{
+	System((" -O -Tpng "+dot_filename).c_str());
+	
+	/// @todo Handle errors.
+	return true;
+}

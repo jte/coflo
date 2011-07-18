@@ -21,9 +21,12 @@
 #define	TOOLBASE_H
 
 #include <string>
+#include <iosfwd>
+
+#include "VersionNumber.h"
 
 /**
- * Base class for external tools we'll invoke.
+ * Base class for wrappers around external executables we need to run.
  */
 class ToolBase
 {
@@ -37,9 +40,27 @@ public:
 	
 	void SetWorkingDirectory(const std::string &working_directory);
 	
-	virtual std::string GetVersion() const = 0;
+	virtual std::string GetVersion() const;
 	
 protected:
+	
+	/**
+	 * Overload this in derived classes to return the options given on the
+	 * command line to cause the program to print its version info to stdout.
+	 * May include sh-style stderr redirection if necessary.
+	 * 
+     * @return The parameters to pass to m_cmd to make it print its version info.
+     */
+	virtual std::string GetVersionOptionString() const = 0;
+	
+	/**
+	 * Overload this in derived classes to return a regular expression which extracts
+	 * the version number from a string in the version info output by the program
+	 * when passed m_version_options.
+	 * 
+     * @return 
+     */
+	virtual std::string GetVersionExtractionRegex() const = 0;
 	
 	/// The filename of the command.
 	std::string m_cmd;
@@ -55,6 +76,16 @@ protected:
      * @return Return value of the command.
      */
 	int System(const std::string &params) const;
+	
+	bool Popen(const std::string &params, std::ostream &progs_stdout) const;
+	
+private:
+	
+	/// The options to pass to the program to make it print its version info to stdout.
+	std::string m_version_options;
+	
+	/// The regular expression used to extract the actual version number from the version string.
+	std::string m_version_regex;
 
 };
 

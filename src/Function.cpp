@@ -55,6 +55,8 @@
 #include "ControlFlowGraph.h"
 #include "CFGDFSVisitor.h"
 
+#include "libexttools/ToolDot.h"
+
 /// Property map typedef which allows us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
 typedef boost::property_map< T_CFG, Function* CFGVertexProperties::* >::type T_VERTEX_PROPERTY_MAP;
@@ -1156,7 +1158,7 @@ void Function::PrintControlFlowGraph()
 }
 
 
-void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir)
+void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir)
 {
 	std::string dot_filename;
 
@@ -1180,7 +1182,8 @@ void Function::PrintDotCFG(const std::string &the_dot, const boost::filesystem::
 	outfile.close();
 	
 	std::cerr << "Compiling " << dot_filename << std::endl;
-	::system((the_dot + " -O -Tpng "+dot_filename).c_str());
+	the_dot->CompileDotToPNG(dot_filename);
+	///::system((the_dot + " -O -Tpng "+dot_filename).c_str());
 }
 
 bool Function::CreateControlFlowGraph(T_CFG & cfg)
@@ -1304,8 +1307,6 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	dfs_back_edge_finder_visitor back_edge_finder(back_edges);
 
 	vertex_filter_predicate the_vertex_filter(vpm, this);
-	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate>
-		graph_of_this_function(*m_cfg, boost::keep_all(), the_vertex_filter);
 	
 	// Find all the back edges.
 	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
@@ -1326,6 +1327,32 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 			T_CFG_EDGE_DESC newedge;
 			boost::tie(newedge, boost::tuples::ignore) = boost::add_edge(src, m_last_statement, *m_cfg);
 			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeFalseExit;
+		}
+	}
+	
+	{
+		typedef boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> T_FILTERED_GRAPH;
+		T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(), the_vertex_filter);
+
+		boost::graph_traits<T_FILTERED_GRAPH>::vertex_iterator vit, vend;
+		boost::tie(vit, vend) = boost::vertices(graph_of_this_function);
+		for(; vit != vend; vit++)
+		{
+			long id, od;
+			id = boost::in_degree(*vit, graph_of_this_function);
+			od = boost::out_degree(*vit, graph_of_this_function);
+
+			if((id == 0) && (*vit != m_first_statement))
+			{
+				std::cerr << "ERROR: Non-ENTRY vertex with in-degree of 0 in function \""
+					<< GetIdentifier() << "\"" << std::endl;
+			}
+
+			if((od == 0) && (*vit != m_last_statement))
+			{
+				std::cerr << "ERROR: Non-EXIT vertex with out-degree of 0 in function \""
+					<< GetIdentifier() << "\"" << std::endl;
+			}
 		}
 	}
 	

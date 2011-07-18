@@ -21,7 +21,7 @@
  * GCC file paths for "gcc -S -fdump-tree-cfg-lineno-blocks <file>.c":
  * - Source path: relative to working directory.
  * - Output <file>.c.013t.cfg:
- *		- 4.3.4: Always in working directory.
+ *		- 4.3.4: Always in working directory, ignores -o directory.
  *		- i686-w64-mingw32-gcc (GCC) 4.5.2: In same directory as <file>.s
  * - Output <file>.c.012t.cfg:
  *		- 4.5.2: In same directory as <file>.s (i.e. follows -o).
@@ -34,12 +34,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <boost/regex.hpp>
-
 #include "ToolCompiler.h"
-
-/// Regex for extracting the version string.
-static const boost::regex f_version_regex("[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+).*");
 
 ToolCompiler::ToolCompiler(const std::string &cmd) 
 {
@@ -52,42 +47,17 @@ ToolCompiler::ToolCompiler(const ToolCompiler& orig) : ToolBase(orig)
 
 ToolCompiler::~ToolCompiler() { }
 
-std::string ToolCompiler::GetVersion() const
-{
-	// Create a temp file to dump the version info into.
-	char temp_filename[] = "/tmp/fileXXXXXX";
-	int fd;
-	std::ifstream input_file;
-	std::string line;
-	std::string retval("UNKNOWN");
-
-	fd = mkstemp(temp_filename);
-	
-	// Invoke the compiler and redirect the version info to the file.
-	System(std::string("--version > ") + temp_filename);
-	
-	input_file.open(temp_filename, std::ifstream::in);
-	if(input_file.good())
-	{
-		// Only need the first line of the file.
-		std::getline(input_file, line);
-
-		boost::cmatch capture_results;
-		
-		// Extract the version text.
-		if(boost::regex_match(line.c_str(), capture_results, f_version_regex))
-		{
-			retval = capture_results[1];
-		}
-	}
-	
-	close(fd);
-
-	return retval;
-}
-
 int ToolCompiler::GenerateCFG(const std::string &params)
 {
+	if(VersionNumber(GetVersion()) != VersionNumber("4.3.3"))
+	{
+		std::cout << "GCC is not 4.3.3" << std::endl;
+	}
+	if(VersionNumber(GetVersion()) == VersionNumber("4.3.4"))
+	{
+		std::cout << "GCC Is 4.3.4" << std::endl;
+	}
+	
 	// Create the compile command.
 	std::string compile_to_cfg_command;
 	

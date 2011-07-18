@@ -25,6 +25,7 @@
 
 #include "Program.h"
 #include "libexttools/ToolCompiler.h"
+#include "libexttools/ToolDot.h"
 #include "Analyzer.h"
 
 // Define a shorter namespace alias for boost::program_options.
@@ -200,8 +201,10 @@ int main(int argc, char* argv[])
 		}
 		
 		the_program->SetTheCtags(the_ctags);
-		the_program->SetTheDot(the_dot);
 		the_program->SetTheFilter(the_filter);
+		ToolDot *tool_dot = new ToolDot(the_dot);
+		std::cout << "Dot version: " << tool_dot->GetVersion() << std::endl;
+		the_program->SetTheDot(tool_dot);
 		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
 		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
 		the_program->SetTheGcc(tool_compiler);

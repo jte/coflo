@@ -1,4 +1,4 @@
-# Second-level Makefile.am for CoFlo
+# Second-level Makefile.am for CoFlo, ./src directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -14,6 +14,9 @@
 # 
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+# Include additional automake fragments.
+include $(top_srcdir)/amlocal.am
 
 # Subdirectories with their own Makefile{.am}'s.
 # @todo Do we need something like the nobase_ stuff here: <http://sources.redhat.com/automake/automake.html#Alternative>
@@ -49,6 +52,3 @@ coflo_SOURCES = main.cpp \
 coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
 coflo_LDADD = ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
-
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am

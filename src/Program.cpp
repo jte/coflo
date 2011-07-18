@@ -42,7 +42,7 @@ void Program::SetTheCtags(std::string the_ctags)
 	m_the_ctags = the_ctags;
 }
 
-void Program::SetTheDot(std::string the_dot)
+void Program::SetTheDot(ToolDot *the_dot)
 {
 	m_the_dot = the_dot;
 }

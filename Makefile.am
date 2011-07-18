@@ -15,11 +15,17 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory.
+# Make sure autotools pick up the M4 macros in the ./m4 directory, and also copies
+# any third-party macros (e.g. the system-wide ax_* Autoconf Macro Archive ones
+# in /usr/share/aclocal) to ./m4 so they get distributed and automatically updated.
 ACLOCAL_AMFLAGS = -I m4 --install
+
+# Include additional automake fragments.
+include $(top_srcdir)/amlocal.am
 
 # The subdirectories containing the source code and tests.
 SUBDIRS = src test
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
+# Add the doxygen-doc files to the MOSTLYCLEANFILES var so they can be cleaned.
+MOSTLYCLEANFILES = $(DX_CLEANFILES)
+

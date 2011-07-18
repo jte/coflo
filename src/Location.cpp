@@ -22,7 +22,7 @@
 
 /// Regex string for matching and capturing locations.
 /// Capture 1 is the path, 2 is the line number, and 3 is the possibly-missing column number.
-static const boost::regex f_location_expression("\\[([^\\]]*?)[[:space:]]\\:[[:space:]]([[:digit:]]+)\\:?([[:digit:]])?\\]");
+static const boost::regex f_location_expression("\\[([^\\]]*?)[[:space:]]\\:[[:space:]]([[:digit:]]+)(?:[[:space:]]?\\:[[:space:]]?([[:digit:]]+))?\\]");
 
 Location::Location(const std::string &location_string)
 {
@@ -44,7 +44,7 @@ Location::Location(const std::string &location_string)
 	}
 	else
 	{
-		std::cerr << "WARNING: UNPARSABLE LOCATION" << std::endl;
+		std::cerr << "WARNING: UNPARSABLE LOCATION: " << location_string << std::endl;
 	}
 }
 
@@ -79,10 +79,10 @@ std::string Location::GetAbsoluteFilePath() const
  */
 std::ostream& operator<<(std::ostream& os, const Location& loc)
 {
-    os << loc.m_passed_file_path << ":" << loc.m_line_number << ":";
+    os << loc.m_passed_file_path << ":" << loc.m_line_number;
 	if(loc.m_column != -1)
 	{
-		os << loc.m_column;
+		os << ":" << loc.m_column;
 	}
     return os;
 }

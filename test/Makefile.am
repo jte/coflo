@@ -1,4 +1,4 @@
-# Makefile.am for CoFlo's Test directory.
+# Second-level Makefile.am for CoFlo's ./test directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -23,17 +23,17 @@ include $(top_srcdir)/amlocal.am
 # Add scripts which will be generated and used during "make check" to check_SCRIPTS.
 # Note that scripts are not distributed by default, so we don't need a "nodist_" prefix here.
 check_SCRIPTS = generated_tests.at
-EXTRA_DIST = testsuite.at $(srcdir)/package.m4 $(TESTSUITE) #atlocal.in
+EXTRA_DIST = testsuite.at $(srcdir)/package.m4 $(TESTSUITE) atlocal.in
 CLEANFILES = generated_tests.at
 TESTSUITE = $(srcdir)/testsuite
 
 ###
 ### Rules to hook the AutoTest functionality into Automake.
 ###
-check-local: atconfig $(TESTSUITE)
+check-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
      
-installcheck-local: atconfig $(TESTSUITE)
+installcheck-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' AUTOTEST_PATH='$(bindir)' \
 	$(TESTSUITEFLAGS)
      
@@ -60,7 +60,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	echo '  [$(PACKAGE_BUGREPORT)])'; \
 	echo 'm4_define([AT_PACKAGE_URL],' && \
 	echo '  [$(PACKAGE_URL)])'; \
-	} >'$(srcdir)/package.m4'
+	} > '$(srcdir)/package.m4'
 
 ###
 ### Make-check-time generated tests.
@@ -92,10 +92,7 @@ generated_tests.at: Makefile
 	done;
 	:; { echo "" && echo "# GENERATION COMPLETE."; } >> $@
 
-###
-### testsuite.at isn't built, but it does include generated_tests.at,
-### so we'll let make know about this dependency.
-###
+# List testsuite.at's dependencies.
 $(srcdir)/testsuite.at: generated_tests.at
 
 ###
@@ -123,18 +120,3 @@ test_source_file_1.cpp: $(srcdir)/test_source_file_1.c
 test_source_file_2.cpp: $(srcdir)/test_source_file_2.c
 	@# Simply copy the C files to make C++ versions.
 	cp $(srcdir)/test_source_file_2.c $@;
-
-# List of scripts that will be use during "make check" and are not built.  Note that scripts are not
-# distributed by default, hence the "dist_" prefix.
-#dist_check_SCRIPTS = test_template.sh
-
-# List of scripts that will be used during "make check" and are built.  Note that scripts are not
-# distributed by default, so these built scripts have no "dist_".
-#check_SCRIPTS = test_cpp1.sh
-#EXTRA_SCRIPTS = 
-#CLEANFILES += $(check_SCRIPTS)
-
-#test_cpp1.sh: test_template.sh Makefile $(CPP_TEST_SOURCE)
-#	cat $(srcdir)/test_template.sh | sed -e 's,[@]gcc[@],gcc,g' \
-#	    -e 's,[@]test_source[@],\"${CPP_TEST_SOURCE}\",g' \
-#	> $@

@@ -34,6 +34,13 @@
 
 using namespace boost;
 
+// Regex for finding a "# SUCC:" statement, which ends the current block.
+// Capture 1 is the string of successors, which will be further parsed by the Block object itself.
+static const boost::regex f_successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
+
+static const boost::regex f_pred_expression("[[:space:]]+# PRED\\:.*");
+
+
 Block::Block(Function * parent_function, long block_number, long block_starting_line_in_src)
 {
 	m_parent_function = parent_function;
@@ -74,6 +81,82 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
  
 Block::~Block()
 {
+}
+
+bool Block::Parse(std::istream &input_stream)
+{
+	std::string line;
+	
+	while(input_stream.good())
+	{
+		// Get the next line of input.
+		std::getline(input_stream, line);
+		std::cout << "LINE=" << line << std::endl;
+		
+		boost::cmatch capture_results;
+		
+		// Check for and ignore comments.
+		if(line[0] == ';')
+		{
+			continue;
+		}
+		
+		if(regex_match(line.c_str(), capture_results, f_pred_expression))
+		{
+			// Found the "#PRED:" expression, skip for now (maybe we'll use this some time in the future).
+			//std::cout << "SKIPPING PRED=" << line << std::endl;
+			break;
+		}
+	}
+	
+	// Look for Statements.
+	Statement *next_statement;
+	do
+	{
+		next_statement = Statement::Parse(input_stream);
+
+		if(next_statement != NULL)
+		{
+			// Add the statement to the block's statement list.
+			AddStatement(next_statement);
+		}
+	} while (next_statement != NULL);
+		
+	while(input_stream.good())
+	{
+		// Get the next line of input.
+		std::getline(input_stream, line);
+		std::cout << "LINE=" << line << std::endl;
+		
+		boost::cmatch capture_results;
+		
+		// Check for and ignore comments.
+		if(line[0] == ';')
+		{
+			continue;
+		}
+		
+		// Look for block ends.
+		if(regex_match(line.c_str(), capture_results, f_successor_expression))
+		{
+			std::cout << "Found \"SUCC:\" line: \"" << capture_results[1] << "\", ending block "
+				<< GetBlockNumber() << ", with " 
+				<< NumberOfStatements() << " statements." << std::endl;
+
+			if(NumberOfStatements() == 0)
+			{
+				// Make sure every block has at least one statement.
+				std::stringstream oss;
+				oss << "[UNKNOWN/file.c : " << GetBlockStartingLineNo() << "]";
+				AddStatement(new NoOp(new Location(oss.str())));
+			}
+
+			// Parse the block's successors.
+			AddSuccessors(capture_results[1]);
+
+			return true;
+		} 
+	}
 }
  
 void Block::AddStatement(Statement *statement)
