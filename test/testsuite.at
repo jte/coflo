@@ -23,6 +23,9 @@ AT_COLOR_TESTS
 
 AT_TESTED([../src/coflo.exe])
 
+GCC_LIST=$(find /usr/bin -iname "\*-\*-\*-gcc-\*${EXEEXT}" -or -iname "\*-\*-\*-gcc${EXEEXT}")
+echo ${GCC_LIST}
+
 # Start a test category.
 AT_BANNER([[Compiler Compatibility Tests]])
 

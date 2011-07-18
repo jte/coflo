@@ -26,8 +26,10 @@
 #include "ControlFlowGraph.h"
 #include "Program.h"
 
+// Forward declarations.
 class Function;
 class FunctionCall;
+class ToolDot;
 
 /**
  * Class representing a single source file.
@@ -70,7 +72,7 @@ public:
 	
 	bool CreateControlFlowGraphs(T_CFG * cfg);
 
-	void Print(const std::string &the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
+	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
 	
 	std::string GetFilePath() const { return m_source_filename.string(); };
 	

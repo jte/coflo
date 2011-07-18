@@ -73,5 +73,5 @@ AX_BOOST_FILESYSTEM
 # Check for come functions we need.
 AC_CHECK_FUNC(glob)
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
 AC_OUTPUT

@@ -29,6 +29,7 @@
 
 class Block;
 class FunctionCall;
+class ToolDot;
 
 class Function
 {
@@ -65,7 +66,7 @@ public:
 	
 	void PrintControlFlowGraph();
 	
-	void PrintDotCFG(const std::string &the_dot, const boost::filesystem::path& output_dir);
+	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
 	
 	/// @name Function Properties
 	/// These are various properties of the function represented by this class instance.
@@ -80,7 +81,7 @@ public:
      */
 	bool IsCalled() const;
 	
-	/// \todo Probably should have the following:
+	/// @todo Probably should have the following:
 	/// IsPure()		(Has no side effects, but may read global memory)
 	/// IsConst()		(IsPure() but with the further restriction that it can't access global memory).
 	/// IsDeprecated()	(Shouldn't be used anymore.)

@@ -18,6 +18,7 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include <iosfwd>
 #include <vector>
 #include <string>
 
@@ -39,6 +40,8 @@ public:
 
 	Block(Function * parent_function, long block_number, long block_starting_line_in_src);
 	~Block();
+	
+	bool Parse(std::istream &input_stream);
 
 	bool IsENTRY() const { return m_block_number == 0; };
 	

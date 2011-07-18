@@ -32,6 +32,8 @@ public:
 	Statement(const Statement& orig);
 	virtual ~Statement();
 	
+	static Statement* Parse(std::istream &input_stream);
+	
 	/**
 	 * Get text suitable for setting the statement's attributes in a dot file.
      * @return 

@@ -55,10 +55,6 @@ static const std::string f_identifier_expression("[[:alpha:]_][[:alnum:]_]*");
 
 static const std::string f_qualifiers("const|virtual|static");
 
-/// Regex string for matching and capturing locations.
-/// Capture 1 is the path, 2 is the line number.
-static const std::string f_location("(\\[[^\\]]*?[[:space:]]\\:[[:space:]][[:digit:]]+\\])");
-
 /// .+? is the filename.
 static const std::string f_static_destructors("\\(static destructors for .+?\\)");
 
@@ -72,24 +68,12 @@ static const boost::regex f_c_function_def_expression("^("+f_identifier_expressi
 /// - Capture 1 is everything before the function name (i.e. return type, qualifiers, etc.).
 /// - Capture 2 is the function identifier itself.
 /// - Capture 3 is the formal parameter list, just the types.
-/// - Capture 4 is the formal maramter list, just the names.
+/// - Capture 4 is the formal parameter list, just the names.
 static const boost::regex f_cpp_function_def_expression("^([^;]*)[[:space:]]("+f_identifier_expression+")\\(.*\\)[[:space:]]\\(.*\\)");
 
-// Regex for finding block starts.  Capture 1 is the block number, 2 is the starting line in the file.
-static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([[:digit:]]+))?");
+/// Regex for finding block starts.  Capture 1 is the block number, 2 is the starting line in the file (possibly "-1").
+static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([-]?[[:digit:]]+))?(?:, discriminator [[:digit:]]+)?");
 
-// Regex for finding a "# SUCC:" statement, which ends the current block.
-// Capture 1 is the string of successors, which will be further parsed by the Block object itself.
-static const boost::regex f_successor_expression("[[:space:]]+# SUCC\\:[[:space:]]*(.*)");
-
-// Regex to find function calls. Capture 1 and 2 is the file/line no, 3 is the called function ID.
-static const boost::regex f_function_call_expression(".+?"+f_location+" ([[:alpha:]_][[:alnum:]_]*) \\(.*\\);");
-
-// Regex to find if/else statements.  Capture 1 is the file/line no.
-static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*?\\)");
-
-// Regex to find switch statements.  Capture 1 and 2 is the file/line no.
-static const boost::regex f_switch_expression(".+?"+f_location+" switch \\(.*?\\)");
 
 
 TranslationUnit::TranslationUnit(const std::string &file_path)
@@ -192,7 +176,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	std::string line;
 	std::string in_function_name;
 	bool in_function = false;
-	bool in_block = false;
 
 	Function *current_function;
 	Block *current_block;
@@ -261,6 +244,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			if(regex_match(line.c_str(), capture_results, f_block_start_expression))
 			{
 				long block_start_line_no;
+				bool block_parsed_successfully;
 
 				std::cout << "Found block: " << capture_results[1] << std::endl;
 
@@ -269,6 +253,13 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				{
 					// There was, pass it to the Block() constructor.
 					block_start_line_no = atoi(capture_results[2].str().c_str());
+					/// @todo For some reason, gcc 4.5.3 will sometimes have a "-1" for the
+					/// block starting line.  Clamp this to zero until/unless we figure out
+					/// if this is actually telling us something useful.
+					if(block_start_line_no < 0)
+					{
+						block_start_line_no = 0;
+					}
 				}
 				else
 				{
@@ -278,74 +269,17 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				current_block = new Block(current_function,
 										 atoi(capture_results[1].str().c_str()),
 										 block_start_line_no);
-				in_block = true;
-				continue;
-			}
-
-			// Look for block ends.
-			if(regex_match(line.c_str(), capture_results, f_successor_expression))
-			{
-				std::cout << "Found \"SUCC:\" line: \"" << capture_results[1] << "\", ending block "
-					<< current_block->GetBlockNumber() << ", with " 
-					<< current_block->NumberOfStatements() << " statements." << std::endl;
 				
-				if(current_block->NumberOfStatements() == 0)
+				block_parsed_successfully = current_block->Parse(input_file);
+				if(!block_parsed_successfully)
 				{
-					// Make sure every block has at least one statement.
-					std::stringstream oss;
-					oss << "[UNKNOWN/file.c : " << current_block->GetBlockStartingLineNo() << "]";
-					current_block->AddStatement(new NoOp(new Location(oss.str())));
+					std::cerr << "ERROR: Block parse failed." << std::endl;
 				}
-
-				// Tell the Block what its successors are.
-				current_block->AddSuccessors(capture_results[1]);
-
+				
 				// Add the block to the current function.
 				current_function->AddBlock(current_block);
-				in_block = false;
+				
 				continue;
-			}
-
-			if(in_block)
-			{
-				// Look for if statements.
-				if(regex_match(line.c_str(), capture_results, f_if_expression))
-				{
-					// Add the if to the block.
-					Location *loc = new Location(capture_results[1].str());
-					std::cerr << "Found if at location: " << *loc << std::endl;
-					If *if_stmnt = new If(loc);
-					current_block->AddStatement(if_stmnt);
-					
-					continue;
-				}
-				
-				// Look for switch statements.
-				if(regex_match(line.c_str(), capture_results, f_switch_expression))
-				{
-					// Add the switch to the block.
-					Location *loc = new Location(capture_results[1].str());
-					std::cerr << "Found switch at location: " << *loc << std::endl;
-					Switch *switch_stmnt = new Switch(loc);
-					current_block->AddStatement(switch_stmnt);
-					
-					continue;
-				}
-				
-				// Look for function calls.
-				if(regex_match(line.c_str(), capture_results, f_function_call_expression))
-				{
-					std::cerr << "Found call: " << capture_results[2] << std::endl;
-					
-					// Add the call to the block.
-					// Note that at this point, it's an Unresolved call, since we haven't
-					// linked yet.
-					Location loc(capture_results[1].str());
-					FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], &loc);
-					current_block->AddStatement(f);
-					
-					continue;
-				}
 			}
 		}
 	}
@@ -386,7 +320,7 @@ bool TranslationUnit::CreateControlFlowGraphs(T_CFG * cfg)
 	return true;
 }
 
-void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
+void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
@@ -415,7 +349,6 @@ void TranslationUnit::Print(const std::string &the_dot, const boost::filesystem:
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		//fp->Print();
 		fp->PrintDotCFG(the_dot, output_dir);
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
 		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;

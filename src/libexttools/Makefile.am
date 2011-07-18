@@ -1,4 +1,4 @@
-# Second-level Makefile.am for CoFlo
+# Second-level Makefile.am for CoFlo, ./libexttools directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -18,4 +18,6 @@
 
 noinst_LIBRARIES = libexttools.a
 libexttools_a_SOURCES = ToolBase.cpp ToolBase.h \
-    ToolCompiler.cpp ToolCompiler.h
+    ToolCompiler.cpp ToolCompiler.h \
+    ToolDot.cpp ToolDot.h \
+    VersionNumber.cpp VersionNumber.h
