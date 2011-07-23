@@ -22,7 +22,28 @@
 
 #include "VersionNumber.h"
 
+VersionNumber::VersionNumber()
+{
+
+}
+
 VersionNumber::VersionNumber(const std::string &version_string)
+{
+	Set(version_string);
+}
+
+VersionNumber::VersionNumber(const VersionNumber& orig) 
+{
+	// Copy the internals.
+	DeepCopy(orig);
+}
+
+VersionNumber::~VersionNumber()
+{
+	// Nothing to destroy.
+}
+
+void VersionNumber::Set(const std::string &version_string)
 {
 	// We'll use stringstream to parse the integers out of version_string.
 	std::istringstream parser(version_string);
@@ -40,9 +61,20 @@ VersionNumber::VersionNumber(const std::string &version_string)
 	}
 }
 
-VersionNumber::VersionNumber(const VersionNumber& orig) { }
-
-VersionNumber::~VersionNumber() { }
+VersionNumber& VersionNumber::operator=(const VersionNumber &other)
+{
+	// Check for self-assignment.
+	if(this == &other)
+	{
+		// This was an attempt to assign to ourself.  Just return a reference to this instance.
+		return *this;
+	}
+	
+	// Otherwise do the copy.
+	DeepCopy(other);
+	
+	return *this;	
+}
 
 bool VersionNumber::operator==(const VersionNumber &other) const
 {
@@ -53,4 +85,30 @@ bool VersionNumber::operator<(const VersionNumber &other) const
 {
 	return std::lexicographical_compare(m_version_digits.begin(), m_version_digits.end(),
 									 other.m_version_digits.begin(), other.m_version_digits.end());
+}
+
+VersionNumber::operator std::string() const
+{
+	return m_version_string;
+}
+
+void VersionNumber::DeepCopy(const VersionNumber &other)
+{
+	// Do a deep (vs. the default shallow) copy of the object.
+	m_version_string = other.m_version_string;
+	m_version_digits = other.m_version_digits;
+}
+
+/**
+ * Insertion operator for VersionNumber.
+ * 
+ * @param os  Stream to insert VersionNumber into.
+ * @param ver Reference to the VersionNumber object.
+ * @return Reference to the ostream that was passed in.
+ */
+std::ostream& operator<<(std::ostream& os, const VersionNumber& ver)
+{
+    os << static_cast<std::string>(ver);
+	
+    return os;
 }

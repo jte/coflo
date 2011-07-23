@@ -32,10 +32,11 @@
 namespace po = boost::program_options;
 
 /**
- * Additional command-line parser for the '@file' response file specification.
+ * Additional command-line parser for '@file' response files.
  * 
- * @param s
- * @return 
+ * @param s String to check for a prefix of '@', indicating that this is a response file name.
+ * @return If this isn't a '@filename' paramter, a std::pair<> of two empty strings.
+ *         If it is, the pair <"response-file", filename>.
  */
 std::pair<std::string, std::string> at_option_parser(const std::string &s)
 {
@@ -95,7 +96,8 @@ int main(int argc, char* argv[])
 	("response-file", po::value<std::string>(), "Read command line options from file. Can also be specified with '@name'.")
 	("debug-parse", "Print debug info concerning the CFG parsing stage.")
 	("debug-link", "Print debug info concerning the CFG linking stage.")
-	("output-dir", po::value< std::string >(), "Put output in the given directory.")
+	("obj-dir", po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
+	("output-dir,O", po::value< std::string >(), "Put output in the given directory.")
 	;
 	preproc_options.add_options()
 	("define,D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
@@ -135,7 +137,7 @@ int main(int argc, char* argv[])
 			 return 1;
 		 }
 		 // Read the whole file into a string
-		 /// @todo Possibly lock the file as FILE_SHARE_READ while doing this.
+		 /// @todo Possibly lock the file as FILE_SHARE_READ while doing this?
 		 std::stringstream ss;
 		 ss << ifs.rdbuf();
 		 // Split the file content
@@ -177,6 +179,21 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
+	// See what we have for an object directory.
+	std::string the_root_object_dir;
+	if(vm.count("obj-dir")>0)
+	{
+		// Get the specified object directory.
+		the_root_object_dir = vm["obj-dir"].as<std::string>();
+	}
+	else
+	{
+		// No object dir was specified, create a temp one under the current directory.
+		the_root_object_dir = ToolBase::Mktemp("./coflo_obj_dir_XXXXXX", true);
+		
+		std::cout << "TEMP DIR = " << the_root_object_dir << std::endl;
+	}
+	
 	the_program = new Program();
 	the_analyzer = new Analyzer();
 	
@@ -203,10 +220,10 @@ int main(int argc, char* argv[])
 		the_program->SetTheCtags(the_ctags);
 		the_program->SetTheFilter(the_filter);
 		ToolDot *tool_dot = new ToolDot(the_dot);
-		std::cout << "Dot version: " << tool_dot->GetVersion() << std::endl;
-		the_program->SetTheDot(tool_dot);
 		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
+		std::cout << "Dot version: " << tool_dot->GetVersion() << std::endl;
 		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
+		the_program->SetTheDot(tool_dot);
 		the_program->SetTheGcc(tool_compiler);
 		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());
 		if(!the_program->Parse(

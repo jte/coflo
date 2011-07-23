@@ -40,7 +40,31 @@ public:
 	
 	void SetWorkingDirectory(const std::string &working_directory);
 	
-	virtual std::string GetVersion() const;
+	virtual VersionNumber GetVersion() const;
+	
+	/// @name Static utility functions.
+	//@{
+	
+	/**
+	 * C++ wrapper around POSIX glob().
+	 * 
+     * @param pattern The pattern to match.
+     * @return A vector of matching filenames.
+     */
+	static std::vector< std::string > Glob(const std::string &pattern);
+	
+	/**
+	 * A mktemp(1) work-alike.  Creates a temporary file or directory in a race-free
+	 * manner and returns the name.
+	 * 
+     * @param filename_template
+     * @param directory If true, create a directory instead of a file.
+     * @param 
+     * @return 
+     */
+	static std::string Mktemp(const std::string &filename_template = "", bool directory = false, bool rooted_in_tmp = true);
+	
+	//@}
 	
 protected:
 	
@@ -61,12 +85,7 @@ protected:
      * @return 
      */
 	virtual std::string GetVersionExtractionRegex() const = 0;
-	
-	/// The filename of the command.
-	std::string m_cmd;
-	
-	/// The working directory in which to invoke the command.
-	std::string m_working_directory;
+
 		
 	/**
 	 * Wrapper around the system() call.
@@ -77,7 +96,20 @@ protected:
      */
 	int System(const std::string &params) const;
 	
+	/**
+	 * Wrapper around popen("???", "r")/pclose().
+	 * 
+     * @param params
+     * @param progs_stdout
+     * @return 
+     */
 	bool Popen(const std::string &params, std::ostream &progs_stdout) const;
+	
+	/// The filename of the command.
+	std::string m_cmd;
+	
+	/// The working directory in which to invoke the command.
+	std::string m_working_directory;
 	
 private:
 	
@@ -86,6 +118,9 @@ private:
 	
 	/// The regular expression used to extract the actual version number from the version string.
 	std::string m_version_regex;
+	
+	/// The version number.
+	mutable VersionNumber m_version_number;
 
 };
 

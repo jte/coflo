@@ -65,7 +65,7 @@ int ToolCompiler::GenerateCFG(const std::string &params)
 	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
 	compile_to_cfg_command = " -S -fdump-tree-cfg-lineno-blocks";
 	
-	std::cout << "Compiling with " << params << "..." << std::endl;
+	std::cout << "Running gcc with params: " << params << "..." << std::endl;
 	
 	return System(compile_to_cfg_command+params);
 }

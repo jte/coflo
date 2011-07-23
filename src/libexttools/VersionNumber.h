@@ -33,22 +33,45 @@
 class VersionNumber : boost::totally_ordered<VersionNumber>
 {
 public:
+	VersionNumber();
 	VersionNumber(const std::string &version_string);
 	VersionNumber(const VersionNumber& orig);
 	virtual ~VersionNumber();
 	
+	void Set(const std::string &version_string);
+	
 	/// @name Overloaded operators.
 	/// Others are provided by Boost.Operators.
 	//@{
+	VersionNumber& operator=(const VersionNumber &other);
 	bool operator==(const VersionNumber &other) const;
 	bool operator<(const VersionNumber &other) const;
 	//@}
+	
+	/// @name Conversion operators
+	//@{
+	operator std::string() const;
+	//@}
+	
+	bool empty() const { return m_version_string.empty(); };
+	
+	friend std::ostream& operator<<(std::ostream& os, const VersionNumber& ver);
+	
 private:
 
+	/**
+	 * Do a deep (vs. the default shallow) copy of the object.
+	 * Does the work for copy constructors and assignment operators.
+	 * 
+     * @param other The other VersionNumber to copy into this one.
+     */
+	void DeepCopy(const VersionNumber &other);
+	
 	/// The version number in its original string form.
 	std::string m_version_string;
 	
-	// The version number parsed into its constituent parts.
+	/// The version number parsed into its constituent parts.
+	/// This is primarily for comparison purposes.
 	std::vector<int> m_version_digits;
 };
 

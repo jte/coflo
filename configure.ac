@@ -18,7 +18,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([[CoFlo]], m4_esyscmd([echo "0.0" | tr -d '\n']), [[BUG-REPORT-ADDRESS]],,[[http://coflo.sourceforge.net/]])
+AC_INIT([CoFlo], m4_esyscmd([echo "0.0" | tr -d '\n']), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
 AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
@@ -42,6 +42,8 @@ AM_INIT_AUTOMAKE([check-news
     parallel-tests
     1.11.1
 ])
+
+# Check for the various compilers and other tools we need to do a build.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -75,3 +77,4 @@ AC_CHECK_FUNC(glob)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
 AC_OUTPUT
+
