@@ -21,10 +21,35 @@ AT_INIT([[CoFlo Test Suite]])
 AT_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
 AT_COLOR_TESTS
 
-AT_TESTED([../src/coflo.exe])
+# We only have one executable to test.
+AT_TESTED([coflo.exe])
 
-GCC_LIST=$(find /usr/bin -iname "\*-\*-\*-gcc-\*${EXEEXT}" -or -iname "\*-\*-\*-gcc${EXEEXT}")
-echo ${GCC_LIST}
+# Get a list of the gcc binaries installed on the system.
+# This runs once at "make check" time, prior to AT_INIT().
+m4_divert_once([PREPARE_TESTS],
+[
+	AS_ECHO(["Getting a list of gcc installations..."])
+	#todo This is duplicated in the ./test/Makefile.am, should figure out a way to make this a single definition.
+	MAX_GCCS_TO_TEST=16;
+	for (( i=0; $i<${MAX_GCCS_TO_TEST}; i++ )); do
+		# Initialize all GCC_VERSION_ARRAY entries to 0, so the skip test works correctly.
+		[GCC_VERSION_ARRAY@<:@$i@:>@="0";]
+	done;
+	# Get the paths to gcc's.
+	GCC_ARRAY=($(find /usr/bin -regextype posix-extended -iregex '.*-.*-.*-gcc-.*(\.exe)?$' -or -iregex '.*/gcc(\.exe)?$'));
+	NUM_GCCS_FOUND=${#GCC_ARRAY@<:@*@:>@};
+	for (( i=0; $i<${NUM_GCCS_FOUND}; i++ )); do
+		# Get the version string from the compiler.
+		GCC_VERSION_STRING="$("${GCC_ARRAY@<:@$i@:>@}" --version | head -n 1)";
+		# Extract the major version number (the "X" from "X.Y.Z").
+		[GCC_VERSION_ARRAY@<:@$i@:>@="$(echo "${GCC_VERSION_STRING}" | sed -r -n -e 's/.+ ([[:digit:]]+)\.[[:digit:]]+\.[[:digit:]]+( .+)?$/\1/p')";]
+		AS_ECHO(["Found the following gcc binary: ${GCC_ARRAY@<:@$i@:>@} (major version ${GCC_VERSION_ARRAY@<:@$i@:>@})"])
+	done;
+	# Initialize the remaining GCC path slots to "NONE" so the skipped test message looks better.
+	for (( ; $i<${MAX_GCCS_TO_TEST}; i++ )); do
+		GCC_ARRAY@<:@$i@:>@="NONE";
+	done;
+])dnl
 
 # Start a test category.
 AT_BANNER([[Compiler Compatibility Tests]])
@@ -41,6 +66,5 @@ AT_CHECK([${abs_top_builddir}/src/coflo.exe ${abs_top_srcdir}/test/test_source_f
 AT_CLEANUP
 
 # Include the compiler compatibility test script.
-# This is automatically generated at "make check" time, and tests CoFlo paired with
-# every instance of GCC we can find on the system.
+# This file is generated at [TODO: autoconf time?]
 m4_include([generated_tests.at])
