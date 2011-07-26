@@ -27,7 +27,7 @@ MAX_GCCS_TO_TEST=16
 # Note that scripts are not distributed by default, so we don't need a "nodist_" prefix here.
 check_SCRIPTS = generated_tests.at
 EXTRA_DIST = testsuite.at $(srcdir)/package.m4 $(TESTSUITE) atlocal.in
-CLEANFILES = generated_tests.at
+CLEANFILES = generated_tests.at $(CPP_TEST_SOURCE)
 TESTSUITE = $(srcdir)/testsuite
 
 ###
@@ -117,7 +117,7 @@ $(srcdir)/testsuite.at: generated_tests.at
 ###
 ### The rule which makes the "testsuite" shell script.
 ###
-$(TESTSUITE): $(srcdir)/testsuite.at generated_tests.at $(srcdir)/package.m4
+$(TESTSUITE): $(srcdir)/testsuite.at generated_tests.at $(srcdir)/package.m4 $(CPP_TEST_SOURCE)
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 

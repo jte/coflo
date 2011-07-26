@@ -68,3 +68,13 @@ AT_CLEANUP
 # Include the compiler compatibility test script.
 # This file is generated at [TODO: autoconf time?]
 m4_include([generated_tests.at])
+
+AT_SETUP([[Using default GCC against C-style C++ code]])
+
+AT_CHECK([${abs_top_builddir}/src/coflo.exe ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_builddir}/test/test_source_file_2.cpp --print-function-cfg=main],
+	0,
+	ignore,
+	ignore)
+
+# End this test group.
+AT_CLEANUP
