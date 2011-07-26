@@ -27,3 +27,7 @@ libstatements_a_SOURCES = Entry.cpp Entry.h \
     PseudoStatement.cpp PseudoStatement.h \
     Statement.cpp Statement.h \
     Switch.cpp Switch.h
+
+libstatements_a_CPPFLAGS = $(AM_CPPFLAGS)
+libstatements_a_CFLAGS = $(AM_CXXFLAGS)
+libstatements_a_CXXFLAGS = $(AM_CXXFLAGS)

@@ -157,6 +157,10 @@ bool Block::Parse(std::istream &input_stream)
 			return true;
 		} 
 	}
+
+	// Got through the entire file but didn't find a block end, something's wrong.
+	std::cerr << "ERROR: Couldn't find block end" << std::endl;
+	return false;
 }
  
 void Block::AddStatement(Statement *statement)

@@ -48,7 +48,9 @@ coflo_SOURCES = main.cpp \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp Translation.h
-	
-coflo_CPPFLAGS = $(BOOST_CPPFLAGS)
+
+coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
+coflo_CFLAGS = $(AM_CXXFLAGS)
+coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
 coflo_LDADD = ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)

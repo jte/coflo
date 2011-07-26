@@ -19,7 +19,9 @@
 
 CFGEdgeTypeFunctionCallBypass::CFGEdgeTypeFunctionCallBypass() { }
 
-CFGEdgeTypeFunctionCallBypass::CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFunctionCallBypass& orig) { }
+CFGEdgeTypeFunctionCallBypass::CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFunctionCallBypass& orig) : CFGEdgeTypeBase(orig)
+{
+}
 
 CFGEdgeTypeFunctionCallBypass::~CFGEdgeTypeFunctionCallBypass() { }
 

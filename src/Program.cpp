@@ -32,7 +32,9 @@
 
 Program::Program() { }
 
-Program::Program(const Program& orig) { }
+Program::Program(const Program& orig)
+{
+}
 
 Program::~Program() { }
 

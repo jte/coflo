@@ -179,6 +179,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
+#if 0
 	// See what we have for an object directory.
 	std::string the_root_object_dir;
 	if(vm.count("obj-dir")>0)
@@ -193,6 +194,7 @@ int main(int argc, char* argv[])
 		
 		std::cout << "TEMP DIR = " << the_root_object_dir << std::endl;
 	}
+#endif
 	
 	the_program = new Program();
 	the_analyzer = new Analyzer();
@@ -223,6 +225,20 @@ int main(int argc, char* argv[])
 		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
 		std::cout << "Dot version: " << tool_dot->GetVersion() << std::endl;
 		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
+		
+		// Check if this version of GCC is going to work.
+		std::string gcc_version_check_string;
+		bool gcc_ver_ok;
+		boost::tie(gcc_version_check_string, gcc_ver_ok) = tool_compiler->CheckIfVersionIsUsable();
+		if(!gcc_version_check_string.empty())
+		{
+			std::cout << gcc_version_check_string << std::endl;
+		}
+		if(gcc_ver_ok == false)
+		{
+			return 1;
+		}
+		
 		the_program->SetTheDot(tool_dot);
 		the_program->SetTheGcc(tool_compiler);
 		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());

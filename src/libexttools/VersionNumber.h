@@ -43,7 +43,7 @@ public:
 	/// @name Overloaded operators.
 	/// Others are provided by Boost.Operators.
 	//@{
-	VersionNumber& operator=(const VersionNumber &other);
+	VersionNumber operator=(const VersionNumber &other);
 	bool operator==(const VersionNumber &other) const;
 	bool operator<(const VersionNumber &other) const;
 	//@}

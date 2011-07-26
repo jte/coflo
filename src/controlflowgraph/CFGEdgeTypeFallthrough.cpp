@@ -25,7 +25,7 @@ CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough() : CFGEdgeTypeBase()
 {
 }
 
-CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig)
+CFGEdgeTypeFallthrough::CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig) : CFGEdgeTypeBase(orig)
 {
 }
 

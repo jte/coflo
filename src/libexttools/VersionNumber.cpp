@@ -61,12 +61,12 @@ void VersionNumber::Set(const std::string &version_string)
 	}
 }
 
-VersionNumber& VersionNumber::operator=(const VersionNumber &other)
+VersionNumber VersionNumber::operator=(const VersionNumber &other)
 {
 	// Check for self-assignment.
 	if(this == &other)
 	{
-		// This was an attempt to assign to ourself.  Just return a reference to this instance.
+		// This was an attempt to assign to ourself.  Just return this instance.
 		return *this;
 	}
 	
@@ -108,7 +108,7 @@ void VersionNumber::DeepCopy(const VersionNumber &other)
  */
 std::ostream& operator<<(std::ostream& os, const VersionNumber& ver)
 {
-    os << static_cast<std::string>(ver);
+    os << ver.m_version_string;
 	
     return os;
 }

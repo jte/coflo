@@ -22,7 +22,7 @@ CFGEdgeTypeReturn::CFGEdgeTypeReturn(FunctionCall *function_call)
 	m_function_call = function_call;
 }
 
-CFGEdgeTypeReturn::CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig)
+CFGEdgeTypeReturn::CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig) : CFGEdgeTypeBase(orig)
 {
 }
 
