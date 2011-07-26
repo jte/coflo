@@ -37,7 +37,7 @@ extern void do_this();
 extern void do_that();
 
 int another_level_deep() { return 1; };
-int function_a() { another_level_deep();};
+int function_a() { another_level_deep(); return 1; };
 int function_b() {return 2;};
 int function_c() {return 3;};
 static int function_w() {return 4;};
