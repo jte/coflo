@@ -21,7 +21,9 @@
 
 CFGEdgeTypeFalseExit::CFGEdgeTypeFalseExit() { }
 
-CFGEdgeTypeFalseExit::CFGEdgeTypeFalseExit(const CFGEdgeTypeFalseExit& orig) { }
+CFGEdgeTypeFalseExit::CFGEdgeTypeFalseExit(const CFGEdgeTypeFalseExit& orig) : CFGEdgeTypeBase(orig)
+{
+}
 
 CFGEdgeTypeFalseExit::~CFGEdgeTypeFalseExit() { }
 

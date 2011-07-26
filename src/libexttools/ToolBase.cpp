@@ -84,7 +84,7 @@ bool ToolBase::Popen(const std::string &params, std::ostream &progs_stdout) cons
 	// Read the text we got from the popen()'ed process and stream it to progs_stdout.
 	while (bytes_read = fread(read_buffer, 1, buff_size, progs_stdout_fp), bytes_read > 0)
 	{
-		progs_stdout << std::string(reinterpret_cast<char*>(&(read_buffer[0])), buff_size);
+		progs_stdout << std::string(reinterpret_cast<char*>(&(read_buffer[0])), bytes_read);
 	}
 	
 	// Close the popen()'ed file pointer.

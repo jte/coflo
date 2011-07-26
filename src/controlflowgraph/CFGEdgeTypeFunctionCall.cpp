@@ -22,7 +22,7 @@ CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(FunctionCallResolved *function_
 	m_function_call = function_call;
 }
 
-CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(const CFGEdgeTypeFunctionCall& orig)
+CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(const CFGEdgeTypeFunctionCall& orig) : CFGEdgeTypeBase(orig)
 {
 	m_function_call = orig.m_function_call;
 }

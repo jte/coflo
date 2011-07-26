@@ -79,5 +79,8 @@ bool Analyzer::Analyze()
 	{
 		constraint->RunRule();
 	}
+
+	/// @todo Make this real.
+	return true;
 }
 

@@ -20,6 +20,8 @@
 #ifndef TOOLCOMPILER_H
 #define	TOOLCOMPILER_H
 
+#include <utility>
+
 #include "ToolBase.h"
 
 class ToolCompiler : public ToolBase
@@ -31,6 +33,8 @@ public:
 	virtual ~ToolCompiler();
 	
 	int GenerateCFG(const std::string &params);
+	
+	std::pair< std::string, bool > CheckIfVersionIsUsable() const;
 	
 protected:
 	

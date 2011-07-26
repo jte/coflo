@@ -36,14 +36,22 @@ AC_CONFIG_MACRO_DIR([./m4])
 # Autoconf-supported test directory.
 AC_CONFIG_TESTDIR([./test])
 
+# Initialize Automake.
 AM_INIT_AUTOMAKE([check-news
     color-tests
     dist-bzip2
     parallel-tests
     1.11.1
+    -Wall
 ])
 
+# Set up the maintainer compiler flags.
+AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
+AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
+
 # Check for the various compilers and other tools we need to do a build.
+: ${CPPFLAGS=""}	# Don't default to "-g -O2"
+: ${CXXFLAGS=""}	# Don't default to "-g -O2"
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB

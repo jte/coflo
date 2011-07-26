@@ -21,7 +21,9 @@
 
 CFGEdgeTypeGoto::CFGEdgeTypeGoto() { }
 
-CFGEdgeTypeGoto::CFGEdgeTypeGoto(const CFGEdgeTypeGoto& orig) { }
+CFGEdgeTypeGoto::CFGEdgeTypeGoto(const CFGEdgeTypeGoto& orig) : CFGEdgeTypeBase(orig)
+{
+}
 
 CFGEdgeTypeGoto::~CFGEdgeTypeGoto() { }
 

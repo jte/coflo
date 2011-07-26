@@ -21,3 +21,7 @@ libexttools_a_SOURCES = ToolBase.cpp ToolBase.h \
     ToolCompiler.cpp ToolCompiler.h \
     ToolDot.cpp ToolDot.h \
     VersionNumber.cpp VersionNumber.h
+
+libexttools_a_CPPFLAGS = $(AM_CPPFLAGS)
+libexttools_a_CFLAGS = $(AM_CXXFLAGS)
+libexttools_a_CXXFLAGS = $(AM_CXXFLAGS)
