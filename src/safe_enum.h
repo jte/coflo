@@ -22,7 +22,6 @@
 
 /**
  * Safe enumeration template.
- * 
  */
 template <typename def, typename representation = typename def::value_type>
 class safe_enum : public def
@@ -38,7 +37,7 @@ public:
 	/// @name Operators
 	//@{
 	bool operator == (const safe_enum & other) const { return m_value == other.m_value; }
-	bool operator != (const safe_enum & other) const { return m_value == other.m_value; }
+	bool operator != (const safe_enum & other) const { return m_value != other.m_value; }
 	//@}
 	
 	value_type get_integral_constant_representation() const { return m_value; };

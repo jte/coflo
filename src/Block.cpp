@@ -31,6 +31,7 @@
 #include "statements/NoOp.h"
 #include "statements/Entry.h"
 #include "statements/Exit.h"
+#include "statements/Placeholder.h"
 
 using namespace boost;
 
@@ -110,10 +111,10 @@ bool Block::Parse(std::istream &input_stream)
 	}
 	
 	// Look for Statements.
-	Statement *next_statement;
+	StatementBase *next_statement;
 	do
 	{
-		next_statement = Statement::Parse(input_stream);
+		next_statement = StatementBase::Parse(input_stream);
 
 		if(next_statement != NULL)
 		{
@@ -148,7 +149,7 @@ bool Block::Parse(std::istream &input_stream)
 				// Make sure every block has at least one statement.
 				std::stringstream oss;
 				oss << "[UNKNOWN/file.c : " << GetBlockStartingLineNo() << "]";
-				AddStatement(new NoOp(new Location(oss.str())));
+				AddStatement(new Placeholder(new Location(oss.str())));
 			}
 
 			// Parse the block's successors.
@@ -163,7 +164,7 @@ bool Block::Parse(std::istream &input_stream)
 	return false;
 }
  
-void Block::AddStatement(Statement *statement)
+void Block::AddStatement(StatementBase *statement)
 {
 	m_statement_list.push_back(statement);
 }
@@ -257,7 +258,7 @@ void Block::PrintBlock(long indent_level)
 	std::cout << m_block_number << std::endl;
 	
 	// Print out all function calls in this block.
-	BOOST_FOREACH(Statement *sp, m_statement_list)
+	BOOST_FOREACH(StatementBase *sp, m_statement_list)
 	{
 		indent(indent_level);
 		std::cout << sp->GetStatementTextDOT() << std::endl;

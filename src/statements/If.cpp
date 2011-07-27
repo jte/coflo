@@ -17,11 +17,11 @@
 
 #include "If.h"
 
-If::If(Location *location) : Statement(location)
+If::If(Location *location) : StatementBase(location)
 {
 }
 
-If::If(const If& orig) : Statement(orig)
+If::If(const If& orig) : StatementBase(orig)
 {
 }
 

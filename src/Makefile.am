@@ -19,9 +19,7 @@
 include $(top_srcdir)/amlocal.am
 
 # Subdirectories with their own Makefile{.am}'s.
-# @todo Do we need something like the nobase_ stuff here: <http://sources.redhat.com/automake/automake.html#Alternative>
-# for the controlflowgraph directory?
-SUBDIRS = libexttools statements
+SUBDIRS = controlflowgraph libexttools statements
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
@@ -30,13 +28,6 @@ coflo_SOURCES = main.cpp \
 	Block.cpp Block.h \
 	CFGDFSVisitor.cpp CFGDFSVisitor.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
-	controlflowgraph/CFGEdgeTypeBase.cpp controlflowgraph/CFGEdgeTypeBase.h \
-	controlflowgraph/CFGEdgeTypeFunctionCallBypass.cpp controlflowgraph/CFGEdgeTypeFunctionCallBypass.h \
-	controlflowgraph/CFGEdgeTypeFallthrough.cpp controlflowgraph/CFGEdgeTypeFallthrough.h \
-	controlflowgraph/CFGEdgeTypeFunctionCall.cpp controlflowgraph/CFGEdgeTypeFunctionCall.h \
-	controlflowgraph/CFGEdgeTypeGoto.cpp controlflowgraph/CFGEdgeTypeGoto.h \
-	controlflowgraph/CFGEdgeTypeFalseExit.cpp controlflowgraph/CFGEdgeTypeFalseExit.h \
-	controlflowgraph/CFGEdgeTypeReturn.cpp controlflowgraph/CFGEdgeTypeReturn.h \
 	Function.cpp Function.h \
 	ImprovedDFSVisitorBase.h \
 	Location.cpp Location.h \
@@ -53,4 +44,4 @@ coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CXXFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
-coflo_LDADD = ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)

@@ -40,7 +40,7 @@ public:
 	
 	void SetWorkingDirectory(const std::string &working_directory);
 	
-	virtual VersionNumber GetVersion() const;
+	VersionNumber GetVersion() const;
 	
 	/// @name Static utility functions.
 	//@{

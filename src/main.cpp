@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
 		 std::ifstream ifs(vm["response-file"].as<std::string>().c_str());
 		 if (!ifs)
 		 {
-			 std::cout << "Could not open the response file\n";
+			 std::cerr << "ERROR: Could not open the response file." << std::endl;
 			 return 1;
 		 }
 		 // Read the whole file into a string

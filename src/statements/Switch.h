@@ -20,7 +20,7 @@
 
 #include "Statement.h"
 
-class Switch : public Statement
+class Switch : public StatementBase
 {
 public:
 	Switch(Location *location);

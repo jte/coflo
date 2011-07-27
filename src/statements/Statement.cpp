@@ -42,7 +42,7 @@ static const boost::regex f_succ_expression("[[:space:]]+#.*");
 
 // Static members.
 
-Statement* Statement::Parse(std::istream &input_stream)
+StatementBase* StatementBase::Parse(std::istream &input_stream)
 {
 	std::string line;
 	std::ios::streampos start_pos;
@@ -118,17 +118,17 @@ Statement* Statement::Parse(std::istream &input_stream)
 
 // Normal members.
 
-Statement::Statement(const Location *location) 
+StatementBase::StatementBase(const Location *location) 
 {
 	m_location = new Location(*location);
 }
 
-Statement::Statement(const Statement& orig) 
+StatementBase::StatementBase(const StatementBase& orig) 
 {
 	// Do a deep copy of the Location object.
 	m_location = new Location(*orig.m_location);
 }
 
-Statement::~Statement()
+StatementBase::~StatementBase()
 {
 }

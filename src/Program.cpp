@@ -100,21 +100,20 @@ bool Program::Parse(const std::vector< std::string > &defines,
 	
 	// Link the function calls.
 	std::cout << "Linking function calls..." << std::endl;
+	std::vector< FunctionCall* > unlinkable_function_calls;
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		std::vector< FunctionCall* > unlinkable_function_calls;
-		
 		tu->Link(m_function_map, &unlinkable_function_calls);
-		
-		if(unlinkable_function_calls.size() > 0)
+	}
+
+	// See if we have any unresolved calls.
+	if(unlinkable_function_calls.size() > 0)
+	{
+		// We couldn't link some function calls.
+		std::cout << "WARNING: Unresolved function calls at the following locations:" << std::endl;
+		BOOST_FOREACH(FunctionCall *fc, unlinkable_function_calls)
 		{
-			// We couldn't link some function calls.
-			std::cout << "INFO: Couldn't link the following function calls in file "
-				<< tu->GetFilePath() << ":" << std::endl;
-			BOOST_FOREACH(FunctionCall *fc, unlinkable_function_calls)
-			{
-				std::cout << "[" << *(fc->GetLocation()) << "]: " << fc->GetIdentifier() << std::endl;
-			}
+			std::cout << "[" << *(fc->GetLocation()) << "]: " << fc->GetIdentifier() << std::endl;
 		}
 	}
 	

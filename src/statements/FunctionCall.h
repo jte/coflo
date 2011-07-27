@@ -28,7 +28,7 @@ class Location;
 /**
  * Class representing a function call statement.
  */
-class FunctionCall : public Statement
+class FunctionCall : public StatementBase
 {
 public:
 	FunctionCall(const Location *location);

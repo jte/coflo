@@ -28,7 +28,7 @@ AC_CONFIG_AUX_DIR([./build-aux])
 AC_REQUIRE_AUX_FILE([install-sh])
 AC_REQUIRE_AUX_FILE([missing])
 AC_REQUIRE_AUX_FILE([depcomp])
-# Don't think I need config.guess or config.sub, not using AC_CANONICAL_BUILD/HOST/TARGET
+# Don't think we need config.guess or config.sub, not using AC_CANONICAL_BUILD/HOST/TARGET
 
 # Additional Autoconf macros are in ./m4.
 AC_CONFIG_MACRO_DIR([./m4])
@@ -44,6 +44,9 @@ AM_INIT_AUTOMAKE([check-news
     1.11.1
     -Wall
 ])
+
+# Enable the configure remake rules.
+AM_MAINTAINER_MODE([enable])
 
 # Set up the maintainer compiler flags.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
@@ -83,6 +86,6 @@ AX_BOOST_FILESYSTEM
 # Check for come functions we need.
 AC_CHECK_FUNC(glob)
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
+AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile	test/atlocal])
 AC_OUTPUT
 
