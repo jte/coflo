@@ -35,7 +35,7 @@ class Function;
 struct CFGVertexProperties
 {
 	/// The Statement at this vertex of the CFG.
-	Statement *m_statement;
+	StatementBase *m_statement;
 	
 	/// The Function which contains this vertex.
 	Function *m_containing_function;

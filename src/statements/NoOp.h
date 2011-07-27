@@ -34,7 +34,7 @@ public:
 	NoOp(const NoOp& orig);
 	virtual ~NoOp();
 	
-	virtual std::string GetStatementTextDOT() const;
+	virtual std::string GetStatementTextDOT() const { return "UNKNOWN"; };
 
 	virtual std::string GetIdentifierCFG() const { return "UNKNOWN"; };
 	

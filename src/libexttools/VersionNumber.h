@@ -27,13 +27,19 @@
 
 /**
  * Class for encapsulating version numbers.
- * 
- * @param version_string The version number string to initialize this instance with.
+ *
+ * @todo Handle a wider range of version number formats, e.g. "1.2.3b".
  */
 class VersionNumber : boost::totally_ordered<VersionNumber>
 {
 public:
 	VersionNumber();
+	/**
+	 * Construct-from-string.
+	 *
+	 * @param version_string The version number string to initialize this instance with.  Should be
+	 *     of the format "N.N.N.N", where "N" is any number of decimal digits.
+	 */
 	VersionNumber(const std::string &version_string);
 	VersionNumber(const VersionNumber& orig);
 	virtual ~VersionNumber();
@@ -53,8 +59,22 @@ public:
 	operator std::string() const;
 	//@}
 	
+	/**
+	 * Check whether the version number is empty.  If it is, this could be due to it never having been
+	 * assigned, or the attempt to assign to it was with a badly formatted string.
+	 *
+	 * @return true if empty().
+	 */
 	bool empty() const { return m_version_string.empty(); };
 	
+	/**
+	 * Output stream inserter.
+	 * Outputs the VersionNumber object @a ver as text to stream @a os.
+	 *
+	 * @param os
+	 * @param ver
+	 * @return Reference to @a os.
+	 */
 	friend std::ostream& operator<<(std::ostream& os, const VersionNumber& ver);
 	
 private:

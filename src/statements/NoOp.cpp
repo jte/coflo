@@ -30,8 +30,3 @@ NoOp::NoOp(const NoOp& orig) : PseudoStatement(orig)
 NoOp::~ NoOp()
 {
 }
-
-std::string NoOp::GetStatementTextDOT() const
-{
-	return "UNKNOWN";
-}

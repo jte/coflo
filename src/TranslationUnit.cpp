@@ -302,7 +302,7 @@ bool TranslationUnit::LinkBasicBlocks()
 }
 
 void TranslationUnit::Link(const std::map< std::string, Function* > &function_map,
-						  std::vector< FunctionCall* > *unresolved_function_calls)
+		T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{

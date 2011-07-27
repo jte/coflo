@@ -63,7 +63,7 @@ RuleDFSBase::RuleDFSBase(const T_CFG &cfg) : m_cfg(cfg)
 	m_found_sink = false;
 }
 
-RuleDFSBase::RuleDFSBase(const RuleDFSBase& orig) : m_cfg(orig.m_cfg)
+RuleDFSBase::RuleDFSBase(const RuleDFSBase& orig) : RuleBase(orig), m_cfg(orig.m_cfg)
 {
 }
 

@@ -249,7 +249,7 @@ void Function::LinkIntoGraph()
 }
 
 void Function::Link(const std::map< std::string, Function* > &function_map,
-		std::vector< FunctionCall* > *unresolved_function_calls)
+		T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 {
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(&CFGVertexProperties::m_containing_function, *m_cfg);
 
@@ -271,8 +271,8 @@ void Function::Link(const std::map< std::string, Function* > &function_map,
 
 			if(it == function_map.end())
 			{
-				// Couldn't resolve it.  Let the caller know.
-				std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
+				// Couldn't resolve it.  Add it to the unresolved call list.
+				/// @todo Remove this: std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
 				unresolved_function_calls->push_back(fcu);
 			}
 			else
@@ -580,7 +580,7 @@ public:
 	
 		// Indent and print the statement corresponding to this vertex.
 		indent(m_current_indent_level);
-		Statement *p = m_graph[u].m_statement;
+		StatementBase *p = m_graph[u].m_statement;
 		std::cout << p->GetIdentifierCFG()
 			<< " <"
 			<< *(p->GetLocation())

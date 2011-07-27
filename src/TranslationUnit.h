@@ -30,6 +30,7 @@
 class Function;
 class FunctionCall;
 class ToolDot;
+typedef std::vector< FunctionCall* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 
 /**
  * Class representing a single source file.
@@ -67,8 +68,14 @@ public:
 
 	bool LinkBasicBlocks();
 	
+	/**
+	 * Link the function calls in this TranslationUnit to the Functions they call.
+	 *
+	 * @param[in] function_map The list of function definitions.
+	 * @param[out] unresolved_function_calls The returned list of FunctionCalls that could not be resolved.
+	 */
 	void Link(const std::map< std::string, Function* > &function_map,
-		std::vector< FunctionCall* > *unresolved_function_calls);
+			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
 	
 	bool CreateControlFlowGraphs(T_CFG * cfg);
 
@@ -76,6 +83,9 @@ public:
 	
 	std::string GetFilePath() const { return m_source_filename.string(); };
 	
+	/**
+	 * Returns the number of function definitions contained in this TranslationUnit.
+	 */
 	long GetNumberOfFunctionDefinitions() const { return m_function_defs.size(); };
 
 private:

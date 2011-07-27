@@ -18,12 +18,12 @@
 #include "FunctionCall.h"
 
 
-FunctionCall::FunctionCall(const Location *location) : Statement(location)
+FunctionCall::FunctionCall(const Location *location) : StatementBase(location)
 {
 
 }
 
-FunctionCall::FunctionCall(const FunctionCall& orig) : Statement(orig)
+FunctionCall::FunctionCall(const FunctionCall& orig) : StatementBase(orig)
 {
 
 }

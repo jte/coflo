@@ -24,7 +24,7 @@
 
 class Function;
 class Successor;
-class Statement;
+class StatementBase;
 
 /**
  * Class encapsulating a basic block.
@@ -32,7 +32,7 @@ class Statement;
 class Block
 {
 public:
-	typedef std::vector< Statement* > T_STATEMENT_LIST;
+	typedef std::vector< StatementBase* > T_STATEMENT_LIST;
 	typedef T_STATEMENT_LIST::iterator T_STATEMENT_LIST_ITERATOR;
 	
 	typedef std::vector< Successor * > T_BLOCK_SUCCESSOR_LIST;
@@ -63,7 +63,7 @@ public:
 	 * 
      * @param statement Pointer to the Statement object to add.
      */
-	void AddStatement(Statement *statement);
+	void AddStatement(StatementBase *statement);
 	
 	T_STATEMENT_LIST::size_type NumberOfStatements() const { return m_statement_list.size(); };
 

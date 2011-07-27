@@ -17,11 +17,11 @@
 
 #include "PseudoStatement.h"
 
-PseudoStatement::PseudoStatement(const Location *location) : Statement(location)
+PseudoStatement::PseudoStatement(const Location *location) : StatementBase(location)
 {
 }
 
-PseudoStatement::PseudoStatement(const PseudoStatement& orig) : Statement(orig)
+PseudoStatement::PseudoStatement(const PseudoStatement& orig) : StatementBase(orig)
 {
 }
 

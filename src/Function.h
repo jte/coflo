@@ -30,6 +30,7 @@
 class Block;
 class FunctionCall;
 class ToolDot;
+typedef std::vector< FunctionCall* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 
 class Function
 {
@@ -52,7 +53,7 @@ public:
 	 * @unresolved_function_calls List of function calls we weren't able to resolve.
      */
 	void Link(const std::map< std::string, Function* > &function_map,
-		std::vector< FunctionCall* > *unresolved_function_calls);
+			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
 	
 	/**
 	 * Add the control flow graph of this Function to \a cfg.

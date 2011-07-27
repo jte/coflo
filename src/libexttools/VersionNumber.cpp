@@ -45,6 +45,9 @@ VersionNumber::~VersionNumber()
 
 void VersionNumber::Set(const std::string &version_string)
 {
+	// Copy the string verbatim, mainly for when we want to stream it out as a string.
+	m_version_string = version_string;
+
 	// We'll use stringstream to parse the integers out of version_string.
 	std::istringstream parser(version_string);
 	int i = 0;

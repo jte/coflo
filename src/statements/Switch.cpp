@@ -17,11 +17,11 @@
 
 #include "Switch.h"
 
-Switch::Switch(Location *location) : Statement(location)
+Switch::Switch(Location *location) : StatementBase(location)
 {
 }
 
-Switch::Switch(const Switch& orig) : Statement(orig)
+Switch::Switch(const Switch& orig) : StatementBase(orig)
 {
 }
 

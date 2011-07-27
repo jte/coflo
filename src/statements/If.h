@@ -22,7 +22,7 @@
 
 #include "Statement.h"
 
-class If : public Statement
+class If : public StatementBase
 {
 public:
 	If(Location *location);

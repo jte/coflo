@@ -25,14 +25,14 @@
 /**
  * Abstract base class for all statements in the control flow graph.
  */
-class Statement
+class StatementBase
 {
 public:
-	Statement(const Location *location);
-	Statement(const Statement& orig);
-	virtual ~Statement();
+	StatementBase(const Location *location);
+	StatementBase(const StatementBase& orig);
+	virtual ~StatementBase();
 	
-	static Statement* Parse(std::istream &input_stream);
+	static StatementBase* Parse(std::istream &input_stream);
 	
 	/**
 	 * Get text suitable for setting the statement's attributes in a dot file.

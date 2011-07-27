@@ -20,7 +20,7 @@
 
 #include "Statement.h"
 
-class PseudoStatement : public Statement
+class PseudoStatement : public StatementBase
 {
 public:
 	PseudoStatement(const Location *location);
