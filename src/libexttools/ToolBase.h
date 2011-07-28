@@ -43,6 +43,8 @@ public:
 	VersionNumber GetVersion() const;
 	
 	/// @name Static utility functions.
+	/// @todo Not sure if this is the best place for all (or any) of these.  May make sense to have these not
+	///       connected to ToolBase at all.
 	//@{
 	
 	/**

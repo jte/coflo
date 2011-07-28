@@ -79,6 +79,7 @@ bool ToolBase::Popen(const std::string &params, std::ostream &progs_stdout) cons
 	{
 		// There was some sort of error.
 		std::cerr << "ERROR: popen() failed." << std::endl;
+		return false;
 	}
 	
 	// Read the text we got from the popen()'ed process and stream it to progs_stdout.
@@ -104,7 +105,9 @@ bool ToolBase::Popen(const std::string &params, std::ostream &progs_stdout) cons
 		{
 			// Child process exited normally, get its return value.
 			int child_retval = WEXITSTATUS(status);
-			std::clog << "INFO: Popen()'ed process returned " << child_retval << std::endl;
+			//std::clog << "INFO: Popen()'ed process returned " << child_retval << std::endl;
+			/// @todo Probably want to make handling of status more robust, differentiate between popen()
+			///       failures and failures of what was popen()'ed..
 			if(child_retval == 0)
 			{
 				return true;

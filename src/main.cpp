@@ -138,6 +138,7 @@ int main(int argc, char* argv[])
 		 }
 		 // Read the whole file into a string
 		 /// @todo Possibly lock the file as FILE_SHARE_READ while doing this?
+		 /// @todo Add comment functionality.
 		 std::stringstream ss;
 		 ss << ifs.rdbuf();
 		 // Split the file content
@@ -223,19 +224,16 @@ int main(int argc, char* argv[])
 		the_program->SetTheFilter(the_filter);
 		ToolDot *tool_dot = new ToolDot(the_dot);
 		ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
-		std::cout << "Dot version: " << tool_dot->GetVersion() << std::endl;
-		std::cout << "GCC version: " << tool_compiler->GetVersion() << std::endl;
+		std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
+		std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
 		
 		// Check if this version of GCC is going to work.
 		std::string gcc_version_check_string;
 		bool gcc_ver_ok;
 		boost::tie(gcc_version_check_string, gcc_ver_ok) = tool_compiler->CheckIfVersionIsUsable();
-		if(!gcc_version_check_string.empty())
-		{
-			std::cout << gcc_version_check_string << std::endl;
-		}
 		if(gcc_ver_ok == false)
 		{
+			std::cerr << "ERROR: " << gcc_version_check_string << std::endl;
 			return 1;
 		}
 		
