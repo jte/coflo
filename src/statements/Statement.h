@@ -15,8 +15,8 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STATEMENT_H
-#define	STATEMENT_H
+#ifndef STATEMENTBASE_H
+#define	STATEMENTBASE_H
 
 #include <string>
 
@@ -67,5 +67,5 @@ private:
 	Location *m_location;
 };
 
-#endif	/* STATEMENT_H */
+#endif	/* STATEMENTBASE_H */
 

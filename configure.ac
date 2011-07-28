@@ -49,12 +49,19 @@ AM_INIT_AUTOMAKE([check-news
 AM_MAINTAINER_MODE([enable])
 
 # Set up the maintainer compiler flags.
+# Increase the default GCC warning level.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
+# By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
+AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
+# Clear the "user defaults".  This doesn't override any configure-time or make-time settings the builder may
+# specifiy for these variables, it just makes the values used if they're not specified empty.
+: ${CPPFLAGS=""}	# Use an empty default.
+: ${CFLAGS=""}		# Don't default to "-g -O2".
+: ${CXXFLAGS=""}	# Don't default to "-g -O2".
+
 # Check for the various compilers and other tools we need to do a build.
-: ${CPPFLAGS=""}	# Don't default to "-g -O2"
-: ${CXXFLAGS=""}	# Don't default to "-g -O2"
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -85,6 +92,9 @@ AX_BOOST_FILESYSTEM
 
 # Check for come functions we need.
 AC_CHECK_FUNC(glob)
+
+# Set up Autotest.
+AC_SUBST([GRVS_TEST_1], [abcde])
 
 AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile	test/atlocal])
 AC_OUTPUT
