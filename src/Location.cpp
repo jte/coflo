@@ -50,15 +50,28 @@ Location::Location(const std::string &location_string)
 
 Location::Location(const Location& orig)
 {
-	m_passed_file_path = orig.m_passed_file_path;
-	m_absolute_file_path = orig.m_absolute_file_path;
-	m_line_number = orig.m_line_number;
-	m_column = orig.m_column;
+	DeepCopy(orig);
 }
 
 Location::~Location()
 {
 }
+
+Location Location::operator=(const Location &other)
+{
+	// Check for self-assignment.
+	if(this == &other)
+	{
+		// This was an attempt to assign to ourself.  Just return this instance.
+		return *this;
+	}
+
+	// Otherwise do the copy.
+	DeepCopy(other);
+
+	return *this;
+}
+
 
 std::string Location::GetPassedFilePath() const
 {
@@ -85,4 +98,13 @@ std::ostream& operator<<(std::ostream& os, const Location& loc)
 		os << ":" << loc.m_column;
 	}
     return os;
+}
+
+void Location::DeepCopy(const Location &orig)
+{
+	// Do a deep (vs. the default shallow) copy of the object.
+	m_passed_file_path = orig.m_passed_file_path;
+	m_absolute_file_path = orig.m_absolute_file_path;
+	m_line_number = orig.m_line_number;
+	m_column = orig.m_column;
 }

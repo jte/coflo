@@ -119,7 +119,7 @@ private:
 	/// The regular expression used to extract the actual version number from the version string.
 	std::string m_version_regex;
 	
-	/// The version number.
+	/// The version number of the tool.
 	mutable VersionNumber m_version_number;
 
 };

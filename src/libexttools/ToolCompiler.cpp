@@ -63,12 +63,13 @@ int ToolCompiler::GenerateCFG(const std::string &params)
 
 std::pair< std::string, bool > ToolCompiler::CheckIfVersionIsUsable() const
 {
-	std::pair<std::string, bool> retval;
+	std::pair<std::string, bool> retval = std::make_pair(std::string("Ok"), true);
 	
-	if(VersionNumber(GetVersion()) < VersionNumber("4.0.0"))
+	// gcc 3.x.x doesn't support the "-fdump-tree-cfg" functionality.
+	if(GetVersion() < VersionNumber("4.0.0"))
 	{
 		retval = std::make_pair(std::string("CoFlo requires a GCC version greater than 4.0.0"), false);
 	}
 
-	return std::make_pair(std::string("Ok"), true);
+	return retval;
 }
