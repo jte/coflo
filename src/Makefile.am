@@ -19,7 +19,7 @@
 include $(top_srcdir)/amlocal.am
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph libexttools statements
+SUBDIRS = controlflowgraph debug libexttools statements
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
@@ -44,4 +44,4 @@ coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CXXFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
-coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a ./debug/libdebugutils.a ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)

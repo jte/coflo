@@ -64,7 +64,7 @@ void VersionNumber::Set(const std::string &version_string)
 	}
 }
 
-VersionNumber VersionNumber::operator=(const VersionNumber &other)
+const VersionNumber VersionNumber::operator=(const VersionNumber &other)
 {
 	// Check for self-assignment.
 	if(this == &other)

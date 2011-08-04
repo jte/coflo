@@ -22,6 +22,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "debug/debug_utils.hpp"
+
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 
@@ -92,7 +94,7 @@ bool Block::Parse(std::istream &input_stream)
 	{
 		// Get the next line of input.
 		std::getline(input_stream, line);
-		std::cout << "LINE=" << line << std::endl;
+		//dout << "LINE=" << line << std::endl;
 		
 		boost::cmatch capture_results;
 		
@@ -127,7 +129,7 @@ bool Block::Parse(std::istream &input_stream)
 	{
 		// Get the next line of input.
 		std::getline(input_stream, line);
-		std::cout << "LINE=" << line << std::endl;
+		//std::cout << "LINE=" << line << std::endl;
 		
 		boost::cmatch capture_results;
 		
@@ -140,9 +142,9 @@ bool Block::Parse(std::istream &input_stream)
 		// Look for block ends.
 		if(regex_match(line.c_str(), capture_results, f_successor_expression))
 		{
-			std::cout << "Found \"SUCC:\" line: \"" << capture_results[1] << "\", ending block "
-				<< GetBlockNumber() << ", with " 
-				<< NumberOfStatements() << " statements." << std::endl;
+			//std::clog << "Found \"SUCC:\" line: \"" << capture_results[1] << "\", ending block "
+			//	<< GetBlockNumber() << ", with "
+			//	<< NumberOfStatements() << " statements." << std::endl;
 
 			if(NumberOfStatements() == 0)
 			{
@@ -183,7 +185,7 @@ void Block::AddSuccessors(std::string successors_string)
 	{
 		// There are no successors listed.  This means that this is a No-Return block.
 		// Add a NoReturn edge to the EXIT block.
-		std::cout << "WARNING: EMPTY SUCCESSOR LIST" << std::endl;
+		std::cerr << "WARNING: EMPTY SUCCESSOR LIST" << std::endl;
 		m_successor_list.push_back(new SuccessorNoReturn(1));
 	}
 	
