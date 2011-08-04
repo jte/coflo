@@ -112,11 +112,11 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	}
 	
 	// Try to compile the source file.
-	CompileSourceFile(filename.string(), the_filter, compiler, defines, include_paths);
+	CompileSourceFile(filename.generic_string(), the_filter, compiler, defines, include_paths);
 	
 	// Construct the filename of the .cfg file gcc made for us.
 	// gcc puts this file in the directory it's running in.
-	gcc_cfg_lineno_blocks_filename = filename.filename().string();
+	gcc_cfg_lineno_blocks_filename = filename.filename().generic_string();
 	
 	// The "*" has so far been observed to be either 012 or 013, depending on the version
 	// of gcc.
@@ -331,9 +331,9 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		std::cout << "Function: " << fp->GetIdentifier() << std::endl;
 	}
 	
-	std::string index_html_filename = output_dir.string()+ "index.html";
+	std::string index_html_filename = (output_dir / "index.html").generic_string();
 	
-	index_html_out << "<p>Filename: "+m_source_filename.string()+"</p>" << std::endl;
+	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
 	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{

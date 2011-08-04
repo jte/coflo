@@ -94,7 +94,11 @@ int main(int argc, char* argv[])
 	std::string the_dot;
 	std::string the_ctags;
 
+	// Name of the response file if we get one on the command line.
 	std::string response_filename;
+
+	// The HTML report output directory.
+	std::string report_output_directory;
 
 	// Debug settings.
 	bool debug_parse = false;
@@ -130,7 +134,7 @@ int main(int argc, char* argv[])
     (CLP_VERSION",v", "Print the version information.")
 	(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
 	(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
-	(CLP_OUTPUT_DIR",O", po::value< std::string >(), "Put output in the given directory.")
+	(CLP_OUTPUT_DIR",O", po::value< std::string >(&report_output_directory), "Put HTML report output in the given directory.")
 	;
 	preproc_options.add_options()
 	(CLP_DEFINE",D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
@@ -308,9 +312,9 @@ int main(int argc, char* argv[])
 	// Perform the analysis.
 	the_analyzer->Analyze();
 	
-	if(vm.count(CLP_OUTPUT_DIR))
+	if(!report_output_directory.empty())
 	{
-		the_program->Print(the_dot, vm[CLP_OUTPUT_DIR].as<std::string>());
+		the_program->Print(the_dot, report_output_directory);
 	}
 	
 	return 0;

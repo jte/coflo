@@ -919,7 +919,7 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate>
 		graph_of_this_function(*m_cfg, boost::keep_all(), the_filter);
 
-	dot_filename = output_dir.string()+m_function_id+".dot";
+	dot_filename = (output_dir / (m_function_id+".dot")).generic_string();
 	
 	std::cerr << "Creating " << dot_filename << std::endl;
 	
@@ -934,7 +934,6 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 	
 	std::cerr << "Compiling " << dot_filename << std::endl;
 	the_dot->CompileDotToPNG(dot_filename);
-	///::system((the_dot + " -O -Tpng "+dot_filename).c_str());
 }
 
 bool Function::CreateControlFlowGraph(T_CFG & cfg)
