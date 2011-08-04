@@ -147,7 +147,7 @@ void Program::Print(const std::string &the_dot, const std::string &output_path)
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	
-	std::string index_html_filename = output_dir.string()+ "index.html";
+	std::string index_html_filename = (output_dir /= "index.html").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
 	index_html_out << \
