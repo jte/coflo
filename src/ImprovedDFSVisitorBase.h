@@ -75,7 +75,7 @@ public:
 	 * However, the target vertex may have already been colored by a previous iteration,
 	 * so the color is not known a priori.
 	 * 
-     * @param u
+     * @param u The edge to examine.
      * @return 
      */
 	edge_return_value_t examine_edge(Edge u) { return edge_return_value_t::ok; };
@@ -90,6 +90,10 @@ public:
      */
 	edge_return_value_t tree_edge(Edge u) { return edge_return_value_t::ok; };
 	
+	/**
+	 * The Edge u has been determined to be part of the DFS tree, and has also been determined
+	 * to be a back edge.
+	 */
 	edge_return_value_t back_edge(Edge u) { return edge_return_value_t::ok; };
 	edge_return_value_t forward_or_cross_edge(Edge u) { return edge_return_value_t::ok; };
 	

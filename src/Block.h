@@ -41,6 +41,12 @@ public:
 	Block(Function * parent_function, long block_number, long block_starting_line_in_src);
 	~Block();
 	
+	/**
+	 * Parse a basic block from @a input_stream, assumed to be a .cfg file from gcc.
+	 *
+	 * @param input_stream
+	 * @return
+	 */
 	bool Parse(std::istream &input_stream);
 
 	bool IsENTRY() const { return m_block_number == 0; };

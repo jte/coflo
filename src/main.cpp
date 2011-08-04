@@ -31,6 +31,31 @@
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
 
+/// @name Command line parameter strings.
+/// Using defines for these because Boost.ProgramOptions uses them (generally) twice.
+//@{
+#define CLP_HELP	"help"
+#define CLP_VERSION	"version"
+#define CLP_RESPONSE_FILE "response-file"
+#define CLP_DEBUG_PARSE "debug-parse"
+#define CLP_DEBUG_LINK  "debug-link"
+#define CLP_TEMPS_DIR	"temps-dir"
+#define CLP_OUTPUT_DIR	"output-dir"
+
+#define CLP_DEFINE	"define"
+#define CLP_INCLUDE_DIR	"include-dir"
+
+#define CLP_USE_GCC "use-gcc"
+#define CLP_USE_DOT "use-dot"
+#define CLP_USE_FILTER "use-filter"
+#define CLP_USE_CTAGS "use-ctags"
+
+#define CLP_PRINT_FUNCTION_CFG "print-function-cfg"
+#define CLP_CONSTRAINT "constraint"
+
+#define CLP_INPUT_FILE "input-file"
+//@}
+
 /**
  * Additional command-line parser for '@file' response files.
  * 
@@ -42,7 +67,7 @@ std::pair<std::string, std::string> at_option_parser(const std::string &s)
 {
     if ('@' == s[0])
 	{
-        return std::make_pair(std::string("response-file"), s.substr(1));
+        return std::make_pair(std::string(CLP_RESPONSE_FILE), s.substr(1));
 	}
     else
 	{
@@ -62,10 +87,18 @@ int main(int argc, char* argv[])
 {
 	Program *the_program;
 	Analyzer *the_analyzer;
+
+	// Subprograms we'll need.
 	std::string the_filter;
 	std::string the_gcc;
 	std::string the_dot;
 	std::string the_ctags;
+
+	std::string response_filename;
+
+	// Debug settings.
+	bool debug_parse = false;
+	bool debug_link = false;
 	
 	// Declare the objects that will describe the supported options.
 	// Declare general options.
@@ -75,7 +108,9 @@ int main(int argc, char* argv[])
 	// Declare subprograms to use.
 	po::options_description subprogram_options("Subprogram Options");
 	// Rules to check.
-	po::options_description rule_options("Analysis Options");
+	po::options_description analysis_options("Analysis Options");
+	// Options for debugging CoFlo itself and/or the program being analyzed.
+	po::options_description debugging_options("Debugging Options");
 	// Declare options_description object for options which won't be shown to
 	// the user in the help message.
 	po::options_description hidden_options("Hidden options");
@@ -91,33 +126,35 @@ int main(int argc, char* argv[])
 	
 	// Add the command-line options.
 	general_options.add_options()
-    ("help", "Produce this help message.")
-    ("version,v", "Print version string.")
-	("response-file", po::value<std::string>(), "Read command line options from file. Can also be specified with '@name'.")
-	("debug-parse", "Print debug info concerning the CFG parsing stage.")
-	("debug-link", "Print debug info concerning the CFG linking stage.")
-	("obj-dir", po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
-	("output-dir,O", po::value< std::string >(), "Put output in the given directory.")
+    (CLP_HELP, "Produce this help message.")
+    (CLP_VERSION",v", "Print the version information.")
+	(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
+	(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
+	(CLP_OUTPUT_DIR",O", po::value< std::string >(), "Put output in the given directory.")
 	;
 	preproc_options.add_options()
-	("define,D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
-	("include-dir,I", po::value< std::vector<std::string> >(), "Add an include directory")
+	(CLP_DEFINE",D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
+	(CLP_INCLUDE_DIR",I", po::value< std::vector<std::string> >(), "Add an include directory")
 	;
 	subprogram_options.add_options()
-	("use-filter", po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
-	("use-gcc", po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
-	("use-ctags", po::value< std::string >(&the_ctags)->default_value("ctags"), "The ctags program to invoke.")
-	("use-dot", po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
+	(CLP_USE_FILTER, po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
+	(CLP_USE_GCC, po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
+	(CLP_USE_CTAGS, po::value< std::string >(&the_ctags)->default_value("ctags"), "The ctags program to invoke.")
+	(CLP_USE_DOT, po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 	;
-	rule_options.add_options()
-	("print-function-cfg", po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
-	("constraint", po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
+	analysis_options.add_options()
+	(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
+	(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
+	;
+	debugging_options.add_options()
+	(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
+	(CLP_DEBUG_LINK, po::bool_switch(&debug_link), "Print debug info concerning the CFG linking stage.")
 	;
 	hidden_options.add_options()
-	("input-file", po::value< std::vector<std::string> >(), "input file")
+	(CLP_INPUT_FILE, po::value< std::vector<std::string> >(), "input file")
 	;
 	positional_options.add("input-file", -1);
-	non_hidden_cmdline_options.add(general_options).add(preproc_options).add(subprogram_options).add(rule_options);
+	non_hidden_cmdline_options.add(general_options).add(preproc_options).add(subprogram_options).add(analysis_options).add(debugging_options);
 	cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
 
 	// Parse the command line.
@@ -127,13 +164,13 @@ int main(int argc, char* argv[])
 		positional(positional_options).run(), vm);
 	
 	// Parse any response files.
-	if (vm.count("response-file"))
+	if(!response_filename.empty())
 	{
 		 // Load the file and tokenize it
-		 std::ifstream ifs(vm["response-file"].as<std::string>().c_str());
+		 std::ifstream ifs(response_filename.c_str());
 		 if (!ifs)
 		 {
-			 std::cerr << "ERROR: Could not open the response file." << std::endl;
+			 std::cerr << "ERROR: Could not open response file \"" << response_filename << "\"." << std::endl;
 			 return 1;
 		 }
 		 // Read the whole file into a string
@@ -155,7 +192,7 @@ int main(int argc, char* argv[])
 	po::notify(vm);
 	
 	// See if the user is asking for help.
-	if (vm.count("help")) 
+	if (vm.count(CLP_HELP))
 	{
 		std::cout << PACKAGE_STRING << std::endl;
 		std::cout << std::endl;
@@ -167,7 +204,7 @@ int main(int argc, char* argv[])
 	}
 	
 	// See if user is requesting version.
-	if (vm.count("version"))
+	if (vm.count(CLP_VERSION))
 	{
 		// Print version info per GNU Coding Standards <http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dversion>.
 		// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y".
@@ -200,20 +237,20 @@ int main(int argc, char* argv[])
 	the_program = new Program();
 	the_analyzer = new Analyzer();
 	
-	if(vm.count("input-file")>0)
+	if(vm.count(CLP_INPUT_FILE)>0)
 	{
 		const std::vector<std::string> *defines, *includes;
-		if(vm.count("define")>0)
+		if(vm.count(CLP_DEFINE)>0)
 		{
-			defines = &(vm["define"].as< std::vector<std::string> >());
+			defines = &(vm[CLP_DEFINE].as< std::vector<std::string> >());
 		}
 		else
 		{
 			defines = new std::vector<std::string>();
 		}
-		if(vm.count("include-dir")>0)
+		if(vm.count(CLP_INCLUDE_DIR)>0)
 		{
-			includes = &(vm["include-dir"].as< std::vector<std::string> >());
+			includes = &(vm[CLP_INCLUDE_DIR].as< std::vector<std::string> >());
 		}
 		else
 		{
@@ -239,21 +276,21 @@ int main(int argc, char* argv[])
 		
 		the_program->SetTheDot(tool_dot);
 		the_program->SetTheGcc(tool_compiler);
-		the_program->AddSourceFiles(vm["input-file"].as< std::vector<std::string> >());
+		the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
 		if(!the_program->Parse(
 			*defines,
 			*includes,
-			static_cast<bool>(vm.count("debug-parse"))))
+			debug_parse))
 		{
 			// Parse failed.
 			return 1;
 		}
 	}
 	
-	if(vm.count("print-function-cfg"))
+	if(vm.count(CLP_PRINT_FUNCTION_CFG))
 	{
 		// User wants a control flow graph.
-		if(!the_program->PrintFunctionCFG(vm["print-function-cfg"].as<std::string>()))
+		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>()))
 		{
 			// Something went wrong.
 			return 1;
@@ -262,18 +299,18 @@ int main(int argc, char* argv[])
 	
 	the_analyzer->AttachToProgram(the_program);
 	
-	if(vm.count("constraint") > 0)
+	if(vm.count(CLP_CONSTRAINT) > 0)
 	{
 		// Add the given constraints to the analysis.
-		the_analyzer->AddConstraints(vm["constraint"].as< std::vector<std::string> >());
+		the_analyzer->AddConstraints(vm[CLP_CONSTRAINT].as< std::vector<std::string> >());
 	}
 	
 	// Perform the analysis.
 	the_analyzer->Analyze();
 	
-	if(vm.count("output-dir"))
+	if(vm.count(CLP_OUTPUT_DIR))
 	{
-		the_program->Print(the_dot, vm["output-dir"].as<std::string>());
+		the_program->Print(the_dot, vm[CLP_OUTPUT_DIR].as<std::string>());
 	}
 	
 	return 0;

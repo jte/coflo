@@ -99,7 +99,8 @@ generated_tests.at: Makefile
 	    echo "# no longer appears to exist and/or isn't executable by the current user on this system." && \
 	    echo "AT_XFAIL_IF([[test \$${GCC_VERSION_ARRAY[$$i]} -le 3]])" && \
 	    echo "AT_CHECK([\
-		    \$${abs_top_builddir}/src/coflo.exe --use-gcc=\$${GCC_ARRAY@<:@$$i@:>@} \$${abs_top_srcdir}/test/test_source_file_1.c \$${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main \
+	    	echo "Current working directory is: \$${PWD}" && \
+		    coflo --use-gcc=\$${GCC_ARRAY@<:@$$i@:>@} \$${abs_top_srcdir}/test/test_source_file_1.c \$${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main \
 		    \], \
 		0, \
 		ignore, \

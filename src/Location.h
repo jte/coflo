@@ -42,7 +42,7 @@ public:
 	 *
 	 * @param location_string
 	 */
-	Location(const std::string &location_string);
+	explicit Location(const std::string &location_string);
 
 	/**
 	 * Copy constructor.
@@ -55,7 +55,7 @@ public:
 	/// @name Overloaded operators.
 	/// Others are provided by Boost.Operators.
 	//@{
-	Location operator=(const Location &other);
+	const Location operator=(const Location &other);
 	//@}
 
 	/// @name Accessors for various components of the Location.

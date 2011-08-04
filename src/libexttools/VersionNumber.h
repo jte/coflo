@@ -40,7 +40,7 @@ public:
 	 * @param version_string The version number string to initialize this instance with.  Should be
 	 *     of the format "N.N.N.N", where "N" is any number of decimal digits.
 	 */
-	VersionNumber(const std::string &version_string);
+	explicit VersionNumber(const std::string &version_string);
 	VersionNumber(const VersionNumber& orig);
 	virtual ~VersionNumber();
 	
@@ -49,7 +49,7 @@ public:
 	/// @name Overloaded operators.
 	/// Others are provided by Boost.Operators.
 	//@{
-	VersionNumber operator=(const VersionNumber &other);
+	const VersionNumber operator=(const VersionNumber &other);
 	bool operator==(const VersionNumber &other) const;
 	bool operator<(const VersionNumber &other) const;
 	//@}

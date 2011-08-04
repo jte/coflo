@@ -34,16 +34,28 @@ AC_REQUIRE_AUX_FILE([depcomp])
 AC_CONFIG_MACRO_DIR([./m4])
 
 # Autoconf-supported test directory.
-AC_CONFIG_TESTDIR([./test])
+AC_CONFIG_TESTDIR([test],[src])
 
 # Initialize Automake.
+# See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
+# what the various settings do.
 AM_INIT_AUTOMAKE([check-news
+	std-options
+	subdir-objects
     color-tests
+    tar-pax
     dist-bzip2
     parallel-tests
     1.11.1
     -Wall
+    -Werror
 ])
+
+# Programs and scripts to exempt from the "installcheck" rule introduced by "std-options".
+# List programs and scripts which don't support --help or --version here.
+# Add the "$(EXEEXT)" suffix to any programs.
+# @TODO This is causing autoconf to fail for some reason.   
+#AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = 
 
 # Enable the configure remake rules.
 AM_MAINTAINER_MODE([enable])
@@ -56,13 +68,15 @@ AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
 # Clear the "user defaults".  This doesn't override any configure-time or make-time settings the builder may
-# specifiy for these variables, it just makes the values used if they're not specified empty.
+# specifiy for these variables, it just makes the values empty if they're not specified.
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
 
 # Check for the various compilers and other tools we need to do a build.
 AC_PROG_CC
+# This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
+AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_INSTALL
@@ -90,12 +104,13 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
+
 # Check for come functions we need.
 AC_CHECK_FUNC(glob)
 
 # Set up Autotest.
 AC_SUBST([GRVS_TEST_1], [abcde])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile	test/atlocal])
+AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
 AC_OUTPUT
 

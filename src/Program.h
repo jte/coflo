@@ -58,7 +58,15 @@ public:
 	
 	void Print(const std::string &the_dot, const std::string &output_path);
 	
-	bool PrintFunctionCFG(const std::string &function_identifier);
+	/**
+	 * Prints the Control Flow Graph of the specified function to cout.
+	 *
+	 * @param function_identifier Identifier of the function whose CFG is to be printed.
+	 * @param only_function_calls If true, only include function calls and control-flow-altering
+	 *        constructs (if/switch) in the printed graph.
+	 * @return
+	 */
+	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls=false);
 	
 	T_CFG& GetControlFlowGraph() { return m_cfg; };
 	
