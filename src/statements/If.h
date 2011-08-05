@@ -35,6 +35,8 @@ public:
 	
 	virtual std::string GetShapeTextDOT() const { return "diamond"; };
 	
+	virtual bool IsDecisionStatement() const { return true; };
+
 private:
 
 };
