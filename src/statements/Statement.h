@@ -36,6 +36,7 @@ public:
 	
 	/**
 	 * Get text suitable for setting the statement's attributes in a dot file.
+	 *
      * @return 
      */
 	virtual std::string GetStatementTextDOT() const = 0;
@@ -61,6 +62,17 @@ public:
 	
 	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
 	
+	/// @name Functions for returning info about the statement.
+	//@{
+
+	/**
+	 * Is this statement a decision statement, e.g. an if() or a switch(), which will
+	 * naturally have more than one out edge?
+	 */
+	virtual bool IsDecisionStatement() const { return false; };
+
+	//@}
+
 private:
 
 	/// The Location of this statement.
