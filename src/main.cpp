@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include <boost/program_options.hpp>
 #include <boost/tokenizer.hpp>
