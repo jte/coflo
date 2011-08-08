@@ -17,7 +17,9 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+# Require the newest autoconf which is commonly deployed on our targeted platforms.
+# Currently, Ubuntu's autoconf is 2.67, Cygwin's is 2.68.
+AC_PREREQ([2.67])
 AC_INIT([CoFlo], m4_esyscmd([echo "0.0" | tr -d '\n']), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
