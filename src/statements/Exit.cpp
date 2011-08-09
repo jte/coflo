@@ -17,7 +17,7 @@
 
 #include "Exit.h"
 
-Exit::Exit(const Location *location) : PseudoStatement (location)
+Exit::Exit(const Location &location) : PseudoStatement (location)
 {
 }
 

@@ -19,7 +19,7 @@
 
 #include "Placeholder.h"
 
-Placeholder::Placeholder(const Location *location) : PseudoStatement (location)
+Placeholder::Placeholder(const Location &location) : PseudoStatement (location)
 {
 	// TODO Auto-generated constructor stub
 

@@ -17,7 +17,7 @@
 
 #include "Switch.h"
 
-Switch::Switch(Location *location) : StatementBase(location)
+Switch::Switch(const Location &location) : StatementBase(location)
 {
 }
 

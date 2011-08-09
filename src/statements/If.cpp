@@ -17,7 +17,7 @@
 
 #include "If.h"
 
-If::If(Location *location) : StatementBase(location)
+If::If(const Location &location) : StatementBase(location)
 {
 }
 

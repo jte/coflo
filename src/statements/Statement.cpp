@@ -66,8 +66,8 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 		if(boost::regex_match(line.c_str(), capture_results, f_if_expression))
 		{
 			// Add the if to the block.
-			Location *loc = new Location(capture_results[1].str());
-			std::cerr << "Found if at location: " << *loc << std::endl;
+			Location loc(capture_results[1].str());
+			std::cerr << "Found if at location: " << loc << std::endl;
 			If *if_stmnt = new If(loc);
 			std::cout << "IF=" << line << std::endl;
 			return if_stmnt;
@@ -77,8 +77,8 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 		else if(boost::regex_match(line.c_str(), capture_results, f_switch_expression))
 		{
 			// Add the switch to the block.
-			Location *loc = new Location(capture_results[1].str());
-			std::cerr << "Found switch at location: " << *loc << std::endl;
+			Location loc(capture_results[1].str());
+			std::cerr << "Found switch at location: " << loc << std::endl;
 			Switch *switch_stmnt = new Switch(loc);
 			std::cout << "SW=" << line << std::endl;
 			return switch_stmnt;
@@ -93,7 +93,7 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 			// Note that at this point, it's an Unresolved call, since we haven't
 			// linked yet.
 			Location loc(capture_results[1].str());
-			FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], &loc);
+			FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc);
 			std::cout << "CALL=" << line << std::endl;
 			return f;
 		}
@@ -118,15 +118,13 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 
 // Normal members.
 
-StatementBase::StatementBase(const Location *location) 
+StatementBase::StatementBase(const Location &location) : m_location(location)
 {
-	m_location = new Location(*location);
 }
 
-StatementBase::StatementBase(const StatementBase& orig) 
+StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
 {
 	// Do a deep copy of the Location object.
-	m_location = new Location(*orig.m_location);
 }
 
 StatementBase::~StatementBase()

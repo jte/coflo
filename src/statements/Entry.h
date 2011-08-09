@@ -24,7 +24,7 @@ class Entry : public PseudoStatement
 {
 
 public:
-	Entry(const Location *location);
+	Entry(const Location &location);
 	Entry(const Entry& orig);
 	virtual ~Entry();
 	

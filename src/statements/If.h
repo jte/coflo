@@ -25,7 +25,7 @@
 class If : public StatementBase
 {
 public:
-	If(Location *location);
+	If(const Location &location);
 	If(const If& orig);
 	virtual ~If();
 	

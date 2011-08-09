@@ -30,7 +30,7 @@
 class NoOp : public PseudoStatement
 {
 public:
-	NoOp(const Location *location);
+	NoOp(const Location &location);
 	NoOp(const NoOp& orig);
 	virtual ~NoOp();
 	

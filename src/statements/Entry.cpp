@@ -17,7 +17,7 @@
 
 #include "Entry.h"
 
-Entry::Entry(const Location *location) : PseudoStatement (location)
+Entry::Entry(const Location &location) : PseudoStatement (location)
 {
 }
 

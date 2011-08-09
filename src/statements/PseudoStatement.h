@@ -23,7 +23,7 @@
 class PseudoStatement : public StatementBase
 {
 public:
-	PseudoStatement(const Location *location);
+	PseudoStatement(const Location &location);
 	PseudoStatement(const PseudoStatement& orig);
 	virtual ~PseudoStatement();
 private:
