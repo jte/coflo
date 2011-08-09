@@ -409,7 +409,7 @@ public:
 		{
 			out << "[label=\"";
 			out << g[v].m_statement->GetStatementTextDOT();
-			out << "\\n" << *(g[v].m_statement->GetLocation()) << "\"";
+			out << "\\n" << g[v].m_statement->GetLocation() << "\"";
 			out << ", color=" << g[v].m_statement->GetDotSVGColor();
 			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
 			out << "]";
@@ -616,7 +616,7 @@ public:
 		// Indent and print the statement corresponding to this vertex.
 		indent(m_current_indent_level);
 		StatementBase *p = m_graph[u].m_statement;
-		std::cout << p->GetIdentifierCFG() << " <" << *(p->GetLocation()) << ">"
+		std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">"
 				<< std::endl;
 		//PrintInEdgeTypes(u, m_graph);
 

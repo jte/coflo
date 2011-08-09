@@ -23,7 +23,7 @@
 class Switch : public StatementBase
 {
 public:
-	Switch(Location *location);
+	Switch(const Location &location);
 	Switch(const Switch& orig);
 	virtual ~Switch();
 	

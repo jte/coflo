@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -24,7 +24,7 @@ class FunctionCallUnresolved : public FunctionCall
 {
 
 public:
-	FunctionCallUnresolved(std::string identifier, Location *location);
+	FunctionCallUnresolved(std::string identifier, const Location &location);
 	FunctionCallUnresolved(const FunctionCallUnresolved& orig);
 	virtual ~FunctionCallUnresolved();
 	

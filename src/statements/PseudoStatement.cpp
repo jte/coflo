@@ -17,7 +17,7 @@
 
 #include "PseudoStatement.h"
 
-PseudoStatement::PseudoStatement(const Location *location) : StatementBase(location)
+PseudoStatement::PseudoStatement(const Location &location) : StatementBase(location)
 {
 }
 

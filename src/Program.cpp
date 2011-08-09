@@ -113,7 +113,7 @@ bool Program::Parse(const std::vector< std::string > &defines,
 		std::cout << "WARNING: Unresolved function calls at the following locations:" << std::endl;
 		BOOST_FOREACH(FunctionCall *fc, unlinkable_function_calls)
 		{
-			std::cout << "[" << *(fc->GetLocation()) << "]: " << fc->GetIdentifier() << std::endl;
+			std::cout << "[" << fc->GetLocation() << "]: " << fc->GetIdentifier() << std::endl;
 		}
 	}
 	

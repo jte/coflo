@@ -23,7 +23,7 @@
 class Exit : public PseudoStatement
 {
 public:
-	Exit(const Location *location);
+	Exit(const Location &location);
 	Exit(const Exit& orig);
 	virtual ~Exit();
 	

@@ -28,7 +28,7 @@
 class StatementBase
 {
 public:
-	StatementBase(const Location *location);
+	StatementBase(const Location &location);
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
 	
@@ -58,7 +58,7 @@ public:
      */
 	virtual std::string GetDotSVGColor() const { return "black"; };
 	
-	const Location* GetLocation() const { return m_location; };
+	const Location GetLocation() const { return m_location; };
 	
 	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
 	
@@ -76,7 +76,7 @@ public:
 private:
 
 	/// The Location of this statement.
-	Location *m_location;
+	Location m_location;
 };
 
 #endif	/* STATEMENTBASE_H */

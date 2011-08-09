@@ -19,7 +19,7 @@
 
 #include "NoOp.h"
 
-NoOp::NoOp(const Location *location) : PseudoStatement (location)
+NoOp::NoOp(const Location &location) : PseudoStatement (location)
 {
 }
 

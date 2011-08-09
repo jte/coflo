@@ -25,7 +25,7 @@
 class Placeholder: public PseudoStatement
 {
 public:
-	Placeholder(const Location *location);
+	Placeholder(const Location &location);
 	Placeholder(const Placeholder &other);
 	virtual ~Placeholder();
 

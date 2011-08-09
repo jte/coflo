@@ -61,14 +61,14 @@ Block::Block(Function * parent_function, long block_number, long block_starting_
 		{
 			// This is the entry block.
 			m_block_label = "ENTRY";
-			m_statement_list.push_back(new Entry(new Location("[UNKNOWN/file.c : 0]")));
+			m_statement_list.push_back(new Entry(Location("[UNKNOWN/file.c : 0]")));
 			break;
 		}
 		case 1:
 		{
 			// This is the exit block.
 			m_block_label = "EXIT";
-			m_statement_list.push_back(new Exit(new Location("[UNKNOWN/file.c : 0]")));
+			m_statement_list.push_back(new Exit(Location("[UNKNOWN/file.c : 0]")));
 			break;
 		}
 		default:
@@ -151,7 +151,7 @@ bool Block::Parse(std::istream &input_stream)
 				// Make sure every block has at least one statement.
 				std::stringstream oss;
 				oss << "[UNKNOWN/file.c : " << GetBlockStartingLineNo() << "]";
-				AddStatement(new Placeholder(new Location(oss.str())));
+				AddStatement(new Placeholder(Location(oss.str())));
 			}
 
 			// Parse the block's successors.

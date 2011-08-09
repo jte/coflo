@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -31,7 +31,7 @@ class Location;
 class FunctionCall : public StatementBase
 {
 public:
-	FunctionCall(const Location *location);
+	FunctionCall(const Location &location);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
 	
