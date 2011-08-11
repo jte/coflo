@@ -89,18 +89,19 @@ generated_tests.at: Makefile
 	for (( i=0; $$i<$(MAX_GCCS_TO_TEST); i++ )); do \
 	    :;{ \
 	    echo "" && \
-	    echo "# Start a test group for testing CoFlo with \$${GCC_ARRAY[$$i]}."  && \
-	    echo "AT_SETUP([[Using GCC @S|@{GCC_ARRAY[$$i]} against C code...]])" && \
+	    echo "# Start a test group for testing CoFlo with \$${GCC_PATH_ARRAY[$$i]}."  && \
+	    echo "AT_SETUP([[Using GCC @S|@{GCC_PATH_ARRAY[$$i]} against C code...]])" && \
 	    echo "# Skip the test if we don't have a compiler in this slot of the array." && \
 	    echo "# Autotest needs to know the number of tests at autoconf time, so we have to do" && \
 	    echo "# this a bit suboptimally like this - preferably we wouldn't generate the test at all." && \
-	    echo "AT_SKIP_IF([[test \$${GCC_VERSION_ARRAY[$$i]} -eq 0]])" && \
+	    echo "AT_SKIP_IF([[test -z \$${GCC_VERSION_STRING_ARRAY[$$i]}]])" && \
 	    echo "# Expect to fail if the GCC is a 3.x version, or the GCC we thought we found above" && \
 	    echo "# no longer appears to exist and/or isn't executable by the current user on this system." && \
-	    echo "AT_XFAIL_IF([[test \$${GCC_VERSION_ARRAY[$$i]} -le 3]])" && \
+	    echo "AT_XFAIL_IF([AS_VERSION_COMPARE([[@S|@{GCC_VERSION_STRING_ARRAY[$$i]}]],[\$${MIN_GCC_VERSION}],[XF=1],[XF=0],[XF=0]) ; \
+	    	test \$$XF -eq 1])" && \
 	    echo "AT_CHECK([\
 	    	echo "Current working directory is: \$${PWD}" && \
-		    coflo --use-gcc=\$${GCC_ARRAY@<:@$$i@:>@} \$${abs_top_srcdir}/test/test_source_file_1.c \$${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main \
+		    coflo --use-gcc=\$${GCC_PATH_ARRAY@<:@$$i@:>@} \$${abs_top_srcdir}/test/test_source_file_1.c \$${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main \
 		    \], \
 		0, \
 		ignore, \

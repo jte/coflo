@@ -75,7 +75,9 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
 
-# Check for the various compilers and other tools we need to do a build.
+###
+### Checks for the programs we need to do a build.
+###
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -99,6 +101,10 @@ DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([CoFlo], [src/Doxyfile])
 
+###
+### Checks for libraries
+###
+
 # Make sure we have a usable Boost version.
 AX_BOOST_BASE([1.42.0])
 AX_BOOST_PROGRAM_OPTIONS
@@ -106,12 +112,14 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
-
-# Check for come functions we need.
+###
+### Checks for some library functions we need.
+###
 AC_CHECK_FUNC(glob)
 
 # Set up Autotest.
-AC_SUBST([GRVS_TEST_1], [abcde])
+# TODO This is at autoconf time, not configure time.
+AC_SUBST([GCCS_FOUND_AT_CONFIGURE_TIME], m4_esyscmd_s([echo "hello";]))
 
 AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
 AC_OUTPUT
