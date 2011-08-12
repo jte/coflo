@@ -21,9 +21,6 @@
 
 #include <iostream>
 
-static bool f_dout_enabled = true;
-static std::ostream null_stream(0);
-
 debug_ostream dout(std::cout);
 debug_ostream derr(std::cerr);
 debug_ostream dlog(std::clog);
@@ -31,34 +28,7 @@ debug_ostream dlog(std::clog);
 
 debug_ostream::debug_ostream(std::ostream &default_ostream) : m_default_ostream(default_ostream)
 {
+	// Always start off enabled.
+	m_enabled = true;
 }
 
-debug_ostream::operator std::ostream& ()
-{
-	if(m_enabled)
-	{
-		return m_default_ostream;
-	}
-	else
-	{
-		return null_stream;
-	}
-}
-/*
-std::ostream& dout()
-{
-	if(f_dout_enabled)
-	{
-		return std::cout;
-	}
-	else
-	{
-		return null_stream;
-	}
-}
-
-void enable_dout(bool enable)
-{
-	f_dout_enabled = enable;
-}
-*/

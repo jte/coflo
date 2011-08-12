@@ -27,6 +27,7 @@
 #include "BasicBlockGraph.h"
 #include "ControlFlowGraph.h"
 
+class TranslationUnit;
 class Block;
 class FunctionCall;
 class ToolDot;
@@ -35,7 +36,7 @@ typedef std::vector< FunctionCall* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 class Function
 {
 public:
-	Function(const std::string &m_function_id);
+	Function(TranslationUnit *parent_tu, const std::string &m_function_id);
 	~Function();
 	
 	void AddBlock(Block *block);
@@ -65,6 +66,8 @@ public:
 	
 	std::string GetIdentifier() const { return m_function_id; };
 	
+	std::string GetDefinitionFilePath() const;
+
 	void PrintControlFlowGraph();
 	
 	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
@@ -100,6 +103,9 @@ public:
 	
 private:
 	
+	/// The translation unit containing this function.
+	TranslationUnit *m_parent_tu;
+
 	/// The block graph.
 	T_BLOCK_GRAPH m_block_graph;
 	

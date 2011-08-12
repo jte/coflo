@@ -216,7 +216,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		{
 			in_function_name = capture_results[function_id_offset];
 			std::cout << "Found function: " << in_function_name << std::endl;
-			current_function = new Function(in_function_name);
+			current_function = new Function(this, in_function_name);
 
 			(*function_map)[in_function_name] = current_function;
 			

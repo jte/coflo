@@ -35,8 +35,8 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/unordered_set.hpp>
 
+#include "TranslationUnit.h"
 #include "Block.h"
-
 #include "Function.h"
 #include "SuccessorTypes.h"
 
@@ -98,8 +98,10 @@ struct vertex_filter_predicate
 	Function *m_parent_function;
 };
 
-Function::Function(const std::string &function_id)
+Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 {
+	// Save a pointer to our parent TranslationUnit for later reference.
+	m_parent_tu = parent_tu;
 	m_function_id = function_id;
 	m_entry_block = NULL;
 	m_exit_block = NULL;
@@ -113,6 +115,11 @@ Function::Function(const std::string &function_id)
 
 Function::~Function()
 {
+}
+
+std::string Function::GetDefinitionFilePath() const
+{
+	return m_parent_tu->GetFilePath();
 }
 
 bool Function::IsCalled() const

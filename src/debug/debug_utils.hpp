@@ -22,28 +22,61 @@
 
 #include <iosfwd>
 
+
 class debug_ostream
 {
 public:
 	debug_ostream(std::ostream &default_ostream);
-	~debug_ostream();
+	~debug_ostream() {};
 
-	operator std::ostream& ();
+	/// Typedef for ostream manipulators, which take ostream references as the input parameter.
+	typedef std::ostream& (*OSTREAM_MANIPULATOR)(std::ostream&);
 
-	void enable(bool enable) { m_enabled = enable; };
+	/**
+	 * Primary inserter overload.  Handles everything except manipulators.
+	 *
+	 * @param value Reference to the value to insert into the output stream.
+	 * @return Reference to this debug_ostream.
+	 */
+	template<typename T>
+	debug_ostream& operator<<(const T &value)
+	{
+		if(m_enabled)
+		{
+			m_default_ostream << value;
+		}
+		return *this;
+	};
+
+	/**
+	 * Inserter overload for handling manipulators.
+	 *
+	 * @param manipulator
+	 * @return
+	 */
+	debug_ostream& operator<<(OSTREAM_MANIPULATOR manipulator)
+	{
+		if(m_enabled)
+		{
+			// Apply the manipulator to the stream.
+			manipulator(m_default_ostream);
+		}
+		return *this;
+	};
+
+	void enable(bool enable = true) { m_enabled = enable; };
+	void disable() { enable(false); };
 
 private:
 	std::ostream &m_default_ostream;
 	bool m_enabled;
 };
 
+/// @name Our three standard debug output streams.
+//@{
 extern debug_ostream dout;
 extern debug_ostream derr;
 extern debug_ostream dlog;
-/*
-std::ostream& dout();
-
-void enable_dout(bool enable);
-*/
+//@}
 
 #endif /* DEBUG_UTILS_HPP */
