@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-
 noinst_LIBRARIES = libexttools.a
 libexttools_a_SOURCES = ToolBase.cpp ToolBase.h \
     ToolCompiler.cpp ToolCompiler.h \

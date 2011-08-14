@@ -42,17 +42,8 @@ ToolBase::~ToolBase()
 
 int ToolBase::System(const std::string &params) const
 {
-	std::string cwd_cmd;
-	
-	// Were we given a working directory?
-	if(!m_working_directory.empty())
-	{
-		// We were, create a "cd" command to switch to it.
-		cwd_cmd = "cd " + m_working_directory + " && ";
-	}
-	
 	// Invoke the command processor, which will invoke the command.
-	return ::system((cwd_cmd + m_cmd + " " + params).c_str());
+	return ::system((m_cmd + " " + params).c_str());
 }
 
 bool ToolBase::Popen(const std::string &params, std::ostream &progs_stdout) const
@@ -63,17 +54,9 @@ bool ToolBase::Popen(const std::string &params, std::ostream &progs_stdout) cons
 	const size_t buff_size = 256;
 	unsigned char read_buffer[buff_size];
 	size_t bytes_read;
-	std::string cwd_cmd;
-	
-	// Were we given a working directory?
-	if(!m_working_directory.empty())
-	{
-		// We were, create a "cd" command to switch to it.
-		cwd_cmd = "cd " + m_working_directory + " && ";
-	}
 	
 	// Run the command in the specified working directory.
-	progs_stdout_fp = popen((cwd_cmd + m_cmd + " " + params).c_str(), "r");
+	progs_stdout_fp = popen((m_cmd + " " + params).c_str(), "r");
 	
 	if(progs_stdout_fp == NULL)
 	{
@@ -195,12 +178,6 @@ std::string ToolBase::Mktemp(const std::string &filename_template, bool director
 	delete [] c_template;
 	
 	return retval;
-}
-
-void ToolBase::SetWorkingDirectory(const std::string &working_directory)
-{
-	// Save the working directory for use later.
-	m_working_directory = working_directory;
 }
 
 VersionNumber ToolBase::GetVersion() const

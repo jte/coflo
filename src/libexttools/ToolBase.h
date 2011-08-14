@@ -38,8 +38,14 @@ public:
 	
 	void SetCommand(const std::string &cmd) { m_cmd = cmd; };
 	
-	void SetWorkingDirectory(const std::string &working_directory);
-	
+	/**
+	 * Returns the VersionNumber of the tool.
+	 * 
+	 * The version is generally obtained by running the tool with a "--version"
+	 * parameter and parsing the output appropriately.
+	 *
+     * @return The VersionNumber of the tool.
+     */
 	VersionNumber GetVersion() const;
 	
 	/// @name Static utility functions.
@@ -109,9 +115,6 @@ protected:
 	
 	/// The filename of the command.
 	std::string m_cmd;
-	
-	/// The working directory in which to invoke the command.
-	std::string m_working_directory;
 	
 private:
 	

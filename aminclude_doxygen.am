@@ -1,3 +1,17 @@
+##
+## Automake include fragment, per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html>.
+##
+## Used almost verbatim.
+##
+## LICENSE
+##
+##   Copyright (c) 2009 Oren Ben-Kiki <oren@ben-kiki.org>
+##
+##   Copying and distribution of this file, with or without modification, are
+##   permitted in any medium without royalty provided the copyright notice
+##   and this notice are preserved. This file is offered as-is, without any
+##   warranty.
+
 ## --------------------------------- ##
 ## Format-independent Doxygen rules. ##
 ## --------------------------------- ##
@@ -91,7 +105,7 @@ doxygen-run: @DX_DOCDIR@/@PACKAGE@.tag
 doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
 	rm -rf "@DX_DOCDIR@"
-	$(DX_ENV) DOT_PATH="$$(cygpath -m "$${DOT_PATH}")" "$(DX_DOXYGEN)" "$(srcdir)/$(DX_CONFIG)"
+	$(DX_ENV) "$(DX_DOXYGEN)" "$(srcdir)/$(DX_CONFIG)"
 DX_CLEANFILES = \
 	@DX_DOCDIR@/@PACKAGE@.tag \
 	-r \

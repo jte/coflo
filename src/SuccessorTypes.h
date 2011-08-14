@@ -22,6 +22,12 @@
 
 #include "Successor.h"
 
+/**
+ * \class Successor
+ * 
+ * Class used for edge types in the Basic Block CFG.
+ */
+
 /// Macro for easily declaring the multiple subclasses.
 #define M_DECLARE_SUCCESSOR_SUBCLASS(s, indent, has_edge_label) \
 class Successor##s : public Successor \
@@ -38,7 +44,7 @@ public: \
 	virtual bool GetIndent() const { return indent; }; \
 }
 
-/// \name The various types of successors
+/// @name The various types of successors.
 //@{
 M_DECLARE_SUCCESSOR_SUBCLASS(Exit, false, false);
 M_DECLARE_SUCCESSOR_SUBCLASS(Fallthru, false, false);
