@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
@@ -16,6 +16,7 @@
  */
 
 /**
+ * @file
  * This is the second file of the do-nothing sample C program used to test CoFlo.
  */
 
