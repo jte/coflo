@@ -56,8 +56,8 @@ AM_INIT_AUTOMAKE([check-news
 # Programs and scripts to exempt from the "installcheck" rule introduced by "std-options".
 # List programs and scripts which don't support --help or --version here.
 # Add the "$(EXEEXT)" suffix to any programs.
-# @TODO This is causing autoconf to fail for some reason.   
-#AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = 
+# @TODO This is causing autoconf to fail for some reason.
+#AM_INSTALLCHECK_STD_OPTIONS_EXEMPT=
 
 # Enable the configure remake rules.
 AM_MAINTAINER_MODE([enable])
@@ -88,7 +88,7 @@ AC_PROG_INSTALL
 # Some other tools we'll need.
 AC_PROG_SED
 
-# Look for Doxygen.
+# Look for Doxygen and configure it if it does exist.
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(ON)
 DX_HTML_FEATURE(ON)
@@ -99,7 +99,7 @@ DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
-DX_INIT_DOXYGEN([CoFlo], [src/Doxyfile])
+DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
 
 ###
 ### Checks for libraries

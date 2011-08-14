@@ -53,8 +53,14 @@ public:
 	virtual ~Location();
 	
 	/// @name Overloaded operators.
-	/// Others are provided by Boost.Operators.
 	//@{
+
+	/**
+	 * Assignment from another Location object.
+	 * 
+     * @param other
+     * @return
+     */
 	const Location operator=(const Location &other);
 	//@}
 

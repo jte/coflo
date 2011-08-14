@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
-
 # Subdirectories with their own Makefile{.am}'s.
 SUBDIRS = controlflowgraph debug libexttools statements
+
+# Make sure the Doxygen configuration file is distributed.
+EXTRA_DIST = Doxyfile
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \

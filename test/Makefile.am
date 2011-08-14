@@ -17,9 +17,6 @@
 
 ## Process this file with automake to produce Makefile.in.
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
-
 # Test at most the first 16 GCCs that we find installed on the system.
 MAX_GCCS_TO_TEST=16
 

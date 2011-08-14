@@ -18,15 +18,15 @@
 # Make sure autotools pick up the M4 macros in the ./m4 directory, and also copies
 # any third-party macros (e.g. the system-wide ax_* Autoconf Macro Archive ones
 # in /usr/share/aclocal) to ./m4 so they get distributed and automatically updated.
-# Only usefule in the top-level Makefile.am (see http://sources.redhat.com/automake/automake.html#Rebuilding).
+# Only useful in the top-level Makefile.am (see http://sources.redhat.com/automake/automake.html#Rebuilding).
 ACLOCAL_AMFLAGS = -I m4 --install
 
-# Include additional automake fragments.
-include $(top_srcdir)/amlocal.am
+# Include additional automake fragments for Doxygen support.
+include $(top_srcdir)/aminclude_doxygen.am
 
 # The subdirectories containing the source code and tests.
 SUBDIRS = src test
 
-# Add the doxygen-doc files to the MOSTLYCLEANFILES var so they can be cleaned.
+# Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
+# Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
-
