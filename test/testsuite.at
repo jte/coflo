@@ -24,15 +24,26 @@
 # A somewhat more explicit way of skipping tests.
 m4_define([AT_SKIP_TEST],[exit 77])
 
+# A macro which expands to 16 test instances, with USE_GCC_AT_PATH defined to one
+# of the gcc's found at "make check" time.
+# Use like AT_CHECK, except don't wrap in AT_SETUP/AT_CLEANUP.
 m4_define([AT_COFLO_CHECK],[
-  m4_foreach([GCC_PATH],
-             [m4_if([$7],[],[/bin/gcc1,bin/gcc2,/bin/gcc3,/bin/gcc4,/bin/gcc5],[$7])],
-             [AT_CHECK([
-(TEST_COFLO_GCC_PATH=GCC_PATH
-export TEST_COFLO_GCC_PATH
-COFLO_OPTIONS="--use-gcc=GCC_PATH"
-export COFLO_OPTIONS
-$1)],$2,$3,$4,$5,$6)])
+	m4_for([GCC_INDEX], 0, 15, 1, [
+		# Start a test group for testing CoFlo with ${GCC_PATH_ARRAY[GCC_INDEX]}.
+		AT_SETUP([Using GCC @S|@{GCC_PATH_ARRAY@<:@GCC_INDEX@:>@}...])
+		# Skip the test if we don't have a compiler in this slot of the array.
+		# Autotest needs to know the number of tests at autoconf time, so we have to do
+		# this a bit suboptimally like this - preferably we wouldn't generate the test at all.
+		AT_SKIP_IF([test -z ${GCC_VERSION_STRING_ARRAY@<:@GCC_INDEX@:>@}])
+		# Expect to fail if the GCC is a 3.x version, or the GCC we thought we found above
+		# no longer appears to exist and/or isn't executable by the current user on this system.
+		AT_XFAIL_IF([AS_VERSION_COMPARE([${GCC_VERSION_STRING_ARRAY@<:@GCC_INDEX@:>@}],[${MIN_GCC_VERSION}],[XF=1],[XF=0],[XF=0]) ; test $XF -eq 1])
+		AT_XFAIL_IF([test -x ${GCC_VERSION_STRING_ARRAY@<:@GCC_INDEX@:>@}])
+		AT_CHECK([
+		USE_GCC_AT_PATH=@S|@{GCC_PATH_ARRAY@<:@GCC_INDEX@:>@}
+		$1],$2,$3,$4,$5,$6)
+		# End this test group.
+		AT_CLEANUP])
 ])
 
 ###
@@ -45,8 +56,10 @@ AT_COLOR_TESTS
 # We only have one executable to test.
 AT_TESTED([coflo])
 
-# Start a test category.
-AT_BANNER([[Compiler Compatibility Tests]])
+###
+### Start the "Sanity check" test category.
+###
+AT_BANNER([[CoFlo sanity checks]])
 
 # Start a test group.
 AT_SETUP([[Using default GCC against C code]])
@@ -59,9 +72,20 @@ AT_CHECK([coflo ${abs_top_srcdir}/test/test_source_file_1.c ${abs_top_srcdir}/te
 # End this test group.
 AT_CLEANUP
 
-# Include the compiler compatibility test script.
-# This file is generated at [TODO: autoconf time?]
-m4_include([generated_tests.at])
+###
+### Test against C code using all compilers found at "make check" time.
+###
+AT_BANNER([[Compiler Compatibility Tests - C code]])
+
+AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_srcdir}/test/test_source_file_1.c ${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main],
+	0,
+	ignore,
+	ignore)
+
+###
+### Test against C++ code using all compilers found at "make check" time.
+###
+AT_BANNER([[Compiler Compatibility Tests - C++ code]])
 
 AT_SETUP([[Using default GCC against C-style C++ code]])
 
@@ -73,12 +97,7 @@ AT_CHECK([coflo ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_buildd
 # End this test group.
 AT_CLEANUP
 
-# Some autotest test code.
-AT_SETUP([Test testing])
-
-AT_COFLO_CHECK([
-echo "Test of the test"
-exit 0;
-], 0, ignore, ignore)
-
-AT_CLEANUP
+AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_builddir}/test/test_source_file_2.cpp --print-function-cfg=main],
+	0,
+	ignore,
+	ignore)
