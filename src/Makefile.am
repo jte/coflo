@@ -38,7 +38,8 @@ coflo_SOURCES = main.cpp \
 	RuleReachability.cpp RuleReachability.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
-	TranslationUnit.cpp Translation.h
+	TranslationUnit.cpp TranslationUnit.h \
+	safe_enum.h
 
 coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CXXFLAGS)

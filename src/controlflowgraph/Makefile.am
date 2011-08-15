@@ -18,7 +18,7 @@
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
-	CFGEdgeTypeBase.cpp controlflowgraph/CFGEdgeTypeBase.h \
+	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
 	CFGEdgeTypeFunctionCallBypass.cpp CFGEdgeTypeFunctionCallBypass.h \
 	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
 	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
