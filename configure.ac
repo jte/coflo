@@ -18,9 +18,21 @@
 # Process this file with autoconf to produce a configure script.
 
 # Require the newest autoconf which is commonly deployed on our targeted platforms.
-# Currently, Ubuntu's autoconf is 2.67, Cygwin's is 2.68.
+# Current defaults are:
+# - Ubuntu:
+#    autoconf 2.67
+# - Cygwin:
+#    autoconf 2.68
+#    automake 1.11.1
+# - Fedora:
+#    autoconf 2.68
+#    automake 1.11.1
 AC_PREREQ([2.67])
-AC_INIT([CoFlo], m4_esyscmd([echo "0.0" | tr -d '\n']), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+
+# Define an M4 macro which will get the working copy's current version info via "svnversion".
+m4_define([COFLO_SVN_VERSION], m4_esyscmd_s([svnversion -n]))dnl
+
+AC_INIT([CoFlo], [0.1.COFLO_SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
 AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
