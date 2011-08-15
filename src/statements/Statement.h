@@ -23,7 +23,7 @@
 #include "../Location.h"
 
 /**
- * Abstract base class for all statements in the control flow graph.
+ * Abstract base class for all statements and expressions in the control flow graph.
  */
 class StatementBase
 {
@@ -31,7 +31,14 @@ public:
 	StatementBase(const Location &location);
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
-	
+
+
+	/**
+	 * Parse the next statement out of input_stream.
+	 * 
+     * @param input_stream
+     * @return
+     */
 	static StatementBase* Parse(std::istream &input_stream);
 	
 	/**
@@ -42,9 +49,10 @@ public:
 	virtual std::string GetStatementTextDOT() const = 0;
 	
 	/**
-	 * Get text suitable for a text-based CFG printout.
+	 * Get text representing this StatementBase which is suitable for
+	 * printing in a textual CFG printout.
 	 * 
-     * @return 
+     * @return std::string containing the identifier text.
      */
 	virtual std::string GetIdentifierCFG() const = 0;
 	
@@ -57,7 +65,12 @@ public:
      * @return A DOT color for the node's border.
      */
 	virtual std::string GetDotSVGColor() const { return "black"; };
-	
+
+	/**
+	 * Returns the Location corresponding to this StatementBase.
+	 * 
+     * @return The Location of the StatementBase.
+     */
 	const Location GetLocation() const { return m_location; };
 	
 	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
@@ -68,6 +81,8 @@ public:
 	/**
 	 * Is this statement a decision statement, e.g. an if() or a switch(), which will
 	 * naturally have more than one out edge?
+	 *
+	 * @return true if this StatementBase is a decision statement.
 	 */
 	virtual bool IsDecisionStatement() const { return false; };
 

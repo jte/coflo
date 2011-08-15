@@ -30,7 +30,7 @@ GCCS_FOUND_AT_CONFIGURE_TIME=@GCCS_FOUND_AT_CONFIGURE_TIME@
 GCCS_FOUND_AT_TESTSUITE_RUN_TIME=
 
 echo "Getting a list of gcc installations...";
-#todo This is duplicated in the ./test/Makefile.am, should figure out a way to make this a single definition.
+#todo This is duplicated in ./test/testsuite.at, should figure out a way to make this a single definition.
 MAX_GCCS_TO_TEST=16;
 for (( i=0; $i<${MAX_GCCS_TO_TEST}; i++ )); do
 	# Initialize all GCC_VERSION_ARRAY entries to 0, so the skip test works correctly.

@@ -56,6 +56,12 @@ public:
 	
 	/// @name Conversion operators
 	//@{
+
+	/**
+	 * Convert the VersionNumber to a std::string.
+	 * 
+     * @return the VersionNumber as a std::string.
+     */
 	operator std::string() const;
 	//@}
 	
@@ -68,11 +74,11 @@ public:
 	bool empty() const { return m_version_string.empty(); };
 	
 	/**
-	 * Output stream inserter.
+	 * Friend relation to the output stream inserter.
 	 * Outputs the VersionNumber object @a ver as text to stream @a os.
 	 *
-	 * @param os
-	 * @param ver
+	 * @param os The output stream to insert VersionNumber @a ver into.
+	 * @param ver The VersionNumber object to insert into @a os.
 	 * @return Reference to @a os.
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const VersionNumber& ver);
