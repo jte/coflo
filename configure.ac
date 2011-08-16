@@ -117,7 +117,7 @@ DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
 ###
 
 # Make sure we have a usable Boost version.
-AX_BOOST_BASE([1.42.0])
+AX_BOOST_BASE([1.45.0])
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
