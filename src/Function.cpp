@@ -620,6 +620,23 @@ public:
 		// Get the current indentation level of the vertex.
 		m_current_indent_level = m_indent_level_map[u];
 
+		// Check if this vertex starts a new branch of the cfg.
+		T_CFG::in_edge_iterator iei,iee;
+		boost::tie(iei, iee) = boost::in_edges(u, m_graph);
+		if(filtered_in_degree(u, m_graph)==1 && iei != iee)
+		{
+			T_CFG::vertex_descriptor predecessor;
+			predecessor = boost::source(*iei, m_graph);
+			if(m_graph[predecessor].m_statement->IsDecisionStatement())
+			{
+				// Predecessor was a decision statement, so this vertex starts a new branch.
+				indent(m_current_indent_level);
+				std::cout << "{" << predecessor << std::endl;
+				m_current_indent_level++;
+
+			}
+		}
+
 		// Indent and print the statement corresponding to this vertex.
 		indent(m_current_indent_level);
 		StatementBase *p = m_graph[u].m_statement;
@@ -638,13 +655,13 @@ public:
 
 		// If this vertex results in a branch of the CFG,
 		// indent the subsequent vertices another level.
-		if (p->IsDecisionStatement())
+		/*if (p->IsDecisionStatement())
 		{
 			indent(m_current_indent_level);
 			std::cout << "{" << std::endl;
 			m_current_indent_level++;
 		}
-		else if (dynamic_cast<FunctionCallResolved*>(p) != NULL)
+		else*/ if (dynamic_cast<FunctionCallResolved*>(p) != NULL)
 		{
 			// This is a function call which has been resolved (i.e. has a link to the
 			// actual Function that's being called).  Track the call context, and 
