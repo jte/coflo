@@ -30,25 +30,24 @@
 AC_PREREQ([2.67])
 
 # Define an M4 macro which will get the working copy's current version info via "svnversion".
-m4_define([COFLO_SVN_VERSION], m4_esyscmd_s([svnversion -n]))dnl
+m4_define([SVN_VERSION], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]))dnl
 
-AC_INIT([CoFlo], [0.1.COFLO_SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.1.SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+#AC_SUBST([SVN_VERSION])
 AC_CONFIG_SRCDIR([src/main.cpp])
 # AC_CONFIG_HEADER([config.h])
 AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
-AC_CONFIG_AUX_DIR([./build-aux])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([install-sh])
 AC_REQUIRE_AUX_FILE([missing])
 AC_REQUIRE_AUX_FILE([depcomp])
+AC_REQUIRE_AUX_FILE([svn-version-gen])
 # Don't think we need config.guess or config.sub, not using AC_CANONICAL_BUILD/HOST/TARGET
 
 # Additional Autoconf macros are in ./m4.
-AC_CONFIG_MACRO_DIR([./m4])
-
-# Autoconf-supported test directory.
-AC_CONFIG_TESTDIR([test],[src])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
@@ -72,7 +71,7 @@ AM_INIT_AUTOMAKE([check-news
 #AM_INSTALLCHECK_STD_OPTIONS_EXEMPT=
 
 # Enable the configure remake rules.
-AM_MAINTAINER_MODE([enable])
+#AM_MAINTAINER_MODE([enable])
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
@@ -129,10 +128,13 @@ AX_BOOST_FILESYSTEM
 ###
 AC_CHECK_FUNC(glob)
 
-# Set up Autotest.
-# TODO This is at autoconf time, not configure time.
-AC_SUBST([GCCS_FOUND_AT_CONFIGURE_TIME], m4_esyscmd_s([echo "hello";]))
+###
+### Initialize the test suite.
+# Autoconf-supported test directory.
+AC_CONFIG_TESTDIR([test])
+AC_CONFIG_FILES([test/Makefile test/atlocal])
+AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug/Makefile src/libexttools/Makefile src/statements/Makefile test/Makefile test/atlocal])
+AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug/Makefile src/libexttools/Makefile src/statements/Makefile])
 AC_OUTPUT
 

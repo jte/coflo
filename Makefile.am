@@ -27,6 +27,16 @@ include $(top_srcdir)/aminclude_doxygen.am
 # The subdirectories containing the source code and tests.
 SUBDIRS = src test
 
+# We want to distribute .version.
+EXTRA_DIST = .version
+
+# We make .version depend on configure so that it stays in sync with VERSION and PACKAGE_VERSION.
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version: configure
+	echo $(VERSION) > $@-t && mv $@-t $@
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version
+
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
