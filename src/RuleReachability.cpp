@@ -20,10 +20,10 @@
 #include <iostream>
 #include <boost/graph/depth_first_search.hpp>
 
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 #include "Function.h"
 #include "RuleReachability.h"
-#include "statements/Entry.h"
+#include "controlflowgraph/statements/Entry.h"
 
 RuleReachability::RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {

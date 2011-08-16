@@ -15,10 +15,11 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../Function.h"
+#include "../../Location.h"
+#include "../../Function.h"
 #include "FunctionCallResolved.h"
 #include "FunctionCallUnresolved.h"
-#include "../Location.h"
+
 
 
 FunctionCallResolved::FunctionCallResolved(Function *f, FunctionCallUnresolved *fcu) : FunctionCall(fcu->GetLocation())

@@ -22,7 +22,7 @@
 #include "If.h"
 #include "Switch.h"
 #include "FunctionCallUnresolved.h"
-#include "../Location.h"
+#include "../../Location.h"
 
 /// Regex string for matching and capturing locations.
 /// Capture 1 is the path, 2 is the line number.

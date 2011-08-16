@@ -21,7 +21,7 @@
 
 #include "RulePrintFunctionCFG.h"
 #include "Function.h"
-#include "statements/Entry.h"
+#include "controlflowgraph/statements/Entry.h"
 
 RulePrintFunctionCFG::RulePrintFunctionCFG(const T_CFG &cfg, Function *f) : RuleDFSBase(cfg)
 {

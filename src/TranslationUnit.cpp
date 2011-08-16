@@ -40,10 +40,10 @@
 #include "Block.h"
 #include "Function.h"
 
-#include "statements/If.h"
-#include "statements/FunctionCallUnresolved.h"
-#include "statements/NoOp.h"
-#include "statements/Switch.h"
+#include "controlflowgraph/statements/If.h"
+#include "controlflowgraph/statements/FunctionCallUnresolved.h"
+#include "controlflowgraph/statements/NoOp.h"
+#include "controlflowgraph/statements/Switch.h"
 
 #include "libexttools/ToolCompiler.h"
 
