@@ -30,10 +30,12 @@ SUBDIRS = src test
 # We want to distribute .version.
 EXTRA_DIST = .version
 
-# We make .version depend on configure so that it stays in sync with VERSION and PACKAGE_VERSION.
+# Rules for making and cleaning .version.
 BUILT_SOURCES = $(top_srcdir)/.version
-$(top_srcdir)/.version: configure
+DISTCLEANFILES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
 	echo $(VERSION) > $@-t && mv $@-t $@
+
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
 

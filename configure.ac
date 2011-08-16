@@ -30,12 +30,12 @@
 AC_PREREQ([2.67])
 
 # Define an M4 macro which will get the working copy's current version info via "svnversion".
-m4_define([SVN_VERSION], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]))dnl
+m4_include([m4/coflo_source_control_version.m4])
 
 AC_INIT([CoFlo], [0.1.SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 #AC_SUBST([SVN_VERSION])
 AC_CONFIG_SRCDIR([src/main.cpp])
-# AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([config.h])
 AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
@@ -48,6 +48,9 @@ AC_REQUIRE_AUX_FILE([svn-version-gen])
 
 # Additional Autoconf macros are in ./m4.
 AC_CONFIG_MACRO_DIR([m4])
+
+# Make sure we re-configure when the version changes.
+AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/build-aux/svn-version-gen' '$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
