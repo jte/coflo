@@ -20,29 +20,11 @@
 # Test at most the first 16 GCCs that we find installed on the system.
 MAX_GCCS_TO_TEST=16
 
-# Add scripts which will be generated and used during "make check" to check_SCRIPTS.
-# Note that scripts are not distributed by default, so we don't need a "nodist_" prefix here.
-check_SCRIPTS = 
-EXTRA_DIST = testsuite.at $(srcdir)/package.m4 $(TESTSUITE) atlocal.in $(C_TEST_SOURCE)
+EXTRA_DIST = testsuite.at $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
 CLEANFILES = $(CPP_TEST_SOURCE)
-TESTSUITE = $(srcdir)/testsuite
+     
+#AUTOM4TE = $(SHELL) $(top_srcdir)/build-aux/missing --run autom4te
 
-###
-### Rules to hook the AutoTest functionality into Automake.
-###
-check-local: atconfig atlocal $(TESTSUITE)
-	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
-     
-installcheck-local: atconfig atlocal $(TESTSUITE)
-	$(SHELL) '$(TESTSUITE)' AUTOTEST_PATH='$(bindir)' \
-	$(TESTSUITEFLAGS)
-     
-clean-local:
-	test ! -f '$(TESTSUITE)' || \
-	$(SHELL) '$(TESTSUITE)' --clean
-     
-AUTOM4TE = $(SHELL) $(top_srcdir)/build-aux/missing --run autom4te
-AUTOTEST = $(AUTOM4TE) --language=autotest
 
 # The `:;' works around a Bash 3.2 bug when the output is not writeable.
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
@@ -64,29 +46,37 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	echo '#' && \
 	echo '# THIS FILE GENERATED, DO NOT EDIT.' && \
 	echo '# Signature of the current package.' && \
-	echo 'm4_define([AT_PACKAGE_NAME],' && \
-	echo '  [$(PACKAGE_NAME)])' && \
-	echo 'm4_define([AT_PACKAGE_TARNAME],' && \
-	echo '  [$(PACKAGE_TARNAME)])' && \
-	echo 'm4_define([AT_PACKAGE_VERSION],' && \
-	echo '  [$(PACKAGE_VERSION)])' && \
-	echo 'm4_define([AT_PACKAGE_STRING],' && \
-	echo '  [$(PACKAGE_STRING)])' && \
-	echo 'm4_define([AT_PACKAGE_BUGREPORT],' && \
-	echo '  [$(PACKAGE_BUGREPORT)])'; \
-	echo 'm4_define([AT_PACKAGE_URL],' && \
-	echo '  [$(PACKAGE_URL)])'; \
+	echo 'm4_define([AT_PACKAGE_NAME],      [$(PACKAGE_NAME)])' && \
+	echo 'm4_define([AT_PACKAGE_TARNAME],   [$(PACKAGE_TARNAME)])' && \
+	echo 'm4_define([AT_PACKAGE_VERSION],   [$(PACKAGE_VERSION)])' && \
+	echo 'm4_define([AT_PACKAGE_STRING],    [$(PACKAGE_STRING)])' && \
+	echo 'm4_define([AT_PACKAGE_BUGREPORT], [$(PACKAGE_BUGREPORT)])' && \
+	echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])' ; \
 	} > '$(srcdir)/package.m4'
 
-# List testsuite.at's dependencies (i.e. the files it includes)
-$(srcdir)/testsuite.at:
+TESTSUITE = $(srcdir)/testsuite
+
+AUTOTEST = $(AUTOM4TE) --language=autotest
 
 ###
 ### The rule which makes the "testsuite" shell script.
 ###
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(CPP_TEST_SOURCE) $(C_TEST_SOURCE)
-	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
+	$(AUTOTEST) -I '$(srcdir)' $(srcdir)/testsuite.at -o $@.tmp
 	mv $@.tmp $@
+
+###
+### Rules to hook the AutoTest functionality into Automake.
+###
+     
+clean-local:
+	test ! -f '$(TESTSUITE)' ||	$(SHELL) '$(TESTSUITE)' --clean
+	
+check-local: atconfig atlocal $(TESTSUITE)
+	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
+     
+installcheck-local: atconfig atlocal $(TESTSUITE)
+	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS) AUTOTEST_PATH='$(bindir)'
 
 
 ###
@@ -97,7 +87,6 @@ $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(CPP_TEST_SOURCE) $(C
 C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c
 # The built C++ test files.
 CPP_TEST_SOURCE = test_source_file_1.cpp test_source_file_2.cpp
-CLEANFILES += $(CPP_TEST_SOURCE)
 
 test_source_file_1.cpp: $(srcdir)/test_source_file_1.c
 	@# Simply copy the C files to make C++ versions.

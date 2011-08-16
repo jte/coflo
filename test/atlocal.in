@@ -1,3 +1,4 @@
+# @configure_input@                                     -*- shell-script -*-
 # atlocal.in for CoFlo's ./test directory, used to collect configure-time
 # information about the build system.
 #
@@ -17,7 +18,6 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Process this file with autoconf to produce atlocal.
-# @configure_input@
 
 # TODO Not sure if we need something like this or not.
 PATH=@abs_builddir@:@abs_top_builddir@/src:@abs_top_srcdir@/build-aux:$top_srcdir:$srcdir:$PATH
