@@ -23,7 +23,7 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 #include "Program.h"
 
 // Forward declarations.

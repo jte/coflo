@@ -16,7 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug libexttools statements
+SUBDIRS = controlflowgraph debug libexttools
 
 # Make sure the Doxygen configuration file is distributed.
 EXTRA_DIST = Doxyfile
@@ -27,7 +27,6 @@ coflo_SOURCES = main.cpp \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
 	CFGDFSVisitor.cpp CFGDFSVisitor.h \
-	ControlFlowGraph.cpp ControlFlowGraph.h \
 	Function.cpp Function.h \
 	ImprovedDFSVisitorBase.h \
 	Location.cpp Location.h \

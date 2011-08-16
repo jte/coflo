@@ -22,7 +22,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 
 #include "RuleDFSBase.h"
 

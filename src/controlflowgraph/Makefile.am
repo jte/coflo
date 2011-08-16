@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+SUBDIRS = statements
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
@@ -25,6 +26,7 @@ libcontrolflowgraph_a_SOURCES = \
 	CFGEdgeTypeGoto.cpp CFGEdgeTypeGoto.h \
 	CFGEdgeTypeImpossible.cpp CFGEdgeTypeImpossible.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
+	ControlFlowGraph.cpp ControlFlowGraph.h \
 	depth_first_traversal.hpp
 
 libcontrolflowgraph_a_CPPFLAGS = $(AM_CPPFLAGS)

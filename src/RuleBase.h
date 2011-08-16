@@ -18,7 +18,7 @@
 #ifndef RULEBASE_H
 #define	RULEBASE_H
 
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 
 /**
  * Abstract base class for all rules.

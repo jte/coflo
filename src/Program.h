@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 
 class TranslationUnit;
 class Function;
