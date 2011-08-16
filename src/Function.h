@@ -25,7 +25,7 @@
 #include <boost/filesystem.hpp>
 
 #include "BasicBlockGraph.h"
-#include "ControlFlowGraph.h"
+#include "controlflowgraph/ControlFlowGraph.h"
 
 class TranslationUnit;
 class Block;
