@@ -1,4 +1,4 @@
-# Second-level Makefile.am for CoFlo, ./debug directory.
+# Second-level Makefile.am for CoFlo, ./debug_utils directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #

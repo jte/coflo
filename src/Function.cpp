@@ -35,6 +35,8 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/unordered_set.hpp>
 
+#include "debug_utils/debug_utils.hpp"
+
 #include "TranslationUnit.h"
 #include "Block.h"
 #include "Function.h"
@@ -156,12 +158,12 @@ void Function::LinkBlocks()
 				{
 					if (NULL != dynamic_cast<SuccessorExit*>(*s))
 					{
-						std::cout << "INFO: Found EXIT successor." << std::endl;
+						dlog_block << "INFO: Found EXIT successor." << std::endl;
 						(*s)->SetSuccessorBlockPtr(m_exit_block);
 					}
 					else if (NULL != dynamic_cast<SuccessorNoReturn*>(*s))
 					{
-						std::cout << "INFO: Found NoReturn successor."
+						dlog_block << "INFO: Found NoReturn successor."
 								<< std::endl;
 						(*s)->SetSuccessorBlockPtr(m_exit_block);
 					}
@@ -299,7 +301,6 @@ T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 			if (it == function_map.end())
 			{
 				// Couldn't resolve it.  Add it to the unresolved call list.
-				/// @todo Remove this: std::cerr << "WARNING: Can't find function " << fcu->GetIdentifier() << " in link map." << std::endl;
 				unresolved_function_calls->push_back(fcu);
 			}
 			else
@@ -1007,7 +1008,7 @@ void Function::PrintDotCFG(ToolDot *the_dot,
 
 	dot_filename = (output_dir / (m_function_id + ".dot")).generic_string();
 
-	std::cerr << "Creating " << dot_filename << std::endl;
+	std::clog << "Creating " << dot_filename << std::endl;
 
 	std::ofstream outfile(dot_filename.c_str());
 
@@ -1017,7 +1018,7 @@ void Function::PrintDotCFG(ToolDot *the_dot,
 
 	outfile.close();
 
-	std::cerr << "Compiling " << dot_filename << std::endl;
+	std::clog << "Compiling " << dot_filename << std::endl;
 	the_dot->CompileDotToPNG(dot_filename);
 }
 
