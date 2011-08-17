@@ -357,8 +357,9 @@ static void print_lib_versions()
 	using std::cout;
 	using std::endl;
 
-	cout << "Boost version.............: " << (BOOST_VERSION / 100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << endl;
-	cout << "Boost compiler string.....: " << BOOST_COMPILER << endl;
-	cout << "Boost using standard lib..: " << BOOST_STDLIB << endl;
-	cout << "Boost detected platform...: " << BOOST_PLATFORM << endl;
+	cout << "Boost library info:"
+	cout << "  Version.............: " << (BOOST_VERSION / 100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << endl;
+	cout << "  Compiler string.....: " << BOOST_COMPILER << endl;
+	cout << "  Using standard lib..: " << BOOST_STDLIB << endl;
+	cout << "  Detected platform...: " << BOOST_PLATFORM << endl;
 }
