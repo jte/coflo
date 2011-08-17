@@ -33,8 +33,9 @@ EXTRA_DIST = .version
 # Rules for making and cleaning .version.
 BUILT_SOURCES = $(top_srcdir)/.version
 DISTCLEANFILES = $(top_srcdir)/.version
-$(top_srcdir)/.version:
+$(top_srcdir)/.version: FORCE
 	echo $(VERSION) > $@-t && mv $@-t $@
+FORCE:
 
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
