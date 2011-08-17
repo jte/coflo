@@ -138,6 +138,6 @@ AC_CONFIG_TESTDIR([test])
 AC_CONFIG_FILES([test/Makefile test/atlocal])
 AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug/Makefile src/libexttools/Makefile src/controlflowgraph/statements/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug_utils/Makefile src/libexttools/Makefile src/controlflowgraph/statements/Makefile])
 AC_OUTPUT
 

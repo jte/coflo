@@ -34,6 +34,8 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
+#include "debug_utils/debug_utils.hpp"
+
 #include "TranslationUnit.h"
 
 #include "Location.h"
@@ -107,7 +109,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// Check if it's a C++ file.
 	if(filename.extension() == ".cpp")
 	{
-		std::cerr << "File is C++" << std::endl;
+		dlog_block << "File is C++" << std::endl;
 		file_is_cpp = true;
 	}
 	
@@ -142,7 +144,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				}
 				// Otherwise everything is OK, get the real filename.
 				gcc_cfg_lineno_blocks_filename.assign(globbuf.gl_pathv[0]);
-				std::cerr << "INFO: Successfully matched \""
+				dlog_block << "INFO: Successfully matched \""
 					<< gcc_cfg_lineno_blocks_filename << "\" with \""
 					<< globbuf.gl_pathv[0] << "\"" << std::endl;
 				break;
@@ -215,7 +217,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		if(regex_match(line.c_str(), capture_results, *function_regex))
 		{
 			in_function_name = capture_results[function_id_offset];
-			std::cout << "Found function: " << in_function_name << std::endl;
+			dlog_block << "Found function: " << in_function_name << std::endl;
 			current_function = new Function(this, in_function_name);
 
 			(*function_map)[in_function_name] = current_function;
@@ -235,7 +237,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			if(line.compare("}") == 0)
 			{
 				// Found the end of the function.
-				std::cout << "Found function end" << std::endl;
+				dlog_block << "Found function end" << std::endl;
 				in_function = false;
 				continue;
 			}
@@ -246,7 +248,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				long block_start_line_no;
 				bool block_parsed_successfully;
 
-				std::cout << "Found block: " << capture_results[1] << std::endl;
+				dlog_block << "Found block: " << capture_results[1] << std::endl;
 
 				// See if there was a starting line number for this block.
 				if(capture_results[2].matched)
@@ -265,7 +267,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 				{
 					block_start_line_no = 0;
 				}
-				std::cout << "BLOCK LINE NO: " << block_start_line_no << std::endl;
+				dlog_block << "BLOCK LINE NO: " << block_start_line_no << std::endl;
 				current_block = new Block(current_function,
 										 atoi(capture_results[1].str().c_str()),
 										 block_start_line_no);

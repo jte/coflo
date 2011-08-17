@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "../../debug_utils/debug_utils.hpp"
 #include "../../Location.h"
 
 /**

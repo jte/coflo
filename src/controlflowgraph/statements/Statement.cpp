@@ -67,9 +67,9 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 		{
 			// Add the if to the block.
 			Location loc(capture_results[1].str());
-			std::cerr << "Found if at location: " << loc << std::endl;
+			dlog_block << "Found if at location: " << loc << std::endl;
 			If *if_stmnt = new If(loc);
-			std::cout << "IF=" << line << std::endl;
+			dlog_block << "IF=" << line << std::endl;
 			return if_stmnt;
 		}
 
@@ -78,29 +78,29 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 		{
 			// Add the switch to the block.
 			Location loc(capture_results[1].str());
-			std::cerr << "Found switch at location: " << loc << std::endl;
+			dlog_block << "Found switch at location: " << loc << std::endl;
 			Switch *switch_stmnt = new Switch(loc);
-			std::cout << "SW=" << line << std::endl;
+			dlog_block << "SW=" << line << std::endl;
 			return switch_stmnt;
 		}
 
 		// Look for function calls.
 		else if(boost::regex_match(line.c_str(), capture_results, f_function_call_expression))
 		{
-			std::cerr << "Found call: " << capture_results[2] << std::endl;
+			dlog_block << "Found call: " << capture_results[2] << std::endl;
 
 			// Add the call to the block.
 			// Note that at this point, it's an Unresolved call, since we haven't
 			// linked yet.
 			Location loc(capture_results[1].str());
 			FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc);
-			std::cout << "CALL=" << line << std::endl;
+			dlog_block << "CALL=" << line << std::endl;
 			return f;
 		}
 		else if(boost::regex_match(line.c_str(), capture_results, f_succ_expression))
 		{
 			// This is the start of a "#SUCC".  Reset the stream and return.
-			std::cout << "SUCC=" << line << std::endl;
+			dlog_block << "SUCC=" << line << std::endl;
 			input_stream.seekg(start_pos);
 		
 			return NULL;
@@ -108,7 +108,7 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 
 		// Else it is an unknown statement.  Absorb it.
 		/// @todo Parse these as well.
-		std::cout << "UNK=" << line << std::endl;
+		dlog_block << "UNK=" << line << std::endl;
 		start_pos = input_stream.tellg();
 	}
 	

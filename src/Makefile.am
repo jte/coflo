@@ -16,7 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug libexttools
+SUBDIRS = controlflowgraph debug_utils libexttools
 
 # Make sure the Doxygen configuration file is distributed.
 EXTRA_DIST = Doxyfile
@@ -44,4 +44,4 @@ coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CXXFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LDFLAGS)
-coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a ./debug/libdebugutils.a ./libexttools/libexttools.a ./statements/libstatements.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a ./controlflowgraph/statements/libstatements.a ./debug_utils/libdebugutils.a ./libexttools/libexttools.a $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
