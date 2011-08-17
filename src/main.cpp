@@ -20,6 +20,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <boost/version.hpp>
+#include <boost/config.hpp>
 #include <boost/program_options.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -78,6 +80,10 @@ std::pair<std::string, std::string> at_option_parser(const std::string &s)
 	}
 }
 
+/**
+ * Prints the versions of the various libraries we were compiled against.
+ */
+static void print_lib_versions();
 
 /**
  * CoFlo entry point.
@@ -233,6 +239,9 @@ int main(int argc, char* argv[])
 			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
 			std::cout << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 
+			std::cout << "\n" << "Library info:" << std::endl;
+			print_lib_versions();
+
 			return 0;
 		}
 
@@ -341,4 +350,15 @@ int main(int argc, char* argv[])
 	}
 	
 	return 0;
+}
+
+static void print_lib_versions()
+{
+	using std::cout;
+	using std::endl;
+
+	cout << "Boost version.............: " << (BOOST_VERSION / 100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << endl;
+	cout << "Boost compiler string.....: " << BOOST_COMPILER << endl;
+	cout << "Boost using standard lib..: " << BOOST_STDLIB << endl;
+	cout << "Boost detected platform...: " << BOOST_PLATFORM << endl;
 }

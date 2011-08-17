@@ -35,7 +35,7 @@ m4_include([m4/coflo_source_control_version.m4])
 AC_INIT([CoFlo], [0.1.SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 #AC_SUBST([SVN_VERSION])
 AC_CONFIG_SRCDIR([src/main.cpp])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
