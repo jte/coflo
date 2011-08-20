@@ -28,11 +28,19 @@
  * - Output <file>.s:
  *		- In working directory by default.
  *		- If "-o file.s", then relative to working directory.
+ *
+ *	The code in GenerateCFG() normalizes this so that the .nnnt.cfg file:
+ *	- Always has an extension of ".coflo.cfg".
+ *	- Always is put in the current working directory.
  */
 
-#include <glob.h>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
+
+// Tell <boost/filesystem.hpp> that we want the new interface.
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
 
 #include "ToolCompiler.h"
 
@@ -45,10 +53,15 @@ ToolCompiler::ToolCompiler(const ToolCompiler& orig) : ToolBase(orig)
 {
 }
 
-ToolCompiler::~ToolCompiler() { }
-
-int ToolCompiler::GenerateCFG(const std::string &params)
+ToolCompiler::~ToolCompiler()
 {
+}
+
+int ToolCompiler::GenerateCFG(const std::string &params, const std::string &source_filename)
+{
+	int system_retval;
+	std::vector< std::string > matching_filenames;
+
 	// Create the compile command.
 	std::string compile_to_cfg_command;
 	
@@ -58,7 +71,44 @@ int ToolCompiler::GenerateCFG(const std::string &params)
 	
 	std::cout << "Running gcc with params: " << params << "..." << std::endl;
 	
-	return System(compile_to_cfg_command+params);
+	// Call the compiler to generate the CFG file.
+	system_retval = System(compile_to_cfg_command + params);
+
+	if(system_retval != 0)
+	{
+		// Either the System command failed, or gcc did.  Propagate the error to the caller.
+		return system_retval;
+	}
+
+	// Normalize the output filename by removing the three-digit compile stage number,
+	// which can vary between gcc versions and builds.
+
+	// Create a pattern to glob for.
+	boost::filesystem::path source_filename_only = source_filename;
+	source_filename_only = source_filename_only.filename();
+	std::string filename_to_glob_for = source_filename_only.generic_string()+".????.cfg";
+	matching_filenames = Glob(filename_to_glob_for);
+
+	// Check for errors.
+	if(matching_filenames.size() > 1)
+	{
+		// We matched more than one file, there must be some leftover CFG files.
+		std::cerr << "ERROR: Matched " << matching_filenames.size() << " files with pattern \"" << filename_to_glob_for << "\", should only be one." << std::endl;
+		return 1;
+	}
+	else if(matching_filenames.size() < 1)
+	{
+		// We couldn't match the file, something must have gone wrong.
+		std::cerr << "ERROR: Couldn't match any files with pattern \"" << filename_to_glob_for << "\", should be one." << std::endl;
+		return 1;
+	}
+
+	// We're OK, rename the file.
+	rename(matching_filenames[0].c_str(), (source_filename_only.generic_string()+".coflo.cfg").c_str());
+	//std::cout << matching_filenames.size() << " " << matching_filenames[0] << " " << filename_to_glob_for << std::endl;
+	//exit (0);
+
+	return 0;
 }
 
 std::pair< std::string, bool > ToolCompiler::CheckIfVersionIsUsable() const
