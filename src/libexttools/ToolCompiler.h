@@ -32,7 +32,7 @@ public:
 	ToolCompiler(const ToolCompiler& orig);
 	virtual ~ToolCompiler();
 	
-	int GenerateCFG(const std::string &params);
+	int GenerateCFG(const std::string &params, const std::string &source_filename);
 	
 	std::pair< std::string, bool > CheckIfVersionIsUsable() const;
 	
