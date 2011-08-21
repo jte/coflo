@@ -60,6 +60,7 @@ ToolCompiler::~ToolCompiler()
 int ToolCompiler::GenerateCFG(const std::string &params, const std::string &source_filename)
 {
 	int system_retval;
+	int rename_retval;
 	std::vector< std::string > matching_filenames;
 
 	// Create the compile command.
@@ -104,11 +105,9 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	}
 
 	// We're OK, rename the file.
-	rename(matching_filenames[0].c_str(), (source_filename_only.generic_string()+".coflo.cfg").c_str());
-	//std::cout << matching_filenames.size() << " " << matching_filenames[0] << " " << filename_to_glob_for << std::endl;
-	//exit (0);
+	rename_retval = rename(matching_filenames[0].c_str(), (source_filename_only.generic_string()+".coflo.cfg").c_str());
 
-	return 0;
+	return rename_retval;
 }
 
 std::pair< std::string, bool > ToolCompiler::CheckIfVersionIsUsable() const
