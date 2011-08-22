@@ -68,7 +68,12 @@ public:
 	
 	std::string GetDefinitionFilePath() const;
 
-	void PrintControlFlowGraph();
+	/**
+	 * Prints the control flow graph of this function to cout.
+	 *
+	 * @param only_function_calls  If true, only print function calls and flow control constructs.
+	 */
+	void PrintControlFlowGraph(bool only_function_calls);
 	
 	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
 	

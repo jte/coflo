@@ -87,6 +87,13 @@ public:
 	 */
 	virtual bool IsDecisionStatement() const { return false; };
 
+	/**
+	 * Is this statement a function call, either resolved or unresolved?
+	 *
+	 * @return true if the statement is a function call, false if it isn't.
+	 */
+	virtual bool IsFunctionCall() const { return false; };
+
 	//@}
 
 private:

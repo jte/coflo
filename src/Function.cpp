@@ -575,6 +575,17 @@ static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	return i;
 }
 
+static bool VertexTerminatesBranch(StatementBase *p, T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+{
+	// If vertex v:
+	// - Is not a decision statement
+	// then it should have only one non-back-edge out edge.
+	// If the vertex that non-back-edge leads to has a non-zero filtered in degree,
+	// vertex v terminates a branch.
+	/// @TODO the above isn't right.
+	//if()
+}
+
 /**
  * Visitor which does the actual creation of the control flow graph.
  */
@@ -582,10 +593,12 @@ class function_control_flow_graph_visitor: public CFGDFSVisitor
 {
 public:
 	function_control_flow_graph_visitor(T_CFG &g,
-			T_CFG_VERTEX_DESC last_statement) :
+			T_CFG_VERTEX_DESC last_statement,
+			bool only_function_calls) :
 			CFGDFSVisitor(g)
 	{
 		m_last_statement = last_statement;
+		m_only_function_calls = only_function_calls;
 		m_current_indent_level = 0;
 		m_last_discovered_vertex_is_recursive = false;
 	}
@@ -638,12 +651,15 @@ public:
 			}
 		}
 
-		// Indent and print the statement corresponding to this vertex.
-		indent(m_current_indent_level);
 		StatementBase *p = m_graph[u].m_statement;
-		std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">"
-				<< std::endl;
-		//PrintInEdgeTypes(u, m_graph);
+		// Check if this vertex meets the criteria for printing the statement.
+		if(!m_only_function_calls || (p->IsDecisionStatement() || (p->IsFunctionCall())))
+		{
+			// Indent and print the statement corresponding to this vertex.
+			indent(m_current_indent_level);
+			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
+			//PrintInEdgeTypes(u, m_graph);
+		}
 
 		if (u == m_last_statement)
 		{
@@ -683,12 +699,26 @@ public:
 			if (!wasnt_already_there)
 			{
 				// We're recursing, we need to treat this vertex as if it were a FunctionCallUnresolved.
-				std::cout << "RECURSION DETECTED" << std::endl;
+				std::cout << "RECURSION DETECTED: Function \"" << fcr->m_target_function << "\"" << std::endl;
 				m_last_discovered_vertex_is_recursive = true;
 				//return vertex_return_value_t::terminate_branch;
 			}
 		}
 
+#if 0
+		// Check if this is the last vertex in this branch.
+		if(filtered_out_degree(u, m_graph) == 1)
+		{
+			// Check if the next vertex terminates more than one branch of the graph.
+			if (filtered_in_degree(u, m_graph) > 1)
+			{
+				// This edge terminates a branch.  Decrement the current indent level counter.
+				m_current_indent_level--;
+				indent(m_current_indent_level);
+				std::cout << "}" << std::endl;
+			}
+		}
+#endif
 		return vertex_return_value_t::ok;
 	}
 
@@ -816,6 +846,9 @@ private:
 	/// Vertex corresponding to the last statement of the function.
 	/// We'll terminate the search when we find this.
 	T_CFG_VERTEX_DESC m_last_statement;
+
+	/// Flag indicating if we should only print function calls and flow control constructs.
+	bool m_only_function_calls;
 
 	/// The indent level.  This corresponds to the number of branching statements
 	/// with unterminated branches between the starting node and the current node.
@@ -974,7 +1007,7 @@ void topological_visit_kahn(Graph &graph,
 	}
 }
 
-void Function::PrintControlFlowGraph()
+void Function::PrintControlFlowGraph(bool only_function_calls)
 {
 #if 0
 	// Set up the color map stack.
@@ -989,7 +1022,7 @@ void Function::PrintControlFlowGraph()
 	improved_depth_first_visit(*m_cfg, m_first_statement, cfg_visitor, color_map_stack);
 #else
 	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement);
+	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, only_function_calls);
 	topological_visit_kahn(*m_cfg, m_first_statement, cfg_visitor);
 #endif
 }
