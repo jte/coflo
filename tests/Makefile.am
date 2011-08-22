@@ -21,8 +21,13 @@
 MAX_GCCS_TO_TEST=16
 
 EXTRA_DIST = testsuite.at $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
+DISTCLEANFILES = atconfig
+MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 CLEANFILES = $(CPP_TEST_SOURCE)
      
+# This appears in the Autoconf/Autotest manual, but see configure.ac.
+# The "AM_MISSING_PROG([AUTOM4TE], [autom4te])" line takes care of that,
+# though the "AM_MISSING_PROG" macro is not documented.
 #AUTOM4TE = $(SHELL) $(top_srcdir)/build-aux/missing --run autom4te
 
 
@@ -54,8 +59,10 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])' ; \
 	} > '$(srcdir)/package.m4'
 
+# The actual shell script which is the testsuite.
 TESTSUITE = $(srcdir)/testsuite
 
+# Our AutoTest compiler is really Autom4te with "--language=autotest".
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
 ###
@@ -64,6 +71,11 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(CPP_TEST_SOURCE) $(C_TEST_SOURCE)
 	$(AUTOTEST) -I '$(srcdir)' $(srcdir)/testsuite.at -o $@.tmp
 	mv $@.tmp $@
+	
+# It appears that at least up to autoconf 2.68, atconfig doesn't get a dependency
+# and rebuild rule generated for it.  Do that manually here.
+atconfig: $(top_builddir)/config.status
+	cd $(top_builddir) && ./config.status tests/$@
 
 ###
 ### Rules to hook the AutoTest functionality into Automake.

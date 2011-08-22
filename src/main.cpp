@@ -247,23 +247,6 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 
-	#if 0
-		// See what we have for an object directory.
-		std::string the_root_object_dir;
-		if(vm.count("obj-dir")>0)
-		{
-			// Get the specified object directory.
-			the_root_object_dir = vm["obj-dir"].as<std::string>();
-		}
-		else
-		{
-			// No object dir was specified, create a temp one under the current directory.
-			the_root_object_dir = ToolBase::Mktemp("./coflo_obj_dir_XXXXXX", true);
-
-			std::cout << "TEMP DIR = " << the_root_object_dir << std::endl;
-		}
-	#endif
-		
 		// Enable/disable debug output.
 		/// @todo Add debug_link control.
 		dlog_block.enable(debug_parse);

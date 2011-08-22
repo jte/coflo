@@ -32,11 +32,11 @@ AC_PREREQ([2.67])
 # Define an M4 macro which will get the working copy's current version info via "svnversion".
 m4_include([m4/coflo_source_control_version.m4])
 
-AC_INIT([CoFlo], [0.1.SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.1.0.SVN_VERSION], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 #AC_SUBST([SVN_VERSION])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
-AC_COPYRIGHT([[Copyright (C) 2011 Gary R. Van Sickle]])
+AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
 AC_CONFIG_AUX_DIR([build-aux])
@@ -46,7 +46,7 @@ AC_REQUIRE_AUX_FILE([depcomp])
 AC_REQUIRE_AUX_FILE([svn-version-gen])
 # Don't think we need config.guess or config.sub, not using AC_CANONICAL_BUILD/HOST/TARGET
 
-# Additional Autoconf macros are in ./m4.
+# Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
 
 # Make sure we re-configure when the version changes.
@@ -83,8 +83,10 @@ AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
-# Clear the "user defaults".  This doesn't override any configure-time or make-time settings the builder may
-# specifiy for these variables, it just makes the values empty if they're not specified.
+# Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
+# specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
+# Otherwise, Autoconf assumes the builder wants to compile everything "-g -O2" by default, which overrides
+# any AM_C*FLAGS.
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
