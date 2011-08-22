@@ -60,6 +60,8 @@ namespace po = boost::program_options;
 #define CLP_PRINT_FUNCTION_CFG "print-function-cfg"
 #define CLP_CONSTRAINT "constraint"
 
+#define CLP_FUNCTION_CALLS_ONLY "cfg-function-calls-only"
+
 #define CLP_INPUT_FILE "input-file"
 //@}
 
@@ -115,6 +117,11 @@ int main(int argc, char* argv[])
 	bool debug_parse = false;
 	bool debug_link = false;
 	
+	// Control flow graph option flags.
+	// Whether to limit display to only function calls, or to everything CoFlo
+	// recognizes.
+	bool display_only_function_calls = false;
+
 	// Declare a variables_map to take the command line options we're passed.
 	po::variables_map vm;
 
@@ -131,6 +138,8 @@ int main(int argc, char* argv[])
 		po::options_description subprogram_options("Subprogram Options");
 		// Rules to check.
 		po::options_description analysis_options("Analysis Options");
+		// Control Flow Graph options.
+		po::options_description cfg_options("Control Flow Graph Options");
 		// Options for debugging CoFlo itself and/or the program being analyzed.
 		po::options_description debugging_options("Debugging Options");
 		// Declare options_description object for options which won't be shown to
@@ -167,6 +176,11 @@ int main(int argc, char* argv[])
 		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
 		(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
 		;
+		cfg_options.add_options()
+		(CLP_FUNCTION_CALLS_ONLY, po::bool_switch(&display_only_function_calls),
+				"Limit control flow graph output to function calls and flow control constructs only."
+				"  Otherwise, output other statements and nodes CoFlo finds the control flow graph.")
+		;
 		debugging_options.add_options()
 		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
 		(CLP_DEBUG_LINK, po::bool_switch(&debug_link), "Print debug info concerning the CFG linking stage.")
@@ -175,7 +189,12 @@ int main(int argc, char* argv[])
 		(CLP_INPUT_FILE, po::value< std::vector<std::string> >(), "input file")
 		;
 		positional_options.add("input-file", -1);
-		non_hidden_cmdline_options.add(general_options).add(preproc_options).add(subprogram_options).add(analysis_options).add(debugging_options);
+		non_hidden_cmdline_options.add(general_options)
+				.add(preproc_options)
+				.add(subprogram_options)
+				.add(analysis_options)
+				.add(cfg_options)
+				.add(debugging_options);
 		cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
 	
 		// Parse the command line.
@@ -316,7 +335,7 @@ int main(int argc, char* argv[])
 	if(vm.count(CLP_PRINT_FUNCTION_CFG))
 	{
 		// User wants a control flow graph.
-		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>()))
+		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), display_only_function_calls))
 		{
 			// Something went wrong.
 			return 1;

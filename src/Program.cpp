@@ -189,7 +189,7 @@ bool Program::PrintFunctionCFG(const std::string &function_identifier, bool only
 	std::cout << "Control Flow Graph of function " << function->GetIdentifier() << ":" << std::endl;
 	
 	// Print the CFG.
-	function->PrintControlFlowGraph();
+	function->PrintControlFlowGraph(only_function_calls);
 	
 	return true;
 }

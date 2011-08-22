@@ -66,7 +66,7 @@ public:
 	 *        constructs (if/switch) in the printed graph.
 	 * @return
 	 */
-	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls=false);
+	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls);
 	
 	T_CFG& GetControlFlowGraph() { return m_cfg; };
 	

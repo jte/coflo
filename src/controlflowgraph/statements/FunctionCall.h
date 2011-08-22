@@ -40,6 +40,13 @@ public:
 	
 	virtual std::string GetIdentifierCFG() const;
 
+	/**
+	 * Anything derived from this class is a function call of some sort.
+	 *
+	 * @return true, indicating this is a function call.
+	 */
+	virtual bool IsFunctionCall() const { return true; };
+
 private:
 };
 
