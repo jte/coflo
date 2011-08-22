@@ -34,7 +34,17 @@ EXTRA_DIST = .version
 BUILT_SOURCES = $(top_srcdir)/.version
 DISTCLEANFILES = $(top_srcdir)/.version
 $(top_srcdir)/.version: FORCE
-	echo $(VERSION) > $@-t && mv $@-t $@
+	@if test -f $@; then \
+		if test "x$(VERSION)" != "x$$(cat "$@")"; then \
+			echo "Updating .version file."; \
+			echo $(VERSION) > $@-t && mv $@-t $@; \
+		else \
+			echo "No need to create or update .version file."; \
+		fi; \
+	else \
+		echo "Creating .version file."; \
+		echo $(VERSION) > $@-t && mv $@-t $@; \
+	fi;
 FORCE:
 
 dist-hook:
