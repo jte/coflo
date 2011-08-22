@@ -107,6 +107,12 @@ int main()
 		{
 			do_that();
 		}
+
+		if(g_external_variable)
+		{
+			// This if() has no else.
+			printf("if with no else\n");
+		}
 	}
 	
 Label1:
