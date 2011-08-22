@@ -575,17 +575,6 @@ static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	return i;
 }
 
-static bool VertexTerminatesBranch(StatementBase *p, T_CFG_VERTEX_DESC v, const T_CFG &cfg)
-{
-	// If vertex v:
-	// - Is not a decision statement
-	// then it should have only one non-back-edge out edge.
-	// If the vertex that non-back-edge leads to has a non-zero filtered in degree,
-	// vertex v terminates a branch.
-	/// @TODO the above isn't right.
-	//if()
-}
-
 /**
  * Visitor which does the actual creation of the control flow graph.
  */
@@ -616,16 +605,18 @@ public:
 
 	vertex_return_value_t start_subgraph_vertex(T_CFG_VERTEX_DESC u)
 	{
-		// Either the very first vertex or a converging vertex has been popped.
-		// Pop the corresponding indent level.
-		std::cout << m_graph[u].m_statement->GetIdentifierCFG()
-				<< " = POPPED CONVERGING NODE" << std::endl;
+		// The very first vertex has been popped.
+		indent(m_current_indent_level);
+		std::cout << "{" << std::endl;
+		m_current_indent_level++;
+
+		/*std::cout << m_graph[u].m_statement->GetIdentifierCFG()
+				<< " = POPPED CONVERGING NODE" << std::endl;*/
 
 		m_indent_level_map[u] = m_current_indent_level;
 
 		return vertex_return_value_t::ok;
-	}
-	;
+	};
 
 	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u)
 	{
@@ -647,7 +638,6 @@ public:
 				indent(m_current_indent_level);
 				std::cout << "{" << predecessor << std::endl;
 				m_current_indent_level++;
-
 			}
 		}
 
@@ -670,15 +660,7 @@ public:
 			//return terminate_search;				
 		}
 
-		// If this vertex results in a branch of the CFG,
-		// indent the subsequent vertices another level.
-		/*if (p->IsDecisionStatement())
-		{
-			indent(m_current_indent_level);
-			std::cout << "{" << std::endl;
-			m_current_indent_level++;
-		}
-		else*/ if (dynamic_cast<FunctionCallResolved*>(p) != NULL)
+		if (dynamic_cast<FunctionCallResolved*>(p) != NULL)
 		{
 			// This is a function call which has been resolved (i.e. has a link to the
 			// actual Function that's being called).  Track the call context, and 
@@ -705,20 +687,6 @@ public:
 			}
 		}
 
-#if 0
-		// Check if this is the last vertex in this branch.
-		if(filtered_out_degree(u, m_graph) == 1)
-		{
-			// Check if the next vertex terminates more than one branch of the graph.
-			if (filtered_in_degree(u, m_graph) > 1)
-			{
-				// This edge terminates a branch.  Decrement the current indent level counter.
-				m_current_indent_level--;
-				indent(m_current_indent_level);
-				std::cout << "}" << std::endl;
-			}
-		}
-#endif
 		return vertex_return_value_t::ok;
 	}
 
@@ -826,6 +794,18 @@ public:
 		return retval;
 	}
 
+	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed)
+	{
+		if(num_vertices_pushed == 0)
+		{
+			// This vertex pushed no new vertices onto the stack.  This means that it terminates the branch it
+			// is in.  Decrement the current indent level counter.
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}" << std::endl;
+		}
+	}
+
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u)
 	{
 		// Check if this vertex terminates more than one branch of the graph.
@@ -903,6 +883,9 @@ void topological_visit_kahn(Graph &graph,
 
 	while (!no_remaining_in_edges_set.empty())
 	{
+		// We'll count up the number of vertices pushed into the no-remaining-edges set by this vertex.
+		long num_vertices_pushed = 0;
+
 		// Remove a vertex from the set of in-degree == 0 vertices.
 		u = no_remaining_in_edges_set.top();
 		no_remaining_in_edges_set.pop();
@@ -950,6 +933,7 @@ void topological_visit_kahn(Graph &graph,
 			// If the examine_edge() call didn't skip this edge or terminate the
 			// graph traversal entirely, the edge is now part of
 			// the topologically sorted search graph.  Let the visitor know.
+			// Note that tree edges are visited in a breadth-first order.
 			visitor_edge_return_value = visitor.tree_edge(*ei);
 			/// @todo Handle return value.
 
@@ -995,6 +979,7 @@ void topological_visit_kahn(Graph &graph,
 				in_degree_map.erase(it);
 				//std::cout << "Pushed: " << v << std::endl;
 				//PrintInEdgeTypes(v, graph);
+				num_vertices_pushed++;
 			}
 			else
 			{
@@ -1004,6 +989,10 @@ void topological_visit_kahn(Graph &graph,
 			// Go to the next out-edge of u.
 			++ei;
 		}
+
+		// We've visited all the out edges of this vertex.  Tell the visitor that we're done, and how many
+		// new vertices we added to the no-in-edges set.
+		visitor.vertex_visit_complete(u, num_vertices_pushed);
 	}
 }
 
