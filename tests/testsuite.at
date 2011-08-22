@@ -64,7 +64,7 @@ AT_BANNER([[CoFlo sanity checks]])
 # Start a test group.
 AT_SETUP([[Using default GCC against C code]])
 
-AT_CHECK([coflo ${abs_top_srcdir}/test/test_source_file_1.c ${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main],
+AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --print-function-cfg=main],
 	0,
 	ignore,
 	ignore)
@@ -77,7 +77,7 @@ AT_CLEANUP
 ###
 AT_BANNER([[Compiler Compatibility Tests - C code]])
 
-AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_srcdir}/test/test_source_file_1.c ${abs_top_srcdir}/test/test_source_file_2.c --print-function-cfg=main],
+AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --print-function-cfg=main],
 	0,
 	ignore,
 	ignore)
@@ -89,7 +89,7 @@ AT_BANNER([[Compiler Compatibility Tests - C++ code]])
 
 AT_SETUP([[Using default GCC against C-style C++ code]])
 
-AT_CHECK([coflo ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_builddir}/test/test_source_file_2.cpp --print-function-cfg=main],
+AT_CHECK([coflo ${abs_top_builddir}/tests/test_source_file_1.cpp ${abs_top_builddir}/tests/test_source_file_2.cpp --print-function-cfg=main],
 	0,
 	ignore,
 	ignore)
@@ -97,7 +97,7 @@ AT_CHECK([coflo ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_buildd
 # End this test group.
 AT_CLEANUP
 
-AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_builddir}/test/test_source_file_1.cpp ${abs_top_builddir}/test/test_source_file_2.cpp --print-function-cfg=main],
+AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_builddir}/tests/test_source_file_1.cpp ${abs_top_builddir}/tests/test_source_file_2.cpp --print-function-cfg=main],
 	0,
 	ignore,
 	ignore)

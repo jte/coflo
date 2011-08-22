@@ -25,7 +25,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 include $(top_srcdir)/aminclude_doxygen.am
 
 # The subdirectories containing the source code and tests.
-SUBDIRS = src test
+SUBDIRS = src tests
 
 # We want to distribute .version.
 EXTRA_DIST = .version

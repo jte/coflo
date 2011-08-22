@@ -1,4 +1,4 @@
-# Second-level Makefile.am for CoFlo's ./test directory.
+# Second-level Makefile.am for CoFlo's ./tests directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #

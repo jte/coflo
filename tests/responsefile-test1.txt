@@ -1,1 +1,1 @@
-../test/test_source_file_1.c ../test/test_source_file_2.c --print-function-cfg=main
+../tests/test_source_file_1.c ../tests/test_source_file_2.c --print-function-cfg=main

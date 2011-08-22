@@ -133,11 +133,12 @@ AC_CHECK_FUNC(glob)
 
 ###
 ### Initialize the test suite.
+###
 # Autoconf-supported test directory.
-AC_CONFIG_TESTDIR([test])
-AC_CONFIG_FILES([test/Makefile test/atlocal])
+AC_CONFIG_TESTDIR([tests])
+AC_CONFIG_FILES([tests/Makefile tests/atlocal])
 AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/debug_utils/Makefile src/libexttools/Makefile src/controlflowgraph/statements/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/controlflowgraph/statements/Makefile src/debug_utils/Makefile src/libexttools/Makefile])
 AC_OUTPUT
 

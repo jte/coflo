@@ -333,7 +333,6 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	{
 		params += " -I \"" + ip + "\"";
 	}
-	params += " \"" + file_path + "\"";
 	
 	// Do the compile.
 	int compile_retval = compiler->GenerateCFG(params.c_str(), file_path);
