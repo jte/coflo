@@ -92,7 +92,7 @@ int main()
 	}
 	else
 	{
-		while(predicate_1())
+		if(predicate_1())
 		{
 			retval = function_w();
 			retval = function_y();

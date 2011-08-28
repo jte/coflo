@@ -495,7 +495,7 @@ private:
 	 * statement we can find.  This is primarily for adding a "proxy" edge to replace the back edge for certain
 	 * purposes, such as printing and searching the CFG.
 	 *
-	 * @todo Make sure the if we find actually is the one which breaks us out of the loop.
+	 * @todo Make sure the one we find actually is the one which breaks us out of the loop.
 	 */
 	T_CFG_VERTEX_DESC FindForwardTargetForBackEdge(T_CFG &cfg, T_CFG_EDGE_DESC e)
 	{
@@ -506,7 +506,7 @@ private:
 		// The forward target we'll try to find.
 		T_CFG_VERTEX_DESC retval;
 
-
+		v = boost::source(e, cfg);
 	}
 };
 
@@ -680,7 +680,7 @@ public:
 		{
 			// Indent and print the statement corresponding to this vertex.
 			indent(m_current_indent_level);
-			std::cout << u << " " << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
+			std::cout /*<< u << " "*/ << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
 			//PrintInEdgeTypes(u, m_graph);
 		}
 
@@ -749,10 +749,15 @@ public:
 			/// EXIT node, which is ignored for everything but topological sort purposes?
 			return edge_return_value_t::terminate_branch;
 		}
-		else if ((ret != NULL) && (ret->m_function_call != m_call_stack.back()))
+		else if ((ret != NULL) && (m_call_stack.empty() || (ret->m_function_call != m_call_stack.back())))
 		{
 			// This edge is a return, but not the one corresponding to the FunctionCall
-			// that brought us here.  Skip it.
+			// that brought us here.  Or, the call stack is empty, indicating that we got here
+			// by means other than tracing the control-flow graph (e.g. we started tracing the
+			// graph at an internal vertex).
+			// Skip it.
+			/// @todo An empty call stack here could also be an error in the program.  We should maybe
+			/// add a fake "call" when starting a cfg trace from an internal vertex.
 			return edge_return_value_t::terminate_branch;
 		}
 
@@ -988,8 +993,8 @@ void topological_visit_kahn(Graph &graph,
 				// encountered it before now.
 				// Pretend it was in the map and add it with its original in-degree.
 				id = filtered_in_degree(v, graph);
-				std::cout << "Start IND: " << id << " " << v << std::endl;
-				PrintInEdgeTypes(v, graph);
+				//std::cout << "Start IND: " << id << " " << v << std::endl;
+				//PrintInEdgeTypes(v, graph);
 				in_degree_map[v] = id;
 				it = in_degree_map.find(v);
 			}
