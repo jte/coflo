@@ -44,7 +44,7 @@ AC_PREREQ([2.67])
 # There is considerable mechanism required to make this work properly.  See the "build-aux/svn-version-gen" script,
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
-AC_INIT([CoFlo], [0.0.1.m4_esyscmd_s([build-aux/svn-version-gen .tarball-version])], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
