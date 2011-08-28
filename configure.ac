@@ -59,10 +59,11 @@ AC_REQUIRE_AUX_FILE([svn-version-gen])
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
 
-# Make sure we re-configure when the version changes.
-# This adds a dependency to the config.status rule in the ultimately resulting Makefile.  This
-# rule reruns configure, so the new .version info will get picked up.  
-AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/.version'])
+# Make sure we re-autoconf when the version changes.
+# This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
+# rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
+# and the config.h file.  
+AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
