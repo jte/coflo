@@ -1,7 +1,7 @@
 #!/bin/sh
 # Print a version string containing the Subversion repo version info.
 
-scriptversion=2011-08-16.01; # UTC
+scriptversion=2011-08-27.01; # UTC
 
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
@@ -19,24 +19,44 @@ scriptversion=2011-08-16.01; # UTC
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Based on Autoconf's own git-version-gen script.
+# Functionality based on Autoconf's own git-version-gen script.
 
-tarball_version_file=$1
+tarball_version_file=$1;
 
-# Does the specified tarball version file exist?
-if test -f $tarball_version_file
+# The svnversion executable.
+SVNVERSION=`which svnversion`;
+if test $? -ne 0;
 then
-	version_string=`cat $tarball_version_file` || exit 1
+	# Couldn't find an svnversion on PATH.
+	# This is only a problem if we don't have a valid .tarball-version.
+	# Stub in "svnversion" here, but it will probably fail below.
+	SVNVERSION=svnversion;
 fi
 
-if test -z "$version_string"
+# Does the specified tarball version file exist?
+if test -f $tarball_version_file;
 then
-	# Try svnversion.
-	version_string=`svnversion -n | tr ':' '.'`
-	which svnversion > /dev/null; \
-	if [ $? -ne 0 ] || [ "x$version_string" = "xexported" ]
+	version_string=`cat $tarball_version_file` || exit 1;
+fi
+
+# Did we get a version string?
+if test -z "$version_string";
+then
+	# No, try svnversion.
+	# Can we execute $SVNVERSION?
+	if test -x $SVNVERSION;
 	then
-		version_string=UNKNOWN
+		# We should be able to execute $SVNVERSION.
+		version_string=`$SVNVERSION -n` \
+			|| { version_string=UNKNOWN; echo "$0: WARNING: svnversion -n failed" 1>&2; };
+		version_string=`echo $version_string | tr ':' '.'`;
+		if test "x$version_string" = "xexported";
+		then
+			version_string=UNKNOWN
+		fi
+	else
+		# We aren't able to execute $SVNVERSION, or it doesn't exist.
+		echo "$0: WARNING: Can't execute $SVNVERSION" 1>&2;
 	fi
 fi
 
@@ -46,4 +66,4 @@ then
 	version_string=UNKNOWN
 fi
 
-echo -n "$version_string"
+echo "$version_string"

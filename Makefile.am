@@ -30,23 +30,35 @@ SUBDIRS = src tests
 # We want to distribute .version.
 EXTRA_DIST = .version
 
-# Rules for making and cleaning .version.
+# .version is built source.  We want it to be built before anything else
+# so that it will trigger a reconfigure at the earliest possible time.
 BUILT_SOURCES = $(top_srcdir)/.version
 DISTCLEANFILES = $(top_srcdir)/.version
+
+# The make rule for building .version.
+# Note that we force this to always run.  We check if the contents of .version match
+# what configure told us in $(VERSION), and if they don't, we regenerate the file.
+# Note that $(VERSION) is created by AM_INIT_AUTOMAKE. 
 $(top_srcdir)/.version: FORCE
 	@if test -f $@; then \
 		if test "x$(VERSION)" != "x$$(cat "$@")"; then \
-			echo "Updating .version file."; \
+			echo "Updating .version file..."; \
 			echo $(VERSION) > $@-t && mv $@-t $@; \
+			echo "Done."; \
 		else \
 			echo "No need to create or update .version file."; \
 		fi; \
 	else \
-		echo "Creating .version file."; \
+		echo "Creating .version file..."; \
 		echo $(VERSION) > $@-t && mv $@-t $@; \
+		echo "Done."; \
 	fi;
 FORCE:
 
+# The dist-hook for building .tarball-version.
+# This is invoked when we do a "make dist", and simply
+# creates a file which contains the value of $(VERSION)
+# which was current at that time.
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
 
