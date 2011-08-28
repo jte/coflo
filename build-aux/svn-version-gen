@@ -36,6 +36,7 @@ fi
 # Does the specified tarball version file exist?
 if test -f $tarball_version_file;
 then
+	echo "$0: INFO: Getting rev info from $tarball_version_file" 1>&2;
 	version_string=`cat $tarball_version_file` || exit 1;
 fi
 
@@ -65,5 +66,7 @@ then
 	# Can't get a version string.
 	version_string=UNKNOWN
 fi
+
+echo "$0: INFO: Determined version info: $version_string" 1>&2;
 
 echo "$version_string"
