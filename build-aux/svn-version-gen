@@ -34,7 +34,7 @@ then
 fi
 
 # Does the specified tarball version file exist?
-if test -f $tarball_version_file;
+if test -f "$tarball_version_file";
 then
 	echo "$0: INFO: Getting rev info from $tarball_version_file" 1>&2;
 	version_string=`cat $tarball_version_file` || exit 1;

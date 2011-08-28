@@ -36,22 +36,24 @@ BUILT_SOURCES = $(top_srcdir)/.version
 DISTCLEANFILES = $(top_srcdir)/.version
 
 # The make rule for building .version.
-# Note that we force this to always run.  We check if the contents of .version match
-# what configure told us in $(VERSION), and if they don't, we regenerate the file.
-# Note that $(VERSION) is created by AM_INIT_AUTOMAKE. 
+# Note that we force this to always run.
 $(top_srcdir)/.version: FORCE
-	@if test -f $@; then \
-		if test "x$(VERSION)" != "x$$(cat "$@")"; then \
-			echo "Updating .version file..."; \
-			echo $(VERSION) > $@-t && mv $@-t $@; \
-			echo "Done."; \
-		else \
-			echo "No need to create or update .version file."; \
-		fi; \
-	else \
+	@# Get svn-version-gen's idea of what the right version number is.
+	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > temp.version
+	@# If .version doesn't exist, create it.
+	@if ! test -f "$@"; \
+	then \
 		echo "Creating .version file..."; \
-		echo $(VERSION) > $@-t && mv $@-t $@; \
+		mv temp.version "$@"; \
 		echo "Done."; \
+	: If temp.version differs from .version, update .version. ; \
+	elif ! cmp "$@" temp.version; then \
+		echo "Updating .version file..."; \
+		mv temp.version "$@"; \
+		echo "Done."; \
+	else \
+		echo "No need to create or update .version file."; \
+		rm temp.version; \
 	fi;
 FORCE:
 
@@ -60,7 +62,7 @@ FORCE:
 # creates a file which contains the value of $(VERSION)
 # which was current at that time.
 dist-hook:
-	echo $(VERSION) > $(distdir)/.tarball-version
+	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > $(distdir)/.tarball-version
 
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
