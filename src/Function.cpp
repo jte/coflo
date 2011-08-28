@@ -462,19 +462,52 @@ private:
 class dfs_back_edge_finder_visitor: public boost::default_dfs_visitor
 {
 public:
-	dfs_back_edge_finder_visitor(std::vector<T_CFG_EDGE_DESC> &back_edges) :
-			boost::default_dfs_visitor(), m_back_edges(back_edges)
+	dfs_back_edge_finder_visitor(std::vector<T_CFG_EDGE_DESC> &back_edges, boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> &predecessor_map) :
+			boost::default_dfs_visitor(), m_back_edges(back_edges), m_predecessor_map(predecessor_map)
 	{
-	}
-	;
+	};
+
+	void tree_edge(T_CFG_EDGE_DESC e, const T_CFG &g)
+	{
+		// An edge just became part of the DFS search tree.  Capture the predecessor info this provides.
+		m_predecessor_map[boost::source(e, g)] = e;
+	};
 
 	void back_edge(T_CFG_EDGE_DESC e, const T_CFG &g) const
 	{
+		// Found a back edge.  Search for a suitable target for an Impossible edge which will
+		// be inserted later as a "proxy" for the back edge.
+
+		/// @todo
+
 		m_back_edges.push_back(e);
 	}
 private:
 	/// External vector where we'll store the edges we'll mark later.
 	std::vector<T_CFG_EDGE_DESC> &m_back_edges;
+	/// External map where we'll store the predecessors we find during the depth-first-search.
+	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
+	/// to deal with back edges caused by loops.
+	boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> &m_predecessor_map;
+
+	/**
+	 * Search the predecessor list from this vertex to the back edge's target vertex for the first decision
+	 * statement we can find.  This is primarily for adding a "proxy" edge to replace the back edge for certain
+	 * purposes, such as printing and searching the CFG.
+	 *
+	 * @todo Make sure the if we find actually is the one which breaks us out of the loop.
+	 */
+	T_CFG_VERTEX_DESC FindForwardTargetForBackEdge(T_CFG &cfg, T_CFG_EDGE_DESC e)
+	{
+		// The source vertex of the back edge.
+		T_CFG_VERTEX_DESC v;
+		// The target vertex of the back edge.
+		T_CFG_VERTEX_DESC u;
+		// The forward target we'll try to find.
+		T_CFG_VERTEX_DESC retval;
+
+
+	}
 };
 
 struct back_edge_filter_predicate
@@ -647,7 +680,7 @@ public:
 		{
 			// Indent and print the statement corresponding to this vertex.
 			indent(m_current_indent_level);
-			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
+			std::cout << u << " " << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
 			//PrintInEdgeTypes(u, m_graph);
 		}
 
@@ -802,7 +835,7 @@ public:
 			// is in.  Decrement the current indent level counter.
 			m_current_indent_level--;
 			indent(m_current_indent_level);
-			std::cout << "}" << std::endl;
+			std::cout << "}vvc" << std::endl;
 		}
 	}
 
@@ -811,10 +844,10 @@ public:
 		// Check if this vertex terminates more than one branch of the graph.
 		if (filtered_in_degree(u, m_graph) > 1)
 		{
-			// This edge terminates a branch.  Decrement the current indent level counter.
+			// This vertex terminates more than one branch.  Decrement the current indent level counter.
 			m_current_indent_level--;
 			indent(m_current_indent_level);
-			std::cout << "}" << std::endl;
+			std::cout << "}ptp" << std::endl;
 		}
 
 		m_indent_level_map[u] = m_current_indent_level;
@@ -955,8 +988,8 @@ void topological_visit_kahn(Graph &graph,
 				// encountered it before now.
 				// Pretend it was in the map and add it with its original in-degree.
 				id = filtered_in_degree(v, graph);
-				//std::cout << "Start IND: " << id << " " << v << std::endl;
-				//PrintInEdgeTypes(v, graph);
+				std::cout << "Start IND: " << id << " " << v << std::endl;
+				PrintInEdgeTypes(v, graph);
 				in_degree_map[v] = id;
 				it = in_degree_map.find(v);
 			}
@@ -1043,6 +1076,7 @@ void Function::PrintDotCFG(ToolDot *the_dot,
 	std::clog << "Compiling " << dot_filename << std::endl;
 	the_dot->CompileDotToPNG(dot_filename);
 }
+
 
 bool Function::CreateControlFlowGraph(T_CFG & cfg)
 {
@@ -1160,19 +1194,19 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	}
 
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
-	/// @todo We need to do something about vertices where the only out-edge
-	/// is a back edge.  In these cases, the vertex looks like a second EXIT
-	/// to the topological sort algorithm.  Maybe add a fake edge to the real
-	/// EXIT node, which is ignored for everything but topological sort purposes?
 
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
 	std::vector<T_CFG_EDGE_DESC> back_edges;
+	/// External map where we'll store the predecessors we find during the depth-first-search.
+	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
+	/// to deal with back edges caused by loops.
+	boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> predecessor_map;
 
 	// Define a filtered view of this function's CFG, which hides the back-edges
 	// so that we can produce a topological sort.
-	dfs_back_edge_finder_visitor back_edge_finder(back_edges);
+	dfs_back_edge_finder_visitor back_edge_finder(back_edges, predecessor_map);
 
 	vertex_filter_predicate the_vertex_filter(vpm, this);
 
@@ -1186,7 +1220,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
 
 		// If the source node of this back edge now has no out-edges,
-		// add a FalseExit edge to it, so topological sorting works correctly.
+		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
 		T_CFG_VERTEX_DESC src;
 		src = boost::source(e, *m_cfg);
 		if (boost::out_degree(src, *m_cfg) == 1)
@@ -1198,6 +1232,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		}
 	}
 
+	// Check CFG for inconsistencies and clean up the ones we can.
 	{
 		typedef boost::filtered_graph<T_CFG, boost::keep_all,
 				vertex_filter_predicate> T_FILTERED_GRAPH;

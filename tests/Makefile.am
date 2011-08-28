@@ -33,7 +33,7 @@ CLEANFILES = $(CPP_TEST_SOURCE)
 
 # The `:;' works around a Bash 3.2 bug when the output is not writeable.
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
-	:;{ \
+	@ :;{ \
 	echo '# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).' && \
 	echo '#' && \
 	echo '# This file is part of CoFlo.' && \
@@ -67,8 +67,15 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 
 ###
 ### The rule which makes the "testsuite" shell script.
+### Note that this script is distributed, and ordinarily anyone using a distribution
+### shouldn't need to or want to rebuild it.  "make distcheck" will fail in cryptic
+### ways if it is for some reason rebuilt:
+###   - "$@.tmp" points to a file in $(srcdir)/tests/, which during "make distcheck" is read-only, so autom4te fails.
+###   - Similarly, "$(srcdir)/tests/testsuite" can't be overwritten, so the mv will fail.
+### To avoid this, don't make $(TESTSUITE) depend on non-distributed built files.
+### See <http://sources.redhat.com/automake/automake.html#distcleancheck> for more info.
 ###
-$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(CPP_TEST_SOURCE) $(C_TEST_SOURCE)
+$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' $(srcdir)/testsuite.at -o $@.tmp
 	mv $@.tmp $@
 	
@@ -84,10 +91,10 @@ atconfig: $(top_builddir)/config.status
 clean-local:
 	test ! -f '$(TESTSUITE)' ||	$(SHELL) '$(TESTSUITE)' --clean
 	
-check-local: atconfig atlocal $(TESTSUITE)
+check-local: atconfig atlocal $(TESTSUITE) $(CPP_TEST_SOURCE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
      
-installcheck-local: atconfig atlocal $(TESTSUITE)
+installcheck-local: atconfig atlocal $(TESTSUITE) $(CPP_TEST_SOURCE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS) AUTOTEST_PATH='$(bindir)'
 
 

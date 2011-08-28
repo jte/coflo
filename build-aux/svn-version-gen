@@ -1,0 +1,49 @@
+#!/bin/sh
+# Print a version string containing the Subversion repo version info.
+
+scriptversion=2011-08-16.01; # UTC
+
+#
+# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+#
+# This file is part of CoFlo.
+#
+# CoFlo is free software: you can redistribute it and/or modify it under the
+# terms of version 3 of the GNU General Public License as published by the Free
+# Software Foundation.
+#
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+# Based on Autoconf's own git-version-gen script.
+
+tarball_version_file=$1
+
+# Does the specified tarball version file exist?
+if test -f $tarball_version_file
+then
+	version_string=`cat $tarball_version_file` || exit 1
+fi
+
+if test -z "$version_string"
+then
+	# Try svnversion.
+	version_string=`svnversion -n | tr ':' '.'`
+	which svnversion > /dev/null; \
+	if [ $? -ne 0 ] || [ "x$version_string" = "xexported" ]
+	then
+		version_string=UNKNOWN
+	fi
+fi
+
+if test -z "$version_string"
+then
+	# Can't get a version string.
+	version_string=UNKNOWN
+fi
+
+echo -n "$version_string"
