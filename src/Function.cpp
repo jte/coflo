@@ -655,7 +655,8 @@ public:
 	{
 		// We found a new vertex.
 
-		// Get the current indentation level of the vertex.
+		// Set the current indentation level to the value that it was at when we pushed it onto the
+		// topological sort stack in prior_to_push().
 		m_current_indent_level = m_indent_level_map[u];
 
 		// Check if this vertex starts a new branch of the cfg.
@@ -855,6 +856,9 @@ public:
 			std::cout << "}ptp" << std::endl;
 		}
 
+		// We're just about to push this vertex onto the topological sort stack.
+		// Save its indent level, because we'll want to restore it to the current indent
+		// level when we pop it off again and print it.
 		m_indent_level_map[u] = m_current_indent_level;
 		return vertex_return_value_t::ok;
 	}

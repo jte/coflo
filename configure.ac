@@ -64,7 +64,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
 # and the config.h file.  
-AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
+#AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
