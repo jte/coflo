@@ -172,7 +172,7 @@ void Program::Print(const std::string &the_dot, const std::string &output_path)
 </html>" << std::endl;
 }
 
-bool Program::PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls)
+bool Program::PrintFunctionCFG(const std::string &function_identifier, bool cfg_verbose)
 {
 	Function *function;
 		
@@ -189,7 +189,7 @@ bool Program::PrintFunctionCFG(const std::string &function_identifier, bool only
 	std::cout << "Control Flow Graph of function " << function->GetIdentifier() << ":" << std::endl;
 	
 	// Print the CFG.
-	function->PrintControlFlowGraph(only_function_calls);
+	function->PrintControlFlowGraph(cfg_verbose);
 	
 	return true;
 }

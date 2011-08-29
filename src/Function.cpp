@@ -544,7 +544,7 @@ static void indent(long i)
 {
 	while (i > 0)
 	{
-		std::cout << " ";
+		std::cout << "    ";
 		i--;
 	};
 }
@@ -616,11 +616,11 @@ class function_control_flow_graph_visitor: public CFGDFSVisitor
 public:
 	function_control_flow_graph_visitor(T_CFG &g,
 			T_CFG_VERTEX_DESC last_statement,
-			bool only_function_calls) :
+			bool cfg_verbose) :
 			CFGDFSVisitor(g)
 	{
 		m_last_statement = last_statement;
-		m_only_function_calls = only_function_calls;
+		m_cfg_verbose = cfg_verbose;
 		m_current_indent_level = 0;
 		m_last_discovered_vertex_is_recursive = false;
 	}
@@ -642,9 +642,6 @@ public:
 		indent(m_current_indent_level);
 		std::cout << "{" << std::endl;
 		m_current_indent_level++;
-
-		/*std::cout << m_graph[u].m_statement->GetIdentifierCFG()
-				<< " = POPPED CONVERGING NODE" << std::endl;*/
 
 		m_indent_level_map[u] = m_current_indent_level;
 
@@ -677,17 +674,17 @@ public:
 
 		StatementBase *p = m_graph[u].m_statement;
 		// Check if this vertex meets the criteria for printing the statement.
-		if(!m_only_function_calls || (p->IsDecisionStatement() || (p->IsFunctionCall())))
+		if(m_cfg_verbose || (p->IsDecisionStatement() || (p->IsFunctionCall())))
 		{
 			// Indent and print the statement corresponding to this vertex.
 			indent(m_current_indent_level);
-			std::cout /*<< u << " "*/ << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
+			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
 			//PrintInEdgeTypes(u, m_graph);
 		}
 
 		if (u == m_last_statement)
 		{
-			std::cout << "INFO: Found last statement of function" << std::endl;
+			std::clog << "INFO: Found last statement of function" << std::endl;
 			// We've reached the end of the function, terminate the search.
 			// We should never have to do this, the topological search should always
 			// terminate on the EXIT vertex unless there is a branch which erroneously terminates.
@@ -870,7 +867,7 @@ private:
 	T_CFG_VERTEX_DESC m_last_statement;
 
 	/// Flag indicating if we should only print function calls and flow control constructs.
-	bool m_only_function_calls;
+	bool m_cfg_verbose;
 
 	/// The indent level.  This corresponds to the number of branching statements
 	/// with unterminated branches between the starting node and the current node.
@@ -1038,7 +1035,7 @@ void topological_visit_kahn(Graph &graph,
 	}
 }
 
-void Function::PrintControlFlowGraph(bool only_function_calls)
+void Function::PrintControlFlowGraph(bool cfg_verbose)
 {
 #if 0
 	// Set up the color map stack.
@@ -1053,7 +1050,7 @@ void Function::PrintControlFlowGraph(bool only_function_calls)
 	improved_depth_first_visit(*m_cfg, m_first_statement, cfg_visitor, color_map_stack);
 #else
 	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, only_function_calls);
+	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, cfg_verbose);
 	topological_visit_kahn(*m_cfg, m_first_statement, cfg_visitor);
 #endif
 }
