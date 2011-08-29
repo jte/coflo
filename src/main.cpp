@@ -60,7 +60,7 @@ namespace po = boost::program_options;
 #define CLP_PRINT_FUNCTION_CFG "print-function-cfg"
 #define CLP_CONSTRAINT "constraint"
 
-#define CLP_FUNCTION_CALLS_ONLY "cfg-function-calls-only"
+#define CLP_CFG_VERBOSE "cfg-verbose"
 
 #define CLP_INPUT_FILE "input-file"
 //@}
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	// Control flow graph option flags.
 	// Whether to limit display to only function calls, or to everything CoFlo
 	// recognizes.
-	bool display_only_function_calls = false;
+	bool cfg_verbose = false;
 
 	// Declare a variables_map to take the command line options we're passed.
 	po::variables_map vm;
@@ -177,9 +177,9 @@ int main(int argc, char* argv[])
 		(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
 		;
 		cfg_options.add_options()
-		(CLP_FUNCTION_CALLS_ONLY, po::bool_switch(&display_only_function_calls),
-				"Limit control flow graph output to function calls and flow control constructs only."
-				"  Otherwise, output other statements and nodes CoFlo finds the control flow graph.")
+		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
+				"Output all statements and nodes CoFlo finds the control flow graph."
+				"Default is to limit output to function calls and flow control constructs only.")
 		;
 		debugging_options.add_options()
 		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
 	if(vm.count(CLP_PRINT_FUNCTION_CFG))
 	{
 		// User wants a control flow graph.
-		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), display_only_function_calls))
+		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose))
 		{
 			// Something went wrong.
 			return 1;

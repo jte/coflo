@@ -78,6 +78,31 @@ void _Pragma("is_an_isr") /*is_an_isr*/ ISR1(void)
     threadsafe_printf_wrapper(9);
 }
 
+int one_if(int val)
+{
+	int x = val;
+
+	if(x > val)
+	{
+		printf("Yes\n");
+
+		if(x > 6)
+		{
+			printf("t");
+		}
+	}
+	else
+	{
+		printf("No\n");
+		return 4;
+	}
+
+	printf("h");
+	exit(2);
+
+	return x;
+}
+
 int main()
 {
 	int retval;
