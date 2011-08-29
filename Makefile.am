@@ -28,41 +28,41 @@ include $(top_srcdir)/aminclude_doxygen.am
 SUBDIRS = src tests
 
 # We want to distribute .version.
-EXTRA_DIST = .version
+#EXTRA_DIST = .version
 
 # .version is built source.  We want it to be built before anything else
 # so that it will trigger a reconfigure at the earliest possible time.
-BUILT_SOURCES = $(top_srcdir)/.version
-DISTCLEANFILES = $(top_srcdir)/.version
+#BUILT_SOURCES = $(top_srcdir)/.version
+#DISTCLEANFILES = $(top_srcdir)/.version
 
 # The make rule for building .version.
 # Note that we force this to always run.
-$(top_srcdir)/.version: FORCE
-	@# Get svn-version-gen's idea of what the right version number is.
-	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > temp.version
-	@# If .version doesn't exist, create it.
-	@if ! test -f "$@"; \
-	then \
-		echo "Creating .version file..."; \
-		mv temp.version "$@"; \
-		echo "Done."; \
-	: If temp.version differs from .version, update .version. ; \
-	elif ! cmp "$@" temp.version; then \
-		echo "Updating .version file..."; \
-		mv temp.version "$@"; \
-		echo "Done."; \
-	else \
-		echo "No need to create or update .version file."; \
-		rm temp.version; \
-	fi;
-FORCE:
+#$(top_srcdir)/.version: FORCE
+#	@# Get svn-version-gen's idea of what the right version number is.
+#	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > temp.version
+#	@# If .version doesn't exist, create it.
+#	@if ! test -f "$@"; \
+#	then \
+#		echo "Creating .version file..."; \
+#		mv temp.version "$@"; \
+#		echo "Done."; \
+#	: If temp.version differs from .version, update .version. ; \
+#	elif ! cmp "$@" temp.version; then \
+#		echo "Updating .version file..."; \
+#		mv temp.version "$@"; \
+#		echo "Done."; \
+#	else \
+#		echo "No need to create or update .version file."; \
+#		rm temp.version; \
+#	fi;
+#FORCE:
 
 # The dist-hook for building .tarball-version.
 # This is invoked when we do a "make dist", and simply
 # creates a file which contains the value of $(VERSION)
 # which was current at that time.
-dist-hook:
-	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > $(distdir)/.tarball-version
+#dist-hook:
+#	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > $(distdir)/.tarball-version
 
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
