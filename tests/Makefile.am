@@ -103,7 +103,7 @@ installcheck-local: atconfig atlocal $(TESTSUITE) $(CPP_TEST_SOURCE)
 ###
 
 # The C test files.
-C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c
+C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c $(srcdir)/loop_test_1.c
 # The built C++ test files.
 CPP_TEST_SOURCE = test_source_file_1.cpp test_source_file_2.cpp
 

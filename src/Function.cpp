@@ -54,6 +54,7 @@
 #include "controlflowgraph/CFGEdgeTypeReturn.h"
 #include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
 #include "controlflowgraph/ControlFlowGraph.h"
+#include "controlflowgraph/BackEdgeFixupVisitor.h"
 #include "CFGDFSVisitor.h"
 
 #include "libexttools/ToolDot.h"
@@ -459,56 +460,6 @@ private:
 	T_CFG& g;
 };
 
-class dfs_back_edge_finder_visitor: public boost::default_dfs_visitor
-{
-public:
-	dfs_back_edge_finder_visitor(std::vector<T_CFG_EDGE_DESC> &back_edges, boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> &predecessor_map) :
-			boost::default_dfs_visitor(), m_back_edges(back_edges), m_predecessor_map(predecessor_map)
-	{
-	};
-
-	void tree_edge(T_CFG_EDGE_DESC e, const T_CFG &g)
-	{
-		// An edge just became part of the DFS search tree.  Capture the predecessor info this provides.
-		m_predecessor_map[boost::source(e, g)] = e;
-	};
-
-	void back_edge(T_CFG_EDGE_DESC e, const T_CFG &g) const
-	{
-		// Found a back edge.  Search for a suitable target for an Impossible edge which will
-		// be inserted later as a "proxy" for the back edge.
-
-		/// @todo
-
-		m_back_edges.push_back(e);
-	}
-private:
-	/// External vector where we'll store the edges we'll mark later.
-	std::vector<T_CFG_EDGE_DESC> &m_back_edges;
-	/// External map where we'll store the predecessors we find during the depth-first-search.
-	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
-	/// to deal with back edges caused by loops.
-	boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> &m_predecessor_map;
-
-	/**
-	 * Search the predecessor list from this vertex to the back edge's target vertex for the first decision
-	 * statement we can find.  This is primarily for adding a "proxy" edge to replace the back edge for certain
-	 * purposes, such as printing and searching the CFG.
-	 *
-	 * @todo Make sure the one we find actually is the one which breaks us out of the loop.
-	 */
-	T_CFG_VERTEX_DESC FindForwardTargetForBackEdge(T_CFG &cfg, T_CFG_EDGE_DESC e)
-	{
-		// The source vertex of the back edge.
-		T_CFG_VERTEX_DESC v;
-		// The target vertex of the back edge.
-		T_CFG_VERTEX_DESC u;
-		// The forward target we'll try to find.
-		T_CFG_VERTEX_DESC retval;
-
-		v = boost::source(e, cfg);
-	}
-};
 
 struct back_edge_filter_predicate
 {
@@ -1166,7 +1117,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	last_statement_it = last_statement_of_block.begin();
 	for (boost::tie(vit, vend) = boost::vertices(m_block_graph); vit != vend;
 			vit++)
-			{
+	{
 		T_BLOCK_GRAPH::out_edge_iterator eit, eend;
 		for (boost::tie(eit, eend) = boost::out_edges(*vit, m_block_graph);
 				eit != eend; eit++)
@@ -1204,15 +1155,11 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
-	std::vector<T_CFG_EDGE_DESC> back_edges;
-	/// External map where we'll store the predecessors we find during the depth-first-search.
-	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
-	/// to deal with back edges caused by loops.
-	boost::unordered_map<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC> predecessor_map;
+	std::vector<BackEdgeFixupVisitor::BackEdgeFixupInfo> back_edges;
 
 	// Define a filtered view of this function's CFG, which hides the back-edges
 	// so that we can produce a topological sort.
-	dfs_back_edge_finder_visitor back_edge_finder(back_edges, predecessor_map);
+	BackEdgeFixupVisitor back_edge_finder(back_edges);
 
 	vertex_filter_predicate the_vertex_filter(vpm, this);
 
@@ -1220,12 +1167,14 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
 
 	// Mark them as back edges.
-	BOOST_FOREACH(T_CFG_EDGE_DESC e, back_edges)
+	BOOST_FOREACH(BackEdgeFixupVisitor::BackEdgeFixupInfo fixinfo, back_edges)
 	{
+		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
+
 		// Change this edge type to a back edge.
 		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
 
-		// If the source node of this back edge now has no out-edges,
+		// If the source node of this back edge now has no non-back-edge out-edges,
 		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
 		T_CFG_VERTEX_DESC src;
 		src = boost::source(e, *m_cfg);
@@ -1233,7 +1182,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		{
 			T_CFG_EDGE_DESC newedge;
 			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, m_last_statement, *m_cfg);
+					boost::add_edge(src, fixinfo.m_impossible_target_vertex, *m_cfg);
 			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
 		}
 	}
