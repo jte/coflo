@@ -591,10 +591,10 @@ public:
 	{
 		// The very first vertex has been popped.
 		indent(m_current_indent_level);
-		std::cout << "{" << std::endl;
+		std::cout << "{s" << std::endl;
 		m_current_indent_level++;
 
-		m_indent_level_map[u] = m_current_indent_level;
+		//m_indent_level_map[u] = m_current_indent_level;
 
 		return vertex_return_value_t::ok;
 	};
@@ -605,7 +605,7 @@ public:
 
 		// Set the current indentation level to the value that it was at when we pushed it onto the
 		// topological sort stack in prior_to_push().
-		m_current_indent_level = m_indent_level_map[u];
+		//m_current_indent_level = m_indent_level_map[u];
 
 		// Check if this vertex starts a new branch of the cfg.
 		T_CFG::in_edge_iterator iei,iee;
@@ -617,8 +617,9 @@ public:
 			if(m_graph[predecessor].m_statement->IsDecisionStatement())
 			{
 				// Predecessor was a decision statement, so this vertex starts a new branch.
+				// Print a block start marker and increment the current indent level.
 				indent(m_current_indent_level);
-				std::cout << "{" << predecessor << std::endl;
+				std::cout << "{d" << predecessor << std::endl;
 				m_current_indent_level++;
 			}
 		}
@@ -692,10 +693,6 @@ public:
 		if (edge_type->IsBackEdge())
 		{
 			// Skip all back edges.
-			/// @todo We need to do something about vertices where the only out-edge
-			/// is a back edge.  In these cases, the vertex looks like a second EXIT
-			/// to the topological sort algorithm.  Maybe add a fake edge to the real
-			/// EXIT node, which is ignored for everything but topological sort purposes?
 			return edge_return_value_t::terminate_branch;
 		}
 		else if ((ret != NULL) && (m_call_stack.empty() || (ret->m_function_call != m_call_stack.back())))
@@ -778,6 +775,8 @@ public:
 			return edge_return_value_t::pop_color_context;
 		}
 
+		//std::cout << ed << std::endl;
+
 		return retval;
 	}
 
@@ -786,28 +785,45 @@ public:
 		if(num_vertices_pushed == 0)
 		{
 			// This vertex pushed no new vertices onto the stack.  This means that it terminates the branch it
-			// is in.  Decrement the current indent level counter.
+			// is in.  Decrement the current indent level counter, and write the block end marker.
+			// Note that for a vertex with multiple in-edges, only one of them will push the vertex onto the stack.
 			m_current_indent_level--;
 			indent(m_current_indent_level);
-			std::cout << "}vvc" << std::endl;
+			std::cout << "}nopush" << std::endl;
 		}
 	}
 
-	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u)
+	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
 		// Check if this vertex terminates more than one branch of the graph.
 		if (filtered_in_degree(u, m_graph) > 1)
 		{
-			// This vertex terminates more than one branch.  Decrement the current indent level counter.
+			// This vertex terminates more than one branch.
+			// This means that we had other incoming branches which didn't push us onto the stack,
+			// which handled their indent decrementing in vertex_visit_complete().
+			// Decrement the current indent level counter.
 			m_current_indent_level--;
 			indent(m_current_indent_level);
 			std::cout << "}ptp" << std::endl;
+
+			// Check if the vertex which pushed us was a decision vertex.  This would mean
+			// that the pushing edge was a critical edge, and there were no nodes between
+			// the branch point and this end point to be visited and the indentation handled by
+			// vertex_visit_complete().
+			// So, we take care of that here.
+			if(m_graph[boost::source(e, m_graph)].m_statement->IsDecisionStatement())
+			{
+				m_current_indent_level--;
+				indent(m_current_indent_level);
+				std::cout << "}crit" << std::endl;
+			}
 		}
+		std::cout << e << std::endl;
 
 		// We're just about to push this vertex onto the topological sort stack.
 		// Save its indent level, because we'll want to restore it to the current indent
 		// level when we pop it off again and print it.
-		m_indent_level_map[u] = m_current_indent_level;
+		//m_indent_level_map[u] = m_current_indent_level;
 		return vertex_return_value_t::ok;
 	}
 
@@ -867,7 +883,7 @@ void topological_visit_kahn(Graph &graph,
 	T_IN_DEGREE_MAP in_degree_map;
 
 	// Start at the source vertex.
-	visitor.prior_to_push(source);
+	//visitor.prior_to_push(source);
 	no_remaining_in_edges_set.push(source);
 	visitor.start_subgraph_vertex(source);
 
@@ -958,6 +974,7 @@ void topological_visit_kahn(Graph &graph,
 
 			// We're "removing" this edge, so decrement the effective in-degree of
 			// vertex v.
+			//std::cout << "Removing edge " << *ei << std::endl;
 			--id;
 
 			if (id == 0)
@@ -965,7 +982,7 @@ void topological_visit_kahn(Graph &graph,
 				// This vertex now has an in-degree of zero, push it into the
 				// input set.
 				no_remaining_in_edges_set.push(v);
-				visitor.prior_to_push(v);
+				visitor.prior_to_push(v, *ei);
 				in_degree_map.erase(it);
 				//std::cout << "Pushed: " << v << std::endl;
 				//PrintInEdgeTypes(v, graph);
