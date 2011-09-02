@@ -22,7 +22,7 @@
 
 
 
-FunctionCallResolved::FunctionCallResolved(Function *f, FunctionCallUnresolved *fcu) : FunctionCall(fcu->GetLocation())
+FunctionCallResolved::FunctionCallResolved(Function *f, FunctionCallUnresolved *fcu) : FunctionCall(fcu->GetLocation(), fcu->m_params)
 {
 	m_target_function = f;
 }

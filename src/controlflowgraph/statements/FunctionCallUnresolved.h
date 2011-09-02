@@ -24,7 +24,7 @@ class FunctionCallUnresolved : public FunctionCall
 {
 
 public:
-	FunctionCallUnresolved(std::string identifier, const Location &location);
+	FunctionCallUnresolved(std::string identifier, const Location &location, const std::string &params);
 	FunctionCallUnresolved(const FunctionCallUnresolved& orig);
 	virtual ~FunctionCallUnresolved();
 	
