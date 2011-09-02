@@ -122,7 +122,6 @@ statement
 	: location? statement_with_optional_location
 	| scope
 	| label ';'?
-	| switch
 	;
 	
 statement_with_optional_location
@@ -133,6 +132,7 @@ statement_with_optional_location
 	| function_call ';'
 	| goto ';'
 	| switch
+	| comment
 	;
 	
 assignment
@@ -141,7 +141,6 @@ assignment
 	| lhs '=' var_id '|' var_id
 	| lhs '=' rhs '&' rhs
 	| lhs '=' location? rhs
-	| lhs '=' '*' rhs
 	| lhs '=' '~' rhs
 	| lhs '=' rhs '+' rhs
 	| lhs '=' rhs '-' rhs
@@ -170,7 +169,7 @@ condition
 	| lhs '==' rhs
 	| lhs '>=' rhs
 	| lhs '<=' rhs
-	| lhs '!=' rhs
+	| rhs '!=' rhs
 	;
 	
 function_call
@@ -194,7 +193,13 @@ switch
 	// Style used in 4.5.3.
 	| 'switch' '(' rhs ')' '<' case_453 (',' case_453)* '>'
 	;
+
+comment
+	: '// predicted unlikely by continue predictor.'
+	;
 	
+/************************/
+
 case
 	: location? 'case' rhs ':' goto ';'
 	| location? 'default' ':' goto ';'
@@ -210,7 +215,8 @@ fc_param_list
 	;
 
 decl_spec
-	: type_qualifier 
+	: type_qualifier
+	| 'struct' identifier 
 	| 'short'
 	| 'signed'
 	| 'unsigned'
@@ -218,6 +224,12 @@ decl_spec
 	| 'int'
 	| 'long'
 	| 'double'
+	/* These are typedefs in bzip2.c */
+	| 'IntNative'
+	| 'Int32'
+	| 'Char'
+	| 'Bool'
+	/******/
 	| 'void'
 	| '*'
 	| identifier
@@ -231,19 +243,26 @@ type_qualifier
 	;
 
 lhs
-	: '*'? var_id
+	: location?
+	('*'? var_id
 	| var_id '->' var_id
 	| var_id '[' var_id | integer_decimal ']'
+	)
 	;
 	
 rhs
-	: var_id
-	| var_id '->' var_id
-	| var_id '[' var_id | integer_decimal ']'
-	| location? '&' var_id
-	| integer_decimal
-	| integer_hex
-	| location? '&' string_literal '[' integer ']'
+	: location? (
+		var_id
+		| var_id '->' var_id
+		| var_id '[' var_id | integer_decimal ']'
+		| '&' var_id
+		| '*' var_id
+		| integer_decimal 'B'? /* Not sure what the 'B' represents.  Seems to always be '0B'. */
+		| integer_hex
+		| string_literal
+		| '&' string_literal '[' integer ']'
+		| '&' var_id '[' integer ']'
+	)
 	;
 
 var_id

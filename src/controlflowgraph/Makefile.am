@@ -21,6 +21,7 @@ noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
+	CFGEdgeTypeExceptional.cpp CFGEdgeTypeExceptional.h \
 	CFGEdgeTypeFunctionCallBypass.cpp CFGEdgeTypeFunctionCallBypass.h \
 	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
 	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \

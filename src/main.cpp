@@ -43,6 +43,7 @@ namespace po = boost::program_options;
 //@{
 #define CLP_HELP	"help"
 #define CLP_VERSION	"version"
+#define CLP_BUILD_INFO	"build-info"
 #define CLP_RESPONSE_FILE "response-file"
 #define CLP_DEBUG_PARSE "debug-parse"
 #define CLP_DEBUG_LINK  "debug-link"
@@ -158,6 +159,7 @@ int main(int argc, char* argv[])
 		general_options.add_options()
 		(CLP_HELP, "Produce this help message.")
 		(CLP_VERSION",v", "Print the version information.")
+		(CLP_BUILD_INFO, "Print information about library versions and options used to build this program.")
 		(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
 		(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
 		(CLP_OUTPUT_DIR",O", po::value< std::string >(&report_output_directory), "Put HTML report output in the given directory.")
@@ -260,9 +262,20 @@ int main(int argc, char* argv[])
 			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
 			std::cout << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 
-			std::cout << "\n" << "Library info:" << std::endl;
+
 			print_lib_versions();
 
+			return 0;
+		}
+
+		// See of the user is requesting build info.
+		if(vm.count(CLP_BUILD_INFO))
+		{
+			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
+			std::cout << std::endl;
+			std::cout << "Build info:" << std::endl;
+			print_lib_versions();
 			return 0;
 		}
 
