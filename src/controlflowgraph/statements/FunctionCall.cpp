@@ -18,14 +18,14 @@
 #include "FunctionCall.h"
 
 
-FunctionCall::FunctionCall(const Location &location) : StatementBase(location)
+FunctionCall::FunctionCall(const Location &location, const std::string &params) : StatementBase(location)
 {
-
+	m_params = params;
 }
 
 FunctionCall::FunctionCall(const FunctionCall& orig) : StatementBase(orig)
 {
-
+	m_params = orig.m_params;
 }
 
 FunctionCall::~FunctionCall()
@@ -34,5 +34,5 @@ FunctionCall::~FunctionCall()
 
 std::string FunctionCall::GetIdentifierCFG() const
 {
-	return GetIdentifier() + "()";
+	return GetIdentifier() + "( " + m_params + " )";
 }

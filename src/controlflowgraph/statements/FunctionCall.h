@@ -31,7 +31,7 @@ class Location;
 class FunctionCall : public StatementBase
 {
 public:
-	FunctionCall(const Location &location);
+	FunctionCall(const Location &location, const std::string &params);
 	FunctionCall(const FunctionCall& orig);
 	virtual ~FunctionCall();
 	
@@ -47,7 +47,13 @@ public:
 	 */
 	virtual bool IsFunctionCall() const { return true; };
 
+	/// The parameters passed to the function.
+	/// @todo We need to handle this better in many ways.
+	std::string m_params;
+
 private:
+
+
 };
 
 #endif	/* FUNCTIONCALL_H */

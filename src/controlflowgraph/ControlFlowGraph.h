@@ -95,6 +95,77 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 	return retval;
 }
 
+
+/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
+struct graph_property_writer
+{
+	void operator()(std::ostream& out) const
+	{
+		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
+		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
+		out << "edge [style=solid]" << std::endl;
+	}
+};
+
+/**
+ * Class for a vertex property writer, for use with write_graphviz().
+ */
+class cfg_vertex_property_writer
+{
+public:
+	cfg_vertex_property_writer(T_CFG _g) :
+			g(_g)
+	{
+	}
+
+	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
+	{
+		if (g[v].m_statement != NULL)
+		{
+			out << "[label=\"";
+			out << g[v].m_statement->GetStatementTextDOT();
+			out << "\\n" << g[v].m_statement->GetLocation() << "\"";
+			out << ", color=" << g[v].m_statement->GetDotSVGColor();
+			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
+			out << "]";
+		}
+		else
+		{
+			out << "[label=\"NULL STMNT\"]";
+		}
+	}
+private:
+
+	/// The graph whose vertices we're writing the properties of.
+	T_CFG& g;
+};
+
+/**
+ * Class for an edge property writer, for use with write_graphviz().
+ */
+class cfg_edge_property_writer
+{
+public:
+	cfg_edge_property_writer(T_CFG _g) :
+			g(_g)
+	{
+	}
+	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
+	{
+		// Set the edge attributes.
+		out << "[";
+		out << "label=\"" << g[e].m_edge_type->GetDotLabel() << "\"";
+		out << ", color=" << g[e].m_edge_type->GetDotSVGColor();
+		out << ", style=" << g[e].m_edge_type->GetDotStyle();
+		out << "]";
+	}
+	;
+private:
+
+	/// The graph whose edges we're writing the properties of.
+	T_CFG& g;
+};
+
 void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
 
 void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);

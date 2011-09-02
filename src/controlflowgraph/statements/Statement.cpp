@@ -28,8 +28,8 @@
 /// Capture 1 is the path, 2 is the line number.
 static const std::string f_location("(\\[[^\\]]*?[[:space:]]\\:[[:space:]][[:digit:]]+(?:[[:space:]]?\\:[[:space:]]?[[:digit:]]+)?\\])");
 
-/// Regex to find function calls. Capture 1 is the file/line no, 2 is the called function identifier.
-static const boost::regex f_function_call_expression(".+?"+f_location+" (?:.+? = )?([[:alpha:]_][[:alnum:]_]*) \\(.*\\);");
+/// Regex to find function calls. Capture 1 is the file/line no, 2 is the called function identifier, 3 is the parameter list.
+static const boost::regex f_function_call_expression(".+?"+f_location+" (?:.+? = )?([[:alpha:]_][[:alnum:]_]*) \\((.*)\\);");
 
 /// Regex to find if/else statements.  Capture 1 is the file/line no.
 static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*\\)");
@@ -93,7 +93,7 @@ StatementBase* StatementBase::Parse(std::istream &input_stream)
 			// Note that at this point, it's an Unresolved call, since we haven't
 			// linked yet.
 			Location loc(capture_results[1].str());
-			FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc);
+			FunctionCallUnresolved *f = new FunctionCallUnresolved(capture_results[2], loc, capture_results[3]);
 			dlog_block << "CALL=" << line << std::endl;
 			return f;
 		}

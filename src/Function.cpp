@@ -342,8 +342,7 @@ T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 				// to the next statement in its containing function.
 				T_CFG_EDGE_DESC function_call_out_edge;
 
-				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<
-						CFGEdgeTypeFallthrough>(*vit, *m_cfg);
+				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
 				if (!ok)
 				{
 					// Couldn't find the return.
@@ -389,77 +388,6 @@ T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 		}
 	}
 }
-
-/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
-struct graph_property_writer
-{
-	void operator()(std::ostream& out) const
-	{
-		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
-		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
-		out << "edge [style=solid]" << std::endl;
-	}
-};
-
-/**
- * Class for a vertex property writer, for use with write_graphviz().
- */
-class cfg_vertex_property_writer
-{
-public:
-	cfg_vertex_property_writer(T_CFG _g) :
-			g(_g)
-	{
-	}
-
-	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
-	{
-		if (g[v].m_statement != NULL)
-		{
-			out << "[label=\"";
-			out << g[v].m_statement->GetStatementTextDOT();
-			out << "\\n" << g[v].m_statement->GetLocation() << "\"";
-			out << ", color=" << g[v].m_statement->GetDotSVGColor();
-			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
-			out << "]";
-		}
-		else
-		{
-			out << "[label=\"NULL STMNT\"]";
-		}
-	}
-private:
-
-	/// The graph whose vertices we're writing the properties of.
-	T_CFG& g;
-};
-
-/**
- * Class for an edge property writer, for use with write_graphviz().
- */
-class cfg_edge_property_writer
-{
-public:
-	cfg_edge_property_writer(T_CFG _g) :
-			g(_g)
-	{
-	}
-	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
-	{
-		// Set the edge attributes.
-		out << "[";
-		out << "label=\"" << g[e].m_edge_type->GetDotLabel() << "\"";
-		out << ", color=" << g[e].m_edge_type->GetDotSVGColor();
-		out << ", style=" << g[e].m_edge_type->GetDotStyle();
-		out << "]";
-	}
-	;
-private:
-
-	/// The graph whose edges we're writing the properties of.
-	T_CFG& g;
-};
-
 
 struct back_edge_filter_predicate
 {
@@ -560,7 +488,7 @@ static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 }
 
 /**
- * Visitor which does the actual creation of the control flow graph.
+ * Visitor which prints out the control flow graph.
  */
 class function_control_flow_graph_visitor: public CFGDFSVisitor
 {
@@ -602,10 +530,6 @@ public:
 	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u)
 	{
 		// We found a new vertex.
-
-		// Set the current indentation level to the value that it was at when we pushed it onto the
-		// topological sort stack in prior_to_push().
-		//m_current_indent_level = m_indent_level_map[u];
 
 		// Check if this vertex starts a new branch of the cfg.
 		T_CFG::in_edge_iterator iei,iee;
@@ -775,7 +699,18 @@ public:
 			return edge_return_value_t::pop_color_context;
 		}
 
-		//std::cout << ed << std::endl;
+		// If this source is a decision statement and the target has more than one incoming branch,
+		// we have the somewhat-degenerate case of a branch with no statements.  In this case,
+		// the target vertex will have to pop some extra levels of indentation.  Keep track of how many.
+		T_CFG_VERTEX_DESC s, t;
+		s = boost::source(ed, m_graph);
+		t = boost::target(ed, m_graph);
+		if(m_graph[s].m_statement->IsDecisionStatement() && filtered_in_degree(t, m_graph) > 1)
+		{
+			//std::cout << "Crit Edge: " << ed << std::endl;
+			m_indent_level_map[t] += 1;
+		}
+
 
 		return retval;
 	}
@@ -795,6 +730,8 @@ public:
 
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
+		// We're just about to push this vertex onto the topological sort stack.
+
 		// Check if this vertex terminates more than one branch of the graph.
 		if (filtered_in_degree(u, m_graph) > 1)
 		{
@@ -805,25 +742,17 @@ public:
 			m_current_indent_level--;
 			indent(m_current_indent_level);
 			std::cout << "}ptp" << std::endl;
-
-			// Check if the vertex which pushed us was a decision vertex.  This would mean
-			// that the pushing edge was a critical edge, and there were no nodes between
-			// the branch point and this end point to be visited and the indentation handled by
-			// vertex_visit_complete().
-			// So, we take care of that here.
-			if(m_graph[boost::source(e, m_graph)].m_statement->IsDecisionStatement())
-			{
-				m_current_indent_level--;
-				indent(m_current_indent_level);
-				std::cout << "}crit" << std::endl;
-			}
 		}
-		std::cout << e << std::endl;
 
-		// We're just about to push this vertex onto the topological sort stack.
-		// Save its indent level, because we'll want to restore it to the current indent
-		// level when we pop it off again and print it.
-		//m_indent_level_map[u] = m_current_indent_level;
+		long extra_indent_levels_to_pop = m_indent_level_map[u];
+		while(extra_indent_levels_to_pop > 1)
+		{
+			extra_indent_levels_to_pop--;
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}crit" << std::endl;
+		}
+
 		return vertex_return_value_t::ok;
 	}
 

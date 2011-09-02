@@ -17,7 +17,8 @@
 
 #include "FunctionCallUnresolved.h"
 
-FunctionCallUnresolved::FunctionCallUnresolved(std::string identifier, const Location &location) : FunctionCall(location)
+FunctionCallUnresolved::FunctionCallUnresolved(std::string identifier, const Location &location, const std::string &params)
+	: FunctionCall(location, params)
 {
 	m_identifier = identifier;
 }

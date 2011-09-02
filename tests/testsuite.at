@@ -103,3 +103,23 @@ AT_CLEANUP
 	0,
 	ignore,
 	ignore)
+	
+###
+### See if we can generate the control flow graph of CoFlo itself.
+###
+AT_BANNER([CoFlo self-checks])
+
+# Start a test group.
+AT_SETUP([Trying to generate CFG of main.cpp::main()])
+
+# We don't expect to be able to do this yet.
+AT_XFAIL_IF([true])
+
+AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --print-function-cfg=main],
+	0,
+	ignore,
+	ignore)
+
+# End this test group.
+AT_CLEANUP
+
