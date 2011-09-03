@@ -15,6 +15,8 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef STATEMENTBASE_H
 #define	STATEMENTBASE_H
 

@@ -34,6 +34,7 @@ coflo_SOURCES = main.cpp \
 	ImprovedDFSVisitorBase.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
+	ResponseFileParser.cpp ResponseFileParser.h \
 	RuleBase.cpp RuleBase.h \
 	RuleDFSBase.cpp RuleDFSBase.h \
 	RulePrintFunctionCFG.cpp RulePrintFunctionCFG.h \
