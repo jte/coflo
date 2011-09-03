@@ -55,7 +55,6 @@
 #include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
 #include "controlflowgraph/ControlFlowGraph.h"
 #include "controlflowgraph/BackEdgeFixupVisitor.h"
-#include "CFGDFSVisitor.h"
 
 #include "libexttools/ToolDot.h"
 
@@ -782,6 +781,7 @@ private:
 	std::map<T_CFG_VERTEX_DESC, long> m_indent_level_map;
 };
 
+#if 0
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting the nodes of) a graph.
  * 
@@ -931,6 +931,8 @@ void topological_visit_kahn(Graph &graph,
 		visitor.vertex_visit_complete(u, num_vertices_pushed);
 	}
 }
+
+#endif
 
 void Function::PrintControlFlowGraph(bool cfg_verbose)
 {

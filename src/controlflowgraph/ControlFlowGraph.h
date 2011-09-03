@@ -172,4 +172,11 @@ void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
 
 //@}
 
+
+/// @name Other headers in this library.
+//@{
+#include "CFGDFSVisitor.h"
+#include "topological_visit_kahn.h"
+//@}
+
 #endif	/* CONTROLFLOWGRAPH_H */

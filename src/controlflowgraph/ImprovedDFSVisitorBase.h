@@ -20,7 +20,7 @@
 #ifndef IMPROVEDDFSVISITORBASE_H
 #define	IMPROVEDDFSVISITORBASE_H
 
-#include "safe_enum.h"
+#include "../safe_enum.h"
 
 /**
  * The return value type for the visitor's *_vertex() member functions, indicating to the
