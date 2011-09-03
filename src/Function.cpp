@@ -531,6 +531,15 @@ public:
 	{
 		// We found a new vertex.
 
+		long extra_indent_levels_to_pop = m_indent_level_map[u];
+		while(extra_indent_levels_to_pop > 1)
+		{
+			extra_indent_levels_to_pop--;
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}crit" << std::endl;
+		}
+
 		// Check if this vertex starts a new branch of the cfg.
 		T_CFG::in_edge_iterator iei,iee;
 		boost::tie(iei, iee) = boost::in_edges(u, m_graph);
@@ -742,15 +751,6 @@ public:
 			m_current_indent_level--;
 			indent(m_current_indent_level);
 			std::cout << "}ptp" << std::endl;
-		}
-
-		long extra_indent_levels_to_pop = m_indent_level_map[u];
-		while(extra_indent_levels_to_pop > 1)
-		{
-			extra_indent_levels_to_pop--;
-			m_current_indent_level--;
-			indent(m_current_indent_level);
-			std::cout << "}crit" << std::endl;
 		}
 
 		return vertex_return_value_t::ok;
