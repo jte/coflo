@@ -20,6 +20,7 @@ SUBDIRS = statements
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
+	CFGDFSVisitor.cpp CFGDFSVisitor.h \
 	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
 	CFGEdgeTypeExceptional.cpp CFGEdgeTypeExceptional.h \
 	CFGEdgeTypeFunctionCallBypass.cpp CFGEdgeTypeFunctionCallBypass.h \
@@ -29,7 +30,9 @@ libcontrolflowgraph_a_SOURCES = \
 	CFGEdgeTypeImpossible.cpp CFGEdgeTypeImpossible.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
-	depth_first_traversal.hpp
+	depth_first_traversal.hpp \
+	ImprovedDFSVisitorBase.h \
+	topological_visit_kahn.h
 
 libcontrolflowgraph_a_CPPFLAGS = $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CXXFLAGS)

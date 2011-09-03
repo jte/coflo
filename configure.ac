@@ -148,6 +148,11 @@ AX_BOOST_FILESYSTEM
 AC_CHECK_FUNC(glob)
 
 ###
+### Check for some library functions we can optionally use.
+###
+AC_CHECK_FUNCS(malloc_stats mallinfo mallopt)
+
+###
 ### Initialize the test suite.
 ###
 # Autoconf-supported test directory.

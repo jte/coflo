@@ -29,9 +29,7 @@ coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
 	Block.cpp Block.h \
-	CFGDFSVisitor.cpp CFGDFSVisitor.h \
 	Function.cpp Function.h \
-	ImprovedDFSVisitorBase.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
