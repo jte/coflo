@@ -39,12 +39,16 @@ DECLARE_ENUM_CLASS(vertex_return_value_t, ok, terminate_branch, terminate_search
  * DFS algorithm whether to continue searching or not.
  * 
  * Definitions:
- *	- ok: Continue the graph traversal.
- *	- terminate_branch: Stop traversing this branch of the graph.
- *  - terminate_search: Stop the traversal entirely.
+ *	- ok\n
+ *	  Continue the graph traversal.
+ *	- terminate_branch\n
+ *	  Stop traversing this branch of the graph.
+ *  - terminate_search\n
+ *    Stop the traversal entirely.
  *  - push_color_context:
  *  - pop_color_context:
- *  - push_dummy_vertex:
+ *  - push_dummy_vertex\n
+ *    Push a dummy vertex onto the vertices-to-visit-next stack.
  */
 DECLARE_ENUM_CLASS(edge_return_value_t, ok, terminate_branch, terminate_search,
 				   push_color_context, pop_color_context, push_dummy_vertex)

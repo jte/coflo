@@ -166,6 +166,11 @@ private:
 	T_CFG& g;
 };
 
+void InitializeControlFlowGraph(T_CFG &cfg);
+
+bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);
+T_CFG_VERTEX_DESC GetDummyVertex();
+
 void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
 
 void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);

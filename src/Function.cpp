@@ -427,7 +427,7 @@ static void indent(long i)
 	};
 }
 
-static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_decision_predecessors = false)
 {
 	boost::graph_traits<T_CFG>::in_edge_iterator ieit, ieend;
 
@@ -441,6 +441,15 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 		{
 			// Always skip anything marked as a back edge.
 			continue;
+		}
+
+		if(only_decision_predecessors)
+		{
+			// Is the predecessor a decision statement?
+			if(!cfg[boost::source(*ieit,cfg)].m_statement->IsDecisionStatement())
+			{
+				continue;
+			}
 		}
 
 		// Count up all the incoming edges, with two exceptions:
@@ -530,19 +539,33 @@ public:
 	{
 		// We found a new vertex.
 
-		long extra_indent_levels_to_pop = m_indent_level_map[u];
-		while(extra_indent_levels_to_pop > 1)
+		long fid = filtered_in_degree(u, m_graph);
+		if (fid > 1)
 		{
-			extra_indent_levels_to_pop--;
-			m_current_indent_level--;
-			indent(m_current_indent_level);
-			std::cout << "}crit" << std::endl;
+			// This vertex terminates more than one branch.
+			// This means that we had other incoming branches which didn't push us onto the stack,
+			// which handled their indent decrementing in vertex_visit_complete().
+			// Decrement the current indent level counter.
+
+			long extra_indent_levels_to_pop = fid-1; //filtered_in_degree(u, m_graph, true);
+			std::cout << extra_indent_levels_to_pop << std::endl;
+			while(extra_indent_levels_to_pop > 0)
+			{
+				// This vertex terminates more than one branch.
+				// This means that we had other incoming branches which didn't push us onto the stack,
+				// which handled their indent decrementing in vertex_visit_complete().
+				// Decrement the current indent level counter.
+				m_current_indent_level--;
+				indent(m_current_indent_level);
+				std::cout << "}ext" << std::endl;
+				extra_indent_levels_to_pop--;
+			}
 		}
 
 		// Check if this vertex starts a new branch of the cfg.
 		T_CFG::in_edge_iterator iei,iee;
 		boost::tie(iei, iee) = boost::in_edges(u, m_graph);
-		if(filtered_in_degree(u, m_graph)==1 && iei != iee)
+		if(fid==1 && iei != iee)
 		{
 			T_CFG::vertex_descriptor predecessor;
 			predecessor = boost::source(*iei, m_graph);
@@ -683,6 +706,8 @@ public:
 			// This edge is a function call.
 
 			// Indent another level.
+			indent(m_current_indent_level);
+			std::cout << "[" << std::endl;
 			m_current_indent_level++;
 			//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
 			m_call_stack.push_back(fc->m_function_call);
@@ -704,21 +729,10 @@ public:
 			m_call_set.erase(fcr->m_target_function);
 			m_call_stack.pop_back();
 			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "]" << std::endl;
 			return edge_return_value_t::pop_color_context;
 		}
-
-		// If this source is a decision statement and the target has more than one incoming branch,
-		// we have the somewhat-degenerate case of a branch with no statements.  In this case,
-		// the target vertex will have to pop some extra levels of indentation.  Keep track of how many.
-		T_CFG_VERTEX_DESC s, t;
-		s = boost::source(ed, m_graph);
-		t = boost::target(ed, m_graph);
-		if(m_graph[s].m_statement->IsDecisionStatement() && filtered_in_degree(t, m_graph) > 1)
-		{
-			//std::cout << "Crit Edge: " << ed << std::endl;
-			m_indent_level_map[t] += 1;
-		}
-
 
 		return retval;
 	}
@@ -739,18 +753,6 @@ public:
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
 		// We're just about to push this vertex onto the topological sort stack.
-
-		// Check if this vertex terminates more than one branch of the graph.
-		if (filtered_in_degree(u, m_graph) > 1)
-		{
-			// This vertex terminates more than one branch.
-			// This means that we had other incoming branches which didn't push us onto the stack,
-			// which handled their indent decrementing in vertex_visit_complete().
-			// Decrement the current indent level counter.
-			m_current_indent_level--;
-			indent(m_current_indent_level);
-			std::cout << "}ptp" << std::endl;
-		}
 
 		return vertex_return_value_t::ok;
 	}

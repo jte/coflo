@@ -164,7 +164,13 @@ void topological_visit_kahn(Graph &graph,
 			// the topologically sorted search graph.  Let the visitor know.
 			// Note that tree edges are visited in a breadth-first order.
 			visitor_edge_return_value = visitor.tree_edge(*ei);
-			/// @todo Handle return value.
+			if(visitor_edge_return_value == edge_return_value_t::push_dummy_vertex)
+			{
+				// The visitor wants us to push a dummy vertex onto the stack.
+				/// @todo Seems like there should be a better way to do this.
+				no_remaining_in_edges_set.push(GetDummyVertex());
+				num_vertices_pushed++;
+			}
 
 			//
 			// Look up the current in-degree of the target vertex of *ei in the
