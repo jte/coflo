@@ -9,17 +9,81 @@
 #define TOPOLOGICAL_VISIT_KAHN_H
 
 #include <stack>
+#include <boost/unordered_map.hpp>
 
 #include "ImprovedDFSVisitorBase.h"
 
+template < typename Graph >
+class RemainingInDegreeMap
+{
+	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
+	typedef boost::unordered_map<T_VERTEX_DESC,long> T_UNDERLYING_MAP;
+
+public:
+	RemainingInDegreeMap(Graph &graph) : m_graph(graph) {};
+	~RemainingInDegreeMap() {};
+
+	void set(const T_VERTEX_DESC& vdesc, long val)
+	{
+		if(val != 0)
+		{
+			// Simply set the value.
+			m_remaining_in_degree_map[vdesc] = val;
+		}
+		else
+		{
+			// If we're setting that value to 0, we no longer need the key.
+			// Let's erase it in the interest of conserving space.
+			m_remaining_in_degree_map.erase(vdesc);
+		}
+	};
+
+	long get(const T_VERTEX_DESC& vdesc)
+	{
+		typename T_UNDERLYING_MAP::iterator it;
+
+		it = m_remaining_in_degree_map.find(vdesc);
+		if (it == m_remaining_in_degree_map.end())
+		{
+			// The target vertex wasn't in the map, which means we haven't
+			// encountered it before now.
+			// Pretend it was in the map and add it with its original in-degree.
+			long indegree;
+			indegree = filtered_in_degree(vdesc, m_graph);
+			//std::cout << "Start IND: " << indegree << " " << v << std::endl;
+			//PrintInEdgeTypes(v, graph);
+			m_remaining_in_degree_map[vdesc] = indegree;
+
+			return indegree;
+		}
+		else
+		{
+			// Vertex was in the map.
+			return it->second;
+		}
+	};
+
+private:
+
+	Graph &m_graph;
+
+	T_UNDERLYING_MAP m_remaining_in_degree_map;
+};
+
+
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting the nodes of) a graph.
+ *
+ * @tparam Graph The graph type.
+ * @tparam
+ * @tparam RemainingInDegreeMap The type to use to track the number of in-edges which have not yet been "removed" from the
+ *         vertices.  Must support
  *
  * @param graph
  * @param source The vertex to start the graph traversal from.
  * @param visitor
  */
-template<typename Graph, class ImprovedDFSVisitor>
+template<typename Graph, typename ImprovedDFSVisitor>
 void topological_visit_kahn(Graph &graph,
 		typename boost::graph_traits<Graph>::vertex_descriptor source,
 		ImprovedDFSVisitor &visitor)
@@ -37,9 +101,9 @@ void topological_visit_kahn(Graph &graph,
 	// The set of all vertices with no incoming edges.
 	std::stack<T_VERTEX_DESC> no_remaining_in_edges_set;
 
-	// Map of in-degrees.
-	typedef std::map<T_VERTEX_DESC, long> T_IN_DEGREE_MAP;
-	T_IN_DEGREE_MAP in_degree_map;
+	// Map of the remaining in-degrees.
+	typedef RemainingInDegreeMap< T_CFG > T_IN_DEGREE_MAP;
+	T_IN_DEGREE_MAP in_degree_map(graph);
 
 	// Start at the source vertex.
 	//visitor.prior_to_push(source);
@@ -112,46 +176,26 @@ void topological_visit_kahn(Graph &graph,
 
 			long id;
 
-			typename T_IN_DEGREE_MAP::iterator it;
-			it = in_degree_map.find(v);
-			if (it == in_degree_map.end())
-			{
-				// The target vertex wasn't in the map, which means we haven't
-				// encountered it before now.
-				// Pretend it was in the map and add it with its original in-degree.
-				id = filtered_in_degree(v, graph);
-				//std::cout << "Start IND: " << id << " " << v << std::endl;
-				//PrintInEdgeTypes(v, graph);
-				in_degree_map[v] = id;
-				it = in_degree_map.find(v);
-			}
-			else
-			{
-				// Vertex was in the map.
-				id = it->second;
-			}
+			id = in_degree_map.get(v);
 
 			// We're "removing" this edge, so decrement the effective in-degree of
 			// vertex v.
 			//std::cout << "Removing edge " << *ei << std::endl;
 			--id;
+			// Store the decremented value back to the map.
+			in_degree_map.set(v, id);
 
 			if (id == 0)
 			{
-				// This vertex now has an in-degree of zero, push it into the
+				// The target vertex now has an in-degree of zero, push it into the
 				// input set.
-				no_remaining_in_edges_set.push(v);
 				visitor.prior_to_push(v, *ei);
-				in_degree_map.erase(it);
+				no_remaining_in_edges_set.push(v);
 				//std::cout << "Pushed: " << v << std::endl;
 				//PrintInEdgeTypes(v, graph);
 				num_vertices_pushed++;
 			}
-			else
-			{
-				// Store the decremented value back to the map.
-				it->second = id;
-			}
+
 			// Go to the next out-edge of u.
 			++ei;
 		}

@@ -165,6 +165,11 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 ###
 ### Create the Makefiles for the program.
 ###
-AC_CONFIG_FILES([Makefile src/Makefile src/controlflowgraph/Makefile src/controlflowgraph/statements/Makefile src/debug_utils/Makefile src/libexttools/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile
+	src/controlflowgraph/Makefile
+	src/controlflowgraph/statements/Makefile
+	src/debug_utils/Makefile
+	src/libexttools/Makefile
+	doc/Makefile])
 AC_OUTPUT
 

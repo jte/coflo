@@ -21,7 +21,7 @@
 #define	SAFE_ENUM_H
 
 /**
- * Safe enumeration template.
+ * Safe enumeration class template.
  */
 template <typename def, typename representation = typename def::value_type>
 class safe_enum : public def
