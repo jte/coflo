@@ -24,8 +24,8 @@ ACLOCAL_AMFLAGS = -I m4 --install
 # Include additional automake fragments for Doxygen support.
 include $(top_srcdir)/aminclude_doxygen.am
 
-# The subdirectories containing the source code and tests.
-SUBDIRS = src tests
+# The subdirectories containing the source code, docs, and tests.
+SUBDIRS = src doc tests
 
 # We want to distribute .version.
 #EXTRA_DIST = .version

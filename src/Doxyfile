@@ -676,7 +676,7 @@ RECURSIVE              = YES
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 # Note that relative paths are relative to directory from which doxygen is run.
 
-EXCLUDE                = 
+EXCLUDE                =
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -690,8 +690,9 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories
 # for example use the pattern */test/*
 
-# Exclude distributed built sources, which means they'll be in the src/ hierarchy. 
-EXCLUDE_PATTERNS       = */gcc_cfg_parser.*.c*
+# Exclude distributed built sources, which means they'll be in the src/ hierarchy.
+# Also exclude source control dirs (.svn). 
+EXCLUDE_PATTERNS       = */gcc_cfg_parser.*.c* */.svn/* */.svn
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -699,7 +700,7 @@ EXCLUDE_PATTERNS       = */gcc_cfg_parser.*.c*
 # wildcard * is used, a substring. Examples: ANamespace, AClass,
 # AClass::ANamespace, ANamespace::*Test
 
-EXCLUDE_SYMBOLS        =
+EXCLUDE_SYMBOLS        = std::*
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or
 # directories that contain example code fragments that are included (see
@@ -736,7 +737,7 @@ IMAGE_PATH             =
 # If FILTER_PATTERNS is specified, this tag will be
 # ignored.
 
-INPUT_FILTER           =
+INPUT_FILTER           =  #"C:/cygwin/bin/bash -c $(srcdir)/doc/doxygen_filter.sh"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis.

@@ -362,6 +362,7 @@ int main(int argc, char* argv[])
 #ifdef HAVE_MALLOC_STATS
 	// Print out some memeory info before we quit, mainly to see how much we're not deallocating.
 	/// @todo Make this less kludgy.
+	std::cerr << std::endl << "Memory info:" << std::endl;
 	malloc_stats();
 #endif
 
