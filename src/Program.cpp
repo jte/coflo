@@ -30,7 +30,11 @@
 #include "controlflowgraph/statements/FunctionCall.h"
 #include "Function.h"
 
-Program::Program() { }
+Program::Program()
+{
+	// Get the control flow graph ready for use.
+	InitializeControlFlowGraph(m_cfg);
+}
 
 Program::Program(const Program& orig)
 {

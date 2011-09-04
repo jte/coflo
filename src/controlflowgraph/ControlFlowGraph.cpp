@@ -19,6 +19,24 @@
 
 #include "ControlFlowGraph.h"
 
+static T_CFG_VERTEX_DESC f_dummy_vertex;
+
+void InitializeControlFlowGraph(T_CFG &cfg)
+{
+	// Create a dummy node.
+	f_dummy_vertex = boost::add_vertex(cfg);
+}
+
+bool IsDummyVertex(const T_CFG_VERTEX_DESC &v)
+{
+	return (v == f_dummy_vertex);
+}
+
+T_CFG_VERTEX_DESC GetDummyVertex()
+{
+	return f_dummy_vertex;
+}
+
 void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
 {
 	T_CFG_OUT_EDGE_ITERATOR ei, eend;
