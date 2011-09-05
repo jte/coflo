@@ -35,7 +35,7 @@ static const boost::regex f_function_call_expression(".+?"+f_location+" (?:.+? =
 static const boost::regex f_if_expression(".+?"+f_location+" if \\(.*\\)");
 
 /// Regex to find switch statements.  Capture 1 and 2 is the file/line no.
-static const boost::regex f_switch_expression(".+?"+f_location+" switch \\(.*?\\)");
+static const boost::regex f_switch_expression(".+?"+f_location+" switch \\(.*?\\).*");
 
 /// Regex to find non-"#WHATEVER" statements to break us out of the loop.
 static const boost::regex f_succ_expression("[[:space:]]+#.*");
