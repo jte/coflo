@@ -108,6 +108,8 @@ public:
 	
 private:
 	
+	void FixupBackEdges();
+
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 

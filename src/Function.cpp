@@ -44,6 +44,7 @@
 
 #include "controlflowgraph/statements/Statement.h"
 #include "controlflowgraph/statements/If.h"
+#include "controlflowgraph/statements/NoOp.h"
 #include "controlflowgraph/statements/Switch.h"
 #include "controlflowgraph/statements/FunctionCallUnresolved.h"
 #include "controlflowgraph/statements/FunctionCallResolved.h"
@@ -527,7 +528,7 @@ public:
 	{
 		// The very first vertex has been popped.
 		indent(m_current_indent_level);
-		std::cout << "{s" << std::endl;
+		std::cout << "{" << std::endl;
 		m_current_indent_level++;
 
 		//m_indent_level_map[u] = m_current_indent_level;
@@ -540,14 +541,14 @@ public:
 		// We found a new vertex.
 
 		long fid = filtered_in_degree(u, m_graph);
-		if (fid > 1)
+		if (0)//fid > 1)
 		{
 			// This vertex terminates more than one branch.
 			// This means that we had other incoming branches which didn't push us onto the stack,
 			// which handled their indent decrementing in vertex_visit_complete().
 			// Decrement the current indent level counter.
 
-			long extra_indent_levels_to_pop = fid-1; //filtered_in_degree(u, m_graph, true);
+			long extra_indent_levels_to_pop = fid-2; //filtered_in_degree(u, m_graph, true);
 			std::cout << extra_indent_levels_to_pop << std::endl;
 			while(extra_indent_levels_to_pop > 0)
 			{
@@ -572,11 +573,19 @@ public:
 			if(m_graph[predecessor].m_statement->IsDecisionStatement())
 			{
 				// Predecessor was a decision statement, so this vertex starts a new branch.
+				// Retrieve the predecessor's indent level.
+				m_current_indent_level = m_indent_level_map[predecessor];
 				// Print a block start marker and increment the current indent level.
 				indent(m_current_indent_level);
-				std::cout << "{d" << predecessor << std::endl;
+				std::cout << "{" << std::endl;
 				m_current_indent_level++;
 			}
+		}
+
+		if(m_graph[u].m_statement->IsDecisionStatement())
+		{
+			// There's more than one out edge.  Store our indent level, we'll need it for each branch.
+			m_indent_level_map[u] = m_current_indent_level;
 		}
 
 		StatementBase *p = m_graph[u].m_statement;
@@ -591,7 +600,7 @@ public:
 
 		if (u == m_last_statement)
 		{
-			std::clog << "INFO: Found last statement of function" << std::endl;
+			//std::clog << "INFO: Found last statement of function" << std::endl;
 			// We've reached the end of the function, terminate the search.
 			// We should never have to do this, the topological search should always
 			// terminate on the EXIT vertex unless there is a branch which erroneously terminates.
@@ -723,8 +732,7 @@ public:
 			if (fcr == NULL)
 			{
 				// Should never happen.
-				std::cerr << "ERROR: Return from unresolved function call."
-						<< std::endl;
+				std::cerr << "ERROR: Return from unresolved function call." << std::endl;
 			}
 			m_call_set.erase(fcr->m_target_function);
 			m_call_stack.pop_back();
@@ -746,13 +754,31 @@ public:
 			// Note that for a vertex with multiple in-edges, only one of them will push the vertex onto the stack.
 			m_current_indent_level--;
 			indent(m_current_indent_level);
-			std::cout << "}nopush" << std::endl;
+			std::cout << "}" << std::endl;
 		}
 	}
 
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
 		// We're just about to push this vertex onto the topological sort stack.
+
+		CFGEdgeTypeBase *edge_type;
+		CFGEdgeTypeFunctionCall *fc;
+		CFGEdgeTypeReturn *ret;
+		edge_type = m_graph[e].m_edge_type;
+		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
+		if(fc == NULL)
+		{
+			// Not a function call edge, the target of which will normally have more than one in edge,
+			// but that never represents the call graph merging.
+			T_CFG_VERTEX_DESC v = boost::target(e, m_graph);
+			if(filtered_in_degree(v, m_graph) > 1)
+			{
+				m_current_indent_level--;
+				indent(m_current_indent_level);
+				std::cout << "}" << std::endl;
+			}
+		}
 
 		return vertex_return_value_t::ok;
 	}
@@ -837,7 +863,6 @@ void Function::PrintDotCFG(ToolDot *the_dot,
 	std::clog << "Compiling " << dot_filename << std::endl;
 	the_dot->CompileDotToPNG(dot_filename);
 }
-
 
 bool Function::CreateControlFlowGraph(T_CFG & cfg)
 {
@@ -925,7 +950,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		T_BLOCK_GRAPH::out_edge_iterator eit, eend;
 		for (boost::tie(eit, eend) = boost::out_edges(*vit, m_block_graph);
 				eit != eend; eit++)
-				{
+		{
 			// Add an edge from the last statement of Block vit to the first statement
 			// of the Block pointed to by eit.
 			T_CFG_VERTEX_DESC target_vertex_descr = boost::target(*eit,
@@ -936,8 +961,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 
 			if (first_statement_it == first_statement_of_block.end())
 			{
-				std::cerr << "ERROR: No first block statement found."
-						<< std::endl;
+				std::cerr << "ERROR: No first block statement found." << std::endl;
 			}
 			else
 			{
@@ -955,41 +979,14 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	}
 
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
+	FixupBackEdges();
+
+
 
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
-	std::vector<BackEdgeFixupVisitor::BackEdgeFixupInfo> back_edges;
-
-	// Define a filtered view of this function's CFG, which hides the back-edges
-	// so that we can produce a topological sort.
-	BackEdgeFixupVisitor back_edge_finder(back_edges);
-
 	vertex_filter_predicate the_vertex_filter(vpm, this);
-
-	// Find all the back edges.
-	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
-
-	// Mark them as back edges.
-	BOOST_FOREACH(BackEdgeFixupVisitor::BackEdgeFixupInfo fixinfo, back_edges)
-	{
-		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
-
-		// Change this edge type to a back edge.
-		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
-
-		// If the source node of this back edge now has no non-back-edge out-edges,
-		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
-		T_CFG_VERTEX_DESC src;
-		src = boost::source(e, *m_cfg);
-		if (boost::out_degree(src, *m_cfg) == 1)
-		{
-			T_CFG_EDGE_DESC newedge;
-			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, fixinfo.m_impossible_target_vertex, *m_cfg);
-			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
-		}
-	}
 
 	// Check CFG for inconsistencies and clean up the ones we can.
 	{
@@ -1023,7 +1020,105 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 						<< GetIdentifier() << "\"" << std::endl;
 			}
 		}
+
+		{
+			std::vector<T_CFG_EDGE_DESC> edges_to_remove;
+
+			// Find any critical edges and split them by inserting NOOPs.
+			boost::graph_traits<T_FILTERED_GRAPH>::edge_iterator eit, eend;
+
+			boost::tie(eit, eend) = boost::edges(graph_of_this_function);
+			for (; eit != eend; ++eit)
+			{
+				T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc;
+				long target_id, source_od;
+
+				// Get the vertex descriptors.
+				source_vertex_desc = boost::source(*eit, graph_of_this_function);
+				target_vertex_desc = boost::target(*eit, graph_of_this_function);
+
+				// Get the effective in and out degrees.
+				source_od = filtered_out_degree(source_vertex_desc, *m_cfg);
+				target_id = filtered_in_degree(target_vertex_desc, *m_cfg);
+
+				// Check if they meet the criteria for a critical edge.
+				if((source_od > 1) && (target_id > 1))
+				{
+					// They do, we've found a critical edge.
+					edges_to_remove.push_back(*eit);
+				}
+			}
+
+			// Remove the critical edges we found.
+			BOOST_FOREACH(T_CFG_EDGE_DESC e, edges_to_remove)
+			{
+				T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc, splitting_vertex;
+
+				// Get the vertex descriptors.
+				source_vertex_desc = boost::source(e, graph_of_this_function);
+				target_vertex_desc = boost::target(e, graph_of_this_function);
+
+				// Create the new NoOp vertex.
+				splitting_vertex = boost::add_vertex(*m_cfg);
+				(*m_cfg)[splitting_vertex].m_statement = new NoOp(Location("[UNKNOWN : 0]"));
+				(*m_cfg)[splitting_vertex].m_containing_function = this;
+
+				// Split the edge by pointing the old edge at the new vertex, and a new fallthrough
+				// edge from the new vertex to the old target.
+				T_CFG_EDGE_DESC new_edge_1, new_edge_2;
+				boost::tie(new_edge_1, boost::tuples::ignore) = boost::add_edge(source_vertex_desc, splitting_vertex, *m_cfg);
+				boost::tie(new_edge_2, boost::tuples::ignore) = boost::add_edge(splitting_vertex, target_vertex_desc, *m_cfg);
+				(*m_cfg)[new_edge_1].m_edge_type = (*m_cfg)[e].m_edge_type;
+				(*m_cfg)[e].m_edge_type = NULL;
+				(*m_cfg)[new_edge_2].m_edge_type = new CFGEdgeTypeFallthrough();
+				boost::remove_edge(e, *m_cfg);
+			}
+		}
 	}
 
 	return true;
 }
+
+void Function::FixupBackEdges()
+{
+	// Property map for getting at the edge types in the CFG.
+	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+			&CFGVertexProperties::m_containing_function, *m_cfg);
+	vertex_filter_predicate the_vertex_filter(vpm, this);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all,
+					vertex_filter_predicate> T_FILTERED_GRAPH;
+			T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(),
+					the_vertex_filter);
+
+	std::vector<BackEdgeFixupVisitor::BackEdgeFixupInfo> back_edges;
+
+	// Define a filtered view of this function's CFG, which hides the back-edges
+	// so that we can produce a topological sort.
+	BackEdgeFixupVisitor back_edge_finder(back_edges);
+
+	// Find all the back edges.
+	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
+
+	// Mark them as back edges.
+	BOOST_FOREACH(BackEdgeFixupVisitor::BackEdgeFixupInfo fixinfo, back_edges)
+	{
+		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
+
+		// Change this edge type to a back edge.
+		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
+
+		// If the source node of this back edge now has no non-back-edge out-edges,
+		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
+		T_CFG_VERTEX_DESC src;
+		src = boost::source(e, *m_cfg);
+		if (boost::out_degree(src, *m_cfg) == 1)
+		{
+			T_CFG_EDGE_DESC newedge;
+			boost::tie(newedge, boost::tuples::ignore) =
+					boost::add_edge(src, fixinfo.m_impossible_target_vertex, *m_cfg);
+			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
+		}
+	}
+}
+
+
