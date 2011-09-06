@@ -18,7 +18,7 @@
 #ifndef PSEUDOSTATEMENT_H
 #define	PSEUDOSTATEMENT_H
 
-#include "Statement.h"
+#include "StatementBase.h"
 
 class PseudoStatement : public StatementBase
 {

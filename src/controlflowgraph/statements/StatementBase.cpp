@@ -18,7 +18,7 @@
 #include <string>
 #include <boost/regex.hpp>
 
-#include "Statement.h"
+#include "StatementBase.h"
 #include "If.h"
 #include "Switch.h"
 #include "FunctionCallUnresolved.h"
