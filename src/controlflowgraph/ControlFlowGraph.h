@@ -23,7 +23,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "statements/Statement.h"
+#include "statements/statements.h"
 #include "CFGEdgeTypeBase.h"
 
 class Function;
@@ -167,6 +167,22 @@ private:
 
 	/// The graph whose edges we're writing the properties of.
 	T_CFG& g;
+};
+
+
+/**
+ * The primary control flow graph class.
+ * @todo Well, it will be.
+ */
+class ControlFlowGraph
+{
+public:
+	ControlFlowGraph();
+	~ControlFlowGraph();
+
+private:
+
+	T_CFG m_cfg;
 };
 
 void InitializeControlFlowGraph(T_CFG &cfg);
