@@ -42,18 +42,8 @@
 #include "Function.h"
 #include "SuccessorTypes.h"
 
-#include "controlflowgraph/statements/Statement.h"
-#include "controlflowgraph/statements/If.h"
-#include "controlflowgraph/statements/NoOp.h"
-#include "controlflowgraph/statements/Switch.h"
-#include "controlflowgraph/statements/FunctionCallUnresolved.h"
-#include "controlflowgraph/statements/FunctionCallResolved.h"
-
-#include "controlflowgraph/CFGEdgeTypeFallthrough.h"
-#include "controlflowgraph/CFGEdgeTypeFunctionCall.h"
-#include "controlflowgraph/CFGEdgeTypeImpossible.h"
-#include "controlflowgraph/CFGEdgeTypeReturn.h"
-#include "controlflowgraph/CFGEdgeTypeFunctionCallBypass.h"
+#include "controlflowgraph/statements/statements.h"
+#include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
 #include "controlflowgraph/BackEdgeFixupVisitor.h"
 

@@ -168,6 +168,7 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 AC_CONFIG_FILES([Makefile src/Makefile
 	src/controlflowgraph/Makefile
 	src/controlflowgraph/statements/Makefile
+	src/controlflowgraph/edges/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
 	doc/Makefile])

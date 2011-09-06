@@ -297,9 +297,7 @@ int main(int argc, char* argv[])
 
 			the_program->SetTheCtags(the_ctags);
 			the_program->SetTheFilter(the_filter);
-			ToolDot *tool_dot = new ToolDot(the_dot);
 			ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
-			std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
 			std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
 
 			// Check if this version of GCC is going to work.
@@ -312,7 +310,6 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 
-			the_program->SetTheDot(tool_dot);
 			the_program->SetTheGcc(tool_compiler);
 			the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
 			if(!the_program->Parse(
@@ -356,6 +353,10 @@ int main(int argc, char* argv[])
 	
 	if(!report_output_directory.empty())
 	{
+		// User wants HTML output.
+		ToolDot *tool_dot = new ToolDot(the_dot);
+		the_program->SetTheDot(tool_dot);
+		std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
 		the_program->Print(the_dot, report_output_directory);
 	}
 	
@@ -379,4 +380,7 @@ static void print_lib_versions()
 	cout << "  Compiler string.....: " << BOOST_COMPILER << endl;
 	cout << "  Using standard lib..: " << BOOST_STDLIB << endl;
 	cout << "  Detected platform...: " << BOOST_PLATFORM << endl;
+	cout << endl;
+	cout << "Boost.Program_Options:" << endl;
+	cout << "  Version.............: " << BOOST_PROGRAM_OPTIONS_VERSION << endl;
 }
