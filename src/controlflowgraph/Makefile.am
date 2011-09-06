@@ -15,20 +15,12 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = statements
+SUBDIRS = statements edges
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 	CFGDFSVisitor.cpp CFGDFSVisitor.h \
-	CFGEdgeTypeBase.cpp CFGEdgeTypeBase.h \
-	CFGEdgeTypeExceptional.cpp CFGEdgeTypeExceptional.h \
-	CFGEdgeTypeFunctionCallBypass.cpp CFGEdgeTypeFunctionCallBypass.h \
-	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
-	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
-	CFGEdgeTypeGoto.cpp CFGEdgeTypeGoto.h \
-	CFGEdgeTypeImpossible.cpp CFGEdgeTypeImpossible.h \
-	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	depth_first_traversal.hpp \
 	ImprovedDFSVisitorBase.h \

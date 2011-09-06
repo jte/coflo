@@ -31,11 +31,7 @@
 
 #include "Location.h"
 #include "SuccessorTypes.h"
-#include "controlflowgraph/statements/Statement.h"
-#include "controlflowgraph/statements/NoOp.h"
-#include "controlflowgraph/statements/Entry.h"
-#include "controlflowgraph/statements/Exit.h"
-#include "controlflowgraph/statements/Placeholder.h"
+#include "controlflowgraph/statements/statements.h"
 
 using namespace boost;
 
