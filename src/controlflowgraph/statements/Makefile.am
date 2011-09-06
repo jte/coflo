@@ -17,7 +17,8 @@
 
 
 noinst_LIBRARIES = libstatements.a
-libstatements_a_SOURCES = Entry.cpp Entry.h \
+libstatements_a_SOURCES = statements.h \
+	Entry.cpp Entry.h \
     Exit.cpp Exit.h \
     FunctionCall.cpp FunctionCall.h \
     FunctionCallResolved.cpp FunctionCallResolved.h \
@@ -26,7 +27,7 @@ libstatements_a_SOURCES = Entry.cpp Entry.h \
     NoOp.cpp NoOp.h \
     Placeholder.cpp Placeholder.h \
     PseudoStatement.cpp PseudoStatement.h \
-    Statement.cpp Statement.h \
+    StatementBase.cpp StatementBase.h \
     Switch.cpp Switch.h
 
 libstatements_a_CPPFLAGS = $(AM_CPPFLAGS)

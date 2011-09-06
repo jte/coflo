@@ -20,7 +20,7 @@
 #ifndef IF_H
 #define	IF_H
 
-#include "Statement.h"
+#include "StatementBase.h"
 
 class If : public StatementBase
 {
