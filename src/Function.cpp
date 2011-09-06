@@ -467,6 +467,45 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_
 	return i;
 }
 
+T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+{
+	boost::graph_traits<T_CFG>::in_edge_iterator ieit, ieend;
+
+	boost::tie(ieit, ieend) = boost::in_edges(v, cfg);
+
+	bool saw_function_call_already = false;
+	for (; ieit != ieend; ++ieit)
+	{
+		if (cfg[*ieit].m_edge_type->IsBackEdge())
+		{
+			// Always skip anything marked as a back edge.
+			continue;
+		}
+
+		// Count up all the incoming edges, with two exceptions:
+		// - Ignore Return edges.  They will always have exactly one matching FunctionCallBypass, which
+		//   is what we'll count instead.
+		// - Ignore all but the first CFGEdgeTypeFunctionCall.  The situation here is that we'd be
+		//   looking at a vertex v that's an ENTRY statement, with a predecessor of type FunctionCallResolved.
+		//   Any particular instance of an ENTRY has at most only one valid FunctionCall edge.
+		//   For our current purposes, we only care about this one.
+		if ((dynamic_cast<CFGEdgeTypeReturn*>(cfg[*ieit].m_edge_type) == NULL)
+				&& (saw_function_call_already == false))
+		{
+			return *ieit;
+		}
+
+		if (dynamic_cast<CFGEdgeTypeFunctionCall*>(cfg[*ieit].m_edge_type)
+				!= NULL)
+		{
+			// Multiple incoming function calls only count as one for convergence purposes.
+			saw_function_call_already = true;
+		}
+	}
+
+	return *ieend;
+}
+
 static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
 	boost::graph_traits<T_CFG>::out_edge_iterator eit, eend;
@@ -500,6 +539,7 @@ public:
 		m_last_statement = last_statement;
 		m_cfg_verbose = cfg_verbose;
 		m_current_indent_level = 0;
+		m_live_branches = 0;
 		m_last_discovered_vertex_is_recursive = false;
 	}
 	;
@@ -520,6 +560,7 @@ public:
 		indent(m_current_indent_level);
 		std::cout << "{" << std::endl;
 		m_current_indent_level++;
+		m_live_branches++;
 
 		//m_indent_level_map[u] = m_current_indent_level;
 
@@ -530,15 +571,17 @@ public:
 	{
 		// We found a new vertex.
 
+		m_this_vertex_terminates_branch = false;
+
 		long fid = filtered_in_degree(u, m_graph);
-		if (0)//fid > 1)
+		if (0)//(fid > 1) && (m_live_branches < m_current_indent_level))
 		{
 			// This vertex terminates more than one branch.
 			// This means that we had other incoming branches which didn't push us onto the stack,
 			// which handled their indent decrementing in vertex_visit_complete().
 			// Decrement the current indent level counter.
 
-			long extra_indent_levels_to_pop = fid-2; //filtered_in_degree(u, m_graph, true);
+			long extra_indent_levels_to_pop = m_current_indent_level - m_live_branches; //filtered_in_degree(u, m_graph, true);
 			std::cout << extra_indent_levels_to_pop << std::endl;
 			while(extra_indent_levels_to_pop > 0)
 			{
@@ -572,17 +615,20 @@ public:
 			}
 		}
 
-		if(m_graph[u].m_statement->IsDecisionStatement())
+		StatementBase *p = m_graph[u].m_statement;
+		if(p->IsDecisionStatement())
 		{
 			// There's more than one out edge.  Store our indent level, we'll need it for each branch.
 			m_indent_level_map[u] = m_current_indent_level;
+			/// @todo For switch() this needs to be in-degree.
+			m_live_branches++;
 		}
 
-		StatementBase *p = m_graph[u].m_statement;
 		// Check if this vertex meets the criteria for printing the statement.
 		if(m_cfg_verbose || (p->IsDecisionStatement() || (p->IsFunctionCall())))
 		{
 			// Indent and print the statement corresponding to this vertex.
+			std::cout << u << std::endl;
 			indent(m_current_indent_level);
 			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
 			//PrintInEdgeTypes(u, m_graph);
@@ -690,7 +736,9 @@ public:
 		CFGEdgeTypeBase *edge_type;
 		CFGEdgeTypeFunctionCall *fc;
 		CFGEdgeTypeReturn *ret;
+		T_CFG_VERTEX_DESC t;
 		edge_type = m_graph[ed].m_edge_type;
+		t = boost::target(ed, m_graph);
 		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 
@@ -729,7 +777,22 @@ public:
 			m_current_indent_level--;
 			indent(m_current_indent_level);
 			std::cout << "]" << std::endl;
+
+			if(filtered_in_degree(t, m_graph) > 1)
+			{
+				// This edge will end on a merge node.  Set the flag so we know to outdent in vertex_visit_complete.
+				std::cerr << "TERM " << ed << std::endl;
+				m_this_vertex_terminates_branch = true;
+			}
+
 			return edge_return_value_t::pop_color_context;
+		}
+
+		if(filtered_in_degree(t, m_graph) > 1)
+		{
+			// This edge will end on a merge node.  Set the flag so we know to outdent in vertex_visit_complete.
+			std::cerr << "TERM " << ed << std::endl;
+			m_this_vertex_terminates_branch = true;
 		}
 
 		return retval;
@@ -737,7 +800,15 @@ public:
 
 	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed)
 	{
-		if(num_vertices_pushed == 0)
+		T_CFG_DEGREE_SIZE_TYPE fod = filtered_out_degree(u, m_graph);
+		if(m_this_vertex_terminates_branch)
+		{
+			m_live_branches--;
+			m_current_indent_level--;
+			indent(m_current_indent_level);
+			std::cout << "}tb" << u << std::endl;
+		}
+		/*if(num_vertices_pushed == 0)
 		{
 			// This vertex pushed no new vertices onto the stack.  This means that it terminates the branch it
 			// is in.  Decrement the current indent level counter, and write the block end marker.
@@ -745,13 +816,23 @@ public:
 			m_current_indent_level--;
 			indent(m_current_indent_level);
 			std::cout << "}" << std::endl;
-		}
+		}*/
+		/*if(fod == 1)
+		{
+			T_CFG_VERTEX_DESC t = boost::target(first_filtered_out_edge(u, m_graph), m_graph);
+			if(filtered_in_degree(t,m_graph) > 1)
+			{
+				m_current_indent_level--;
+				indent(m_current_indent_level);
+				std::cout << "}t>1" << std::endl;
+			}
+		}*/
 	}
 
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
 		// We're just about to push this vertex onto the topological sort stack.
-
+#if 0
 		CFGEdgeTypeBase *edge_type;
 		CFGEdgeTypeFunctionCall *fc;
 		CFGEdgeTypeReturn *ret;
@@ -769,7 +850,7 @@ public:
 				std::cout << "}" << std::endl;
 			}
 		}
-
+#endif
 		return vertex_return_value_t::ok;
 	}
 
@@ -786,14 +867,19 @@ private:
 	/// with unterminated branches between the starting node and the current node.
 	long m_current_indent_level;
 
-	struct CallStackContext
+	long m_live_branches;
+
+	struct IndentStackContext
 	{
-		/// The function call which pushed this context onto the stack.
-		FunctionCall *m_function_call;
+		/// The vertex that pushed this context.
+		T_CFG_VERTEX_DESC m_v;
+		long m_indent_level;
 	};
 
 	/// The FunctionCall call stack.
 	std::vector<FunctionCall*> m_call_stack;
+
+	std::vector<IndentStackContext> m_indent_stack;
 
 	/// The Function call set.
 	/// This is used only to determine if our call stack has gone recursive.
@@ -801,6 +887,8 @@ private:
 	T_FUNCTION_CALL_SET m_call_set;
 
 	bool m_last_discovered_vertex_is_recursive;
+
+	bool m_this_vertex_terminates_branch;
 
 	std::map<T_CFG_VERTEX_DESC, long> m_indent_level_map;
 };

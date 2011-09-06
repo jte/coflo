@@ -9,9 +9,12 @@
 #define TOPOLOGICAL_VISIT_KAHN_H
 
 #include <stack>
+#include <boost/throw_exception.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "ImprovedDFSVisitorBase.h"
+
+struct my_exception: virtual std::exception, virtual boost::exception { };
 
 template < typename Graph >
 class RemainingInDegreeMap
@@ -164,13 +167,13 @@ void topological_visit_kahn(Graph &graph,
 			// the topologically sorted search graph.  Let the visitor know.
 			// Note that tree edges are visited in a breadth-first order.
 			visitor_edge_return_value = visitor.tree_edge(*ei);
-			if(visitor_edge_return_value == edge_return_value_t::push_dummy_vertex)
+			/// @todo This doesn't currently return anything we need to handle, but we should handle the return value
+			/// appropriately anyway.
+			/*if(visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::push_color_context
+					|| visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::pop_color_context)
 			{
-				// The visitor wants us to push a dummy vertex onto the stack.
-				/// @todo Seems like there should be a better way to do this.
-				no_remaining_in_edges_set.push(GetDummyVertex());
-				num_vertices_pushed++;
-			}
+				BOOST_THROW_EXCEPTION(my_exception());
+			}*/
 
 			//
 			// Look up the current in-degree of the target vertex of *ei in the

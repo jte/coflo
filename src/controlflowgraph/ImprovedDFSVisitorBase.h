@@ -47,11 +47,9 @@ DECLARE_ENUM_CLASS(vertex_return_value_t, ok, terminate_branch, terminate_search
  *    Stop the traversal entirely.
  *  - push_color_context:
  *  - pop_color_context:
- *  - push_dummy_vertex\n
- *    Push a dummy vertex onto the vertices-to-visit-next stack.
  */
 DECLARE_ENUM_CLASS(edge_return_value_t, ok, terminate_branch, terminate_search,
-				   push_color_context, pop_color_context, push_dummy_vertex)
+				   push_color_context, pop_color_context)
 
 template <typename Vertex, typename Edge, typename Graph>
 class ImprovedDFSVisitorBase
