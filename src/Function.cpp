@@ -719,8 +719,9 @@ public:
 		CFGEdgeTypeBase *edge_type;
 		CFGEdgeTypeFunctionCall *fc;
 		CFGEdgeTypeReturn *ret;
-		T_CFG_VERTEX_DESC t;
+		T_CFG_VERTEX_DESC s, t;
 		edge_type = m_graph[ed].m_edge_type;
+		s = boost::source(ed, m_graph);
 		t = boost::target(ed, m_graph);
 		fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
@@ -736,9 +737,12 @@ public:
 			// This edge is a function call.
 
 			// Indent another level.
-			indent(m_current_indent_level);
+			//PushIndentStack();
+			//indent(m_current_indent_level);
+			indent(m_indent_stack.top().m_indent_level);
 			std::cout << "[" << std::endl;
-			m_current_indent_level++;
+			//m_current_indent_level++;
+			m_indent_stack.top().m_indent_level++;
 			//std::cout << "PUSHING CALL: " << fc->m_function_call->GetIdentifier() << std::endl;
 			m_call_stack.push_back(fc->m_function_call);
 			return edge_return_value_t::push_color_context;
@@ -757,8 +761,10 @@ public:
 			}
 			m_call_set.erase(fcr->m_target_function);
 			m_call_stack.pop_back();
-			m_current_indent_level--;
-			indent(m_current_indent_level);
+			//m_current_indent_level--;
+			//indent(m_current_indent_level);
+			m_indent_stack.top().m_indent_level--;
+			indent(m_indent_stack.top().m_indent_level);
 			std::cout << "]" << std::endl;
 
 			retval = edge_return_value_t::pop_color_context;
@@ -775,28 +781,8 @@ public:
 		{
 			// This edge will end on a merge node.  Set the flag so we know to outdent in vertex_visit_complete.
 			//std::cerr << "TERM vvc edge=" << e << std::endl;
-
-			while(m_indent_stack.size() > 1)
-			{
-				indent(m_indent_stack.top().m_indent_level-1);
-				std::cout << "}" /*<< " vvc " << u*/ << std::endl;
-
-				m_indent_stack.top().m_number_of_unterminated_new_branches--;
-				if(m_indent_stack.top().m_number_of_unterminated_new_branches == 0)
-				{
-					// The branches from this decision vertex have all been terminated.
-					//std::cerr << "POP " << m_indent_stack.top().m_v << std::endl;
-					m_indent_stack.pop();
-				}
-				else
-				{
-					//std::cerr << "DEC " << m_indent_stack.top().m_v << std::endl;
-					break;
-				}
-			}
+			PopIndentStack();
 		}
-
-		if(m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
 	}
 
 	vertex_return_value_t prior_to_push(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
@@ -817,6 +803,29 @@ private:
 		isc.m_indent_level = m_indent_stack.top().m_indent_level + 1;
 		m_indent_stack.push(isc);
 		//std::cout << "PUSH " << u << "," << isc.m_number_of_unterminated_new_branches << std::endl;
+	}
+
+	void PopIndentStack()
+	{
+		while(m_indent_stack.size() > 1)
+		{
+			indent(m_indent_stack.top().m_indent_level-1);
+			std::cout << "}" /*<< " vvc " << u*/ << std::endl;
+
+			m_indent_stack.top().m_number_of_unterminated_new_branches--;
+			if(m_indent_stack.top().m_number_of_unterminated_new_branches == 0)
+			{
+				// The branches from this decision vertex have all been terminated.
+				//std::cerr << "POP " << m_indent_stack.top().m_v << std::endl;
+				m_indent_stack.pop();
+			}
+			else
+			{
+				//std::cerr << "DEC " << m_indent_stack.top().m_v << std::endl;
+				break;
+			}
+		}
+		if(m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
 	}
 
 	/// Vertex corresponding to the last statement of the function.
