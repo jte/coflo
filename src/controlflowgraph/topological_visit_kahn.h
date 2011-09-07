@@ -93,6 +93,7 @@ void topological_visit_kahn(Graph &graph,
 {
 	// Some convenience typedefs.
 	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
+	typedef typename boost::graph_traits<Graph>::edge_descriptor T_EDGE_DESC;
 	typedef typename boost::graph_traits<Graph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
 
 	// The local variables.
@@ -137,6 +138,7 @@ void topological_visit_kahn(Graph &graph,
 
 		// Get iterators to the out edges of vertex u.
 		boost::tie(ei, eend) = boost::out_edges(u, graph);
+		T_EDGE_DESC first_edge_pushed;
 
 		while (ei != eend)
 		{
@@ -162,8 +164,7 @@ void topological_visit_kahn(Graph &graph,
 				break;
 			}
 
-			// If the examine_edge() call didn't skip this edge or terminate the
-			// graph traversal entirely, the edge is now part of
+			// The edge is now part of
 			// the topologically sorted search graph.  Let the visitor know.
 			// Note that tree edges are visited in a breadth-first order.
 			visitor_edge_return_value = visitor.tree_edge(*ei);
@@ -199,6 +200,7 @@ void topological_visit_kahn(Graph &graph,
 				// The target vertex now has an in-degree of zero, push it into the
 				// input set.
 				visitor.prior_to_push(v, *ei);
+				first_edge_pushed = *ei;
 				no_remaining_in_edges_set.push(v);
 				//std::cout << "Pushed: " << v << std::endl;
 				//PrintInEdgeTypes(v, graph);
@@ -211,7 +213,7 @@ void topological_visit_kahn(Graph &graph,
 
 		// We've visited all the out edges of this vertex.  Tell the visitor that we're done, and how many
 		// new vertices we added to the no-in-edges set.
-		visitor.vertex_visit_complete(u, num_vertices_pushed);
+		visitor.vertex_visit_complete(u, num_vertices_pushed, first_edge_pushed);
 	}
 };
 
