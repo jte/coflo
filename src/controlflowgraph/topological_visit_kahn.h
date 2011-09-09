@@ -164,17 +164,7 @@ void topological_visit_kahn(Graph &graph,
 				break;
 			}
 
-			// The edge is now part of
-			// the topologically sorted search graph.  Let the visitor know.
-			// Note that tree edges are visited in a breadth-first order.
-			visitor_edge_return_value = visitor.tree_edge(*ei);
-			/// @todo This doesn't currently return anything we need to handle, but we should handle the return value
-			/// appropriately anyway.
-			/*if(visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::push_color_context
-					|| visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::pop_color_context)
-			{
-				BOOST_THROW_EXCEPTION(my_exception());
-			}*/
+
 
 			//
 			// Look up the current in-degree of the target vertex of *ei in the
@@ -197,6 +187,18 @@ void topological_visit_kahn(Graph &graph,
 
 			if (id == 0)
 			{
+				// The edge is now part of
+				// the topologically sorted search graph.  Let the visitor know.
+				// Note that tree edges are visited in a breadth-first order.
+				visitor_edge_return_value = visitor.tree_edge(*ei);
+				/// @todo This doesn't currently return anything we need to handle, but we should handle the return value
+				/// appropriately anyway.
+				/*if(visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::push_color_context
+						|| visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::pop_color_context)
+				{
+					BOOST_THROW_EXCEPTION(my_exception());
+				}*/
+
 				// The target vertex now has an in-degree of zero, push it into the
 				// input set.
 				visitor.prior_to_push(v, *ei);
