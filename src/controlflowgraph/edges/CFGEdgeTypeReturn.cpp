@@ -17,13 +17,14 @@
 
 #include "CFGEdgeTypeReturn.h"
 
-CFGEdgeTypeReturn::CFGEdgeTypeReturn(FunctionCall *function_call)
+CFGEdgeTypeReturn::CFGEdgeTypeReturn(FunctionCallResolved *function_call)
 {
 	m_function_call = function_call;
 }
 
 CFGEdgeTypeReturn::CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig) : CFGEdgeTypeBase(orig)
 {
+	m_function_call = orig.m_function_call;
 }
 
 CFGEdgeTypeReturn::~CFGEdgeTypeReturn()

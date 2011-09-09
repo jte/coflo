@@ -20,12 +20,12 @@
 
 #include "CFGEdgeTypeBase.h"
 
-class FunctionCall;
+class FunctionCallResolved;
 
 class CFGEdgeTypeReturn : public CFGEdgeTypeBase
 {
 public:
-	CFGEdgeTypeReturn(FunctionCall *function_call);
+	CFGEdgeTypeReturn(FunctionCallResolved *function_call);
 	CFGEdgeTypeReturn(const CFGEdgeTypeReturn& orig);
 	virtual ~CFGEdgeTypeReturn();
 	
@@ -33,9 +33,9 @@ public:
 
 //private:
 	
-	/// The FunctionCall instance which resulted in this edge.
+	/// The FunctionCallResolved statement which resulted in this edge.
 	/// We need this to determine the point to return to.
-	FunctionCall *m_function_call;
+	FunctionCallResolved *m_function_call;
 
 };
 
