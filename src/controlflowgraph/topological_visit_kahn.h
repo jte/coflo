@@ -1,9 +1,21 @@
 /*
- * topological_visit_kahn.h
+ * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
- *  Created on: Sep 3, 2011
- *      Author: Gary
+ * This file is part of CoFlo.
+ *
+ * CoFlo is free software: you can redistribute it and/or modify it under the
+ * terms of version 3 of the GNU General Public License as published by the Free
+ * Software Foundation.
+ *
+ * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/** @file */
 
 #ifndef TOPOLOGICAL_VISIT_KAHN_H
 #define TOPOLOGICAL_VISIT_KAHN_H
@@ -88,7 +100,8 @@ private:
  */
 template<typename Graph, typename ImprovedDFSVisitor>
 void topological_visit_kahn(Graph &graph,
-		typename boost::graph_traits<Graph>::vertex_descriptor source,
+		/*typename boost::graph_traits<Graph>::vertex_descriptor source*/
+		typename boost::graph_traits<Graph>::edge_descriptor source,
 		ImprovedDFSVisitor &visitor)
 {
 	// Some convenience typedefs.
@@ -98,12 +111,14 @@ void topological_visit_kahn(Graph &graph,
 
 	// The local variables.
 	T_VERTEX_DESC u, v;
+	T_EDGE_DESC e;
 	T_OUT_EDGE_ITERATOR ei, eend;
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
 	// The set of all vertices with no incoming edges.
-	std::stack<T_VERTEX_DESC> no_remaining_in_edges_set;
+	//std::stack<T_VERTEX_DESC> no_remaining_in_edges_set;
+	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
 	typedef RemainingInDegreeMap< T_CFG > T_IN_DEGREE_MAP;
@@ -120,11 +135,14 @@ void topological_visit_kahn(Graph &graph,
 		long num_vertices_pushed = 0;
 
 		// Remove a vertex from the set of in-degree == 0 vertices.
-		u = no_remaining_in_edges_set.top();
+//		u = no_remaining_in_edges_set.top();
+		e = no_remaining_in_edges_set.top();
 		no_remaining_in_edges_set.pop();
 
+		u = boost::target(e, graph);
+
 		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
-		visitor_vertex_return_value = visitor.discover_vertex(u);
+		visitor_vertex_return_value = visitor.discover_vertex(u, e);
 		if (visitor_vertex_return_value
 				== vertex_return_value_t::terminate_branch)
 		{
@@ -203,7 +221,7 @@ void topological_visit_kahn(Graph &graph,
 				// input set.
 				visitor.prior_to_push(v, *ei);
 				first_edge_pushed = *ei;
-				no_remaining_in_edges_set.push(v);
+				no_remaining_in_edges_set.push(*ei);
 				//std::cout << "Pushed: " << v << std::endl;
 				//PrintInEdgeTypes(v, graph);
 				num_vertices_pushed++;

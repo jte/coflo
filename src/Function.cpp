@@ -211,61 +211,61 @@ void Function::LinkIntoGraph()
 
 	// Add the function blocks into the m_block_graph.	
 	BOOST_FOREACH(Block *bp, m_block_list)
-			{
-				// this_block_id is the new Vertex.
-				T_BLOCK_GRAPH_VERTEX_DESC this_block_id = boost::add_vertex(
-						m_block_graph);
-				m_block_graph[this_block_id].m_block = bp;
+	{
+		// this_block_id is the new Vertex.
+		T_BLOCK_GRAPH_VERTEX_DESC this_block_id = boost::add_vertex(
+				m_block_graph);
+		m_block_graph[this_block_id].m_block = bp;
 
-				// Add the block ID to a temporary map for use in linking below.
-				block_map[bp] = this_block_id;
-			}
+		// Add the block ID to a temporary map for use in linking below.
+		block_map[bp] = this_block_id;
+	}
 
 	// Iterate over each block again, this time adding the edges between blocks.
 	BOOST_FOREACH(Block *bp, m_block_list)
-			{
-				T_BLOCK_GRAPH_VERTEX_DESC this_block = block_map[bp];
-				T_BLOCK_GRAPH_VERTEX_DESC next_block;
+	{
+		T_BLOCK_GRAPH_VERTEX_DESC this_block = block_map[bp];
+		T_BLOCK_GRAPH_VERTEX_DESC next_block;
 
-				// Go through all the successors.
-				Block::T_BLOCK_SUCCESSOR_ITERATOR s;
-				for (s = bp->successor_begin(); s != bp->successor_end(); s++)
+		// Go through all the successors.
+		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
+		for (s = bp->successor_begin(); s != bp->successor_end(); s++)
+		{
+			T_BLOCK_MAP::iterator it;
+			it = block_map.find((*s)->GetSuccessorBlockPtr());
+			if (it != block_map.end())
+			{
+				// Found the next block.
+				next_block = it->second;
+				T_BLOCK_GRAPH_EDGE_DESC edge;
+				bool ok;
+				boost::tie(edge, ok) = boost::add_edge(this_block,
+						next_block, m_block_graph);
+				// Check if there's no error, then set up the edge properties.
+				if (ok)
 				{
-					T_BLOCK_MAP::iterator it;
-					it = block_map.find((*s)->GetSuccessorBlockPtr());
-					if (it != block_map.end())
+					// Label the edge with whatever the Successor object has
+					// for a label.
+					if ((*s)->HasEdgeLabel())
 					{
-						// Found the next block.
-						next_block = it->second;
-						T_BLOCK_GRAPH_EDGE_DESC edge;
-						bool ok;
-						boost::tie(edge, ok) = boost::add_edge(this_block,
-								next_block, m_block_graph);
-						// Check if there's no error, then set up the edge properties.
-						if (ok)
-						{
-							// Label the edge with whatever the Successor object has
-							// for a label.
-							if ((*s)->HasEdgeLabel())
-							{
-								m_block_graph[edge].m_edge_text =
-										(*s)->GetEdgeLabel();
-							}
-						}
-					}
-					else
-					{
-						// Couldn't find the next block, it's probably EXIT.
-						std::cerr
-								<< "ERROR: Couldn't find next_block in block_map"
-								<< std::endl;
+						m_block_graph[edge].m_edge_text =
+								(*s)->GetEdgeLabel();
 					}
 				}
 			}
+			else
+			{
+				// Couldn't find the next block, it's probably EXIT.
+				std::cerr
+						<< "ERROR: Couldn't find next_block in block_map"
+						<< std::endl;
+			}
+		}
+	}
 }
 
 void Function::Link(const std::map<std::string, Function*> &function_map,
-T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
+		T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
 {
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
@@ -557,26 +557,17 @@ public:
 	}
 	;
 
-	vertex_return_value_t start_subgraph_vertex(T_CFG_VERTEX_DESC u)
+	vertex_return_value_t start_subgraph_vertex(T_CFG_EDGE_DESC u)
 	{
 		// The very first vertex has been popped.
 
-		// Indent a level.
-
-
-		//indent(0);
-		//std::cout << "{" << std::endl;
-
-		/*IndentStackContext isc;
-		isc.m_v = u;
-		isc.m_number_of_unterminated_new_branches = filtered_out_degree(u, m_graph);
-		isc.m_indent_level = 1;
-		m_call_stack_2.top().m_indent_stack.push(isc);*/
+		// We're at the first function entry point.
+		//PushCallStack(NULL, u, filtered_out_degree(u, m_graph), 0);
 
 		return vertex_return_value_t::ok;
 	};
 
-	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u)
+	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
 	{
 		// We found a new vertex.
 
@@ -584,44 +575,35 @@ public:
 
 		if(p->IsType<Entry>())
 		{
-			// We're at a function entry point.
+			// We're visiting a function entry point.
 
 			long indent_level;
-			if(m_call_stack_2.size() == 0)
-			{
-				// We're at the first function entry point.
-				indent_level = 1;
-				m_next_function_call_resolved = NULL;
-			}
-			else
-			{
-				// We'll start at an indent level of whatever the calling context's was
-				// plus one.
-				indent_level = m_call_stack_2.top().m_indent_stack.top().m_indent_level + 1;
-			}
 
-			indent(indent_level-1);
+			// We'll start at an indent level of whatever the calling context's was plus one.
+			indent_level = TopIndentStack_IndentLevel();
+
+			indent(indent_level);
 			std::cout << "[" << std::endl;
+			PushCallStack(m_next_function_call_resolved, u, filtered_out_degree(u, m_graph), indent_level+1);
 
-			FunctionCallContext fcc(m_next_function_call_resolved, u, filtered_out_degree(u, m_graph), indent_level);
-			m_call_stack_2.push(fcc);
+			if(m_next_function_call_resolved != NULL)
+			{
+				cout << "IN TARGET: " << m_next_function_call_resolved->m_target_function << " Called at " << m_next_function_call_resolved->GetIdentifierCFG() << endl;
+			}
 		}
-
 
 		// Check if this vertex starts a new branch of the cfg.
 		long fid = filtered_in_degree(u, m_graph);
-		T_CFG::in_edge_iterator iei,iee;
-		boost::tie(iei, iee) = boost::in_edges(u, m_graph);
-		if(fid==1 && iei != iee)
+		if(fid==1)
 		{
-			T_CFG::vertex_descriptor predecessor;
-			predecessor = boost::source(*iei, m_graph);
+			T_CFG_VERTEX_DESC predecessor;
+			predecessor = boost::source(e, m_graph);
 			if(m_graph[predecessor].m_statement->IsDecisionStatement())
 			{
 				// Predecessor was a decision statement, so this vertex starts a new branch.
-				// Print a block start marker and increment the current indent level.
-				indent(m_call_stack_2.top().m_indent_stack.top().m_indent_level-1);
-				std::cout << "{" /* << " v=" << m_indent_stack.top().m_v */ << std::endl;
+				// Print a block start marker at the current indent level minus one.
+				indent(TopIndentStack_IndentLevel()-1);
+				std::cout << "{"  << " v=" << m_call_stack.top().m_indent_stack.top().m_v << std::endl;
 			}
 		}
 
@@ -629,8 +611,8 @@ public:
 		if(m_cfg_verbose || (p->IsDecisionStatement() || (p->IsFunctionCall())))
 		{
 			// Indent and print the statement corresponding to this vertex.
-			//std::cout << u << std::endl;
-			indent(m_call_stack_2.top().m_indent_stack.top().m_indent_level);
+			std::cout << u << " ";
+			indent(TopIndentStack_IndentLevel());
 			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
 			//PrintInEdgeTypes(u, m_graph);
 			if(p->IsDecisionStatement())
@@ -699,6 +681,12 @@ public:
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 		fcb = dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type);
 
+		if(ed.m_source == ed.m_target)
+		{
+			// Skip all edges which have the same source and target.  That means they're ENTRY or EXIT pseudostatements.
+			return edge_return_value_t::terminate_branch;
+		}
+
 		if (edge_type->IsBackEdge())
 		{
 			// Skip all back edges.
@@ -709,19 +697,19 @@ public:
 		{
 			// This is a return edge.
 
-			if(m_call_stack_2.empty())
+			if(m_call_stack.empty())
 			{
 				// Should never get here.
 				cout << "EMPTY" << endl;
 			}
 
-			if(m_call_stack_2.top().m_function_call_which_pushed_context == NULL)
+			if(m_call_stack.top().m_function_call_which_pushed_context == NULL)
 			{
 				// We're at the top of the call stack, and we're trying to return.
 				cout << "NULL" << endl;
 				//return edge_return_value_t::terminate_branch;
 			}
-			else if(ret->m_function_call != m_call_stack_2.top().m_function_call_which_pushed_context)
+			else if(ret->m_function_call != m_call_stack.top().m_function_call_which_pushed_context)
 			{
 				// This edge is a return, but not the one corresponding to the FunctionCall
 				// that brought us here.  Or, the call stack is empty, indicating that we got here
@@ -730,9 +718,6 @@ public:
 				// Skip it.
 				/// @todo An empty call stack here could also be an error in the program.  We should maybe
 				/// add a fake "call" when starting a cfg trace from an internal vertex.
-				//cout << "t1" << endl;
-				//cout << ret->m_function_call->GetIdentifier() << endl;
-				//cout << m_call_stack_2.top().m_function_call_which_pushed_context->GetIdentifier() << endl;
 				return edge_return_value_t::terminate_branch;
 			}
 		}
@@ -769,6 +754,8 @@ public:
 	{
 		// We're just about to push this vertex onto the topological sort stack.
 
+		cout << "PTP Edge = " << e << endl;
+
 		return vertex_return_value_t::ok;
 	}
 
@@ -776,10 +763,13 @@ public:
 	{
 		// Check if the vertex we terminate on has more than just us coming in.
 		if((num_vertices_pushed == 0) ||
-				((num_vertices_pushed == 1) && (filtered_in_degree(boost::target(e, m_graph), m_graph) > 1)))
+				((num_vertices_pushed == 1) &&
+						((filtered_in_degree(boost::target(e, m_graph), m_graph) > 1) || (m_graph[boost::target(e, m_graph)].m_statement->IsType<Exit>()))))
 		{
 			// This edge will end on a merge vertex.  Pop our indent stack.
-			//std::cerr << "TERM vvc edge=" << e << std::endl;
+			std::cerr << "TERM vvc edge=" << e << " num v==" << num_vertices_pushed
+					<< " Exit=" << m_graph[boost::target(e, m_graph)].m_statement->IsType<Exit>()
+					<< std::endl;
 			PopIndentStack();
 		}
 
@@ -787,27 +777,14 @@ public:
 
 		if(p->IsType<Exit>())
 		{
-			// We're leaving the function we were in.
+			// We're leaving the function we were in, pop the call stack it pushed.
+			PopCallStack();
 
-			// Remove it from the "functions we're in" set.
-			m_call_set.erase(m_call_stack_2.top().m_function_call_which_pushed_context->m_target_function);
-
-			m_call_stack_2.pop();
 			//cout << "Exit" << endl;
-			long indent_level;
-			if(m_call_stack_2.size() == 0)
-			{
-				// We're at the first function entry point.
-				indent_level = 0;
-			}
-			else
-			{
-				// We'll start at an indent level of whatever the calling context's was
-				// plus one.
-				indent_level = m_call_stack_2.top().m_indent_stack.top().m_indent_level;
-			}
 
-			indent(indent_level);
+			// Get the indent level that was in force before we entered the function
+			// which we are now leaving.
+			indent(TopIndentStack_IndentLevel());
 			std::cout << "]" << std::endl;
 		}
 	}
@@ -819,33 +796,78 @@ private:
 		IndentStackContext isc;
 		isc.m_v = u;
 		isc.m_number_of_unterminated_new_branches = filtered_out_degree(u, m_graph);
-		if(m_call_stack_2.top().m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
-		isc.m_indent_level = m_call_stack_2.top().m_indent_stack.top().m_indent_level + 1;
-		m_call_stack_2.top().m_indent_stack.push(isc);
+		if(m_call_stack.top().m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
+		isc.m_indent_level = m_call_stack.top().m_indent_stack.top().m_indent_level + 1;
+		m_call_stack.top().m_indent_stack.push(isc);
 		//std::cout << "PUSH " << u << "," << isc.m_number_of_unterminated_new_branches << std::endl;
 	}
 
 	void PopIndentStack()
 	{
-		while(m_call_stack_2.top().m_indent_stack.size() > 1)
+		while(m_call_stack.top().m_indent_stack.size() > 1)
 		{
-			indent(m_call_stack_2.top().m_indent_stack.top().m_indent_level-1);
-			std::cout << "}" /*<< " vvc " << u*/ << std::endl;
+			// Get a reference to reduce typing and improve readability.
+			T_INDENT_STACK& is = m_call_stack.top().m_indent_stack;
 
-			m_call_stack_2.top().m_indent_stack.top().m_number_of_unterminated_new_branches--;
-			if(m_call_stack_2.top().m_indent_stack.top().m_number_of_unterminated_new_branches == 0)
+			indent(is.top().m_indent_level-1);
+
+			// Popping an indent level is synonymous with terminating
+			// a branch, unless we're at the top level.
+			std::cout << "}" << " vvc " << is.top().m_v << std::endl;
+
+			is.top().m_number_of_unterminated_new_branches--;
+			if(is.top().m_number_of_unterminated_new_branches == 0)
 			{
 				// The branches from this decision vertex have all been terminated.
+				// This means that we've also terminated one of the branches from the
+				// indent context beneath us on the indent stack.
+				// Pop the current index context, and return to the top of the loop to
+				// decrement the previous context's unterminated branch counter.
 				//std::cerr << "POP " << m_indent_stack.top().m_v << std::endl;
-				m_call_stack_2.top().m_indent_stack.pop();
+				is.pop();
 			}
 			else
 			{
+				// There are still some outstanding branches from the decision vertex which
+				// pushed this indent context.  Break out of this loop and return.
 				//std::cerr << "DEC " << m_indent_stack.top().m_v << std::endl;
 				break;
 			}
 		}
-		if(m_call_stack_2.top().m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
+		if(m_call_stack.top().m_indent_stack.size() == 0) std::cerr << "ERROR: Indent stack empty." << std::endl;
+	}
+
+	long TopIndentStack_IndentLevel()
+	{
+		if(m_call_stack.size() == 0)
+		{
+			// We're at the first function entry point.
+			return 0;
+		}
+		else
+		{
+			// Return the current indent level of the top indent stack entry.
+			return m_call_stack.top().m_indent_stack.top().m_indent_level;
+		}
+	}
+
+
+	void PushCallStack(FunctionCallResolved* pushing_function_call,
+			T_CFG_VERTEX_DESC entry_vertex,
+			long entry_vertex_out_degree,
+			long indent_level)
+	{
+		FunctionCallContext fcc(pushing_function_call, entry_vertex, entry_vertex_out_degree, indent_level);
+		m_call_stack.push(fcc);
+	}
+
+	void PopCallStack()
+	{
+		// Remove the function we're returning from from the functions-on-the-call-stack set.
+		m_call_set.erase(m_call_stack.top().m_function_call_which_pushed_context->m_target_function);
+
+		// Pop the call stack.
+		m_call_stack.pop();
 	}
 
 	/// Vertex corresponding to the last statement of the function.
@@ -857,9 +879,14 @@ private:
 
 	struct IndentStackContext
 	{
-		/// The vertex that pushed this context.
+		/// The vertex which pushed this indent stack context.
 		T_CFG_VERTEX_DESC m_v;
+
+		/// The number of branches emanating from this vertex which have not yet
+		/// terminated on a merge vertex.
 		long m_number_of_unterminated_new_branches;
+
+		/// The indent level of this
 		long m_indent_level;
 	};
 
@@ -887,6 +914,7 @@ private:
 				long indent_level)
 		{
 			m_function_call_which_pushed_context = function_call;
+			// Push a "root" entry onto the indent stack.
 			IndentStackContext isc;
 			isc.m_v = u;
 			isc.m_number_of_unterminated_new_branches = number_of_unterminated_new_branches;
@@ -896,11 +924,12 @@ private:
 	};
 
 	/// The FunctionCall call stack.
-	std::stack<FunctionCallContext> m_call_stack_2;
+	std::stack<FunctionCallContext> m_call_stack;
 
-	/// The Function call set.
-	/// This is used only to determine if our call stack has gone recursive.
 	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
+
+	/// The set of Functions currently on the call stack.
+	/// This is currently used only to determine if our call stack has gone recursive.
 	T_FUNCTION_CALL_SET m_call_set;
 
 	FunctionCallResolved *m_next_function_call_resolved;
@@ -924,7 +953,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose)
 #else
 	// Set up the visitor.
 	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, cfg_verbose);
-	topological_visit_kahn(*m_cfg, m_first_statement, cfg_visitor);
+	topological_visit_kahn(*m_cfg, m_first_statement_self_edge, cfg_visitor);
 #endif
 }
 
@@ -978,7 +1007,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	T_BLOCK_GRAPH::vertex_iterator vit, vend;
 	for (boost::tie(vit, vend) = boost::vertices(m_block_graph); vit != vend;
 			vit++)
-			{
+	{
 		Block::T_STATEMENT_LIST_ITERATOR sit;
 		T_CFG_VERTEX_DESC last_vid;
 		bool is_first = true;
@@ -1070,10 +1099,14 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 		last_statement_it++;
 	}
 
+	// Add self-edges to the Entry and Exit statements.
+	boost::tie(m_first_statement_self_edge, boost::tuples::ignore) = boost::add_edge(m_first_statement, m_first_statement, (*m_cfg));
+	(*m_cfg)[m_first_statement_self_edge].m_edge_type = new CFGEdgeTypeImpossible();
+	boost::tie(m_last_statement_self_edge, boost::tuples::ignore) = boost::add_edge(m_last_statement, m_last_statement, (*m_cfg));
+	(*m_cfg)[m_last_statement_self_edge].m_edge_type = new CFGEdgeTypeImpossible();
+
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
 	FixupBackEdges();
-
-
 
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
@@ -1089,7 +1122,7 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 
 		boost::graph_traits<T_FILTERED_GRAPH>::vertex_iterator vit, vend;
 		boost::tie(vit, vend) = boost::vertices(graph_of_this_function);
-		for (; vit != vend; vit++)
+		for (; vit != vend; ++vit)
 		{
 			long id, od;
 			id = boost::in_degree(*vit, graph_of_this_function);
@@ -1179,16 +1212,19 @@ void Function::FixupBackEdges()
 	vertex_filter_predicate the_vertex_filter(vpm, this);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
 					vertex_filter_predicate> T_FILTERED_GRAPH;
-			T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(),
-					the_vertex_filter);
+	// Define a filtered view of only this function's CFG.
+	T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(), the_vertex_filter);
 
 	std::vector<BackEdgeFixupVisitor::BackEdgeFixupInfo> back_edges;
 
-	// Define a filtered view of this function's CFG, which hides the back-edges
-	// so that we can produce a topological sort.
+	// Define a visitor which will find all the back edges and send back the info
+	// we need to fix them up.
 	BackEdgeFixupVisitor back_edge_finder(back_edges);
 
-	// Find all the back edges.
+	// Set the back_edge_finder visitor loose on the function's CFG, with its
+	// search strategy being a simple depth-first search.
+	// Locate all the back edges, and send the fix-up info back to the back_edges
+	// std::vector<> above.
 	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
 
 	// Mark them as back edges.
@@ -1211,6 +1247,8 @@ void Function::FixupBackEdges()
 			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
 		}
 	}
+
+	cout << "Back edge fixup complete." << endl;
 }
 
 
