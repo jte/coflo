@@ -68,9 +68,10 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	
 	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
 	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
-	compile_to_cfg_command = " -S -fdump-tree-cfg-lineno-blocks";
+	compile_to_cfg_command = " -fno-builtin -S -fdump-tree-cfg-lineno-blocks";
 	
-	std::cout << "Running gcc with params: " << params << " and source file \"" << source_filename << "\"..." << std::endl;
+	std::cout << "Running gcc with params: " << compile_to_cfg_command << " "
+			<< params << " and source file \"" << source_filename << "\"..." << std::endl;
 	
 	// Call the compiler to generate the CFG file.
 	system_retval = System(compile_to_cfg_command + params + " " + source_filename);

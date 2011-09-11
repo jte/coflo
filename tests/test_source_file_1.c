@@ -24,13 +24,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef double (*T_FUNCTION_PTR)(void);
+
 static pthread_mutex_t f_mutex_protecting_thread_unsafe_function = PTHREAD_MUTEX_INITIALIZER;
 
 int some_global_variable = 1;
 
 extern volatile int some_variable_set_by_an_isr;
-extern volatile int g_external_variable; 
+extern volatile int g_external_variable;
 
+double function_that_we_will_call_through_a_ptr(void)
+{
+    return (some_variable_set_by_an_isr + g_external_variable);
+}
+
+#if 0
 /**
  * External function declarations.
  */
@@ -45,12 +53,8 @@ static int function_w() {return 4;};
 int function_y() {return 5;};
 int function_z() {return some_global_variable;};
 
-typedef double (*T_FUNCTION_PTR)(void);
 
-double function_that_we_will_call_through_a_ptr(void)
-{
-    return (some_variable_set_by_an_isr + g_external_variable);
-}
+
 
 long threadsafe_printf_wrapper(int which_thread)
 {
@@ -102,7 +106,7 @@ int one_if(int val)
 
 	return x;
 }
-
+#endif
 int main()
 {
 	int retval;

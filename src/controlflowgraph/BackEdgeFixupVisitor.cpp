@@ -40,7 +40,8 @@ void BackEdgeFixupVisitor::back_edge(T_CFG_EDGE_DESC e, const T_CFG &g)
 	dlog_cfg << "FOUND BACK EDGE: " << e << std::endl;
 
 	fui.m_back_edge = e;
-	fui.m_impossible_target_vertex = FindForwardTargetForBackEdge(g, e);
+	//fui.m_impossible_target_vertex = FindForwardTargetForBackEdge(g, e);
+	fui.m_impossible_target_vertex = boost::target(e, g);
 
 	m_back_edges.push_back(fui);
 }

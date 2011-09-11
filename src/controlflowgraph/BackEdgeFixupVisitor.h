@@ -41,11 +41,18 @@ public:
 	};
 
 	BackEdgeFixupVisitor(std::vector<BackEdgeFixupInfo> &back_edges) :
-		boost::default_dfs_visitor(), m_back_edges(back_edges)
+		boost::default_dfs_visitor(), m_back_edges(back_edges), m_predecessor_map()
 	{
 	};
 	~BackEdgeFixupVisitor() {};
 
+	/**
+	 * Tree-edge visitor to capture which edge of the DFS search tree resulted in
+	 * vertex.target being visited.  I.e., the predecessor info.
+	 *
+	 * @param e The search tree edge.
+	 * @param g The graph being traversed.
+	 */
 	void tree_edge(T_CFG_EDGE_DESC e, const T_CFG &g);
 
 	void back_edge(T_CFG_EDGE_DESC e, const T_CFG &g);

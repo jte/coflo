@@ -135,9 +135,11 @@ private:
 	
 	/// The first statement in the body of this function.
 	T_CFG_VERTEX_DESC m_first_statement;
+	T_CFG_EDGE_DESC m_first_statement_self_edge;
 	
 	/// The last statement in the body of this function.
 	T_CFG_VERTEX_DESC m_last_statement;
+	T_CFG_EDGE_DESC m_last_statement_self_edge;
 	
 	T_CFG *m_cfg;
 };
