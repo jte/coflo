@@ -23,6 +23,7 @@ libcontrolflowgraph_a_SOURCES = \
 	CFGDFSVisitor.cpp CFGDFSVisitor.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	depth_first_traversal.hpp \
+	MergeNodeInsertionVisitor.cpp MergeNodeInsertionVisitor.h \
 	ImprovedDFSVisitorBase.h \
 	topological_visit_kahn.h
 

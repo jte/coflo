@@ -95,9 +95,9 @@ Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 {
 	// Save a pointer to our parent TranslationUnit for later reference.
 	m_parent_tu = parent_tu;
+
+	// Save our identifier.
 	m_function_id = function_id;
-	m_entry_block = NULL;
-	m_exit_block = NULL;
 
 	// Add the entry and exit blocks.
 	m_entry_block = new Block(this, 0, 0);
@@ -340,7 +340,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 							<< "ERROR: COULDN'T FIND OUT EDGE OF TYPE CFGEdgeTypeFallthrough"
 							<< std::endl;
 					std::cerr << "Edges found are:" << std::endl;
-					PrintOutEdgeTypes(*vit, *m_cfg);
+					//PrintOutEdgeTypes(*vit, *m_cfg);
 				}
 
 				boost::tie(new_edge_desc, ok) = boost::add_edge(
@@ -985,7 +985,7 @@ void Function::PrintDotCFG(ToolDot *the_dot,
 	the_dot->CompileDotToPNG(dot_filename);
 }
 
-bool Function::CreateControlFlowGraph(T_CFG & cfg)
+bool Function::CreateControlFlowGraph(ControlFlowGraph &cfg)
 {
 	// We create the Control Flow Graph in two stages:
 	//
@@ -997,7 +997,9 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	// A third step is performed to mark all back-edges in the graph, so we can easily
 	// identify them during traversals later.
 
-	m_cfg = &cfg;
+	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
+
+	m_cfg = &cfg.GetT_CFG();
 
 	std::map<T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC> first_statement_of_block;
 	std::vector<T_CFG_VERTEX_DESC> last_statement_of_block;
@@ -1106,7 +1108,10 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	(*m_cfg)[m_last_statement_self_edge].m_edge_type = new CFGEdgeTypeImpossible();
 
 	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
-	FixupBackEdges();
+	cfg.FixupBackEdges(this);
+
+	// Insert Merge nodes where needed.
+	cfg.InsertMergeNodes(this);
 
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
@@ -1202,53 +1207,6 @@ bool Function::CreateControlFlowGraph(T_CFG & cfg)
 	}
 
 	return true;
-}
-
-void Function::FixupBackEdges()
-{
-	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, *m_cfg);
-	vertex_filter_predicate the_vertex_filter(vpm, this);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
-					vertex_filter_predicate> T_FILTERED_GRAPH;
-	// Define a filtered view of only this function's CFG.
-	T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(), the_vertex_filter);
-
-	std::vector<BackEdgeFixupVisitor::BackEdgeFixupInfo> back_edges;
-
-	// Define a visitor which will find all the back edges and send back the info
-	// we need to fix them up.
-	BackEdgeFixupVisitor back_edge_finder(back_edges);
-
-	// Set the back_edge_finder visitor loose on the function's CFG, with its
-	// search strategy being a simple depth-first search.
-	// Locate all the back edges, and send the fix-up info back to the back_edges
-	// std::vector<> above.
-	boost::depth_first_search(*m_cfg, boost::visitor(back_edge_finder));
-
-	// Mark them as back edges.
-	BOOST_FOREACH(BackEdgeFixupVisitor::BackEdgeFixupInfo fixinfo, back_edges)
-	{
-		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
-
-		// Change this edge type to a back edge.
-		(*m_cfg)[e].m_edge_type->MarkAsBackEdge(true);
-
-		// If the source node of this back edge now has no non-back-edge out-edges,
-		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
-		T_CFG_VERTEX_DESC src;
-		src = boost::source(e, *m_cfg);
-		if (boost::out_degree(src, *m_cfg) == 1)
-		{
-			T_CFG_EDGE_DESC newedge;
-			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, fixinfo.m_impossible_target_vertex, *m_cfg);
-			(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
-		}
-	}
-
-	cout << "Back edge fixup complete." << endl;
 }
 
 

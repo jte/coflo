@@ -28,6 +28,7 @@
 #include "FunctionCallResolved.h"
 #include "FunctionCallUnresolved.h"
 #include "If.h"
+#include "Merge.h"
 #include "NoOp.h"
 #include "Placeholder.h"
 #include "PseudoStatement.h"

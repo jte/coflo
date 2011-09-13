@@ -24,6 +24,7 @@ libstatements_a_SOURCES = statements.h \
     FunctionCallResolved.cpp FunctionCallResolved.h \
     FunctionCallUnresolved.cpp FunctionCallUnresolved.h \
     If.cpp If.h \
+    Merge.cpp Merge.h \
     NoOp.cpp NoOp.h \
     Placeholder.cpp Placeholder.h \
     PseudoStatement.cpp PseudoStatement.h \

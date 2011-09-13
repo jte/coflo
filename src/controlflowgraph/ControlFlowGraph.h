@@ -181,19 +181,30 @@ public:
 	ControlFlowGraph();
 	~ControlFlowGraph();
 
+	void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc);
+	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
+
+	T_CFG& GetT_CFG() { return m_cfg; };
+
+
+	/// @name Graph construction helpers
+	//@{
+
+	void FixupBackEdges(Function *f);
+
+	void InsertMergeNodes(Function *f);
+
+	//@}
+
 private:
 
+	void InitializeControlFlowGraph();
+	bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);
+	T_CFG_VERTEX_DESC GetDummyVertex();
+
+	/// The Boost Graph Library graph we'll use for our underlying graph implementation.
 	T_CFG m_cfg;
 };
-
-void InitializeControlFlowGraph(T_CFG &cfg);
-
-bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);
-T_CFG_VERTEX_DESC GetDummyVertex();
-
-void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
-
-void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg);
 
 //@}
 

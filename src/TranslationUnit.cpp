@@ -267,7 +267,7 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 	}
 }
 
-bool TranslationUnit::CreateControlFlowGraphs(T_CFG * cfg)
+bool TranslationUnit::CreateControlFlowGraphs(ControlFlowGraph *cfg)
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{

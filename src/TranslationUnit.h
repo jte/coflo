@@ -77,7 +77,7 @@ public:
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
 	
-	bool CreateControlFlowGraphs(T_CFG * cfg);
+	bool CreateControlFlowGraphs(ControlFlowGraph *cfg);
 
 	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
 	
