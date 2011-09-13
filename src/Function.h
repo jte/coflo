@@ -59,10 +59,10 @@ public:
 	/**
 	 * Add the control flow graph of this Function to \a cfg.
 	 * 
-     * @param cfg The T_CFG to add this function's control-flow graph to.
+     * @param cfg The ControlFlowGraph to add this function's control-flow graph to.
      * @return true on success, false on failure.
      */
-	bool CreateControlFlowGraph(T_CFG & cfg);
+	bool CreateControlFlowGraph(ControlFlowGraph &cfg);
 	
 	std::string GetIdentifier() const { return m_function_id; };
 	
@@ -108,8 +108,6 @@ public:
 	
 private:
 	
-	void FixupBackEdges();
-
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 
@@ -141,6 +139,7 @@ private:
 	T_CFG_VERTEX_DESC m_last_statement;
 	T_CFG_EDGE_DESC m_last_statement_self_edge;
 	
+	ControlFlowGraph *m_the_cfg;
 	T_CFG *m_cfg;
 };
  

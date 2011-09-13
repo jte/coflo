@@ -32,8 +32,7 @@
 
 Program::Program()
 {
-	// Get the control flow graph ready for use.
-	InitializeControlFlowGraph(m_cfg);
+
 }
 
 Program::Program(const Program& orig)

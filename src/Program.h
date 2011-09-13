@@ -68,7 +68,7 @@ public:
 	 */
 	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls);
 	
-	T_CFG& GetControlFlowGraph() { return m_cfg; };
+	T_CFG& GetControlFlowGraph() { return m_cfg.GetT_CFG(); };
 	
 private:
 
@@ -89,7 +89,7 @@ private:
 	std::string m_the_ctags;
 	
 	/// The Control Flow Graph for the Program.
-	T_CFG m_cfg;
+	ControlFlowGraph m_cfg;
 	
 	/// The identifier string to Function* map.
 	T_ID_TO_FUNCTION_PTR_MAP m_function_map;
