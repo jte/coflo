@@ -28,6 +28,10 @@
 #include "edges/edge_types.h"
 #include "../Function.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 /// Property map typedef which allows us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
 typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP;
@@ -188,36 +192,74 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 
 	boost::depth_first_search(graph_of_this_function, boost::visitor(mni_visitor));
 
+	cout << "Returned Merge info:" << endl;
+	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mi, returned_merge_info)
+	{
+		cout << "MI:" << endl;
+		BOOST_FOREACH(T_CFG_EDGE_DESC e, mi.m_terminal_edges)
+		{
+				cout << e << endl;
+		}
+	}
+
 	// Now modify the tree.
 	T_CFG_EDGE_DESC last_merge_vertex_out_edge;
 	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mii, returned_merge_info)
 	{
-		T_CFG_VERTEX_DESC merge_vertex, terminal_vertex;
+		T_CFG_VERTEX_DESC merge_vertex, last_merge_vertex;
+		T_CFG_EDGE_DESC new_edge, last_merge_edge;
+		CFGEdgeTypeBase *new_edge_type;
 
-		merge_vertex = boost::add_vertex(m_cfg);
-		m_cfg[merge_vertex].m_statement = new Merge(Location("[UNKNOWN : 0]"));
-		m_cfg[merge_vertex].m_containing_function = f;
-		terminal_vertex = mii.m_merging_edges[0].m_target;
-
-		T_CFG_EDGE_DESC new_edge;
-
-		if(mii.m_merging_edges.size() == 1)
+		if(mii.m_terminal_edges.size() < 3)
 		{
-			// Only one merging edge.  Make the previous merge vertex out edge point to this merge vertex.
-			boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(boost::source(last_merge_vertex_out_edge, m_cfg), merge_vertex, m_cfg);
-			m_cfg[new_edge].m_edge_type = m_cfg[last_merge_vertex_out_edge].m_edge_type;
-			boost::remove_edge(last_merge_vertex_out_edge, m_cfg);
+			// Something went wrong, this should never be less than 3.
+			std::cerr << "ERROR: Less than 3 vertices in InsertMergeNodes()." << std::endl;
 		}
 
-		BOOST_FOREACH(T_CFG_EDGE_DESC e, mii.m_merging_edges)
+		std::vector<T_CFG_EDGE_DESC>::iterator eit, eend;
+		eit = mii.m_terminal_edges.begin();
+		eend = mii.m_terminal_edges.end();
+		last_merge_edge = *eit;
+		last_merge_vertex = boost::source(last_merge_edge, m_cfg);
+		new_edge_type = m_cfg[last_merge_edge].m_edge_type;
+		++eit;
+		for(; eit+1 != eend; ++eit)
 		{
-			boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(boost::source(e, m_cfg), merge_vertex, m_cfg);
-			m_cfg[new_edge].m_edge_type = m_cfg[e].m_edge_type;
-			boost::remove_edge(e, m_cfg);
+			std::cout << "INFO: Inserting Merge vertex, in edges=" << endl;
+			cout << *eit << endl;
+			merge_vertex = boost::add_vertex(m_cfg);
+			m_cfg[merge_vertex].m_statement = new Merge(Location("[UNKNOWN : 0]"));
+			m_cfg[merge_vertex].m_containing_function = f;
+
+			// Add the in-edges.
+			boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(last_merge_vertex, merge_vertex, m_cfg);
+			m_cfg[new_edge].m_edge_type = new_edge_type;
+			cout << " " << last_merge_vertex << "->" << merge_vertex << std::endl;
+			boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(boost::source(*eit, m_cfg), merge_vertex, m_cfg);
+			m_cfg[new_edge].m_edge_type = m_cfg[*eit].m_edge_type;
+			cout << " " << boost::source(*eit, m_cfg) << "->" << merge_vertex << std::endl;
+
+			last_merge_vertex = merge_vertex;
+
+			new_edge_type = new CFGEdgeTypeFallthrough();
 		}
-		boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(merge_vertex, terminal_vertex, m_cfg);
-		last_merge_vertex_out_edge = new_edge;
-		m_cfg[new_edge].m_edge_type = new CFGEdgeTypeFallthrough();
+
+		// Now add the final out edge of the last merge vertex added above.
+		boost::tie(new_edge, boost::tuples::ignore) = boost::add_edge(last_merge_vertex, boost::target(*eit, m_cfg), m_cfg);
+		m_cfg[new_edge].m_edge_type = new_edge_type;
+		cout << " Target=" << last_merge_vertex << "->" << boost::target(*eit, m_cfg) << endl;
+	}
+
+	// Now remove all the old edges which are now invalid.
+	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mii, returned_merge_info)
+	{
+		std::vector<T_CFG_EDGE_DESC>::iterator eit, eend;
+		eit = mii.m_terminal_edges.begin();
+		eend = mii.m_terminal_edges.end();
+		for(; eit+1 != eend; ++eit)
+		{
+			boost::remove_edge(*eit, m_cfg);
+		}
 	}
 }
 
