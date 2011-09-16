@@ -38,7 +38,7 @@ double function_that_we_will_call_through_a_ptr(void)
     return (some_variable_set_by_an_isr + g_external_variable);
 }
 
-#if 0
+
 /**
  * External function declarations.
  */
@@ -106,7 +106,7 @@ int one_if(int val)
 
 	return x;
 }
-#endif
+
 int main()
 {
 	int retval;

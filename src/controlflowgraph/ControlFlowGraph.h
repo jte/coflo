@@ -127,7 +127,7 @@ public:
 		if (g[v].m_statement != NULL)
 		{
 			out << "[label=\"";
-			out << g[v].m_statement->GetStatementTextDOT();
+			out << v << " " << g[v].m_statement->GetStatementTextDOT();
 			out << "\\n" << g[v].m_statement->GetLocation() << "\"";
 			out << ", color=" << g[v].m_statement->GetDotSVGColor();
 			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
@@ -197,6 +197,8 @@ public:
 	//@}
 
 private:
+
+	void RemoveEdge(const T_CFG_EDGE_DESC &e);
 
 	void InitializeControlFlowGraph();
 	bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);

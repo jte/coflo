@@ -258,8 +258,14 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 		eend = mii.m_terminal_edges.end();
 		for(; eit+1 != eend; ++eit)
 		{
-			boost::remove_edge(*eit, m_cfg);
+			RemoveEdge(*eit);
 		}
 	}
+}
+
+
+void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
+{
+	boost::remove_edge(e, m_cfg);
 }
 

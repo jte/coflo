@@ -219,7 +219,6 @@ void topological_visit_kahn(Graph &graph,
 
 				// The target vertex now has an in-degree of zero, push it into the
 				// input set.
-				visitor.prior_to_push(v, *ei);
 				first_edge_pushed = *ei;
 				no_remaining_in_edges_set.push(*ei);
 				//std::cout << "Pushed: " << v << std::endl;

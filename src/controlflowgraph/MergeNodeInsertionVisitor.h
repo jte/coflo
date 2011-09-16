@@ -62,18 +62,94 @@ public:
 	};
 	~MergeNodeInsertionVisitor() {};
 
+	/*void examine_edge(T_EDGE_DESC e, const GraphType &g)
+	{
+		dlog_cfg << "Examining edge: " << e << std::endl;
+	};*/
+
+	void examine_edge(T_EDGE_DESC e, const GraphType &g)
+	{
+		T_VERTEX_DESC terminal_target;
+
+		dlog_cfg << "FOUND EDGE=" << e << std::endl;
+
+		terminal_target = boost::target(e, g);
+
+		if(terminal_target == boost::source(e, g))
+		{
+			// This is a self-edge.
+			return;
+		}
+
+		long indeg = filtered_in_degree(terminal_target, g);
+		if(indeg > 1)
+		{
+			assert(m_last_decision_vertex_stack.size() > 0);
+			m_last_decision_vertex_stack.top().m_merging_edges.push_back(e);
+
+			dlog_cfg << "FOUND BRANCH-TERMINATING EDGE=" << e
+					<< "\n IF=" << m_last_decision_vertex_stack.top().m_u
+					<< "\n OUT DEGREE=" << m_last_decision_vertex_stack.top().m_remaining_out_degree
+					<< "\n TARGET IN DEGREE=" << indeg
+					<< std::endl;
+
+			MergeInsertionInfo mi;
+
+			while(m_last_decision_vertex_stack.size() > 0)
+			{
+				m_last_decision_vertex_stack.top().m_remaining_out_degree--;
+				if(m_last_decision_vertex_stack.top().m_remaining_out_degree == 0)
+				{
+					// We've completed terminating all branches emanating from this decision statement.
+
+					// We now have all the info needed to create a new Merge vertex.
+					// Tell the caller what to do to add this Merge vertex.
+
+					dlog_cfg << "INSERT MERGE VERTEX: "
+							<< "\n IF=" << m_last_decision_vertex_stack.top().m_u
+							<< "\n EDGES:";
+					BOOST_FOREACH(T_EDGE_DESC me, m_last_decision_vertex_stack.top().m_merging_edges)
+					{
+						dlog_cfg << " " << me;
+						mi.m_terminal_edges.push_back(me);
+					}
+					dlog_cfg << std::endl;
+
+					// Pop the decision node stack to the previous decision vertex.
+					m_last_decision_vertex_stack.pop();
+
+
+				}
+				else
+				{
+
+					break;
+				}
+			}
+
+			if(mi.m_terminal_edges.size() > 0)
+			{
+				// We have something to return.
+				// First duplicate the first entry to the end.
+				mi.m_terminal_edges.push_back(*(mi.m_terminal_edges.begin()));
+				m_returned_merge_info->push_back(mi);
+			}
+		}
+	};
+
 	void discover_vertex(T_VERTEX_DESC u, const GraphType &g)
 	{
 		if(g[u].m_statement->IsDecisionStatement())
 		{
 			// Found a Decision statement, push a new context.
+			std::cout << "Decision node " << u << " " << g[u].m_statement->GetIdentifierCFG() << std::endl;
 			DecisionVertexStackEntry se;
 			se.m_u = u;
 			se.m_initial_out_degree = filtered_out_degree(u, g);
 			se.m_remaining_out_degree = se.m_initial_out_degree;
 			m_last_decision_vertex_stack.push(se);
 		}
-
+#if 0
 		T_OUT_EDGE_ITERATOR ei, eend;
 
 		// Get a pair of iterators over the out edges of this node.
@@ -89,17 +165,21 @@ public:
 				continue;
 			}
 
-			if(dynamic_cast<Merge*>(g[terminal_target].m_statement) != NULL)
+			StatementBase *sb;
+			sb = g[terminal_target].m_statement;
+
+			if(dynamic_cast<Merge*>(sb) != NULL)
 			{
 				// This is already a merge node, don't add another one in front of it.
 				continue;
 			}
 
 			// If the in degree of the target > 1, u is a vertex which ends a branch.
-			long indeg = filtered_in_degree(terminal_target, g);
+			long indeg = boost::in_degree(terminal_target, g);//filtered_in_degree(terminal_target, g);
 			if(indeg > 1)
 			{
 				// Ends the branch.
+				assert(m_last_decision_vertex_stack.size() > 0);
 				m_last_decision_vertex_stack.top().m_merging_edges.push_back(*ei);
 
 				dlog_cfg << "FOUND BRANCH-TERMINATING EDGE=" << *ei
@@ -150,6 +230,7 @@ public:
 				}
 			}
 		}
+#endif
 	};
 
 private:
