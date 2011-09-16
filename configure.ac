@@ -170,6 +170,7 @@ AC_CONFIG_FILES([Makefile src/Makefile
 	src/controlflowgraph/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile
+	src/controlflowgraph/visitors/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
 	doc/Makefile])

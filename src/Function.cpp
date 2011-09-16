@@ -530,7 +530,7 @@ using std::cout;
 using std::endl;
 
 /**
- * Visitor which prints out the control flow graph.
+ * Visitor which, when passed to topological_visit_kahn, prints out the control flow graph.
  */
 class function_control_flow_graph_visitor: public CFGDFSVisitor
 {
@@ -557,7 +557,7 @@ public:
 	}
 	;
 
-	vertex_return_value_t start_subgraph_vertex(T_CFG_EDGE_DESC u)
+	vertex_return_value_t start_vertex(T_CFG_EDGE_DESC u)
 	{
 		// The very first vertex has been popped.
 
@@ -589,7 +589,7 @@ public:
 			}*/
 		}
 
-		// Check if this vertex starts a new branch of the cfg.
+		// Check if this vertex is the first vertex of a new branch of the control flow graph.
 		long fid = filtered_in_degree(u, m_graph);
 		if(fid==1)
 		{
@@ -755,6 +755,7 @@ public:
 
 	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed, T_CFG_EDGE_DESC e)
 	{
+		// Check if we're leaving an Exit vertex.
 		StatementBase *p = m_graph[u].m_statement;
 		if(p->IsType<Exit>())
 		{
@@ -779,7 +780,8 @@ public:
 			// We're leaving a branch indent context.
 			std::cout << "}" << std::endl;
 		}
-		else if	((num_vertices_pushed == 1) && (filtered_in_degree(boost::target(e, m_graph), m_graph) > 1))
+
+		if	((num_vertices_pushed == 1) && (filtered_in_degree(boost::target(e, m_graph), m_graph) > 1))
 		{
 			// The edge will end on a merge vertex.  Pop our indent stack.
 			m_indent_level--;
@@ -814,12 +816,17 @@ private:
 	/// The FunctionCall call stack.
 	std::stack<FunctionCallResolved*> m_call_stack;
 
+	/// Typedef for an unordered collection of Function pointers.
+	/// Used to efficiently track which functions are on the call stack, for checking if we're going recursive.
 	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
 
 	/// The set of Functions currently on the call stack.
 	/// This is currently used only to determine if our call stack has gone recursive.
 	T_FUNCTION_CALL_SET m_call_set;
 
+	/// The current indentation level of the output control flow graph.
+	/// This is affected by both intra-function branch-producing instructions (if()'s and switch()'s) and
+	/// by inter-Function operations (function calls).
 	long m_indent_level;
 
 	FunctionCallResolved *m_next_function_call_resolved;
