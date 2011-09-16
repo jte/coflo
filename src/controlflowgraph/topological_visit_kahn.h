@@ -90,17 +90,14 @@ private:
  * Kahn's algorithm for topologically sorting (in this case visiting the nodes of) a graph.
  *
  * @tparam Graph The graph type.
- * @tparam
- * @tparam RemainingInDegreeMap The type to use to track the number of in-edges which have not yet been "removed" from the
- *         vertices.  Must support
+ * @tparam ImprovedDFSVisitor The type of the @a visitor object which will be notified of graph traversal events.
  *
- * @param graph
- * @param source The vertex to start the graph traversal from.
- * @param visitor
+ * @param graph The graph to traverse.
+ * @param source An edge descriptor whose target vertex is the vertex where the graph traversal should begin.
+ * @param visitor The visitor to notify of traversal events.
  */
 template<typename Graph, typename ImprovedDFSVisitor>
 void topological_visit_kahn(Graph &graph,
-		/*typename boost::graph_traits<Graph>::vertex_descriptor source*/
 		typename boost::graph_traits<Graph>::edge_descriptor source,
 		ImprovedDFSVisitor &visitor)
 {
@@ -116,8 +113,7 @@ void topological_visit_kahn(Graph &graph,
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
-	// The set of all vertices with no incoming edges.
-	//std::stack<T_VERTEX_DESC> no_remaining_in_edges_set;
+	// The set of all edges whose target vertices have no remaining incoming edges.
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
@@ -125,9 +121,8 @@ void topological_visit_kahn(Graph &graph,
 	T_IN_DEGREE_MAP in_degree_map(graph);
 
 	// Start at the source vertex.
-	//visitor.prior_to_push(source);
 	no_remaining_in_edges_set.push(source);
-	visitor.start_subgraph_vertex(source);
+	visitor.start_vertex(source);
 
 	while (!no_remaining_in_edges_set.empty())
 	{
@@ -135,7 +130,6 @@ void topological_visit_kahn(Graph &graph,
 		long num_vertices_pushed = 0;
 
 		// Remove a vertex from the set of in-degree == 0 vertices.
-//		u = no_remaining_in_edges_set.top();
 		e = no_remaining_in_edges_set.top();
 		no_remaining_in_edges_set.pop();
 
@@ -143,8 +137,7 @@ void topological_visit_kahn(Graph &graph,
 
 		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
 		visitor_vertex_return_value = visitor.discover_vertex(u, e);
-		if (visitor_vertex_return_value
-				== vertex_return_value_t::terminate_branch)
+		if (visitor_vertex_return_value	== vertex_return_value_t::terminate_branch)
 		{
 			// Visitor wants us to not explore the children of this vertex.
 			continue;
@@ -182,24 +175,18 @@ void topological_visit_kahn(Graph &graph,
 				break;
 			}
 
-
-
-			//
-			// Look up the current in-degree of the target vertex of *ei in the
-			// in-degree map.
-			//
-
-			// First let's get the target vertex.
+			// Get the target vertex of this edge.
 			v = boost::target(*ei, graph);
 
+			// Look up the current in-degree of the target vertex of *ei in the
+			// in-degree map.
 			long id;
-
 			id = in_degree_map.get(v);
 
 			// We're "removing" this edge, so decrement the effective in-degree of
 			// vertex v.
-			//std::cout << "Removing edge " << *ei << std::endl;
 			--id;
+
 			// Store the decremented value back to the map.
 			in_degree_map.set(v, id);
 
@@ -207,7 +194,9 @@ void topological_visit_kahn(Graph &graph,
 			{
 				// The edge is now part of
 				// the topologically sorted search graph.  Let the visitor know.
-				// Note that tree edges are visited in a breadth-first order.
+				// Note that tree edges are visited in a breadth-first order, and in particular note
+				// that the fact that this edge pushed a vertex here does not mean that the pushed vertex
+				// will be the next one to be visited.
 				visitor_edge_return_value = visitor.tree_edge(*ei);
 				/// @todo This doesn't currently return anything we need to handle, but we should handle the return value
 				/// appropriately anyway.

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = statements edges
+SUBDIRS = statements edges visitors
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \

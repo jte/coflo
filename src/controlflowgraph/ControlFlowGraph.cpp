@@ -144,7 +144,7 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 	// std::vector<> above.
 	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
 
-	// Mark them as back edges.
+	// Mark the edges back edges we found.
 	BOOST_FOREACH(BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo fixinfo, back_edges)
 	{
 		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;

@@ -31,6 +31,13 @@
 #include "edges/edge_types.h"
 #include "statements/statements.h"
 
+/**
+ * Visitor for inserting Merge nodes.
+ *
+ * @bug This class is incomplete and known to not function properly.
+ *
+ * @deprecated It is likely this class is not needed and may be removed in the near future.
+ */
 template <typename GraphType>
 class MergeNodeInsertionVisitor : public boost::default_dfs_visitor
 {

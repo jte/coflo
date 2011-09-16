@@ -173,7 +173,8 @@ private:
 
 /**
  * The primary control flow graph class.
- * @todo Well, it will be.
+ * @todo Well, it will be.  At the moment too much functionality is implemented in terms of the Boost Graph Library's
+ *       free functions acting on the underlying T_CFG.
  */
 class ControlFlowGraph
 {
@@ -181,9 +182,15 @@ public:
 	ControlFlowGraph();
 	~ControlFlowGraph();
 
-	void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc);
-	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 
+	/**
+	 * This returns a reference to the underlying T_CFG object.
+	 *
+	 * @deprecated Ultimately, the goal is to make exposing this unnecessary.  Avoid using this interface if
+	 * at all possible.
+	 *
+	 * @return A reference to the underlying T_CFG (Boost Graph Library adjacency_list) object.
+	 */
 	T_CFG& GetT_CFG() { return m_cfg; };
 
 
@@ -194,6 +201,12 @@ public:
 
 	void InsertMergeNodes(Function *f);
 
+	//@}
+
+	/// @name Debugging helper functions
+	//@{
+	void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc);
+	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 	//@}
 
 private:
