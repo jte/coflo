@@ -79,11 +79,17 @@ public:
 		/// @todo
 		BackEdgeFixupInfo fui;
 
-		dlog_cfg << "FOUND BACK EDGE: " << e << std::endl;
-
 		fui.m_back_edge = e;
-		//fui.m_impossible_target_vertex = FindForwardTargetForBackEdge(g, e);
-		fui.m_impossible_target_vertex = boost::target(e, g);
+		if(boost::source(e,g) == boost::target(e,g))
+		{
+			dlog_cfg << "FOUND BACK EDGE (SELF): " << e << std::endl;
+			fui.m_impossible_target_vertex = boost::graph_traits<GraphType>::null_vertex();
+		}
+		else
+		{
+			fui.m_impossible_target_vertex = FindForwardTargetForBackEdge(g, e);
+		}
+		//fui.m_impossible_target_vertex = boost::target(e, g);
 
 		m_back_edges.push_back(fui);
 	}
@@ -128,7 +134,7 @@ private:
 	 *
 	 * @todo Make sure the one we find actually is the one which breaks us out of the loop.
 	 */
-	T_VERTEX_DESC FindForwardTargetForBackEdge(const T_CFG &cfg, T_CFG_EDGE_DESC e)
+	T_VERTEX_DESC FindForwardTargetForBackEdge(const GraphType &cfg, T_EDGE_DESC e)
 	{
 		// The source vertex of the back edge.
 		T_VERTEX_DESC u;
@@ -137,7 +143,7 @@ private:
 
 		T_VERTEX_DESC w;
 		// The forward target we'll try to find.
-		T_VERTEX_DESC retval = boost::graph_traits<T_CFG>::null_vertex();
+		T_VERTEX_DESC retval = boost::graph_traits<GraphType>::null_vertex();
 
 		u = boost::source(e, cfg);
 		v = boost::target(e, cfg);
@@ -162,7 +168,10 @@ private:
 
 				// Find an edge that's not this one out of the decision vertex.
 				/// @todo Make this more robust.  As far as I know, this isn't guaranteed to be the right way out, or even *a* way out.
-				retval = boost::target(FindDifferentOutEdge(e, cfg), cfg);
+				T_CFG_EDGE_DESC other_edge;
+				other_edge = FindDifferentOutEdge(e, cfg);
+
+				retval = boost::target(other_edge, cfg);
 				break;
 			}
 

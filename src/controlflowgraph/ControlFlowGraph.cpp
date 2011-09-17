@@ -153,8 +153,9 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 		m_cfg[e].m_edge_type->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
-		if(e.m_source == e.m_target)
+		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<T_FILTERED_GRAPH>::null_vertex())
 		{
+			dlog_cfg << "Self edge, no further action: " << e << std::endl;
 			continue;
 		}
 
@@ -168,10 +169,12 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 			boost::tie(newedge, boost::tuples::ignore) =
 					boost::add_edge(src, fixinfo.m_impossible_target_vertex, m_cfg);
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;
+
+			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
 		}
 	}
 
-	std::cout << "Back edge fixup complete." << std::endl;
+	dlog_cfg << "Back edge fixup complete." << std::endl;
 }
 
 
