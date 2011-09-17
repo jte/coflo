@@ -121,7 +121,7 @@ int main()
 	}
 	else
 	{
-		if(predicate_1())
+		while(predicate_1())
 		{
 			retval = function_w();
 			retval = function_y();
@@ -171,5 +171,10 @@ Label1:
 		}
 	}
 	
+	if(g_external_variable || predicate_1())
+	{
+		printf("OR Test\n");
+	}
+
 	return retval;
 }

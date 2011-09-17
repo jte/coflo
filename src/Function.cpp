@@ -577,16 +577,12 @@ public:
 		if(p->IsType<Entry>())
 		{
 			// We're visiting a function entry point.
+			// Push a new call stack frame.
 
 			indent(m_indent_level);
 			std::cout << "[" << std::endl;
 			PushCallStack(m_next_function_call_resolved);
 			m_indent_level++;
-
-			/*if(m_next_function_call_resolved != NULL)
-			{
-				cout << "IN TARGET: " << m_next_function_call_resolved->m_target_function->GetIdentifier() << " Called at " << m_next_function_call_resolved->GetIdentifierCFG() << endl;
-			}*/
 		}
 
 		// Check if this vertex is the first vertex of a new branch of the control flow graph.
@@ -759,18 +755,24 @@ public:
 		StatementBase *p = m_graph[u].m_statement;
 		if(p->IsType<Exit>())
 		{
-			// We're leaving the function we were in, pop the call stack it pushed.
+			// We're leaving the function we were in, pop the call stack entry it pushed.
 			PopCallStack();
 
-			// Get the indent level that was in force before we entered the function
-			// which we are now leaving.
+			// Outdent.
 			m_indent_level--;
 			indent(m_indent_level);
 			std::cout << "]" << std::endl;
+
+			if(m_last_statement == u)
+			{
+				// This is the last statement of the function we were printing.
+				// No need to check if we need to outdent due to a branch termination.
+				return;
+			}
 		}
 
 		// Check if the vertex we terminate on has more than just us coming in.
-		else if(num_vertices_pushed == 0)
+		if(num_vertices_pushed == 0)
 		{
 			// No target vertices pushed by this vertex.  That means that some other vertex did push our target vertex,
 			// or that we have no out edges.  Either way we terminate the branch.
@@ -783,7 +785,7 @@ public:
 
 		if	((num_vertices_pushed == 1) && (filtered_in_degree(boost::target(e, m_graph), m_graph) > 1))
 		{
-			// The edge will end on a merge vertex.  Pop our indent stack.
+			// The edge will end on a merge vertex.  Outdent.
 			m_indent_level--;
 			indent(m_indent_level);
 			std::cout << "}" << std::endl;
