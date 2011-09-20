@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
 
@@ -49,20 +50,60 @@ void ResponseFileParser::Parse(const std::string & filename, std::vector<std::st
 		return;
 	}
 
-	// Read the whole file into a string
-	/// @todo Possibly lock the file as FILE_SHARE_READ while doing this?
-	/// @todo Add comment functionality.
-	std::stringstream ss;
-	ss << ifs.rdbuf();
+	std::vector<std::string> response_file_lines;
+
+	// Read in the lines of the file.
+	LoadFileIntoVectorOfStrings(ifs, &response_file_lines);
 
 	// Split the file content
-	boost::char_separator<char> sep(" \n\r");
-	std::string ResponsefileContents( ss.str() );
-	boost::tokenizer<boost::char_separator<char> > tok(ResponsefileContents, sep);
+	boost::escaped_list_separator<char> sep("","\t \r\n","\"\'");
 
-	// Insert the options we've found into the args list.
-	copy(tok.begin(), tok.end(), back_inserter(*args));
+	BOOST_FOREACH(std::string s, response_file_lines)
+	{
+		boost::tokenizer<boost::escaped_list_separator<char> > tok(s, sep);
+
+		std::string token;
+		BOOST_FOREACH(token, tok)
+		{
+			// Skip token if it's all space.
+			/// @todo We actually shouldn't be skipping these, there are valid reasons why someone might put a "" on the command line.
+			size_t char_index = token.find_first_not_of("\t \r\n");
+			if(char_index == std::string::npos)
+			{
+				// It's a blank line.
+				continue;
+			}
+
+			args->push_back(token);
+		}
+	}
 }
 
+void ResponseFileParser::LoadFileIntoVectorOfStrings(std::ifstream &ifs, std::vector<std::string> *vec_of_str)
+{
+	std::string line;
+	while (getline(ifs, line))
+	{
+		size_t char_index;
 
+		// Find the first non-whitespace character.
+		char_index = line.find_first_not_of("\t \r\n");
 
+		// Check for blank lines.
+		if(char_index == std::string::npos)
+		{
+			// It's a blank line.
+			continue;
+		}
+
+		// Check for comment lines.
+		if(line[char_index] == ';')
+		{
+			// It's a comment, skip it.
+			continue;
+		}
+
+		// Otherwise it's something we should parse as a command line option.
+		vec_of_str->push_back(line);
+	}
+}
