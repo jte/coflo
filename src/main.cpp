@@ -229,8 +229,8 @@ int main(int argc, char* argv[])
 		// Call the notify() functions for any options.
 		po::notify(vm);
 
-		// See if the user is asking for help.
-		if (vm.count(CLP_HELP))
+		// See if the user is asking for help, or didn't pass any parameters at all.
+		if (vm.count(CLP_HELP) || argc < 2)
 		{
 			std::cout << PACKAGE_STRING << std::endl;
 			std::cout << std::endl;
@@ -325,9 +325,13 @@ int main(int argc, char* argv[])
 			}
 			the_program->SetTheGcc(tool_compiler);
 			the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
+
+			// Parse the program.
+			std::vector< FunctionCallUnresolved* > unresolved_function_calls;
 			if(!the_program->Parse(
 				*defines,
 				*includes,
+				&unresolved_function_calls,
 				debug_parse))
 			{
 				// Parse failed.

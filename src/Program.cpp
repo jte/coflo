@@ -42,7 +42,7 @@ Program::Program(const Program& orig)
 Program::~Program() { }
 
 
-void Program::SetTheCtags(std::string the_ctags)
+void Program::SetTheCtags(const std::string &the_ctags)
 {
 	m_the_ctags = the_ctags;
 }
@@ -57,7 +57,7 @@ void Program::SetTheGcc(ToolCompiler *the_compiler)
 	m_compiler = the_compiler;
 }
 
-void Program::SetTheFilter(std::string the_filter)
+void Program::SetTheFilter(const std::string &the_filter)
 {
 	m_the_filter = the_filter;
 }
@@ -72,6 +72,7 @@ void Program::AddSourceFiles(const std::vector< std::string > &file_paths)
 
 bool Program::Parse(const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
+		std::vector< FunctionCallUnresolved* > *unresolved_function_calls,
 		bool debug_parse)
 {
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
@@ -103,18 +104,18 @@ bool Program::Parse(const std::vector< std::string > &defines,
 	
 	// Link the function calls.
 	std::cout << "Linking function calls..." << std::endl;
-	std::vector< FunctionCall* > unlinkable_function_calls;
+
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		tu->Link(m_function_map, &unlinkable_function_calls);
+		tu->Link(m_function_map, unresolved_function_calls);
 	}
 
 	// See if we have any unresolved calls.
-	if(unlinkable_function_calls.size() > 0)
+	if(unresolved_function_calls->size() > 0)
 	{
 		// We couldn't link some function calls.
 		std::cout << "WARNING: Unresolved function calls at the following locations:" << std::endl;
-		BOOST_FOREACH(FunctionCall *fc, unlinkable_function_calls)
+		BOOST_FOREACH(FunctionCallUnresolved *fc, *unresolved_function_calls)
 		{
 			std::cout << "[" << fc->GetLocation() << "]: " << fc->GetIdentifier() << std::endl;
 		}

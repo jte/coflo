@@ -30,6 +30,7 @@ class Function;
 class ToolCompiler;
 class ToolDot;
 
+/// Map of identifiers to pointers to the Function objects the correspond to.
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
 
 /**
@@ -43,17 +44,24 @@ public:
 	Program(const Program& orig);
 	virtual ~Program();
 	
-    void SetTheCtags(std::string the_ctags);
+    void SetTheCtags(const std::string &the_ctags);
     void SetTheDot(ToolDot *the_dot);
     void SetTheGcc(ToolCompiler *the_compiler);
-    void SetTheFilter(std::string the_filter);
+    void SetTheFilter(const std::string &the_filter);
 
 	void AddSourceFiles(const std::vector< std::string > &file_paths);
 	
 	bool Parse(const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
+		std::vector< FunctionCallUnresolved* > *unresolved_function_calls,
 		bool debug_parse = 0);
 	
+	/**
+	 * Return a pointer to the Function object corresponding to the given identifier.
+	 *
+	 * @param function_id
+	 * @return
+	 */
 	Function *LookupFunction(const std::string &function_id);
 	
 	void Print(const std::string &the_dot, const std::string &output_path);

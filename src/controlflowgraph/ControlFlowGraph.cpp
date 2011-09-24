@@ -267,6 +267,86 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 }
 
 
+void ControlFlowGraph::SplitCriticalEdges(Function *f)
+{
+	// Property map for getting at the edge types in the CFG.
+	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+			&CFGVertexProperties::m_containing_function, m_cfg);
+	vertex_filter_predicate the_vertex_filter(vpm, f);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all,
+					vertex_filter_predicate> T_FILTERED_GRAPH;
+	// Define a filtered view of only this function's CFG.
+	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
+
+	std::vector<T_CFG_EDGE_DESC> edges_to_remove;
+
+	// Find any critical edges and split them by inserting NOOPs.
+	boost::graph_traits<T_FILTERED_GRAPH>::edge_iterator eit, eend;
+
+	boost::tie(eit, eend) = boost::edges(graph_of_this_function);
+	for (; eit != eend; ++eit)
+	{
+		T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc;
+		long target_id, source_od;
+
+		// Get the vertex descriptors.
+		source_vertex_desc = boost::source(*eit, graph_of_this_function);
+		target_vertex_desc = boost::target(*eit, graph_of_this_function);
+
+		// Get the effective in and out degrees.
+		/// @todo
+		/*
+		source_od = filtered_out_degree(source_vertex_desc, m_cfg);
+		target_id = filtered_in_degree(target_vertex_desc, m_cfg);
+
+		// Check if they meet the criteria for a critical edge.
+		if((source_od > 1) && (target_id > 1))
+		{
+			// They do, we've found a critical edge.
+			edges_to_remove.push_back(*eit);
+		}
+		*/
+	}
+
+	// Remove the critical edges we found.
+	BOOST_FOREACH(T_CFG_EDGE_DESC e, edges_to_remove)
+	{
+		T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc, splitting_vertex;
+
+		// Get the vertex descriptors.
+		source_vertex_desc = boost::source(e, graph_of_this_function);
+		target_vertex_desc = boost::target(e, graph_of_this_function);
+
+		// Create the new NoOp vertex.
+		splitting_vertex = boost::add_vertex(m_cfg);
+		m_cfg[splitting_vertex].m_statement = new NoOp(Location("[UNKNOWN : 0]"));
+		m_cfg[splitting_vertex].m_containing_function = f;
+
+		// Split the edge by pointing the old edge at the new vertex, and a new fallthrough
+		// edge from the new vertex to the old target.
+		T_CFG_EDGE_DESC new_edge_1, new_edge_2;
+		boost::tie(new_edge_1, boost::tuples::ignore) = boost::add_edge(source_vertex_desc, splitting_vertex, m_cfg);
+		boost::tie(new_edge_2, boost::tuples::ignore) = boost::add_edge(splitting_vertex, target_vertex_desc, m_cfg);
+		m_cfg[new_edge_1].m_edge_type = m_cfg[e].m_edge_type;
+		m_cfg[e].m_edge_type = NULL;
+		m_cfg[new_edge_2].m_edge_type = new CFGEdgeTypeFallthrough();
+		boost::remove_edge(e, m_cfg);
+	}
+}
+
+void ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
+{
+	boost::add_edge(source, target, m_cfg);
+}
+
+void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & target)
+{
+}
+
+void ControlFlowGraph::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)
+{
+}
+
 void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
 {
 	boost::remove_edge(e, m_cfg);

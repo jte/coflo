@@ -26,8 +26,12 @@
 
 #include "ImprovedDFSVisitorBase.h"
 
-struct my_exception: virtual std::exception, virtual boost::exception { };
-
+/**
+ * Map of vertex descriptors to the remaining in degree value.
+ * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
+ * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
+ * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
+ */
 template < typename Graph >
 class RemainingInDegreeMap
 {
@@ -65,8 +69,6 @@ public:
 			// Pretend it was in the map and add it with its original in-degree.
 			long indegree;
 			indegree = filtered_in_degree(vdesc, m_graph);
-			//std::cout << "Start IND: " << indegree << " " << v << std::endl;
-			//PrintInEdgeTypes(v, graph);
 			m_remaining_in_degree_map[vdesc] = indegree;
 
 			return indegree;
@@ -80,14 +82,16 @@ public:
 
 private:
 
+	/// Reference to the graph object whose vertices we're looking at.
 	Graph &m_graph;
 
+	/// The underlying vertex descriptor to integer map.
 	T_UNDERLYING_MAP m_remaining_in_degree_map;
 };
 
 
 /**
- * Kahn's algorithm for topologically sorting (in this case visiting the nodes of) a graph.
+ * Kahn's algorithm for topologically sorting (in this case visiting) the nodes of a graph.
  *
  * @tparam Graph The graph type.
  * @tparam ImprovedDFSVisitor The type of the @a visitor object which will be notified of graph traversal events.
@@ -200,11 +204,6 @@ void topological_visit_kahn(Graph &graph,
 				visitor_edge_return_value = visitor.tree_edge(*ei);
 				/// @todo This doesn't currently return anything we need to handle, but we should handle the return value
 				/// appropriately anyway.
-				/*if(visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::push_color_context
-						|| visitor_edge_return_value.get_integral_constant_representation() != edge_return_value_t::pop_color_context)
-				{
-					BOOST_THROW_EXCEPTION(my_exception());
-				}*/
 
 				// The target vertex now has an in-degree of zero, push it into the
 				// input set.

@@ -23,34 +23,47 @@
 #include "../safe_enum.h"
 
 /**
+ * @class vertex_return_value_t
  * The return value type for the visitor's *_vertex() member functions, indicating to the
  * DFS algorithm whether to continue searching or not.
  * 
  * Definitions:
- *	- ok = Continue the graph traversal.
- *	- terminate_branch = Stop traversing this branch of the graph.  Do not visit any out-edges
- *		of the vertex.
- *  - terminate_search = Stop the traversal entirely.
+ *  - ok\n
+ *    Continue the graph traversal.
+ *  - terminate_branch\n
+ *    Stop traversing this branch of the graph.  Do not visit any out-edges of the vertex.
+ *  - terminate_search\n
+ *    Stop the traversal entirely.
  */
 DECLARE_ENUM_CLASS(vertex_return_value_t, ok, terminate_branch, terminate_search)
 
 /**
+ * @class edge_return_value_t
+ *
  * The return value type for the visitor's *_edge() member functions, indicating to the
  * DFS algorithm whether to continue searching or not.
  * 
  * Definitions:
- *	- ok\n
- *	  Continue the graph traversal.
- *	- terminate_branch\n
- *	  Stop traversing this branch of the graph.
+ *  - ok\n
+ *    Continue the graph traversal.
+ *  - terminate_branch\n
+ *    Stop traversing this branch of the graph.
  *  - terminate_search\n
  *    Stop the traversal entirely.
- *  - push_color_context:
- *  - pop_color_context:
+ *  - push_color_context
+ *  - pop_color_context
  */
 DECLARE_ENUM_CLASS(edge_return_value_t, ok, terminate_branch, terminate_search,
 				   push_color_context, pop_color_context)
 
+/**
+ * Class template for a graph traversal visitor with additional functionality beyond
+ * that provided by boost::default_dfs_visitor.  The primary differences are:
+ * - It stores a reference to the graph being visited, thus eliminating the need to
+ *   pass a reference to it into the event handlers.
+ * - The event handlers return values allowing them to tell the traversal algorithm whether
+ *   to continue, stop exploring the current branch, or stop the traversal entirely.
+ */
 template <typename Vertex, typename Edge, typename Graph>
 class ImprovedDFSVisitorBase
 {

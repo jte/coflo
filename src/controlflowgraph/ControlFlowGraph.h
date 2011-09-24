@@ -118,19 +118,19 @@ class cfg_vertex_property_writer
 {
 public:
 	cfg_vertex_property_writer(T_CFG _g) :
-			g(_g)
+			m_graph(_g)
 	{
 	}
 
 	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
 	{
-		if (g[v].m_statement != NULL)
+		if (m_graph[v].m_statement != NULL)
 		{
 			out << "[label=\"";
-			out << v << " " << g[v].m_statement->GetStatementTextDOT();
-			out << "\\n" << g[v].m_statement->GetLocation() << "\"";
-			out << ", color=" << g[v].m_statement->GetDotSVGColor();
-			out << ", shape=" << g[v].m_statement->GetShapeTextDOT();
+			out << v << " " << m_graph[v].m_statement->GetStatementTextDOT();
+			out << "\\n" << m_graph[v].m_statement->GetLocation() << "\"";
+			out << ", color=" << m_graph[v].m_statement->GetDotSVGColor();
+			out << ", shape=" << m_graph[v].m_statement->GetShapeTextDOT();
 			out << "]";
 		}
 		else
@@ -141,7 +141,7 @@ public:
 private:
 
 	/// The graph whose vertices we're writing the properties of.
-	T_CFG& g;
+	T_CFG& m_graph;
 };
 
 /**
@@ -151,23 +151,23 @@ class cfg_edge_property_writer
 {
 public:
 	cfg_edge_property_writer(T_CFG _g) :
-			g(_g)
+			m_graph(_g)
 	{
 	}
 	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
 	{
 		// Set the edge attributes.
 		out << "[";
-		out << "label=\"" << g[e].m_edge_type->GetDotLabel() << "\"";
-		out << ", color=" << g[e].m_edge_type->GetDotSVGColor();
-		out << ", style=" << g[e].m_edge_type->GetDotStyle();
+		out << "label=\"" << m_graph[e].m_edge_type->GetDotLabel() << "\"";
+		out << ", color=" << m_graph[e].m_edge_type->GetDotSVGColor();
+		out << ", style=" << m_graph[e].m_edge_type->GetDotStyle();
 		out << "]";
 	}
 	;
 private:
 
 	/// The graph whose edges we're writing the properties of.
-	T_CFG& g;
+	T_CFG& m_graph;
 };
 
 
@@ -201,6 +201,8 @@ public:
 
 	void InsertMergeNodes(Function *f);
 
+	void SplitCriticalEdges(Function *f);
+
 	//@}
 
 	/// @name Debugging helper functions
@@ -211,7 +213,13 @@ public:
 
 private:
 
+	/// @name Edge manipulation routines.
+	//@{
+	void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
 	void RemoveEdge(const T_CFG_EDGE_DESC &e);
+	void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
+	void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);
+	//@}
 
 	void InitializeControlFlowGraph();
 	bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);

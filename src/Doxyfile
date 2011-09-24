@@ -1505,7 +1505,8 @@ PREDEFINED             = __cplusplus
 # Use the PREDEFINED tag if you want to use a different macro definition that
 # overrules the definition found in the source code.
 
-EXPAND_AS_DEFINED      = M_DECLARE_SUCCESSOR_SUBCLASS
+EXPAND_AS_DEFINED      = M_DECLARE_SUCCESSOR_SUBCLASS \
+						DECLARE_ENUM_CLASS
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then
 # doxygen's preprocessor will remove all references to function-like macros

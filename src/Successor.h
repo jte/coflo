@@ -22,6 +22,9 @@
 
 class Block;
 
+/**
+ * Basic Block successor edge class.
+ */
 class Successor
 {
 public:
