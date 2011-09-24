@@ -23,6 +23,9 @@
 #include "ImprovedDFSVisitorBase.h"
 #include "ControlFlowGraph.h"
 
+/**
+ *
+ */
 class CFGDFSVisitor : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
 public:

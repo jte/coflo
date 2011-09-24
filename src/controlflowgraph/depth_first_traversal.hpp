@@ -27,14 +27,18 @@
  * @param ei
  * @param eend
  */
+template <typename IncidenceGraph>
 struct VertexInfo
 {
+	typedef typename boost::graph_traits<IncidenceGraph>::vertex_descriptor T_VERTEX_DESC;
+	typedef typename boost::graph_traits<IncidenceGraph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+
 	/**
 	 * Set the VertexInfo's members to the given values.
      */
-	void Set(T_CFG_VERTEX_DESC v,
-		T_CFG_OUT_EDGE_ITERATOR ei,
-		T_CFG_OUT_EDGE_ITERATOR eend
+	void Set(T_VERTEX_DESC v,
+		T_OUT_EDGE_ITERATOR ei,
+		T_OUT_EDGE_ITERATOR eend
 		)
 	{
 		m_v = v;
@@ -42,10 +46,11 @@ struct VertexInfo
 		m_eend = eend;
 	};
 
-	T_CFG_VERTEX_DESC m_v;
-	T_CFG_OUT_EDGE_ITERATOR m_ei;
-	T_CFG_OUT_EDGE_ITERATOR m_eend;
+	T_VERTEX_DESC m_v;
+	T_OUT_EDGE_ITERATOR m_ei;
+	T_OUT_EDGE_ITERATOR m_eend;
 };
+
 
 template <class IncidenceGraph, class ImprovedDFSVisitor, class ColorMap>
 void improved_depth_first_visit(IncidenceGraph &graph,
@@ -77,7 +82,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 
 	visitor_vertex_return_value = visitor.start_subgraph_vertex(u);
 
-	// Mark this vertex as explored.
+	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
 	(*color_map_stack.back())[u] = T_COLOR::gray();
 
 	// Let the visitor look at the vertex via discover_vertex().
@@ -177,6 +182,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			//
 			if(v_color == T_COLOR::white())
 			{
+				// Target has not yet been visited.
+
 				// This is a tree edge, i.e. it is one of the edges
 				// that is a member of the search tree.
 
@@ -233,6 +240,9 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 			else if(v_color == T_COLOR::gray())
 			{
+				// This vertex has been visited, but we still have vertices reachable from it
+				// that haven't been visited.
+
 				// This is a back edge, i.e. an edge to a vertex that we've
 				// already visited.  Visit it, but don't follow it.
 				visitor_edge_return_value = visitor.back_edge(*ei);
@@ -242,6 +252,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 			else
 			{
+				// This vertex has been visited and so have all vertices reachable from it.
+
 				// A forward or cross edge.  Visit it, but don't follow it.
 				visitor_edge_return_value = visitor.forward_or_cross_edge(*ei);
 				std::cout << "FWDCROSS" << std::endl;

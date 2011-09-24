@@ -30,7 +30,7 @@
 class Function;
 class FunctionCall;
 class ToolDot;
-typedef std::vector< FunctionCall* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 
 /**
  * Class representing a single source file.

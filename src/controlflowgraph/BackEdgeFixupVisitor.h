@@ -20,13 +20,14 @@
 #ifndef BACKEDGEFIXUPVISITOR_H
 #define BACKEDGEFIXUPVISITOR_H
 
+#include <vector>
+#include <boost/unordered_set.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
 #include "ControlFlowGraph.h"
-#include <vector>
-#include <boost/unordered_set.hpp>
 
 #include "../debug_utils/debug_utils.hpp"
+
 /**
  * Depth-first search visitor which finds the information necessary to fix up back edges in the control flow graph.
  */

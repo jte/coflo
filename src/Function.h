@@ -31,7 +31,7 @@ class TranslationUnit;
 class Block;
 class FunctionCall;
 class ToolDot;
-typedef std::vector< FunctionCall* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 
 class Function
 {
@@ -49,9 +49,9 @@ public:
 	 * Link the unresolved function calls in this Function to the Functions
 	 * in the passed \a function_map.
 	 * 
-	 * @function_map The identifier->Function map to use to find the Functions to
+	 * @param function_map The identifier->Function map to use to find the Functions to
 	 * link to.
-	 * @unresolved_function_calls List of function calls we weren't able to resolve.
+	 * @param[out] unresolved_function_calls List of function calls we weren't able to resolve.
      */
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
@@ -64,6 +64,11 @@ public:
      */
 	bool CreateControlFlowGraph(ControlFlowGraph &cfg);
 	
+	/**
+	 * Return this Function's identifier.
+	 *
+	 * @return Identifier of this Function.
+	 */
 	std::string GetIdentifier() const { return m_function_id; };
 	
 	std::string GetDefinitionFilePath() const;
