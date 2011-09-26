@@ -26,12 +26,12 @@
 /**
  *
  */
-class CFGDFSVisitor : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
+class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
 public:
-	CFGDFSVisitor(T_CFG &g);
-	CFGDFSVisitor(const CFGDFSVisitor& orig);
-	virtual ~CFGDFSVisitor();
+	ControlFlowGraphVisitorBase(T_CFG &g);
+	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
+	virtual ~ControlFlowGraphVisitorBase();
 	
 	vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
 	vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);

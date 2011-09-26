@@ -19,54 +19,54 @@
 
 #include "CFGDFSVisitor.h"
 
-CFGDFSVisitor::CFGDFSVisitor(T_CFG &g) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(g)
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(T_CFG &g) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(g)
 {
 }
 
-CFGDFSVisitor::CFGDFSVisitor(const CFGDFSVisitor& orig) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(orig)
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(orig)
 {
 }
 
-CFGDFSVisitor::~CFGDFSVisitor()
+ControlFlowGraphVisitorBase::~ControlFlowGraphVisitorBase()
 {
 }
 
-vertex_return_value_t CFGDFSVisitor::initialize_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::initialize_vertex(T_CFG_VERTEX_DESC u)
 {
 	return vertex_return_value_t::ok; 
 };
 
-vertex_return_value_t CFGDFSVisitor::start_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::start_vertex(T_CFG_VERTEX_DESC u)
 {
 	return vertex_return_value_t::ok;
 };
 
-vertex_return_value_t CFGDFSVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::discover_vertex(T_CFG_VERTEX_DESC u)
 {
 	return vertex_return_value_t::ok;
 };
 
-edge_return_value_t CFGDFSVisitor::examine_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::examine_edge(T_CFG_EDGE_DESC u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t CFGDFSVisitor::tree_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::tree_edge(T_CFG_EDGE_DESC u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t CFGDFSVisitor::back_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::back_edge(T_CFG_EDGE_DESC u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t CFGDFSVisitor::forward_or_cross_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::forward_or_cross_edge(T_CFG_EDGE_DESC u)
 {
 	return edge_return_value_t::ok;
 };
 
-vertex_return_value_t CFGDFSVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::finish_vertex(T_CFG_VERTEX_DESC u)
 {
 	return vertex_return_value_t::ok;
 };
