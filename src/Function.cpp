@@ -532,13 +532,13 @@ using std::endl;
 /**
  * Visitor which, when passed to topological_visit_kahn, prints out the control flow graph.
  */
-class function_control_flow_graph_visitor: public CFGDFSVisitor
+class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 {
 public:
 	function_control_flow_graph_visitor(T_CFG &g,
 			T_CFG_VERTEX_DESC last_statement,
 			bool cfg_verbose) :
-			CFGDFSVisitor(g)
+			ControlFlowGraphVisitorBase(g)
 	{
 		m_last_statement = last_statement;
 		m_cfg_verbose = cfg_verbose;
@@ -548,7 +548,7 @@ public:
 	;
 	function_control_flow_graph_visitor(
 			function_control_flow_graph_visitor &original) :
-			CFGDFSVisitor(original)
+			ControlFlowGraphVisitorBase(original)
 	{
 	}
 	;

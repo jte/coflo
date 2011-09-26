@@ -234,7 +234,7 @@ private:
 
 /// @name Other headers in this library.
 //@{
-#include "CFGDFSVisitor.h"
+#include "ControlFlowGraphVisitorBase.h"
 #include "topological_visit_kahn.h"
 //@}
 

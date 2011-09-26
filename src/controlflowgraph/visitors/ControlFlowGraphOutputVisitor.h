@@ -20,7 +20,7 @@
 #ifndef CONTROLFLOWGRAPHOUTPUTVISITOR_H
 #define CONTROLFLOWGRAPHOUTPUTVISITOR_H
 
-#include "../CFGDFSVisitor.h"
+#include "../ControlFlowGraphVisitorBase.h"
 
 class ControlFlowGraphOutputVisitor: public ControlFlowGraphVisitorBase
 {
