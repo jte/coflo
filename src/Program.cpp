@@ -38,12 +38,8 @@ Program::Program(const Program& orig)
 {
 }
 
-Program::~Program() { }
-
-
-void Program::SetTheCtags(const std::string &the_ctags)
+Program::~Program()
 {
-	m_the_ctags = the_ctags;
 }
 
 void Program::SetTheDot(ToolDot *the_dot)
@@ -79,7 +75,7 @@ bool Program::Parse(const std::vector< std::string > &defines,
 		// Parse this file.
 		std::cout << "Parsing \"" << tu->GetFilePath() << "\"..." << std::endl;
 		bool retval = tu->ParseFile(tu->GetFilePath(), &m_function_map,
-								 m_the_filter, m_compiler, m_the_ctags, 
+								 m_the_filter, m_compiler,
 								 defines, include_paths, debug_parse);
 		if(retval == false)
 		{
@@ -143,7 +139,7 @@ Function *Program::LookupFunction(const std::string &function_id)
 	}
 }
 
-void Program::Print(const std::string &the_dot, const std::string &output_path)
+void Program::Print(const std::string &output_path)
 {
 	boost::filesystem::path output_dir = output_path;
 	

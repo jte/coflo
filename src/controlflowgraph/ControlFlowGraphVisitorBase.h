@@ -24,7 +24,9 @@
 #include "ControlFlowGraph.h"
 
 /**
+ * Base class for ControlFlowGraph visitors.
  *
+ * @todo This should probably be a specialization of ImprovedDFSVisitorBase, not derived from it.
  */
 class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {

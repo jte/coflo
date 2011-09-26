@@ -51,8 +51,9 @@ public:
 	 * @param function_map Map of identifiers to Function pointers to which the
 	 *		functions found in this TranslationUnit are to be added.
 	 * @param the_filter The filter command to invoke.
-	 * @param the_gcc The compiler command to invoke.
-	 * @param the_ctags The ctags command to invoke.
+	 * @param compiler The compiler command to invoke.
+	 * @param defines Vector of preprocessor defines to pass to the compiler.
+	 * @param include_paths Vector of "-I..."'s to pass to the compiler.
 	 * @param debug_parse Whether to output debugging info during the parse stage.
 	 * 
 	 * @return true if the parse succeeded, false if it fails.
@@ -61,7 +62,6 @@ public:
 		T_ID_TO_FUNCTION_PTR_MAP *function_map,
 		const std::string &the_filter,
 		ToolCompiler *compiler,
-		const std::string &the_ctags,
 		const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
 		bool debug_parse = false);
@@ -77,6 +77,12 @@ public:
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
 	
+	/**
+	 * Generate the control flow graphs of all functions in this translation unit, and add them to cfg.
+	 *
+	 * @param cfg The Program's ControlFlowGraph object.
+	 * @return
+	 */
 	bool CreateControlFlowGraphs(ControlFlowGraph *cfg);
 
 	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);

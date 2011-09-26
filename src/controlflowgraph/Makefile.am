@@ -20,7 +20,7 @@ SUBDIRS = statements edges visitors
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
-	CFGDFSVisitor.cpp CFGDFSVisitor.h \
+	ControlFlowGraphVisitorBase.cpp ControlFlowGraphVisitorBase.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	depth_first_traversal.hpp \
 	MergeNodeInsertionVisitor.cpp MergeNodeInsertionVisitor.h \

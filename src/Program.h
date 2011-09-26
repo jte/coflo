@@ -44,7 +44,6 @@ public:
 	Program(const Program& orig);
 	virtual ~Program();
 	
-    void SetTheCtags(const std::string &the_ctags);
     void SetTheDot(ToolDot *the_dot);
     void SetTheGcc(ToolCompiler *the_compiler);
     void SetTheFilter(const std::string &the_filter);
@@ -64,7 +63,12 @@ public:
 	 */
 	Function *LookupFunction(const std::string &function_id);
 	
-	void Print(const std::string &the_dot, const std::string &output_path);
+	/**
+	 * Creates an HTML page containing graphical control flow graphs of all functions in the program.
+	 *
+	 * @param output_path
+	 */
+	void Print(const std::string &output_path);
 	
 	/**
 	 * Prints the Control Flow Graph of the specified function to cout.
@@ -76,6 +80,13 @@ public:
 	 */
 	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls);
 	
+	/**
+	 * Get a reference to the underlying T_CFG.
+	 *
+	 * @deprecated Should eventually not be necessary due to the encapsulation provided by ControlFlowGraph.
+	 *
+	 * @return A reference to the underlying T_CFG.
+	 */
 	T_CFG& GetControlFlowGraph() { return m_cfg.GetT_CFG(); };
 	
 private:
@@ -92,9 +103,6 @@ private:
 	/// The dot program from the GraphViz program to use for generating
 	/// the graph drawings.
 	ToolDot *m_the_dot;
-	
-	/// The ctags program to use to extract further information on the source.
-	std::string m_the_ctags;
 	
 	/// The Control Flow Graph for the Program.
 	ControlFlowGraph m_cfg;

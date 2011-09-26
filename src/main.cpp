@@ -58,7 +58,6 @@ namespace po = boost::program_options;
 #define CLP_USE_GCC "use-gcc"
 #define CLP_USE_DOT "use-dot"
 #define CLP_USE_FILTER "use-filter"
-#define CLP_USE_CTAGS "use-ctags"
 
 #define CLP_PRINT_FUNCTION_CFG "print-function-cfg"
 #define CLP_CONSTRAINT "constraint"
@@ -108,7 +107,6 @@ int main(int argc, char* argv[])
 	std::string the_filter;
 	std::string the_gcc;
 	std::string the_dot;
-	std::string the_ctags;
 
 	// Name of the response file if we get one on the command line.
 	std::string response_filename;
@@ -173,7 +171,6 @@ int main(int argc, char* argv[])
 		subprogram_options.add_options()
 		(CLP_USE_FILTER, po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
 		(CLP_USE_GCC, po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
-		(CLP_USE_CTAGS, po::value< std::string >(&the_ctags)->default_value("ctags"), "The ctags program to invoke.")
 		(CLP_USE_DOT, po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 		;
 		analysis_options.add_options()
@@ -182,8 +179,7 @@ int main(int argc, char* argv[])
 		;
 		cfg_options.add_options()
 		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
-				"Output all statements and nodes CoFlo finds the control flow graph."
-				"Default is to limit output to function calls and flow control constructs only.")
+				"Output all statements and nodes CoFlo finds the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
 		;
 		debugging_options.add_options()
 		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
@@ -309,7 +305,6 @@ int main(int argc, char* argv[])
 				includes = new std::vector<std::string>();
 			}
 
-			the_program->SetTheCtags(the_ctags);
 			the_program->SetTheFilter(the_filter);
 			ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
 			std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
@@ -378,7 +373,7 @@ int main(int argc, char* argv[])
 		ToolDot *tool_dot = new ToolDot(the_dot);
 		the_program->SetTheDot(tool_dot);
 		std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
-		the_program->Print(the_dot, report_output_directory);
+		the_program->Print(report_output_directory);
 	}
 
 	return 0;

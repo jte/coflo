@@ -94,7 +94,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 								T_ID_TO_FUNCTION_PTR_MAP *function_map,
 								const std::string &the_filter,
 								ToolCompiler *compiler,
-								const std::string &the_ctags,
 								const std::vector< std::string > &defines,
 								const std::vector< std::string > &include_paths,
 								bool debug_parse)

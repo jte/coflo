@@ -64,6 +64,10 @@ AT_BANNER([CoFlo sanity checks])
 # Start a test group.
 AT_SETUP([Using default GCC against C code])
 
+# Capture the contents of the intermediate files if the test fails.
+AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_1.c.coflo.cfg])
+AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_2.c.coflo.cfg])
+
 AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --print-function-cfg=main],
 	0,
 	ignore,
@@ -88,6 +92,10 @@ AT_COFLO_CHECK([coflo --use-gcc=${USE_GCC_AT_PATH} ${abs_top_srcdir}/tests/test_
 AT_BANNER([Compiler Compatibility Tests - C++ code])
 
 AT_SETUP([Using default GCC against C-style C++ code])
+
+# Capture the contents of the intermediate files if the test fails.
+AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_1.cpp.coflo.cfg])
+AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_2.cpp.coflo.cfg])
 
 AT_CHECK([coflo ${abs_top_builddir}/tests/test_source_file_1.cpp ${abs_top_builddir}/tests/test_source_file_2.cpp --print-function-cfg=main],
 	0,
@@ -114,6 +122,9 @@ AT_SETUP([Trying to generate CFG of main.cpp::main()])
 
 # We don't expect to be able to do this yet.
 AT_XFAIL_IF([true])
+
+# Capture the contents of the intermediate files if the test fails.
+AT_CAPTURE_FILE([${abs_top_srcdir}/src/main.cpp.coflo.cfg])
 
 AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --print-function-cfg=main],
 	0,
