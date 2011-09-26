@@ -35,7 +35,6 @@ coflo_SOURCES = main.cpp \
 	ResponseFileParser.cpp ResponseFileParser.h \
 	RuleBase.cpp RuleBase.h \
 	RuleDFSBase.cpp RuleDFSBase.h \
-	RulePrintFunctionCFG.cpp RulePrintFunctionCFG.h \
 	RuleReachability.cpp RuleReachability.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \

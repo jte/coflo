@@ -26,7 +26,6 @@
 
 #include "TranslationUnit.h"
 #include "RuleReachability.h"
-#include "RulePrintFunctionCFG.h"
 #include "controlflowgraph/statements/FunctionCall.h"
 #include "Function.h"
 
