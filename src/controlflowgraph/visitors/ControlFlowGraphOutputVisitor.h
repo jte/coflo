@@ -22,7 +22,7 @@
 
 #include "../CFGDFSVisitor.h"
 
-class ControlFlowGraphOutputVisitor: public CFGDFSVisitor
+class ControlFlowGraphOutputVisitor: public ControlFlowGraphVisitorBase
 {
 public:
 	ControlFlowGraphOutputVisitor(T_CFG &g);

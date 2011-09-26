@@ -19,7 +19,7 @@
 
 #include "ControlFlowGraphOutputVisitor.h"
 
-ControlFlowGraphOutputVisitor::ControlFlowGraphOutputVisitor(T_CFG &g)  : CFGDFSVisitor(g)
+ControlFlowGraphOutputVisitor::ControlFlowGraphOutputVisitor(T_CFG &g)  : ControlFlowGraphVisitorBase(g)
 {
 	// TODO Auto-generated constructor stub
 
