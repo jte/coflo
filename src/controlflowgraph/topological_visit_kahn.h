@@ -121,7 +121,7 @@ void topological_visit_kahn(Graph &graph,
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
-	typedef RemainingInDegreeMap< T_CFG > T_IN_DEGREE_MAP;
+	typedef RemainingInDegreeMap< Graph > T_IN_DEGREE_MAP;
 	T_IN_DEGREE_MAP in_degree_map(graph);
 
 	// Start at the source vertex.
