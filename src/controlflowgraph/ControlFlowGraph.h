@@ -203,6 +203,8 @@ public:
 
 	void SplitCriticalEdges(Function *f);
 
+	void StructureCompoundConditionals(Function *f);
+
 	//@}
 
 	/// @name Debugging helper functions
@@ -215,6 +217,13 @@ private:
 
 	/// @name Edge manipulation routines.
 	//@{
+
+	/**
+	 * Add an edge between the given source and target vertices.
+	 *
+	 * @param source Source vertex descriptor.
+	 * @param target Target vertex descriptor.
+	 */
 	void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
 	void RemoveEdge(const T_CFG_EDGE_DESC &e);
 	void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
@@ -234,7 +243,7 @@ private:
 
 /// @name Other headers in this library.
 //@{
-#include "ControlFlowGraphVisitorBase.h"
+#include "visitors/ControlFlowGraphVisitorBase.h"
 #include "topological_visit_kahn.h"
 //@}
 

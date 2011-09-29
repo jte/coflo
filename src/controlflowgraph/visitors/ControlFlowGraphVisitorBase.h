@@ -21,7 +21,7 @@
 #define	CFGDFSVISITOR_H
 
 #include "ImprovedDFSVisitorBase.h"
-#include "ControlFlowGraph.h"
+#include "../ControlFlowGraph.h"
 
 /**
  * Base class for ControlFlowGraph visitors.
@@ -31,21 +31,26 @@
 class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
 public:
+#if 0
+	ControlFlowGraphVisitorBase(ControlFlowGraph &cfg);
+#endif
 	ControlFlowGraphVisitorBase(T_CFG &g);
 	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
 	virtual ~ControlFlowGraphVisitorBase();
 	
-	vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
-	vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
-	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
-	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	virtual edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
+	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 private:
-
+#if 0
+	ControlFlowGraph &m_cfg;
+#endif
 };
 
 #endif	/* CFGDFSVISITOR_H */

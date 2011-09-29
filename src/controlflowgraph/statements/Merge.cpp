@@ -19,13 +19,13 @@
 
 #include "Merge.h"
 
-Merge::Merge(const Location &location) : StatementBase(location)
+Merge::Merge(const Location &location) : PseudoStatement(location)
 {
 	// TODO Auto-generated constructor stub
 
 }
 
-Merge::Merge(const Merge &orig) : StatementBase(orig)
+Merge::Merge(const Merge &orig) : PseudoStatement(orig)
 {
 	// TODO Auto-generated destructor stub
 }

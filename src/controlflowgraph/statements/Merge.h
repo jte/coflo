@@ -20,9 +20,12 @@
 #ifndef MERGE_H
 #define MERGE_H
 
-#include "StatementBase.h"
+#include "PseudoStatement.h"
 
-class Merge: public StatementBase
+/**
+ * A Merge statement, the dual of the If statement.  Merges two branches together.
+ */
+class Merge: public PseudoStatement
 {
 public:
 	Merge(const Location &location);

@@ -24,9 +24,9 @@
 #include <boost/unordered_set.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
-#include "ControlFlowGraph.h"
+#include "../ControlFlowGraph.h"
 
-#include "../debug_utils/debug_utils.hpp"
+#include "../../debug_utils/debug_utils.hpp"
 
 /**
  * Depth-first search visitor which finds the information necessary to fix up back edges in the control flow graph.

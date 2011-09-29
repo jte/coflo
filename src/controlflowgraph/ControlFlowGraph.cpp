@@ -23,8 +23,8 @@
 #include <boost/graph/filtered_graph.hpp>
 
 #include "ControlFlowGraph.h"
-#include "BackEdgeFixupVisitor.h"
-#include "MergeNodeInsertionVisitor.h"
+#include "visitors/BackEdgeFixupVisitor.h"
+#include "visitors/MergeNodeInsertionVisitor.h"
 #include "edges/edge_types.h"
 #include "../Function.h"
 
