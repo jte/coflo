@@ -26,10 +26,10 @@
 #include <boost/foreach.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
-#include "../debug_utils/debug_utils.hpp"
-#include "ControlFlowGraph.h"
-#include "edges/edge_types.h"
-#include "statements/statements.h"
+#include "../../debug_utils/debug_utils.hpp"
+#include "../ControlFlowGraph.h"
+#include "../edges/edge_types.h"
+#include "../statements/statements.h"
 
 /**
  * Visitor for inserting Merge nodes.

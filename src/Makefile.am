@@ -50,6 +50,7 @@ coflo_LDFLAGS = $(BOOST_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
 	./controlflowgraph/edges/libedges.a \
+	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)

@@ -45,7 +45,7 @@
 #include "controlflowgraph/statements/statements.h"
 #include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
-#include "controlflowgraph/BackEdgeFixupVisitor.h"
+#include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
 
 #include "libexttools/ToolDot.h"
 
@@ -64,15 +64,13 @@ struct vertex_filter_predicate
 {
 	vertex_filter_predicate()
 	{
-	}
-	;
+	};
 	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map,
 			Function *parent_function) :
 			m_vertex_prop_map(vertex_prop_map), m_parent_function(
 					parent_function)
 	{
-	}
-	;
+	};
 	bool operator()(const T_CFG_VERTEX_DESC& vid) const
 	{
 		if (m_parent_function == get(m_vertex_prop_map, vid))
@@ -84,8 +82,7 @@ struct vertex_filter_predicate
 		{
 			return false;
 		}
-	}
-	;
+	};
 
 	T_VERTEX_PROPERTY_MAP m_vertex_prop_map;
 	Function *m_parent_function;
@@ -384,13 +381,18 @@ struct back_edge_filter_predicate
 	/// Must be default constructible because such predicates are stored by-value.
 	back_edge_filter_predicate()
 	{
-	}
-	;
+	};
 	back_edge_filter_predicate(T_EDGE_TYPE_PROPERTY_MAP &edge_type_property_map) :
 			m_edge_type_property_map(edge_type_property_map)
 	{
-	}
-	;
+	};
+
+	/**
+	 * Returns false if @a eid is a back edge.
+	 *
+	 * @param eid Reference to an edge descriptor.
+	 * @return
+	 */
 	bool operator()(const T_CFG_EDGE_DESC& eid) const
 	{
 		if (get(m_edge_type_property_map, eid)->IsBackEdge())
@@ -403,8 +405,7 @@ struct back_edge_filter_predicate
 			// This is not a back edge.
 			return true;
 		}
-	}
-	;
+	};
 
 	T_EDGE_TYPE_PROPERTY_MAP m_edge_type_property_map;
 };
@@ -544,18 +545,15 @@ public:
 		m_cfg_verbose = cfg_verbose;
 		m_next_function_call_resolved = NULL;
 		m_last_discovered_vertex_is_recursive = false;
-	}
-	;
+	};
 	function_control_flow_graph_visitor(
 			function_control_flow_graph_visitor &original) :
 			ControlFlowGraphVisitorBase(original)
 	{
-	}
-	;
+	};
 	virtual ~function_control_flow_graph_visitor()
 	{
-	}
-	;
+	};
 
 	vertex_return_value_t start_vertex(T_CFG_EDGE_DESC u)
 	{

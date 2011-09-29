@@ -24,7 +24,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "ImprovedDFSVisitorBase.h"
+#include "visitors/ImprovedDFSVisitorBase.h"
 
 /**
  * Map of vertex descriptors to the remaining in degree value.

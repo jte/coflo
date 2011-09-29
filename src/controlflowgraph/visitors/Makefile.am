@@ -17,7 +17,12 @@
 
 noinst_LIBRARIES = libvisitors.a
 libvisitors_a_SOURCES = \
-	ControlFlowGraphOutputVisitor.cpp ControlFlowGraphOutputVisitor.h
+BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
+	ControlFlowGraphVisitorBase.cpp ControlFlowGraphVisitorBase.h \
+	ControlFlowGraphOutputVisitor.cpp ControlFlowGraphOutputVisitor.h \
+	MergeNodeInsertionVisitor.cpp MergeNodeInsertionVisitor.h \
+	ImprovedDFSVisitorBase.h \
+	ReachabilityVisitor.cpp ReachabilityVisitor.h
 
 libvisitors_a_CPPFLAGS = $(AM_CPPFLAGS)
 libvisitors_a_CFLAGS = $(AM_CXXFLAGS)

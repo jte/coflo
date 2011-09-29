@@ -20,7 +20,7 @@
 #include <vector>
 #include <boost/unordered_set.hpp>
 
-#include "../debug_utils/debug_utils.hpp"
+#include "../../debug_utils/debug_utils.hpp"
 #include "BackEdgeFixupVisitor.h"
 
 

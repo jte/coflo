@@ -19,6 +19,12 @@
 
 #include "ControlFlowGraphVisitorBase.h"
 
+#if 0
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(cfg.GetT_CFG()), m_cfg(cfg)
+{
+}
+#endif
+
 ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(T_CFG &g) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(g)
 {
 }
