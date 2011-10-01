@@ -18,6 +18,7 @@
 /** @file */
 
 #include "ControlFlowGraphVisitorBase.h"
+#include "../../Function.h"
 
 #if 0
 ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(cfg.GetT_CFG()), m_cfg(cfg)
@@ -76,3 +77,41 @@ vertex_return_value_t ControlFlowGraphVisitorBase::finish_vertex(T_CFG_VERTEX_DE
 {
 	return vertex_return_value_t::ok;
 };
+
+void ControlFlowGraphVisitorBase::PushCallStack(FunctionCallResolved* pushing_function_call)
+{
+	m_call_stack.push(pushing_function_call);
+}
+
+void ControlFlowGraphVisitorBase::PopCallStack()
+{
+	// Remove the function we're returning from from the functions-on-the-call-stack set.
+	m_call_set.erase(m_call_stack.top()->m_target_function);
+
+	// Pop the call stack.
+	m_call_stack.pop();
+}
+
+FunctionCallResolved *ControlFlowGraphVisitorBase::TopCallStack()
+{
+	return m_call_stack.top();
+}
+
+bool ControlFlowGraphVisitorBase::IsCallStackEmpty() const
+{
+	return m_call_stack.empty();
+}
+
+bool ControlFlowGraphVisitorBase::AreWeRecursing(Function *function)
+{
+	bool wasnt_already_there;
+
+	boost::tie(boost::tuples::ignore, wasnt_already_there) =
+						m_call_set.insert(function);
+
+	return !wasnt_already_there;
+}
+
+
+
+

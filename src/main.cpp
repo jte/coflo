@@ -63,6 +63,7 @@ namespace po = boost::program_options;
 #define CLP_CONSTRAINT "constraint"
 
 #define CLP_CFG_VERBOSE "cfg-verbose"
+#define CLP_CFG_VERTEX_IDS "cfg-vertex-ids"
 
 #define CLP_INPUT_FILE "input-file"
 //@}
@@ -122,6 +123,8 @@ int main(int argc, char* argv[])
 	// Whether to limit display to only function calls, or to everything CoFlo
 	// recognizes.
 	bool cfg_verbose = false;
+	// Enable or disable outputting vertex IDs.
+	bool cfg_vertex_ids = false;
 
 	// Declare a variables_map to take the command line options we're passed.
 	po::variables_map vm;
@@ -180,6 +183,7 @@ int main(int argc, char* argv[])
 		cfg_options.add_options()
 		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
 				"Output all statements and nodes CoFlo finds the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
+		(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
 		;
 		debugging_options.add_options()
 		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
@@ -349,7 +353,7 @@ int main(int argc, char* argv[])
 	if(vm.count(CLP_PRINT_FUNCTION_CFG))
 	{
 		// User wants a control flow graph.
-		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose))
+		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose, cfg_vertex_ids))
 		{
 			// Something went wrong.
 			return 1;

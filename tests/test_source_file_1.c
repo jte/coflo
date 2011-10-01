@@ -171,7 +171,7 @@ Label1:
 		}
 	}
 	
-	if(g_external_variable || predicate_1())
+	if(g_external_variable && predicate_1())
 	{
 		printf("OR Test\n");
 	}
