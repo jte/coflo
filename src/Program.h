@@ -76,9 +76,10 @@ public:
 	 * @param function_identifier Identifier of the function whose CFG is to be printed.
 	 * @param only_function_calls If true, only include function calls and control-flow-altering
 	 *        constructs (if/switch) in the printed graph.
+	 * @param cfg_vertex_ids If true, also print numeric vertex ID.
 	 * @return
 	 */
-	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls);
+	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls, bool cfg_vertex_ids);
 	
 	/**
 	 * Get a reference to the underlying T_CFG.

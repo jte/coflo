@@ -20,11 +20,19 @@
 #ifndef CFGDFSVISITOR_H
 #define	CFGDFSVISITOR_H
 
+#include <stack>
+#include <boost/unordered_set.hpp>
+
 #include "ImprovedDFSVisitorBase.h"
 #include "../ControlFlowGraph.h"
 
+/// @todo This should probably be a template parameter.
+class FunctionCallResolved;
+class Function;
+
 /**
  * Base class for ControlFlowGraph visitors.
+ * ControlFlowGraphVisitorBase adds a call stack usable by derived classes.
  *
  * @todo This should probably be a specialization of ImprovedDFSVisitorBase, not derived from it.
  */
@@ -36,21 +44,40 @@ public:
 #endif
 	ControlFlowGraphVisitorBase(T_CFG &g);
 	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
-	virtual ~ControlFlowGraphVisitorBase();
+	~ControlFlowGraphVisitorBase();
 	
-	virtual vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
-	virtual vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
-	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	virtual edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
-	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
+	edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
+	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+
+protected:
+
+	void PushCallStack(FunctionCallResolved* pushing_function_call);
+	void PopCallStack();
+	FunctionCallResolved* TopCallStack();
+	bool IsCallStackEmpty() const;
+	bool AreWeRecursing(Function* function);
 
 private:
 #if 0
 	ControlFlowGraph &m_cfg;
 #endif
+
+	/// The FunctionCall call stack.
+	std::stack<FunctionCallResolved*> m_call_stack;
+
+	/// Typedef for an unordered collection of Function pointers.
+	/// Used to efficiently track which functions are on the call stack, for checking if we're going recursive.
+	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
+
+	/// The set of Functions currently on the call stack.
+	/// This is currently used only to determine if our call stack has gone recursive.
+	T_FUNCTION_CALL_SET m_call_set;
 };
 
 #endif	/* CFGDFSVISITOR_H */

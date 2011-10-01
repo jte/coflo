@@ -74,12 +74,18 @@ public:
 	std::string GetDefinitionFilePath() const;
 
 	/**
-	 * Prints the control flow graph of this function to cout.
+	 * Prints the control flow graph of this function to stdout.
 	 *
 	 * @param only_function_calls  If true, only print function calls and flow control constructs.
 	 */
-	void PrintControlFlowGraph(bool only_function_calls);
+	void PrintControlFlowGraph(bool only_function_calls, bool cfg_vertex_ids);
 	
+	/**
+	 * Print the control flow graph of this function to a dot file in @a output_dir.
+	 *
+	 * @param the_dot
+	 * @param output_dir
+	 */
 	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
 	
 	/// @name Function Properties
@@ -91,7 +97,7 @@ public:
 	/**
 	 * Determine if this Function is ever called.
 	 * 
-     * @return true if this Function is called.
+     * @return true If this Function is called.
      */
 	bool IsCalled() const;
 	

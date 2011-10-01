@@ -25,7 +25,7 @@
 #include "controlflowgraph/ControlFlowGraph.h"
 
 #include "RuleDFSBase.h"
-
+#if 0
 class OldCFGDFSVisitor : public boost::default_dfs_visitor
 {
 public:
@@ -57,7 +57,7 @@ private:
 	RuleDFSBase *m_dfs_base;
 };
 
-
+#endif
 RuleDFSBase::RuleDFSBase(const T_CFG &cfg) : m_cfg(cfg)
 {
 	m_found_sink = false;
@@ -107,6 +107,7 @@ bool RuleDFSBase::TerminatorFunction(T_CFG_VERTEX_DESC v)
 
 bool RuleDFSBase::RunRule()
 {
+#if 0
 	// Create the visitor object.
 	OldCFGDFSVisitor v(m_cfg, this);
 	
@@ -135,7 +136,7 @@ bool RuleDFSBase::RunRule()
 		boost::make_iterator_property_map(m_color_vec.begin(), boost::get(boost::vertex_index, m_cfg)),
 		term_func
 	);
-
+#endif
 	return true;
 }
 

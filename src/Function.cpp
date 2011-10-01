@@ -67,8 +67,8 @@ struct vertex_filter_predicate
 	};
 	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map,
 			Function *parent_function) :
-			m_vertex_prop_map(vertex_prop_map), m_parent_function(
-					parent_function)
+			m_vertex_prop_map(vertex_prop_map),
+			m_parent_function(parent_function)
 	{
 	};
 	bool operator()(const T_CFG_VERTEX_DESC& vid) const
@@ -115,9 +115,9 @@ std::string Function::GetDefinitionFilePath() const
 bool Function::IsCalled() const
 {
 	// Determine if this function is ever called.
-	// If the first statement (the ENTRY block) has any in-edges,
-	// it's called by something.
-	return boost::in_degree(m_first_statement, *m_cfg) > 0;
+	// If the first statement (the ENTRY block) has any in-edges
+	// other than its self-edge, it's called by something.
+	return boost::in_degree(m_first_statement, *m_cfg) > 1;
 }
 
 void Function::AddBlock(Block *block)
@@ -376,6 +376,9 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 	}
 }
 
+/**
+ * Predicate for filtering back edges out of the CFG.
+ */
 struct back_edge_filter_predicate
 {
 	/// Must be default constructible because such predicates are stored by-value.
@@ -538,12 +541,13 @@ class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 public:
 	function_control_flow_graph_visitor(T_CFG &g,
 			T_CFG_VERTEX_DESC last_statement,
-			bool cfg_verbose) :
+			bool cfg_verbose,
+			bool cfg_vertex_ids) :
 			ControlFlowGraphVisitorBase(g)
 	{
 		m_last_statement = last_statement;
 		m_cfg_verbose = cfg_verbose;
-		m_next_function_call_resolved = NULL;
+		m_cfg_vertex_ids = cfg_vertex_ids;
 		m_last_discovered_vertex_is_recursive = false;
 	};
 	function_control_flow_graph_visitor(
@@ -579,7 +583,7 @@ public:
 
 			indent(m_indent_level);
 			std::cout << "[" << std::endl;
-			PushCallStack(m_next_function_call_resolved);
+			//PushCallStack(m_next_function_call_resolved);
 			m_indent_level++;
 		}
 
@@ -593,7 +597,6 @@ public:
 			{
 				// Predecessor was a decision statement, so this vertex starts a new branch.
 				// Print a block start marker at the current indent level minus one.
-				//indent(TopIndentStack_IndentLevel()-1);
 				indent(m_indent_level);
 				std::cout << "{" << endl;
 				m_indent_level++;
@@ -606,7 +609,7 @@ public:
 			{
 				m_indent_level--;
 				indent(m_indent_level);
-				std::cout << "}x" << std::endl;
+				std::cout << "}" << std::endl;
 			}
 		}
 
@@ -615,9 +618,13 @@ public:
 		{
 			// Indent and print the statement corresponding to this vertex.
 			indent(m_indent_level);
-			std::cout << p->GetIdentifierCFG() << " <" << p->GetLocation() << ">" << std::endl;
-			indent(m_indent_level);
-			std::cout << u << " " << endl;
+			std::cout << p->GetIdentifierCFG();
+			if(m_cfg_vertex_ids)
+			{
+				// Print the vertex ID.
+				std::cout << " [" << u << "]";
+			}
+			std::cout << " <" << p->GetLocation() << ">" << std::endl;
 		}
 
 		if (u == m_last_statement)
@@ -638,24 +645,19 @@ public:
 
 			fcr = dynamic_cast<FunctionCallResolved*>(p);
 
-			// Let the next ENTRY know what function call it's coming from.
-			m_next_function_call_resolved = fcr;
-
-			// Are we already within the calling context of the called Function?
-			// I.e., are we recursing?
-			bool wasnt_already_there;
-
 			// Assume we're not.
 			m_last_discovered_vertex_is_recursive = false;
 
-			boost::tie(boost::tuples::ignore, wasnt_already_there) =
-					m_call_set.insert(fcr->m_target_function);
-			if (!wasnt_already_there)
+			if(AreWeRecursing(fcr->m_target_function))
 			{
 				// We're recursing, we need to treat this vertex as if it were a FunctionCallUnresolved.
 				std::cout << "RECURSION DETECTED: Function \"" << fcr->m_target_function << "\"" << std::endl;
 				m_last_discovered_vertex_is_recursive = true;
-				//return vertex_return_value_t::terminate_branch;
+			}
+			else
+			{
+				// We're not recursing, push a normal stack frame and do the call.
+				PushCallStack(fcr);
 			}
 		}
 
@@ -695,18 +697,18 @@ public:
 		{
 			// This is a return edge.
 
-			if(m_call_stack.empty())
+			if(IsCallStackEmpty())
 			{
 				// Should never get here.
 				cout << "EMPTY" << endl;
 			}
-			else if(m_call_stack.top() == NULL)
+			else if(TopCallStack() == NULL)
 			{
 				// We're at the top of the call stack, and we're trying to return.
 				cout << "NULL" << endl;
 				return edge_return_value_t::terminate_branch;
 			}
-			else if(ret->m_function_call != m_call_stack.top())
+			else if(ret->m_function_call != TopCallStack())
 			{
 				// This edge is a return, but not the one corresponding to the FunctionCall
 				// that brought us here.  Or, the call stack is empty, indicating that we got here
@@ -738,13 +740,6 @@ public:
 		}
 
 		return edge_return_value_t::ok;
-	}
-
-	edge_return_value_t tree_edge(T_CFG_EDGE_DESC ed)
-	{
-		edge_return_value_t retval = edge_return_value_t::ok;
-
-		return retval;
 	}
 
 	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed, T_CFG_EDGE_DESC e)
@@ -792,20 +787,6 @@ public:
 
 private:
 
-	void PushCallStack(FunctionCallResolved* pushing_function_call)
-	{
-		m_call_stack.push(pushing_function_call);
-	}
-
-	void PopCallStack()
-	{
-		// Remove the function we're returning from from the functions-on-the-call-stack set.
-		m_call_set.erase(m_call_stack.top()->m_target_function);
-
-		// Pop the call stack.
-		m_call_stack.pop();
-	}
-
 	/// Vertex corresponding to the last statement of the function.
 	/// We'll terminate the search when we find this.
 	T_CFG_VERTEX_DESC m_last_statement;
@@ -813,28 +794,19 @@ private:
 	/// Flag indicating if we should only print function calls and flow control constructs.
 	bool m_cfg_verbose;
 
-	/// The FunctionCall call stack.
-	std::stack<FunctionCallResolved*> m_call_stack;
-
-	/// Typedef for an unordered collection of Function pointers.
-	/// Used to efficiently track which functions are on the call stack, for checking if we're going recursive.
-	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
-
-	/// The set of Functions currently on the call stack.
-	/// This is currently used only to determine if our call stack has gone recursive.
-	T_FUNCTION_CALL_SET m_call_set;
+	/// Flag indicating if we should print the vertex ID.
+	bool m_cfg_vertex_ids;
 
 	/// The current indentation level of the output control flow graph.
 	/// This is affected by both intra-function branch-producing instructions (if()'s and switch()'s) and
 	/// by inter-Function operations (function calls).
 	long m_indent_level;
 
-	FunctionCallResolved *m_next_function_call_resolved;
 	bool m_last_discovered_vertex_is_recursive;
 };
 
 
-void Function::PrintControlFlowGraph(bool cfg_verbose)
+void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 {
 #if 0
 	// Set up the color map stack.
@@ -849,7 +821,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose)
 	improved_depth_first_visit(*m_cfg, m_first_statement, cfg_visitor, color_map_stack);
 #else
 	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, cfg_verbose);
+	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, cfg_verbose, cfg_vertex_ids);
 	topological_visit_kahn(*m_cfg, m_first_statement_self_edge, cfg_visitor);
 #endif
 }
