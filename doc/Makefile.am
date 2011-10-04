@@ -15,5 +15,6 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST=doxygen_filter.sh
+# The non-generated documentation.
+EXTRA_DIST=doxygen_filter.sh index.html
 
