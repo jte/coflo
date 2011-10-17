@@ -84,6 +84,7 @@ TranslationUnit::TranslationUnit(const std::string &file_path)
 
 TranslationUnit::TranslationUnit(const TranslationUnit& orig)
 {
+	/// @todo Implement a copy constructor.  Not sure we really need one for this class.
 }
 
 TranslationUnit::~TranslationUnit()
@@ -250,7 +251,7 @@ bool TranslationUnit::LinkBasicBlocks()
 	{
 		fp->LinkBlocks();
 		
-		/// Link the basic blocks into a BlockGraph.
+		// Link the basic blocks into a BlockGraph.
 		fp->LinkIntoGraph();
 	}
 

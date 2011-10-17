@@ -21,9 +21,9 @@
 #define	SAFE_ENUM_H
 
 /**
- * Safe enumeration class template.
+ * Type-safe enumeration class template.
  */
-template <typename def, typename representation = typename def::value_type>
+template <typename def>
 class safe_enum : public def
 {
 	typedef typename def::value_type value_type;
@@ -40,12 +40,13 @@ public:
 	bool operator != (const safe_enum & other) const { return m_value != other.m_value; }
 	//@}
 	
-	value_type get_integral_constant_representation() const { return m_value; };
+	value_type as_enum() const { return m_value; };
 
 private:
 	/// The actual representation of the enum.
-	representation m_value;
+	value_type m_value;
 };
+
 
 /**
  * Macro for backwards- and forwards-compatible support of C++0x's "Strongly Typed Enums",
