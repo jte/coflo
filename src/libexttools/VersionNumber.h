@@ -30,7 +30,7 @@
  *
  * @todo Handle a wider range of version number formats, e.g. "1.2.3b".
  */
-class VersionNumber : boost::totally_ordered<VersionNumber>
+class VersionNumber : private boost::totally_ordered<VersionNumber>
 {
 public:
 	VersionNumber();

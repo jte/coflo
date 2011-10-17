@@ -35,8 +35,9 @@
 template < typename Graph >
 class RemainingInDegreeMap
 {
+	typedef typename boost::graph_traits<Graph>::degree_size_type T_DEGREE_SIZE_TYPE;
 	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
-	typedef boost::unordered_map<T_VERTEX_DESC,long> T_UNDERLYING_MAP;
+	typedef boost::unordered_map<T_VERTEX_DESC, T_DEGREE_SIZE_TYPE> T_UNDERLYING_MAP;
 
 public:
 	RemainingInDegreeMap(Graph &graph) : m_graph(graph) {};
@@ -67,7 +68,7 @@ public:
 			// The target vertex wasn't in the map, which means we haven't
 			// encountered it before now.
 			// Pretend it was in the map and add it with its original in-degree.
-			long indegree;
+			T_DEGREE_SIZE_TYPE indegree;
 			indegree = filtered_in_degree(vdesc, m_graph);
 			m_remaining_in_degree_map[vdesc] = indegree;
 
@@ -159,7 +160,7 @@ void topological_visit_kahn(Graph &graph,
 		{
 			// Let the visitor examine the edge *ei.
 			visitor_edge_return_value = visitor.examine_edge(*ei);
-			switch (visitor_edge_return_value.get_integral_constant_representation())
+			switch (visitor_edge_return_value.as_enum())
 			{
 			case edge_return_value_t::terminate_branch:
 			{

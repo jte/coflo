@@ -95,7 +95,7 @@ AM_INIT_AUTOMAKE([check-news
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
-AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast"])
+AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 #-Weffc++
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
