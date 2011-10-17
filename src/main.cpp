@@ -59,11 +59,11 @@ namespace po = boost::program_options;
 #define CLP_USE_DOT "use-dot"
 #define CLP_USE_FILTER "use-filter"
 
-#define CLP_PRINT_FUNCTION_CFG "print-function-cfg"
-#define CLP_CONSTRAINT "constraint"
-
+#define CLP_PRINT_FUNCTION_CFG "cfg"
 #define CLP_CFG_VERBOSE "cfg-verbose"
 #define CLP_CFG_VERTEX_IDS "cfg-vertex-ids"
+
+#define CLP_CONSTRAINT "constraint"
 
 #define CLP_INPUT_FILE "input-file"
 //@}
@@ -177,12 +177,12 @@ int main(int argc, char* argv[])
 		(CLP_USE_DOT, po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
 		;
 		analysis_options.add_options()
-		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
 		(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
 		;
 		cfg_options.add_options()
+		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
 		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
-				"Output all statements and nodes CoFlo finds the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
+				"Output all statements and nodes CoFlo finds in the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
 		(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
 		;
 		debugging_options.add_options()
