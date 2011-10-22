@@ -16,5 +16,6 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # The non-generated documentation.
-EXTRA_DIST=doxygen_filter.sh index.html
+EXTRA_DIST=doxygen_filter.sh index.html MainPage.dox
+
 
