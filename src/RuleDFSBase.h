@@ -25,7 +25,7 @@
 class RuleDFSBase : public RuleBase
 {
 public:
-	RuleDFSBase(const T_CFG &cfg);
+	RuleDFSBase(ControlFlowGraph &cfg);
 	RuleDFSBase(const RuleDFSBase& orig);
 	virtual ~RuleDFSBase();
 	
@@ -35,17 +35,9 @@ public:
 	
 	bool RunRule();
 	
-	virtual bool TerminatorFunction(T_CFG_VERTEX_DESC v);
-	
-	virtual void WalkPredecessorList(T_CFG_VERTEX_DESC v);
-
 protected:
 	
-	virtual void WalkPredecessorListAction(T_CFG_VERTEX_DESC v) = 0;
-
-protected:
-	
-	friend class OldCFGDFSVisitor;
+	/// @todo remove friend class OldCFGDFSVisitor;
 	
 	T_CFG_VERTEX_DESC m_source;
 	T_CFG_VERTEX_DESC m_sink;
@@ -57,7 +49,7 @@ protected:
 	std::vector<boost::default_color_type> m_color_vec;
 
 	/// The control flow graph we'll run our depth-first search on.
-	const T_CFG &m_cfg;
+	ControlFlowGraph &m_cfg;
 	
 private:
 	

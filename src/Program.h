@@ -88,8 +88,10 @@ public:
 	 *
 	 * @return A reference to the underlying T_CFG.
 	 */
-	T_CFG& GetControlFlowGraph() { return m_cfg.GetT_CFG(); };
+	//T_CFG& GetControlFlowGraph() { return m_cfg.GetT_CFG(); };
 	
+	ControlFlowGraph* GetControlFlowGraphPtr() { return &m_cfg; };
+
 private:
 
 	/// The TranslationUnits which make up this Program.

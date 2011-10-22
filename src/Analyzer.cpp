@@ -60,9 +60,8 @@ void Analyzer::AddConstraints(const std::vector< std::string > &vector_of_constr
 			}
 			else
 			{
-				std::cerr << "INFO: Adding constraint: f1()-xf2()." << std::endl;
-				RuleReachability *rule = new RuleReachability(m_program->GetControlFlowGraph(),
-															 f1, f2);
+				std::cerr << "INFO: Adding constraint: f1() -x f2()." << std::endl;
+				RuleReachability *rule = new RuleReachability(*m_program->GetControlFlowGraphPtr(), f1, f2);
 				m_constraints.push_back(rule);
 			}
 		}

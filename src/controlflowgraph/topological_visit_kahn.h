@@ -23,6 +23,8 @@
 #include <stack>
 #include <boost/throw_exception.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/concept/requires.hpp>
+#include <boost/concept_check.hpp>
 
 #include "visitors/ImprovedDFSVisitorBase.h"
 
@@ -94,22 +96,31 @@ private:
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting) the nodes of a graph.
  *
- * @tparam Graph The graph type.
+ * @tparam BidirectionalGraph The graph type.  Must model the
  * @tparam ImprovedDFSVisitor The type of the @a visitor object which will be notified of graph traversal events.
  *
  * @param graph The graph to traverse.
  * @param source An edge descriptor whose target vertex is the vertex where the graph traversal should begin.
  * @param visitor The visitor to notify of traversal events.
  */
-template<typename Graph, typename ImprovedDFSVisitor>
-void topological_visit_kahn(Graph &graph,
-		typename boost::graph_traits<Graph>::edge_descriptor source,
+template<typename BidirectionalGraph, typename ImprovedDFSVisitor>
+BOOST_CONCEPT_REQUIRES(
+	((boost::BidirectionalGraphConcept< BidirectionalGraph >)),
+	(void))
+topological_visit_kahn(BidirectionalGraph &graph,
+		typename boost::graph_traits<BidirectionalGraph>::edge_descriptor source,
 		ImprovedDFSVisitor &visitor)
 {
+
+	// Required concepts of the passed graph type.
+	// Require a BidirectionGraph because we need efficient access to in edges as well as out edges.
+	boost::function_requires< boost::BidirectionalGraphConcept<BidirectionalGraph> >();
+
 	// Some convenience typedefs.
-	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
-	typedef typename boost::graph_traits<Graph>::edge_descriptor T_EDGE_DESC;
-	typedef typename boost::graph_traits<Graph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef typename boost::graph_traits<BidirectionalGraph>::vertex_descriptor T_VERTEX_DESC;
+	typedef typename boost::graph_traits<BidirectionalGraph>::edge_descriptor T_EDGE_DESC;
+	typedef typename boost::graph_traits<BidirectionalGraph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+
 
 	// The local variables.
 	T_VERTEX_DESC u, v;
@@ -122,7 +133,7 @@ void topological_visit_kahn(Graph &graph,
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
-	typedef RemainingInDegreeMap< Graph > T_IN_DEGREE_MAP;
+	typedef RemainingInDegreeMap< BidirectionalGraph > T_IN_DEGREE_MAP;
 	T_IN_DEGREE_MAP in_degree_map(graph);
 
 	// Start at the source vertex.

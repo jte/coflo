@@ -137,7 +137,7 @@ DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
 ###
 
 # Make sure we have a usable Boost version.
-AX_BOOST_BASE([1.45.0])
+AX_BOOST_BASE([1.42.0])
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
@@ -147,11 +147,6 @@ AX_BOOST_FILESYSTEM
 ### Checks for some library functions we need.
 ###
 AC_CHECK_FUNC(glob)
-
-###
-### Check for some library functions we can optionally use.
-###
-AC_CHECK_FUNCS(malloc_stats mallinfo mallopt)
 
 ###
 ### Initialize the test suite.
@@ -166,7 +161,8 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 ###
 ### Create the Makefiles for the program.
 ###
-AC_CONFIG_FILES([Makefile src/Makefile
+AC_CONFIG_FILES([Makefile
+	src/Makefile
 	src/controlflowgraph/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile

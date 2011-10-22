@@ -39,10 +39,10 @@ class Function;
 class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
 public:
-#if 0
+#if 1
 	ControlFlowGraphVisitorBase(ControlFlowGraph &cfg);
 #endif
-	ControlFlowGraphVisitorBase(T_CFG &g);
+	//ControlFlowGraphVisitorBase(T_CFG &g);
 	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
 	~ControlFlowGraphVisitorBase();
 	
@@ -62,11 +62,11 @@ protected:
 	FunctionCallResolved* TopCallStack();
 	bool IsCallStackEmpty() const;
 	bool AreWeRecursing(Function* function);
-
-private:
-#if 0
+#if 1
 	ControlFlowGraph &m_cfg;
 #endif
+private:
+
 
 	/// The FunctionCall call stack.
 	std::stack<FunctionCallResolved*> m_call_stack;

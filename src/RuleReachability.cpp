@@ -18,14 +18,19 @@
 /** @file */
 
 #include <iostream>
+
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/foreach.hpp>
 
 #include "controlflowgraph/ControlFlowGraph.h"
+#include "controlflowgraph/depth_first_traversal.hpp"
+#include "controlflowgraph/visitors/ReachabilityVisitor.h"
+#include "controlflowgraph/statements/Entry.h"
 #include "Function.h"
 #include "RuleReachability.h"
 #include "controlflowgraph/statements/Entry.h"
 
-RuleReachability::RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
+RuleReachability::RuleReachability(ControlFlowGraph &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {
 	m_source = source;
 	m_sink = sink;
@@ -41,94 +46,29 @@ RuleReachability::~RuleReachability()
 {
 }
 
-class reachability_visitor : public boost::default_dfs_visitor
-{
-public:
-	typedef boost::on_discover_vertex event_filter;
-	reachability_visitor(const T_CFG &cfg, T_CFG_VERTEX_DESC sink, RuleReachability *reachability)
-		: m_cfg(cfg), m_sink(sink)
-	{
-		m_reachability = reachability;
-	};
-	reachability_visitor(const reachability_visitor &other) : boost::default_dfs_visitor(other), m_cfg(other.m_cfg), m_sink(other.m_sink)
-	{
-		m_reachability = other.m_reachability;
-	};
-	virtual ~reachability_visitor() {};
-	
-	void operator()(T_CFG_VERTEX_DESC v, const T_CFG &cfg) 
-	{
-		if(v == m_sink)
-		{
-			std::cout << "Found it." << std::endl;
-			m_reachability->PrintCallChain(cfg, v);
-		}
-	};
-	//void discover_vertex(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg) {};
-	
-private:
-	const T_CFG &m_cfg;
-	
-	T_CFG_VERTEX_DESC m_sink;
-	
-	RuleReachability *m_reachability;
-};
-
-bool RuleReachability::TerminatorFunction(T_CFG_VERTEX_DESC v)
-{
-	//if(v == sink)
-	if(m_found_sink)
-	{
-		// We found the sink vertex we were looking for, so always terminate any new
-		// searches down any paths.
-		return true;
-	}
-	
-	return false;
-}
-
 bool RuleReachability::RunRule()
 {
 	T_CFG_VERTEX_DESC starting_vertex_desc;
-	reachability_visitor v(m_cfg, m_sink->GetEntryVertexDescriptor(), this);
-	// Array to store predecessor (parent) of each visited vertex.
-	std::vector<T_CFG_VERTEX_DESC> p(boost::num_vertices(m_cfg));
-	m_p = &p;
-	
-	// Point each vertex to itself.
-	for(size_t i = 0; i<boost::num_vertices(m_cfg); i++)
-	{
-		p[i] = i;
-	}
-	
-	// The color map to use for the search.
-	std::vector<boost::default_color_type> color_vec(boost::num_vertices(m_cfg));
-
+	//reachability_visitor v(m_cfg, m_sink->GetEntryVertexDescriptor(), this);
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
-	
-	boost::depth_first_visit(m_cfg, starting_vertex_desc,
-		boost::make_dfs_visitor(
-			std::make_pair(
-				v, boost::record_predecessors(&p[0], boost::on_tree_edge())
-			)
-		),
-		boost::make_iterator_property_map(color_vec.begin(), boost::get(boost::vertex_index, m_cfg))
-	);
+
+	ReachabilityVisitor v(m_cfg, starting_vertex_desc, m_sink->GetEntryVertexDescriptor(), &m_predecessors);
+
+	improved_depth_first_visit(m_cfg.GetT_CFG(), starting_vertex_desc, v);
 
 	return true;
 }
 
-void RuleReachability::PrintCallChain(const T_CFG &cfg, T_CFG_VERTEX_DESC v) const
+void RuleReachability::PrintCallChain(T_CFG &cfg, T_CFG_VERTEX_DESC v)
 {
-	T_CFG_VERTEX_DESC parent = -1;
-	
-	while(parent != v)
+	std::deque<T_CFG_VERTEX_DESC>::iterator it;
+
+	for(it = m_predecessors.begin(); it != m_predecessors.end(); it++ )
+	//BOOST_FOREACH(T_CFG_VERTEX_DESC pred, m_predecessors)
 	{
-		if(NULL != dynamic_cast<Entry*>(cfg[v].m_statement))
+		if(cfg[*it].m_statement->IsType<Entry>())
 		{
-			std::cout << "Function Entry: " << cfg[v].m_containing_function->GetIdentifier() << std::endl;
+			std::cout << "Function Entry: " << cfg[*it].m_containing_function->GetIdentifier() << std::endl;
 		}
-		parent = v;
-		v = (*m_p)[v];
 	}
 }

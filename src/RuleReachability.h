@@ -20,27 +20,23 @@
 #ifndef RULEREACHABILITY_H
 #define	RULEREACHABILITY_H
 
+#include <deque>
+
 #include "RuleDFSBase.h"
 
+class ControlFlowGraph;
 class Function;
 
 class RuleReachability : public RuleDFSBase
 {
 public:
-	RuleReachability(const T_CFG &cfg, const Function *source, const Function *sink);
+	RuleReachability(ControlFlowGraph &cfg, const Function *source, const Function *sink);
 	RuleReachability(const RuleReachability& orig);
 	virtual ~RuleReachability();
 	
 	virtual bool RunRule();
 	
-	void PrintCallChain(const T_CFG &cfg, T_CFG_VERTEX_DESC v) const;
-	
-	virtual bool TerminatorFunction(T_CFG_VERTEX_DESC v);
-	
-protected:
-	
-	/// \todo I think we probably don't need this.
-	virtual void WalkPredecessorListAction(T_CFG_VERTEX_DESC v) {};
+	void PrintCallChain(T_CFG &cfg, T_CFG_VERTEX_DESC v);
 	
 private:
 	
@@ -53,7 +49,8 @@ private:
 	/// The function which must not be called from m_sink.
 	const Function *m_sink;
 	
-	std::vector<T_CFG_VERTEX_DESC> *m_p;
+	/// Array to store predecessor of each visited vertex.
+	std::deque<T_CFG_VERTEX_DESC> m_predecessors;
 
 };
 
