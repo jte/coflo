@@ -68,7 +68,7 @@ template <typename Vertex, typename Edge, typename Graph>
 class ImprovedDFSVisitorBase
 {
 public:
-	ImprovedDFSVisitorBase(Graph &g) : m_graph(g)
+	ImprovedDFSVisitorBase(const Graph &g) : m_graph(g)
 	{
 
 	};
@@ -134,7 +134,7 @@ public:
 protected:
 	
 	/// The Graph we'll be visiting.
-	Graph &m_graph;
+	const Graph &m_graph;
 };
 
 #endif	/* IMPROVEDDFSVISITORBASE_H */

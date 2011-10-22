@@ -71,32 +71,18 @@ struct vertex_filter_predicate
 };
 
 
-static T_CFG_VERTEX_DESC f_dummy_vertex;
-
 ControlFlowGraph::ControlFlowGraph()
 {
 
 }
 
+ControlFlowGraph::ControlFlowGraph(const ControlFlowGraph & other) : m_cfg(other.m_cfg)
+{
+}
+
 ControlFlowGraph::~ControlFlowGraph()
 {
 
-}
-
-void ControlFlowGraph::InitializeControlFlowGraph()
-{
-	// Create a dummy node.
-	f_dummy_vertex = boost::add_vertex(m_cfg);
-}
-
-bool ControlFlowGraph::IsDummyVertex(const T_CFG_VERTEX_DESC &v)
-{
-	return (v == f_dummy_vertex);
-}
-
-T_CFG_VERTEX_DESC ControlFlowGraph::GetDummyVertex()
-{
-	return f_dummy_vertex;
 }
 
 void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
@@ -352,3 +338,6 @@ void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
 	boost::remove_edge(e, m_cfg);
 }
 
+void ControlFlowGraph::StructureCompoundConditionals(Function *f)
+{
+}

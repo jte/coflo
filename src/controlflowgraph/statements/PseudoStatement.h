@@ -20,6 +20,9 @@
 
 #include "StatementBase.h"
 
+/**
+ * Base class for pseudostatements such as ENTRY and EXIT vertices.
+ */
 class PseudoStatement : public StatementBase
 {
 public:

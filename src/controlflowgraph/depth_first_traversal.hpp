@@ -15,9 +15,15 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef DEPTH_FIRST_TRAVERSAL_HPP
 #define DEPTH_FIRST_TRAVERSAL_HPP
 
+#include <stack>
+#include <map>
+
+#include <boost/graph/properties.hpp>
 #include <boost/tuple/tuple.hpp>
 
 /**
@@ -51,31 +57,47 @@ struct VertexInfo
 	T_OUT_EDGE_ITERATOR m_eend;
 };
 
-
-template <class IncidenceGraph, class ImprovedDFSVisitor, class ColorMap>
+/**
+ * A depth-first visit algorithm with a number of changes and improvements from the one in the BGL.
+ * The differences:
+ * - The @a visitor can terminate the search by returning terminate_search from its visiting member functions,
+ *   and does not need to throw an exception.
+ * - The @a visitor can prune the search tree by returning terminate_branch from its visiting member functions.
+ * - Supports the notion of a color map stack, allowing transitions into and out of color contexts.  This is primarily
+ *   for the benefit of control flow graph traversals, where multiple function calls to the same function would otherwise
+ *   not work correctly.
+ *
+ * @param graph  The graph to traverse.
+ * @param source  The vertex to start from.
+ * @param visitor  The visitor.
+ * @param color_map_stack
+ */
+template <class IncidenceGraph, class ImprovedDFSVisitor>
 void improved_depth_first_visit(IncidenceGraph &graph,
 	typename boost::graph_traits<IncidenceGraph>::vertex_descriptor source,
-	ImprovedDFSVisitor &visitor,
-	ColorMapStack &color_map_stack)
+	ImprovedDFSVisitor &visitor)
 {
 	// Some convenience typedefs.
-	typedef boost::color_traits<boost::default_color_type> T_COLOR;
+	typedef VertexInfo<IncidenceGraph> T_VERTEX_INFO;
 	typedef typename boost::graph_traits<IncidenceGraph>::vertex_descriptor T_VERTEX_DESC;
 	typedef typename boost::graph_traits<IncidenceGraph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
-	typedef std::map< T_VERTEX_DESC,  boost::default_color_type > T_COLOR_MAP;
+	typedef boost::color_traits<boost::default_color_type> T_COLOR;
+	typedef std::map< T_VERTEX_DESC, boost::default_color_type > T_COLOR_MAP;
+	typedef std::stack< T_COLOR_MAP* > T_COLOR_MAP_STACK;
 
 	// The local variables.
-	VertexInfo vertex_info;
+	T_VERTEX_INFO vertex_info;
 	T_VERTEX_DESC u;
 	T_OUT_EDGE_ITERATOR ei, eend;
+	T_COLOR_MAP_STACK color_map_stack;
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
 	// The vertex "context" stack.
-	std::stack<VertexInfo> dfs_stack;
+	std::stack<T_VERTEX_INFO> dfs_stack;
 
 	// Push a new color context onto the color map stack.
-	color_map_stack.push_back(new T_COLOR_MAP);
+	color_map_stack.push(new T_COLOR_MAP);
 
 	// Start at the source vertex.
 	u = source;
@@ -83,7 +105,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	visitor_vertex_return_value = visitor.start_subgraph_vertex(u);
 
 	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
-	(*color_map_stack.back())[u] = T_COLOR::gray();
+	(*color_map_stack.top())[u] = T_COLOR::gray();
 
 	// Let the visitor look at the vertex via discover_vertex().
 	visitor_vertex_return_value = visitor.discover_vertex(u);
@@ -125,7 +147,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 
 			// Let the visitor examine the edge *ei.
 			visitor_edge_return_value = visitor.examine_edge(*ei);
-			switch(visitor_edge_return_value.get_integral_constant_representation())
+			switch(visitor_edge_return_value.as_enum())
 			{
 				case edge_return_value_t::terminate_branch:
 				{
@@ -143,13 +165,13 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				}
 				case edge_return_value_t::push_color_context:
 				{
-					color_map_stack.push_back(new T_COLOR_MAP);
+					color_map_stack.push(new T_COLOR_MAP);
 					break;
 				}
 				case edge_return_value_t::pop_color_context:
 				{
-					delete color_map_stack.back();
-					color_map_stack.pop_back();
+					delete color_map_stack.top();
+					color_map_stack.pop();
 					break;
 				}
 				default:
@@ -163,12 +185,12 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			// Get the target vertex's color.
 			//
 			typename T_COLOR_MAP::iterator cmi;
-			cmi = (*color_map_stack.back()).find(v);
-			if(cmi == (*color_map_stack.back()).end())
+			cmi = (*color_map_stack.top()).find(v);
+			if(cmi == (*color_map_stack.top()).end())
 			{
 				// Wasn't in the map, must not have seen it before.
 				// Pretend it was and add it with the default color (white).
-				(*color_map_stack.back())[v] = T_COLOR::white();
+				(*color_map_stack.top())[v] = T_COLOR::white();
 				v_color = T_COLOR::white();
 			}
 			else
@@ -189,14 +211,14 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 
 				// Visit the edge.
 				visitor_edge_return_value = visitor.tree_edge(*ei);
-				switch(visitor_edge_return_value.get_integral_constant_representation())
+				switch(visitor_edge_return_value.as_enum())
 				{
 					case edge_return_value_t::push_color_context:
-						color_map_stack.push_back(new T_COLOR_MAP);
+						color_map_stack.push(new T_COLOR_MAP);
 						break;
 					case edge_return_value_t::pop_color_context:
-						delete color_map_stack.back();
-						color_map_stack.pop_back();
+						delete color_map_stack.top();
+						color_map_stack.pop();
 						break;
 					/// @todo Handle other cases.
 					default:
@@ -214,7 +236,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				u = v;
 
 				// Mark the next vertex as touched.
-				(*color_map_stack.back())[u] = T_COLOR::gray();
+				(*color_map_stack.top())[u] = T_COLOR::gray();
 
 				// Visit the next vertex with discover_vertex(u).
 				visitor_vertex_return_value = visitor.discover_vertex(u);
@@ -229,7 +251,6 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 					// we'll break out of the while().
 					/// @todo Can't we just break?
 					ei = eend;
-					converging_node_stack.push(u);
 				}
 				else if(visitor_vertex_return_value == vertex_return_value_t::terminate_search)
 				{
@@ -263,7 +284,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 		}
 
 		// Visited, so mark the vertex black.
-		(*color_map_stack.back())[u] = T_COLOR::black();
+		(*color_map_stack.top())[u] = T_COLOR::black();
 
 		// Finish the vertex.
 		visitor.finish_vertex(u);

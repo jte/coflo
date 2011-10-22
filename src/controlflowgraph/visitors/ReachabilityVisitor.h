@@ -20,29 +20,38 @@
 #ifndef REACHABILITYVISITOR_H
 #define REACHABILITYVISITOR_H
 
-#include <vector>
+#include <deque>
 
 #include "ControlFlowGraphVisitorBase.h"
 
+class RuleReachability;
+
 /**
- * Control flow graph visitor for determining a path from one specified vertex to another.
+ * Control flow graph visitor for determining a path, if one exists, from one specified vertex to another.
  */
 class ReachabilityVisitor: public ControlFlowGraphVisitorBase
 {
 public:
-	ReachabilityVisitor(T_CFG &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::vector<T_CFG_VERTEX_DESC> *predecessor_list);
+	ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_VERTEX_DESC> *predecessor_list);
 	ReachabilityVisitor(const ReachabilityVisitor& orig);
-	virtual ~ReachabilityVisitor();
+	~ReachabilityVisitor();
 
-	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 private:
+
+	/// The starting vertex.
 	T_CFG_VERTEX_DESC m_source;
+
+	/// The vertex we're trying to find.
 	T_CFG_VERTEX_DESC m_sink;
 
 	/// Pointer to the list of predecessors.
-	std::vector<T_CFG_VERTEX_DESC> *m_predecessor_list;
+	std::deque<T_CFG_VERTEX_DESC> *m_predecessor_list;
+
+	/// The reachability rule.
+	RuleReachability *m_reachability;
 };
 
 #endif /* REACHABILITYVISITOR_H */

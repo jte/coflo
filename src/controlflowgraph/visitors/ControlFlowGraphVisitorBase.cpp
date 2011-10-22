@@ -20,17 +20,17 @@
 #include "ControlFlowGraphVisitorBase.h"
 #include "../../Function.h"
 
-#if 0
-ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(cfg.GetT_CFG()), m_cfg(cfg)
+#if 1
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(cfg.GetConstT_CFG()), m_cfg(cfg)
 {
 }
 #endif
 
-ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(T_CFG &g) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(g)
+/*ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(T_CFG &g) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(g)
 {
-}
+}*/
 
-ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(orig)
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(orig), m_cfg(orig.m_cfg)
 {
 }
 

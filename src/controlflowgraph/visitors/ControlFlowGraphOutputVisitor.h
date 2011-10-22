@@ -25,8 +25,8 @@
 class ControlFlowGraphOutputVisitor: public ControlFlowGraphVisitorBase
 {
 public:
-	ControlFlowGraphOutputVisitor(T_CFG &g);
-	virtual ~ControlFlowGraphOutputVisitor();
+	ControlFlowGraphOutputVisitor(ControlFlowGraph &g);
+	~ControlFlowGraphOutputVisitor();
 };
 
 #endif /* CONTROLFLOWGRAPHOUTPUTVISITOR_H */

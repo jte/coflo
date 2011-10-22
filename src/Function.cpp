@@ -33,6 +33,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/iteration_macros.hpp>
 #include <boost/unordered_set.hpp>
 
 #include "debug_utils/debug_utils.hpp"
@@ -539,7 +540,7 @@ using std::endl;
 class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 {
 public:
-	function_control_flow_graph_visitor(T_CFG &g,
+	function_control_flow_graph_visitor(ControlFlowGraph &g,
 			T_CFG_VERTEX_DESC last_statement,
 			bool cfg_verbose,
 			bool cfg_vertex_ids) :
@@ -555,7 +556,7 @@ public:
 			ControlFlowGraphVisitorBase(original)
 	{
 	};
-	virtual ~function_control_flow_graph_visitor()
+	~function_control_flow_graph_visitor()
 	{
 	};
 
@@ -821,7 +822,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 	improved_depth_first_visit(*m_cfg, m_first_statement, cfg_visitor, color_map_stack);
 #else
 	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_last_statement, cfg_verbose, cfg_vertex_ids);
+	function_control_flow_graph_visitor cfg_visitor(*m_the_cfg, m_last_statement, cfg_verbose, cfg_vertex_ids);
 	topological_visit_kahn(*m_cfg, m_first_statement_self_edge, cfg_visitor);
 #endif
 }
@@ -868,6 +869,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph &cfg)
 
 	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
 
+	m_the_cfg = &cfg;
 	m_cfg = &cfg.GetT_CFG();
 
 	std::map<T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC> first_statement_of_block;

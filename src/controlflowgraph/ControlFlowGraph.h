@@ -180,6 +180,7 @@ class ControlFlowGraph
 {
 public:
 	ControlFlowGraph();
+	ControlFlowGraph(const ControlFlowGraph& other);
 	~ControlFlowGraph();
 
 
@@ -191,8 +192,9 @@ public:
 	 *
 	 * @return A reference to the underlying T_CFG (Boost Graph Library adjacency_list) object.
 	 */
-	T_CFG& GetT_CFG() { return m_cfg; };
+	const T_CFG& GetConstT_CFG() const { return m_cfg; };
 
+	T_CFG& GetT_CFG() { return m_cfg; };
 
 	/// @name Graph construction helpers
 	//@{
@@ -228,11 +230,8 @@ private:
 	void RemoveEdge(const T_CFG_EDGE_DESC &e);
 	void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
 	void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);
-	//@}
 
-	void InitializeControlFlowGraph();
-	bool IsDummyVertex(const T_CFG_VERTEX_DESC &v);
-	T_CFG_VERTEX_DESC GetDummyVertex();
+	//@}
 
 	/// The Boost Graph Library graph we'll use for our underlying graph implementation.
 	T_CFG m_cfg;
