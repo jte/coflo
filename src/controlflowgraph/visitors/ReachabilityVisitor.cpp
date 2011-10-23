@@ -42,6 +42,8 @@ vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 	// Add this vertex to the predecessor list.
 	m_predecessor_list->push_back(u);
 
+	std::cout << "discover_vertex: " << m_graph[u].m_statement->GetIdentifierCFG() << std::endl;
+
 	if(u == m_sink)
 	{
 		std::cout << "Found constraint violation." << std::endl;

@@ -827,8 +827,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 #endif
 }
 
-void Function::PrintDotCFG(ToolDot *the_dot,
-		const boost::filesystem::path& output_dir)
+void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir)
 {
 	std::string dot_filename;
 

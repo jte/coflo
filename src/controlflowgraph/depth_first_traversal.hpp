@@ -67,6 +67,9 @@ struct VertexInfo
  *   for the benefit of control flow graph traversals, where multiple function calls to the same function would otherwise
  *   not work correctly.
  *
+ * @tparam IncidenceGraph
+ * @tparam ImprovedDFSVisitor
+ *
  * @param graph  The graph to traverse.
  * @param source  The vertex to start from.
  * @param visitor  The visitor.

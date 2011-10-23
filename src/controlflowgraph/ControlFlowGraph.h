@@ -215,6 +215,11 @@ public:
 	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 	//@}
 
+	T_CFG_VERTEX_DESC Source(T_CFG_EDGE_DESC e) { return boost::source(e, m_cfg); };
+	T_CFG_VERTEX_DESC Target(T_CFG_EDGE_DESC e) { return boost::target(e, m_cfg); };
+
+
+
 private:
 
 	/// @name Edge manipulation routines.

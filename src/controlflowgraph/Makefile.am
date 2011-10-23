@@ -19,7 +19,10 @@ SUBDIRS = statements edges visitors
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
+	CallStackFrameBase.cpp CallStackFrameBase.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
+	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
+	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
 	depth_first_traversal.hpp \
 	topological_visit_kahn.h
 	

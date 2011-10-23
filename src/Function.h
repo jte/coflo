@@ -76,15 +76,19 @@ public:
 	/**
 	 * Prints the control flow graph of this function to stdout.
 	 *
-	 * @param only_function_calls  If true, only print function calls and flow control constructs.
+	 * @param cfg_verbose  If true, output all statements and nodes CoFlo finds in the control flow graph.
+	 *   If false, limit output to function calls and flow control constructs only.
+	 * @param cfg_vertex_ids If true, print the numeric IDs of the control flow graph vertices.
+	 *   This can help when comparing graphical and textual representations.
 	 */
-	void PrintControlFlowGraph(bool only_function_calls, bool cfg_vertex_ids);
+	void PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids);
 	
 	/**
-	 * Print the control flow graph of this function to a dot file in @a output_dir.
+	 * Print the control flow graph of this function to a dot file in @a output_dir, and
+	 * run the dot too to generate the resulting png file.
 	 *
 	 * @param the_dot
-	 * @param output_dir
+	 * @param output_dir The output directory where the dot and png files should be placed.
 	 */
 	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
 	
@@ -112,9 +116,19 @@ public:
 	
 	//@}
 	
-//protected:
 	
+	/**
+	 * Get the T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function.
+	 *
+	 * @return T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function
+	 */
 	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_first_statement; };
+
+	/**
+	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 *
+	 * @return T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 */
 	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_last_statement; };
 	
 private:
