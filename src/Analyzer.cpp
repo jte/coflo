@@ -74,6 +74,7 @@ void Analyzer::AddConstraints(const std::vector< std::string > &vector_of_constr
 
 bool Analyzer::Analyze()
 {
+	// Run all analyses.
 	BOOST_FOREACH(RuleBase *constraint, m_constraints)
 	{
 		constraint->RunRule();

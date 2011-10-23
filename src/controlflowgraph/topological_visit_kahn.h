@@ -71,6 +71,7 @@ public:
 			// encountered it before now.
 			// Pretend it was in the map and add it with its original in-degree.
 			T_DEGREE_SIZE_TYPE indegree;
+			/// @todo We should find a better way to get this "filtered" in degree value.
 			indegree = filtered_in_degree(vdesc, m_graph);
 			m_remaining_in_degree_map[vdesc] = indegree;
 
@@ -96,7 +97,7 @@ private:
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting) the nodes of a graph.
  *
- * @tparam BidirectionalGraph The graph type.  Must model the
+ * @tparam BidirectionalGraph The graph type.  Must model the BidirectionalGraphConcept.
  * @tparam ImprovedDFSVisitor The type of the @a visitor object which will be notified of graph traversal events.
  *
  * @param graph The graph to traverse.
@@ -111,7 +112,6 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		typename boost::graph_traits<BidirectionalGraph>::edge_descriptor source,
 		ImprovedDFSVisitor &visitor)
 {
-
 	// Required concepts of the passed graph type.
 	// Require a BidirectionGraph because we need efficient access to in edges as well as out edges.
 	boost::function_requires< boost::BidirectionalGraphConcept<BidirectionalGraph> >();

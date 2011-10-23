@@ -39,21 +39,19 @@ class Function;
 class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
 public:
-#if 1
+
 	ControlFlowGraphVisitorBase(ControlFlowGraph &cfg);
-#endif
-	//ControlFlowGraphVisitorBase(T_CFG &g);
 	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
-	~ControlFlowGraphVisitorBase();
+	virtual ~ControlFlowGraphVisitorBase();
 	
-	vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
-	vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
-	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
-	edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
-	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	virtual edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
+	virtual edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
+	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 protected:
 
@@ -62,11 +60,10 @@ protected:
 	FunctionCallResolved* TopCallStack();
 	bool IsCallStackEmpty() const;
 	bool AreWeRecursing(Function* function);
-#if 1
-	ControlFlowGraph &m_cfg;
-#endif
-private:
 
+	ControlFlowGraph &m_cfg;
+
+private:
 
 	/// The FunctionCall call stack.
 	std::stack<FunctionCallResolved*> m_call_stack;

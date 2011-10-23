@@ -262,6 +262,11 @@ int main(int argc, char* argv[])
 			std::cout << std::endl;
 			std::cout << "Build info:" << std::endl;
 			print_lib_versions();
+			/// @todo Should add:
+			/// - Build options
+			/// - Build date
+			/// - Build type (e.g. "Release", "Snapshot", etc.)
+			/// - ???
 			return 0;
 		}
 

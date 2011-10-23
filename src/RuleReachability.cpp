@@ -23,7 +23,8 @@
 #include <boost/foreach.hpp>
 
 #include "controlflowgraph/ControlFlowGraph.h"
-#include "controlflowgraph/depth_first_traversal.hpp"
+//#include "controlflowgraph/depth_first_traversal.hpp"
+#include "controlflowgraph/ControlFlowGraphTraversalDFS.h"
 #include "controlflowgraph/visitors/ReachabilityVisitor.h"
 #include "controlflowgraph/statements/Entry.h"
 #include "Function.h"
@@ -54,7 +55,9 @@ bool RuleReachability::RunRule()
 
 	ReachabilityVisitor v(m_cfg, starting_vertex_desc, m_sink->GetEntryVertexDescriptor(), &m_predecessors);
 
-	improved_depth_first_visit(m_cfg.GetT_CFG(), starting_vertex_desc, v);
+	//improved_depth_first_visit(m_cfg.GetT_CFG(), starting_vertex_desc, v);
+	ControlFlowGraphTraversalDFS traversal(m_cfg);
+	traversal.Traverse(starting_vertex_desc, &v);
 
 	return true;
 }

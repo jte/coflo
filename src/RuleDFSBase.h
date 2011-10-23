@@ -37,8 +37,6 @@ public:
 	
 protected:
 	
-	/// @todo remove friend class OldCFGDFSVisitor;
-	
 	T_CFG_VERTEX_DESC m_source;
 	T_CFG_VERTEX_DESC m_sink;
 	

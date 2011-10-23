@@ -34,10 +34,10 @@ class ReachabilityVisitor: public ControlFlowGraphVisitorBase
 public:
 	ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_VERTEX_DESC> *predecessor_list);
 	ReachabilityVisitor(const ReachabilityVisitor& orig);
-	~ReachabilityVisitor();
+	virtual ~ReachabilityVisitor();
 
-	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 private:
 
