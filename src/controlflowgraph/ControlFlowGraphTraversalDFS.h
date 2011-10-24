@@ -36,8 +36,6 @@ public:
 
 protected:
 	virtual bool SkipEdge(typename boost::graph_traits<T_CFG>::edge_descriptor e);
-	virtual void DoCallStackPushIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u);
-	virtual void DoCallStackPopIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u);
 };
 
 #endif /* CONTROLFLOWGRAPHTRAVERSALDFS_H_ */

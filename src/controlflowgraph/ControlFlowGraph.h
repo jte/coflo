@@ -215,9 +215,36 @@ public:
 	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 	//@}
 
+	/// @name Edge attribute accessors.
+	//@{
+
+	/**
+	 * Return the source vertex of edge @a e.
+	 *
+	 * @param e The graph edge to examine.
+	 * @return The source vertex of @a e.
+	 */
 	T_CFG_VERTEX_DESC Source(T_CFG_EDGE_DESC e) { return boost::source(e, m_cfg); };
+
+	/**
+	 * Return the target vertex of edge @a e.
+	 *
+	 * @param e The graph edge to examine.
+	 * @return The target vertex of @a e.
+	 */
 	T_CFG_VERTEX_DESC Target(T_CFG_EDGE_DESC e) { return boost::target(e, m_cfg); };
 
+	/**
+	 * Returns a pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
+	 *
+	 * @param e The graph edge to examine.
+	 * @return Pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
+	 */
+	CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) { return m_cfg[e].m_edge_type; };
+
+	//@}
+
+	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
 
 
 private:

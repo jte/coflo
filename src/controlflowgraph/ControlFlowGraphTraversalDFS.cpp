@@ -26,6 +26,7 @@
 #include "SparsePropertyMap.h"
 #include "ControlFlowGraph.h"
 #include "visitors/ImprovedDFSVisitorBase.h"
+#include "edges/edge_types.h"
 
 #include "../Function.h"
 
@@ -68,7 +69,7 @@ ControlFlowGraphTraversalDFS::ControlFlowGraphTraversalDFS(ControlFlowGraph &con
 
 ControlFlowGraphTraversalDFS::~ControlFlowGraphTraversalDFS()
 {
-	// TODO Auto-generated destructor stub
+
 }
 
 void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>::vertex_descriptor source,
@@ -79,29 +80,29 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 	typedef typename boost::graph_traits<T_CFG>::vertex_descriptor T_VERTEX_DESC;
 	typedef typename boost::graph_traits<T_CFG>::out_edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
-	//typedef std::map< T_VERTEX_DESC, boost::default_color_type > T_COLOR_MAP;
-	typedef SparsePropertyMap< T_VERTEX_DESC, boost::default_color_type, boost::white_color > T_COLOR_MAP;
-	typedef std::stack< T_COLOR_MAP* > T_COLOR_MAP_STACK;
 
 	// The local variables.
 	T_VERTEX_INFO vertex_info;
 	T_VERTEX_DESC u;
 	T_OUT_EDGE_ITERATOR ei, eend;
-	T_COLOR_MAP_STACK color_map_stack;
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
-	// The vertex "context" stack.
+	// The depth-first search vertex "context" stack.
+	// This stack is used exclusively for the essentially ordinary stack-based depth first search.
 	std::stack<T_VERTEX_INFO> dfs_stack;
 
-	// Push a new color context onto the color map stack.
-	color_map_stack.push(new T_COLOR_MAP);
+	// Push a dummy "function call" and the root color context onto the color map stack.
+	// This stack is solely for managing function calls we encounter while traversing the control flow graph.
+	// It primarily maintains a separate color map for each function call, so we don't have to duplicate each Function's
+	// individual CFG for each call; this mechanism will make it appear to the search that we did.
+	PushCallStack(new CallStackFrameBase(NULL));
 
 	// Start at the source vertex.
 	u = source;
 
 	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
-	color_map_stack.top()->set(u, T_COLOR::gray());
+	TopCallStack()->GetColorMap()->set(u, T_COLOR::gray());
 
 	// Let the visitor look at the vertex via discover_vertex().
 	visitor_vertex_return_value = visitor->discover_vertex(u);
@@ -144,6 +145,8 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 			// Check if we want to filter out this edge.
 			if(SkipEdge(*ei))
 			{
+				// Skip this edge.
+				++ei;
 				continue;
 			}
 
@@ -173,7 +176,7 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 			v = m_control_flow_graph.Target(*ei);
 
 			// Get the target vertex's color.
-			v_color = color_map_stack.top()->get(v);
+			v_color = TopCallStack()->GetColorMap()->get(v);
 
 			//
 			// Now decide what to do based on the color of the target vertex.
@@ -201,16 +204,25 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 				vertex_info.Set(u, ei, eend);
 				dfs_stack.push(vertex_info);
 
-				// Go to the next vertex.
+				// Go to the target vertex.
 				u = v;
 
 				// Mark the next vertex as touched.
-				color_map_stack.top()->set(u, T_COLOR::gray());
+				TopCallStack()->GetColorMap()->set(u, T_COLOR::gray());
 
 				// Visit the next vertex with discover_vertex(u).
 				visitor_vertex_return_value = visitor->discover_vertex(u);
 
-				// Get the out-edges of this vertex.
+
+				StatementBase* sbp = m_control_flow_graph.GetStatementPtr(u);
+				//// If this is a FunctionCallResolved node, push a new stack frame.
+				if(sbp->IsType<FunctionCallResolved>())
+				{
+					//std::cout << "PUSH-fcr" << std::endl;
+					PushCallStack(new CallStackFrameBase(dynamic_cast<FunctionCallResolved*>(sbp)));
+				}
+
+				// Get the out-edges of the target vertex.
 				boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -223,9 +235,9 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 				}
 				else if(visitor_vertex_return_value == vertex_return_value_t::terminate_search)
 				{
-					// Stop searching by not pushing this vertex onto the converging_node_stack.
+					// Stop searching entirely.
 					/// @todo Is this really enough?
-					ei = eend;
+					return;
 				}
 			}
 			else if(v_color == T_COLOR::gray())
@@ -252,79 +264,85 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 			}
 		}
 
-		// Visited, so mark the vertex black.
-		color_map_stack.top()->set(u, T_COLOR::black());
+		// All successors have been visited, so mark the vertex black.
+		TopCallStack()->GetColorMap()->set(u, T_COLOR::black());
 
 		// Finish the vertex.
 		visitor->finish_vertex(u);
 	}
 }
 
-void ControlFlowGraphTraversalDFS::DoCallStackPushIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u)
+bool ControlFlowGraphTraversalDFS::SkipEdge(typename boost::graph_traits<T_CFG>::edge_descriptor e)
 {
-	StatementBase *p = m_control_flow_graph.GetT_CFG()[u].m_statement;
+	CFGEdgeTypeBase *edge_type;
+	CFGEdgeTypeFunctionCall *fc;
+	CFGEdgeTypeReturn *ret;
+	CFGEdgeTypeFunctionCallBypass *fcb;
 
-	if (p->IsType<FunctionCallResolved>())
+	edge_type = m_control_flow_graph.GetT_CFG()[e].m_edge_type;
+
+	// Attempt dynamic casts to call/return types to see if we need to handle
+	// these specially.
+	fc = dynamic_cast<CFGEdgeTypeFunctionCall*>(edge_type);
+	ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
+	fcb = dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type);
+
+	if(edge_type->IsBackEdge())
 	{
-		// This is a function call which has been resolved (i.e. has a link to the
-		// actual Function that's being called).  Track the call context, and
-		// check if we're going recursive.
-		FunctionCallResolved *fcr;
+		// Skip back edges.
+		//std::cout << "skipping back edge" << std::endl;
+		return true;
+	}
 
-		fcr = dynamic_cast<FunctionCallResolved*>(p);
-
-		// Assume we're not.
-		//m_last_discovered_vertex_is_recursive = false;
-
-		if(AreWeRecursing(fcr->m_target_function))
+	if(ret != NULL)
+	{
+		if(ret->m_function_call != TopCallStack()->GetPushingCall())
 		{
-			// We're recursing, we need to treat this vertex as if it were a FunctionCallUnresolved.
-			std::cout << "RECURSION DETECTED: Function \"" << fcr->m_target_function->GetIdentifier() << "\"" << std::endl;
-			//m_last_discovered_vertex_is_recursive = true;
+			// This edge is a return, but not the one corresponding to the FunctionCall
+			// that brought us here.  Or, the call stack is empty, indicating that we got here
+			// by means other than tracing the control-flow graph (e.g. we started tracing the
+			// graph at an internal vertex).
+			// Skip it.
+			/// @todo An empty call stack here could also be an error in the program.  We should maybe
+			/// add a fake "call" when starting a cfg trace from an internal vertex.
+			//std::cout << "skipping return:" << std::endl;
+			//std::cout << ret->m_function_call->GetIdentifierCFG() << " [" << e.m_target << "]" << " <" << ret->m_function_call->GetLocation() << ">" << std::endl;
+			if(TopCallStack()->GetPushingCall() == NULL)
+			{
+				//std::cout << "NULL" << std::endl;
+			}
+			else
+			{
+				//std::cout << TopCallStack()->GetPushingCall()->GetIdentifierCFG() << " [" << e.m_target << "]" << " <" << TopCallStack()->GetPushingCall()->GetLocation() << ">" << std::endl;
+			}
+			return true;
 		}
 		else
 		{
-			// We're not recursing, push a normal stack frame and do the call.
-			std::cout << "PUSH" << std::endl;
-			PushCallStack(new CallStackFrameBase(fcr));
+			//std::cout << "POP-exit" << std::endl;
+			PopCallStack();
+			return false;
 		}
 	}
-}
 
-void ControlFlowGraphTraversalDFS::DoCallStackPopIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u)
-{
-	StatementBase *p = m_control_flow_graph.GetT_CFG()[u].m_statement;
-
-	if(p->IsType<Exit>())
+	// Handle recursion.
+	// We deal with recursion by deciding here which path to take out of a FunctionCallResolved vertex.
+	// Note that this is currently the only vertex type which can result in recursion.
+	if ((fcb != NULL) && true/*(m_last_discovered_vertex_is_recursive == false)*/)
 	{
-		// We're leaving the function we were in, pop the call stack entry it pushed.
-		std::cout << "POP" << std::endl;
-		PopCallStack();
+		// If we're not in danger of infinite recursion,
+		// skip FunctionCallBypasses entirely.  Otherwise take them.
+		//std::cout << "skipping fcb" << std::endl;
+		return true;
 	}
-}
-
-bool ControlFlowGraphTraversalDFS::SkipEdge(typename boost::graph_traits<T_CFG>::edge_descriptor e)
-{
-	if(e.m_source == e.m_target)
+	else if ((fc != NULL)
+			&& /*(m_last_discovered_vertex_is_recursive == true)*/false)
 	{
-		// Skip self-edges.
+		// If we are in danger of infinite recursion,
+		// skip FunctionCalls entirely.  Otherwise take them.
+		std::cout << "t3" << std::endl;
 		return true;
 	}
 
-	if(m_control_flow_graph.GetT_CFG()[e].m_edge_type->IsBackEdge())
-	{
-		return true;
-	}
-
-	if(ret->m_function_call != TopCallStack())
-	{
-		// This edge is a return, but not the one corresponding to the FunctionCall
-		// that brought us here.  Or, the call stack is empty, indicating that we got here
-		// by means other than tracing the control-flow graph (e.g. we started tracing the
-		// graph at an internal vertex).
-		// Skip it.
-		/// @todo An empty call stack here could also be an error in the program.  We should maybe
-		/// add a fake "call" when starting a cfg trace from an internal vertex.
-		return edge_return_value_t::terminate_branch;
-	}
+	return false;
 }

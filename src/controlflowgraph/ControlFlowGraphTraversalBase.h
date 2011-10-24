@@ -40,9 +40,6 @@ public:
 
 protected:
 
-	virtual void DoCallStackPushIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u) = 0;
-	virtual void DoCallStackPopIfNecessary(typename boost::graph_traits<T_CFG>::vertex_descriptor u) = 0;
-
 	void PushCallStack(CallStackFrameBase* cfsb);
 	void PopCallStack();
 	CallStackFrameBase* TopCallStack();
