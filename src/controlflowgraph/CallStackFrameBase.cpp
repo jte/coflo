@@ -20,10 +20,14 @@
 CallStackFrameBase::CallStackFrameBase(FunctionCallResolved *function_call_which_pushed_this_frame)
 {
 	m_function_call_which_pushed_this_frame = function_call_which_pushed_this_frame;
+
+	// Create a new color map.
+	m_color_map = new T_COLOR_MAP;
 }
 
 CallStackFrameBase::~CallStackFrameBase()
 {
-	// TODO Auto-generated destructor stub
+	// We own the color map, so destroy it.
+	delete m_color_map;
 }
 

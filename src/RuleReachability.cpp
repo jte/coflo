@@ -50,14 +50,27 @@ RuleReachability::~RuleReachability()
 bool RuleReachability::RunRule()
 {
 	T_CFG_VERTEX_DESC starting_vertex_desc;
-	//reachability_visitor v(m_cfg, m_sink->GetEntryVertexDescriptor(), this);
+
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
 
+	// Set up a visitor.
 	ReachabilityVisitor v(m_cfg, starting_vertex_desc, m_sink->GetEntryVertexDescriptor(), &m_predecessors);
 
-	//improved_depth_first_visit(m_cfg.GetT_CFG(), starting_vertex_desc, v);
 	ControlFlowGraphTraversalDFS traversal(m_cfg);
+
+	// Traverse the CFG.
 	traversal.Traverse(starting_vertex_desc, &v);
+
+	if(!m_predecessors.empty())
+	{
+		BOOST_FOREACH(T_CFG_VERTEX_DESC pred, m_predecessors)
+		{
+			if(m_cfg.GetStatementPtr(pred)->IsType<Entry>())
+			{
+				std::cout << "Function Entry: " << m_cfg.GetT_CFG()[pred].m_containing_function->GetIdentifier() << std::endl;
+			}
+		}
+	}
 
 	return true;
 }
