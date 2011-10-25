@@ -150,16 +150,16 @@ AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/t
 	0,
 	stdout,
 	ignore)
-AT_CHECK([grep -E 'warning.*?another_level_deep' stdout],
+AT_CHECK([grep -E 'warning.*?constraint violation.*?another_level_deep' stdout],
 	0,
 	ignore,
 	ignore)
 
 AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --constraint="main() -x calculate()"],
 	0,
-	ignore,
+	stdout,
 	ignore)
-AT_CHECK([grep -E 'warning.*?another_level_deep' stdout],
+AT_CHECK([grep -E 'warning.*?constraint violation.*?calculate' stdout],
 	0,
 	ignore,
 	ignore)
