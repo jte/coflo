@@ -15,6 +15,8 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sstream>
+
 #include "Location.h"
 
 // Include the necessary Boost libraries.
@@ -92,11 +94,7 @@ std::string Location::GetAbsoluteFilePath() const
  */
 std::ostream& operator<<(std::ostream& os, const Location& loc)
 {
-    os << loc.m_passed_file_path << ":" << loc.m_line_number;
-	if(loc.m_column != -1)
-	{
-		os << ":" << loc.m_column;
-	}
+    os << loc.asGNUCompilerMessageLocation();
     return os;
 }
 
@@ -107,4 +105,17 @@ void Location::DeepCopy(const Location &orig)
 	m_absolute_file_path = orig.m_absolute_file_path;
 	m_line_number = orig.m_line_number;
 	m_column = orig.m_column;
+}
+
+std::string Location::asGNUCompilerMessageLocation() const
+{
+	std::stringstream retval;
+
+	retval << m_passed_file_path << ":" << m_line_number;
+	if(m_column != -1)
+	{
+		retval << ":" << m_column;
+	}
+
+	return retval.str();
 }

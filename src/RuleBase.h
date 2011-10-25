@@ -33,6 +33,10 @@ public:
 	
 	virtual bool RunRule() = 0;
 	
+protected:
+
+	static void indent(long i);
+
 private:
 
 };

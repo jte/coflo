@@ -36,10 +36,12 @@ public:
 	
 	virtual bool RunRule();
 	
-	void PrintCallChain(T_CFG &cfg, T_CFG_VERTEX_DESC v);
+	void PrintCallChain();
 	
 private:
 	
+	void PrintStatement(StatementBase *fc, long indent_level);
+
 	/// Flag which we'll set when we find m_sink to stop the search.
 	bool m_found_sink;
 
@@ -50,8 +52,7 @@ private:
 	const Function *m_sink;
 	
 	/// Array to store predecessor of each visited vertex.
-	std::deque<T_CFG_VERTEX_DESC> m_predecessors;
-
+	std::deque<T_CFG_EDGE_DESC> m_predecessors;
 };
 
 #endif	/* RULEREACHABILITY_H */
