@@ -56,6 +56,7 @@ bool RuleReachability::RunRule()
 	// Set up a visitor.
 	ReachabilityVisitor v(m_cfg, starting_vertex_desc, m_sink->GetEntryVertexDescriptor(), &m_predecessors);
 
+	// Create a depth-first-search graph traversal object.
 	ControlFlowGraphTraversalDFS traversal(m_cfg);
 
 	// Traverse the CFG.
@@ -63,28 +64,48 @@ bool RuleReachability::RunRule()
 
 	if(!m_predecessors.empty())
 	{
-		BOOST_FOREACH(T_CFG_VERTEX_DESC pred, m_predecessors)
-		{
-			if(m_cfg.GetStatementPtr(pred)->IsType<Entry>())
-			{
-				std::cout << "Function Entry: " << m_cfg.GetT_CFG()[pred].m_containing_function->GetIdentifier() << std::endl;
-			}
-		}
+		StatementBase *violating_statement = m_cfg.GetStatementPtr(m_predecessors.rbegin()->m_source);
+		std::cout << m_source->GetDefinitionFilePath() << ": In function " << m_source->GetIdentifier() << ":" << std::endl;
+		std::cout << violating_statement->GetLocation().asGNUCompilerMessageLocation()
+				<< ": warning: constraint violation: path exists in control flow graph to " << violating_statement->GetIdentifierCFG() << std::endl;
+		std::cout << violating_statement->GetLocation().asGNUCompilerMessageLocation() << ": warning: violating path follows" << std::endl;
+		PrintCallChain();
+	}
+	else
+	{
+		std::cout << "Couldn't find a constraint violation." << std::endl;
 	}
 
 	return true;
 }
 
-void RuleReachability::PrintCallChain(T_CFG &cfg, T_CFG_VERTEX_DESC v)
+void RuleReachability::PrintCallChain()
 {
-	std::deque<T_CFG_VERTEX_DESC>::iterator it;
+	long indent_level = 0;
 
-	for(it = m_predecessors.begin(); it != m_predecessors.end(); it++ )
-	//BOOST_FOREACH(T_CFG_VERTEX_DESC pred, m_predecessors)
+	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
-		if(cfg[*it].m_statement->IsType<Entry>())
+		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		if(sb->IsType<FunctionCall>())
 		{
-			std::cout << "Function Entry: " << cfg[*it].m_containing_function->GetIdentifier() << std::endl;
+			PrintStatement(sb, indent_level);
+		}
+		else if(sb->IsType<Entry>())
+		{
+			indent_level++;
+		}
+		else if(sb->IsType<Exit>())
+		{
+			indent_level--;
 		}
 	}
 }
+
+void RuleReachability::PrintStatement(StatementBase *fc, long indent_level)
+{
+	std::cout << fc->GetLocation().asGNUCompilerMessageLocation() << ": warning: ";
+	indent(indent_level);
+	std::cout << fc->GetIdentifierCFG() << std::endl;
+}
+
+

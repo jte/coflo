@@ -21,7 +21,7 @@
 
 #include "../../RuleReachability.h"
 
-ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_VERTEX_DESC> *predecessor_list)
+ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_EDGE_DESC> *predecessor_list)
 	: ControlFlowGraphVisitorBase(g), m_source(source), m_sink(sink)
 {
 	m_predecessor_list = predecessor_list;
@@ -39,22 +39,24 @@ ReachabilityVisitor::~ReachabilityVisitor()
 
 vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 {
-	// Add this vertex to the predecessor list.
-	m_predecessor_list->push_back(u);
-
-	std::cout << "discover_vertex: " << m_graph[u].m_statement->GetIdentifierCFG()
+	/*std::cout << "discover_vertex: " << m_graph[u].m_statement->GetIdentifierCFG()
 					// Print the vertex ID.
-					<< " [" << u << "]" << " <" << m_graph[u].m_statement->GetLocation() << ">" << std::endl;
+					<< " [" << u << "]" << " <" << m_graph[u].m_statement->GetLocation() << ">" << std::endl;*/
 
 	if(u == m_sink)
 	{
-		std::cout << "Found constraint violation." << std::endl;
-		//m_reachability->PrintCallChain(m_cfg.GetT_CFG(), u);
-
+		// We found the sink, terminate the search.
 		return vertex_return_value_t::terminate_search;
 	}
 
 	return vertex_return_value_t::ok;
+}
+
+edge_return_value_t ReachabilityVisitor::tree_edge(T_CFG_EDGE_DESC e)
+{
+	// Add this edge to the predecessor list.
+	//std::cout << "push " << e << std::endl;
+	m_predecessor_list->push_back(e);
 }
 
 vertex_return_value_t ReachabilityVisitor::finish_vertex(T_CFG_VERTEX_DESC u)

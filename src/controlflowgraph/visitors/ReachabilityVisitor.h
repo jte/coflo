@@ -32,11 +32,12 @@ class RuleReachability;
 class ReachabilityVisitor: public ControlFlowGraphVisitorBase
 {
 public:
-	ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_VERTEX_DESC> *predecessor_list);
+	ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_EDGE_DESC> *predecessor_list);
 	ReachabilityVisitor(const ReachabilityVisitor& orig);
 	virtual ~ReachabilityVisitor();
 
 	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
+	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC e);
 	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
 
 private:
@@ -48,7 +49,7 @@ private:
 	T_CFG_VERTEX_DESC m_sink;
 
 	/// Pointer to the list of predecessors.
-	std::deque<T_CFG_VERTEX_DESC> *m_predecessor_list;
+	std::deque<T_CFG_EDGE_DESC> *m_predecessor_list;
 
 	/// The reachability rule.
 	RuleReachability *m_reachability;

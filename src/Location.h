@@ -80,6 +80,15 @@ public:
 	//@}
 	
 	/**
+	 * Returns the Location as a string formatted in the manner of the GNU recommendation for compilers
+	 * here: <http://www.gnu.org/prep/standards/html_node/Errors.html#Errors>.
+	 *
+	 * @return The Location in the following format: source-file-name:lineno:column.  Intention is that a ": message"
+	 * would then be appended.
+	 */
+	std::string asGNUCompilerMessageLocation() const;
+
+	/**
 	 * Stream insertion operator.  Inserts @a loc into stream @a os in the following format:
 	 * "filepath : line_no(:column_no)?"
 	 *

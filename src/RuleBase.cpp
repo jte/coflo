@@ -28,3 +28,12 @@ RuleBase::RuleBase(const RuleBase& orig)
 RuleBase::~RuleBase()
 {
 }
+
+void RuleBase::indent(long i)
+{
+	while (i > 0)
+	{
+		std::cout << "    ";
+		i--;
+	};
+}

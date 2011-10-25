@@ -165,8 +165,9 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 				}
 				case edge_return_value_t::terminate_search:
 				{
-					/// @todo Stop searching.
-					break;
+					// Stop the traversal.
+					/// @todo Is there anything more we need to do here?
+					return;
 				}
 				default:
 					break;
@@ -248,7 +249,7 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 				// This is a back edge, i.e. an edge to a vertex that we've
 				// already visited.  Visit it, but don't follow it.
 				visitor_edge_return_value = visitor->back_edge(*ei);
-				std::cout << "BACKEDGE" << std::endl;
+				//std::cout << "BACKEDGE" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;
 			}
@@ -258,7 +259,7 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 
 				// A forward or cross edge.  Visit it, but don't follow it.
 				visitor_edge_return_value = visitor->forward_or_cross_edge(*ei);
-				std::cout << "FWDCROSS" << std::endl;
+				//std::cout << "FWDCROSS" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;
 			}

@@ -49,6 +49,7 @@ namespace po = boost::program_options;
 #define CLP_RESPONSE_FILE "response-file"
 #define CLP_DEBUG_PARSE "debug-parse"
 #define CLP_DEBUG_LINK  "debug-link"
+#define CLP_DEBUG_CFG	"debug-cfg"
 #define CLP_TEMPS_DIR	"temps-dir"
 #define CLP_OUTPUT_DIR	"output-dir"
 
@@ -118,6 +119,7 @@ int main(int argc, char* argv[])
 	// Debug settings.
 	bool debug_parse = false;
 	bool debug_link = false;
+	bool debug_cfg = false;
 	
 	// Control flow graph option flags.
 	// Whether to limit display to only function calls, or to everything CoFlo
@@ -188,6 +190,7 @@ int main(int argc, char* argv[])
 		debugging_options.add_options()
 		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
 		(CLP_DEBUG_LINK, po::bool_switch(&debug_link), "Print debug info concerning the CFG linking stage.")
+		(CLP_DEBUG_CFG, po::bool_switch(&debug_cfg), "Print debug info concerning the CFG fix-up stages.")
 		;
 		hidden_options.add_options()
 		(CLP_INPUT_FILE, po::value< std::vector<std::string> >(), "input file")
@@ -292,6 +295,7 @@ int main(int argc, char* argv[])
 			/// @todo Add debug_link control.
 			dlog_block.enable(debug_parse);
 			dlog_function.enable(debug_parse);
+			dlog_cfg.enable(debug_cfg);
 
 			the_program = new Program();
 			the_analyzer = new Analyzer();
