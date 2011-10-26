@@ -70,11 +70,6 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
 	compile_to_cfg_command = " -fno-builtin -S -fdump-tree-cfg-lineno-blocks";
 	
-	/*
-	std::cout << "Running gcc with params: " << compile_to_cfg_command << " "
-			<< params << " and source file \"" << source_filename << "\"..." << std::endl;
-			*/
-	
 	// Call the compiler to generate the CFG file.
 	system_retval = System(compile_to_cfg_command + params + " " + source_filename);
 
