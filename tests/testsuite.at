@@ -61,6 +61,8 @@ AT_TESTED([coflo])
 ###
 AT_BANNER([CoFlo sanity checks])
 
+m4_include([version.at])
+
 # Start a test group.
 AT_SETUP([Using default GCC against C code])
 

@@ -20,7 +20,7 @@
 # Test at most the first 16 GCCs that we find installed on the system.
 MAX_GCCS_TO_TEST=16
 
-EXTRA_DIST = testsuite.at $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
+EXTRA_DIST = $(TESTSUITE_AT) $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
 DISTCLEANFILES = atconfig
 MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 CLEANFILES = $(CPP_TEST_SOURCE)
@@ -59,6 +59,11 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])' ; \
 	} > '$(srcdir)/package.m4'
 
+# The .at files which make up the test suite.
+TESTSUITE_AT = \
+	testsuite.at \
+	version.at
+
 # The actual shell script which is the testsuite.
 TESTSUITE = $(srcdir)/testsuite
 
@@ -75,7 +80,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 ### To avoid this, don't make $(TESTSUITE) depend on non-distributed built files.
 ### See <http://sources.redhat.com/automake/automake.html#distcleancheck> for more info.
 ###
-$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4
+$(TESTSUITE): $(srcdir)/package.m4 $(TESTSUITE_AT)
 	$(AUTOTEST) -I '$(srcdir)' $(srcdir)/testsuite.at -o $@.tmp
 	mv $@.tmp $@
 	
