@@ -38,8 +38,8 @@ public:
 	
 protected:
 	
-	virtual std::string GetVersionOptionString() const { return "--version"; };
-	virtual std::string GetVersionExtractionRegex() const { return "[^[:space:]]+[[:space:]]\\(GCC\\)[[:space:]]([\\d\\.]+).*"; };
+	virtual std::string GetVersionOptionString() const { return "-dumpversion"; };
+	virtual std::string GetVersionExtractionRegex() const { return "([\\d\\.]+).*"; };
 	
 private:
 
