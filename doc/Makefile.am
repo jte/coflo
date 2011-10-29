@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+# The non-built HTML documentation.
+dist_html_DATA = index.html
+
 # The non-generated documentation.
-EXTRA_DIST=doxygen_filter.sh index.html MainPage.dox
-
-
+EXTRA_DIST=doxygen_filter.sh MainPage.dox

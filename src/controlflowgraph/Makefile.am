@@ -29,6 +29,6 @@ libcontrolflowgraph_a_SOURCES = \
 	
 
 libcontrolflowgraph_a_CPPFLAGS = $(AM_CPPFLAGS)
-libcontrolflowgraph_a_CFLAGS = $(AM_CXXFLAGS)
+libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 
