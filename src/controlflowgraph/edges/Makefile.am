@@ -24,6 +24,8 @@ libedges_a_SOURCES = \
 	CFGEdgeTypeFallthrough.cpp CFGEdgeTypeFallthrough.h \
 	CFGEdgeTypeFunctionCall.cpp CFGEdgeTypeFunctionCall.h \
 	CFGEdgeTypeGoto.cpp CFGEdgeTypeGoto.h \
+	CFGEdgeTypeIfTrue.cpp CFGEdgeTypeIfTrue.h \
+	CFGEdgeTypeIfFalse.cpp CFGEdgeTypeIfFalse.h \
 	CFGEdgeTypeImpossible.cpp CFGEdgeTypeImpossible.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h
 

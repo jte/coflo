@@ -28,6 +28,8 @@
 #include "CFGEdgeTypeFallthrough.h"
 #include "CFGEdgeTypeFunctionCall.h"
 #include "CFGEdgeTypeGoto.h"
+#include "CFGEdgeTypeIfTrue.h"
+#include "CFGEdgeTypeIfFalse.h"
 #include "CFGEdgeTypeImpossible.h"
 #include "CFGEdgeTypeReturn.h"
 

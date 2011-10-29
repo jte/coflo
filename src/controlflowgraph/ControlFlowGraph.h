@@ -22,6 +22,7 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/utility.hpp>
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
@@ -176,7 +177,7 @@ private:
  * @todo Well, it will be.  At the moment too much functionality is implemented in terms of the Boost Graph Library's
  *       free functions acting on the underlying T_CFG.
  */
-class ControlFlowGraph
+class ControlFlowGraph : boost::noncopyable
 {
 public:
 	ControlFlowGraph();
