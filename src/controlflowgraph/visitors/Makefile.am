@@ -25,5 +25,5 @@ BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 	ReachabilityVisitor.cpp ReachabilityVisitor.h
 
 libvisitors_a_CPPFLAGS = $(AM_CPPFLAGS)
-libvisitors_a_CFLAGS = $(AM_CXXFLAGS)
+libvisitors_a_CFLAGS = $(AM_CFLAGS)
 libvisitors_a_CXXFLAGS = $(AM_CXXFLAGS)

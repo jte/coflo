@@ -44,9 +44,9 @@ coflo_SOURCES = main.cpp \
 # \	gcc_cfg_parser.g.d_parser.cpp
 
 coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
-coflo_CFLAGS = $(AM_CXXFLAGS)
+coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
-coflo_LDFLAGS = $(BOOST_LDFLAGS)
+coflo_LDFLAGS = $(AM_LDFLAGS) $(BOOST_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
 	./controlflowgraph/edges/libedges.a \

@@ -20,5 +20,5 @@ noinst_LIBRARIES = libdebugutils.a
 libdebugutils_a_SOURCES = debug_utils.cpp debug_utils.hpp
 
 libdebugutils_a_CPPFLAGS = $(AM_CPPFLAGS)
-libdebugutils_a_CFLAGS = $(AM_CXXFLAGS)
+libdebugutils_a_CFLAGS = $(AM_CFLAGS)
 libdebugutils_a_CXXFLAGS = $(AM_CXXFLAGS)

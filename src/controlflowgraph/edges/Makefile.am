@@ -28,5 +28,5 @@ libedges_a_SOURCES = \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h
 
 libedges_a_CPPFLAGS = $(AM_CPPFLAGS)
-libedges_a_CFLAGS = $(AM_CXXFLAGS)
+libedges_a_CFLAGS = $(AM_CFLAGS)
 libedges_a_CXXFLAGS = $(AM_CXXFLAGS)
