@@ -90,6 +90,16 @@ AM_INIT_AUTOMAKE([check-news
 # Enable the configure remake rules.
 #AM_MAINTAINER_MODE([enable])
 
+###
+### Manual configure options.
+###
+
+# Should we link with Libcwd?
+#AC_ARG_ENABLE([libcwd], [AS_HELP_STRING([--enable-libcwd],
+#               [Link with the Libcwd debugging library (default is no)])],
+#              [],
+#              [enable_libcwd=yes])
+
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
@@ -147,6 +157,26 @@ AX_BOOST_FILESYSTEM
 ### Checks for some library functions we need.
 ###
 AC_CHECK_FUNC(glob)
+
+###
+### Checks for optional libraries.
+###
+# Check if we have libcwd, $enable_debugging can be "yes", "no" or empty (auto).
+#test -n "$enable_debugging" || enable_debugging=no	# Set the default to an explicit "no".
+# This sets 'cw_use_libcwd' to "yes" if libcwd is actually used; CXXFLAGS and LDFLAGS are updated.
+#CW_LIB_LIBCWD([debugging], [$enable_debugging], [no])
+#LIBCWD=
+#AS_IF([test "x$enable_libcwd" != xno],
+#		[AC_CHECK_LIB([cwd], [__libcwd_version],
+#		[AC_SUBST([LIBCWD], ["-lcwd"])
+#			AC_DEFINE([HAVE_LIBCWD], [1], [Define if you have libcwd])
+#  ],
+#  [AC_MSG_FAILURE([libcwd test failed (--disable-libcwd to disable)])],
+#  [-lcwd])])
+#PKG_CHECK_MODULES([LIBCWD], [libcwd >= 1.0.4])
+## pkg-config's earlier than 0.24 don't AC_SUBST the discovered variables.
+#AC_SUBST([LIBCWD_CFLAGS])
+#AC_SUBST([LIBCWD_LIBS])
 
 ###
 ### Initialize the test suite.

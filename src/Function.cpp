@@ -137,31 +137,31 @@ void Function::LinkBlocks()
 
 	// Go through all the blocks and add them to the link map.
 	BOOST_FOREACH(Block *bp, m_block_list)
-			{
-				// Add this block to the number->Block* map.
-				linkmap[bp->GetBlockNumber()] = bp;
+	{
+		// Add this block to the number->Block* map.
+		linkmap[bp->GetBlockNumber()] = bp;
 
-				// Collect all the blocks' Successors into a list.
-				Block::T_BLOCK_SUCCESSOR_ITERATOR s;
-				for (s = bp->successor_begin(); s != bp->successor_end(); s++)
-				{
-					if (NULL != dynamic_cast<SuccessorExit*>(*s))
-					{
-						dlog_block << "INFO: Found EXIT successor." << std::endl;
-						(*s)->SetSuccessorBlockPtr(m_exit_block);
-					}
-					else if (NULL != dynamic_cast<SuccessorNoReturn*>(*s))
-					{
-						dlog_block << "INFO: Found NoReturn successor."
-								<< std::endl;
-						(*s)->SetSuccessorBlockPtr(m_exit_block);
-					}
-					else
-					{
-						successor_list.push_back(*s);
-					}
-				}
+		// Collect all the blocks' Successors into a list.
+		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
+		for (s = bp->successor_begin(); s != bp->successor_end(); s++)
+		{
+			if (NULL != dynamic_cast<SuccessorExit*>(*s))
+			{
+				dlog_block << "INFO: Found EXIT successor." << std::endl;
+				(*s)->SetSuccessorBlockPtr(m_exit_block);
 			}
+			else if (NULL != dynamic_cast<SuccessorNoReturn*>(*s))
+			{
+				dlog_block << "INFO: Found NoReturn successor."
+						<< std::endl;
+				(*s)->SetSuccessorBlockPtr(m_exit_block);
+			}
+			else
+			{
+				successor_list.push_back(*s);
+			}
+		}
+	}
 
 	// Block 2 appears to always be the first block, start with it.
 	/// @todo We really should check for "PRED: ENTRY" to make sure of this.

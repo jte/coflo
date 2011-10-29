@@ -24,6 +24,9 @@
 
 #include "ToolBase.h"
 
+/**
+ * Class which wraps the compiler executable.
+ */
 class ToolCompiler : public ToolBase
 {
 
@@ -32,6 +35,14 @@ public:
 	ToolCompiler(const ToolCompiler& orig);
 	virtual ~ToolCompiler();
 	
+	/**
+	 * Parse the specified @a source_filename and generate the file containing the SSA representation.
+	 * The resulting file will be named <source_filename>.coflo.cfg.
+	 *
+	 * @param params
+	 * @param source_filename
+	 * @return
+	 */
 	int GenerateCFG(const std::string &params, const std::string &source_filename);
 	
 	std::pair< std::string, bool > CheckIfVersionIsUsable() const;
