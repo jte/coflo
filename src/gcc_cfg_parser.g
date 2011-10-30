@@ -114,23 +114,31 @@ param_decls
 	;
 
 declaration
-	: decl_spec+ var_id ('[' integer ']')? ';'
+	: decl_spec+ var_id ('[' integer ']')? ('=' constant)? ';'
 	| 'void' identifier '=' '<<<' 'error' '>>>' ';'
 	;
 	
 statement
-	: location? statement_with_optional_location
+	: location? statement_one_line ';' post_one_line_statement_text?
+	| location? statement_possibly_split_across_lines
 	| scope
 	| label ';'?
 	;
 	
-statement_with_optional_location
-	: assignment ';'
-	| 'return' var_id ';'
-	| 'return' ';'
-	| if
-	| function_call ';'
-	| goto ';'
+post_one_line_statement_text
+	: "\[[^\]]+\]"
+	;
+	
+statement_one_line
+	: assignment
+	| 'return' var_id
+	| 'return'
+	| function_call
+	| goto
+	;
+	
+statement_possibly_split_across_lines
+	: if
 	| switch
 	| comment
 	;
@@ -138,7 +146,7 @@ statement_with_optional_location
 assignment
 	: lhs '=' rhs '>>' rhs
 	| lhs '=' rhs '<<' rhs
-	| lhs '=' var_id '|' var_id
+	| lhs '=' rhs '|' rhs
 	| lhs '=' rhs '&' rhs
 	| lhs '=' location? rhs
 	| lhs '=' '~' rhs
@@ -243,26 +251,36 @@ type_qualifier
 	;
 
 lhs
-	: location?
-	('*'? var_id
-	| var_id '->' var_id
-	| var_id '[' var_id | integer_decimal ']'
-	)
+	: location* unary_expression
 	;
 	
 rhs
-	: location? (
-		var_id
-		| var_id '->' var_id
-		| var_id '[' var_id | integer_decimal ']'
-		| '&' var_id
-		| '*' var_id
-		| integer_decimal 'B'? /* Not sure what the 'B' represents.  Seems to always be '0B'. */
-		| integer_hex
-		| string_literal
-		| '&' string_literal '[' integer ']'
-		| '&' var_id '[' integer ']'
-	)
+	: location* unary_expression
+	;
+	
+unary_expression
+	: postfix_expression
+	| unary_operator location? unary_expression
+	;
+
+unary_operator : '&' | '*' ;
+
+postfix_expression
+	: primary_expression
+	('[' postfix_expression ']' 
+	| '.' identifier
+	| '->' identifier
+	)* ;
+
+primary_expression 
+  : var_id
+  | constant
+  | string_literal+
+  ;
+
+constant
+	: integer_decimal 'B'? /* Not sure what the 'B' represents.  Seems to always be '0B'. */
+	| integer_hex
 	;
 
 var_id

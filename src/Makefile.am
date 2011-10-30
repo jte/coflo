@@ -24,7 +24,7 @@ EXTRA_DIST = Doxyfile $(srcdir)/gcc_cfg_parser.g
 # The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files. 
 MAINTAINERCLEANFILES = $(srcdir)/gcc_cfg_parser.g.d_parser.cpp
 
-bin_PROGRAMS = coflo
+bin_PROGRAMS = coflo parse
 coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
@@ -41,7 +41,8 @@ coflo_SOURCES = main.cpp \
 	TranslationUnit.cpp TranslationUnit.h \
 	safe_enum.h
 	
-# \	gcc_cfg_parser.g.d_parser.cpp
+parse_SOURCES = gcc_cfg_parser.g gcc_cfg_parser.g.d_parser.cpp
+parse_LDADD = /usr/local/lib/libdparse.a
 
 coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CFLAGS)
