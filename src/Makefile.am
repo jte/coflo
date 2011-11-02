@@ -18,13 +18,14 @@
 # Subdirectories with their own Makefile{.am}'s.
 SUBDIRS = controlflowgraph debug_utils libexttools
 
-# Make sure to distribute the Doxygen configuration file and the parser source.
-EXTRA_DIST = Doxyfile $(srcdir)/gcc_cfg_parser.g
+# Make sure to distribute the Doxygen configuration file and the parser built source.
+EXTRA_DIST = Doxyfile 
+#$(srcdir)/gcc_cfg_parser.cpp
 
 # The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files. 
-MAINTAINERCLEANFILES = $(srcdir)/gcc_cfg_parser.g.d_parser.cpp
+#MAINTAINERCLEANFILES = $(srcdir)/gcc_cfg_parser.cpp
 
-bin_PROGRAMS = coflo parse
+bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
 	BasicBlockGraph.h \
@@ -39,10 +40,15 @@ coflo_SOURCES = main.cpp \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
-	safe_enum.h
+	safe_enum.h \
+	\
+	gcc_cfg_parser.g gcc_gimple_parser.h
 	
-parse_SOURCES = gcc_cfg_parser.g gcc_cfg_parser.g.d_parser.cpp
-parse_LDADD = /usr/local/lib/libdparse.a
+#BUILT_SOURCES = gcc_cfg_parser.g.d_parser.cpp
+#parse_SOURCES = gcc_cfg_parser.g 
+#parse_LDADD = /usr/local/lib/libdparse.a
+# Flags for make_dparser.
+DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_cfg_parser
 
 coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CFLAGS)
@@ -54,15 +60,22 @@ coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
+	/usr/local/lib/libdparse.a \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 	
-#	/usr/local/lib/libdparse.a \#
 
-# Rule to make gcc_cfg_parser.g.d_parser.cpp
+# Rule to make gcc_cfg_parser.cpp from gcc_cfg_parser.g.
 # Note that the output file is built source, but we don't want the user to have to have dparser installed,
 # so it gets distributed.
-$(srcdir)/gcc_cfg_parser.g.d_parser.cpp: $(srcdir)/gcc_cfg_parser.g
-	 make_dparser --ext=cpp "$<"
+#$(srcdir)/gcc_cfg_parser.g.d_parser.cpp: $(srcdir)/gcc_cfg_parser.g
+#	 make_dparser $(DPARSER_FLAGS) "$<"
 
+SUFFIX = .g .gdebug
 
+.g.cpp:
+	TARGET="$(srcdir)/$$(basename "$@")" && \
+	SOURCE="$(srcdir)/$$(basename "$<")" && \
+	INTER="$(srcdir)/$$(basename "$<").gdebug" && \
+	make_dparser $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${TARGET}"
 
+# make_dparser $(DPARSER_FLAGS) -R "$${SOURCE}" > "$${INTER}" && 

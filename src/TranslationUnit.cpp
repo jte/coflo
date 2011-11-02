@@ -48,6 +48,8 @@
 
 #include "libexttools/ToolCompiler.h"
 
+#include "gcc_gimple_parser.h"
+
 using namespace boost;
 using namespace boost::filesystem;
 
@@ -112,13 +114,13 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		file_is_cpp = true;
 	}
 	
-	// Try to compile the source file.
+	// Try to compile the source file into the .gimple intermediate form.
 	CompileSourceFile(filename.generic_string(), the_filter, compiler, defines, include_paths);
 	
 	// Construct the filename of the .cfg file gcc made for us.
 	// gcc puts this file in the directory it's running in.
 	gcc_cfg_lineno_blocks_filename = filename.filename().generic_string();
-	gcc_cfg_lineno_blocks_filename += ".coflo.cfg";
+	gcc_cfg_lineno_blocks_filename += ".coflo.gimple";
 		
 	// Try to open the file whose name we were passed.
 	std::ifstream input_file(gcc_cfg_lineno_blocks_filename.c_str(), std::ifstream::in);
@@ -130,6 +132,60 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		return false;
 	}
 
+#if 1
+
+	// Load the given file into memory.
+	std::string buffer;
+	char previous_char = '\n';
+
+	while (input_file.good())     // loop while extraction from file is possible
+	{
+		char c;
+		c = input_file.get();       // get character from file
+		if (input_file.good())
+		{
+			if(c == '\r')
+			{
+				// Strip CR's.
+				continue;
+			}
+			else
+			{
+				buffer += c;
+			}
+			previous_char = c;
+		}
+	}
+
+	input_file.close();           // close file
+
+	//std::cout << "Read >>>>>" << buffer << "<<<<<" << std::endl;
+
+	// Create a new parser.
+	D_Parser *parser = new_gcc_gimple_Parser(); //new_D_Parser(&parser_tables_gcc_cfg_parser, sizeof(gcc_gimple_parser_ParseNode_User));
+	D_ParseNode *tree = gcc_gimple_dparse(parser, (char*)buffer.c_str(), buffer.length());
+
+	if (tree && !gcc_gimple_parser_GetSyntaxErrorCount(parser))
+	{
+		std::cout << "success:" << std::endl;
+		//print_parsetree(parser_tables_gcc_cfg_parser, tree, NULL, NULL);
+	}
+	else
+	{
+		std::cout << "failure: " << gcc_gimple_parser_GetSyntaxErrorCount(parser) << " syntax errors." << std::endl;
+	}
+
+	if(tree != NULL)
+	{
+		// Destroy the parse tree.
+		free_gcc_gimple_ParseTreeBelow(parser, tree);
+	}
+	// Destroy the parser.
+	free_gcc_gimple_Parser(parser);
+
+	return true;
+
+#else
 	std::string line;
 	std::string in_function_name;
 	bool in_function = false;
@@ -240,6 +296,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 			}
 		}
 	}
+#endif
 
 	return true;
 }

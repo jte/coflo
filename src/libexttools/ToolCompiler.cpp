@@ -66,9 +66,7 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	// Create the compile command.
 	std::string compile_to_cfg_command;
 	
-	// Note that the "-blocks" option is required to make both gcc 4.3.4 and 4.4.1 emit
-	// the same BLOCK/PRED/SUCC notations in the .cfg file (4.3.4 does it without -blocks).
-	compile_to_cfg_command = " -fno-builtin -S -fdump-tree-cfg-lineno-blocks";
+	compile_to_cfg_command = " -fno-builtin -S -fdump-tree-gimple-lineno";
 	
 	// Call the compiler to generate the CFG file.
 	system_retval = System(compile_to_cfg_command + params + " " + source_filename);
@@ -85,7 +83,7 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	// Create a pattern to glob for.
 	boost::filesystem::path source_filename_only = source_filename;
 	source_filename_only = source_filename_only.filename();
-	std::string filename_to_glob_for = source_filename_only.generic_string()+".????.cfg";
+	std::string filename_to_glob_for = source_filename_only.generic_string()+".????.gimple";
 	matching_filenames = Glob(filename_to_glob_for);
 
 	// Check for errors.
@@ -103,7 +101,7 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	}
 
 	// We're OK, rename the file.
-	rename_retval = rename(matching_filenames[0].c_str(), (source_filename_only.generic_string()+".coflo.cfg").c_str());
+	rename_retval = rename(matching_filenames[0].c_str(), (source_filename_only.generic_string()+".coflo.gimple").c_str());
 
 	return rename_retval;
 }
