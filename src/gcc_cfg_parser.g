@@ -139,7 +139,8 @@ local_function_declaration
 	;
 
 statement_list
-	: (statement { std::cout << $n.symbol << std::endl; } NL)+
+	: (statement NL)+
+		{ /*std::cout << $n0 << std::endl;*/ }
 	;
 	
 statement
@@ -149,6 +150,7 @@ statement
 	| location? statement_possibly_split_across_lines
 	| scope
 	| label ';'?
+		{ std::cout << "STATEMENT LABEL: " << *($0.m_str) << std::endl; }
 	;
 	
 post_one_line_statement_text
@@ -161,6 +163,7 @@ statement_one_line
 	| 'return'
 	| function_call
 	| goto
+		{ std::cout << "STATEMENT GOTO: " << *($0.m_str) << std::endl; }
 	;
 	
 statement_possibly_split_across_lines
@@ -194,6 +197,8 @@ if
 	| 'if' '(' condition ')' goto ';' 'else' goto ';'
 		{ std::cout << "DECISION NODE: IF\n"
 			<< "  Condition: " << M_TO_STR($n2) << "\n"
+			<< "  TRUE GOTO: " << *($4.m_str) << "\n"
+			<< "  FALSE GOTO: " << *($7.m_str) << "\n"
 			<< std::endl;
 		}
 	;
@@ -220,12 +225,19 @@ function_call
 	;
 
 goto
-	: 'goto' (synthetic_label_id|identifier)
+	: 'goto' synthetic_label_id
+		{ $$.m_str = $1.m_str; }
+	| 'goto' identifier
+		{ $$.m_str = $1.m_str; }
 	;
 	
 label
 	: synthetic_label_id ':'
-	| location? identifier ':'
+		{ $$.m_str = new M_TO_STR($n0); }
+	| location identifier ':'
+		{ $$.m_str = new M_TO_STR($n1); }
+	| identifier ':'
+		{ $$.m_str = new M_TO_STR($n0); }
 	;
 
 switch
@@ -323,6 +335,7 @@ var_id
 	
 synthetic_label_id
 	: '<' identifier_ssa '>'
+		{ $$.m_str = new M_TO_STR($n1); *($$.m_str) = "<" + *($$.m_str) + ">"; }
 	;
 
 /// Terminals.
@@ -336,5 +349,8 @@ literal_floating_point: "[0-9]+.[0-9]+(e[\+\-][0-9]+)?";
 string_literal: "\"([^\"\\]|\\[^])*\"";
 path: "[a-zA-Z0-9_\.\-\\\/]+" $term -1;
 identifier_ssa: "[a-zA-Z_][a-zA-Z0-9_]*.[0-9]+" $term -2;
-identifier: "[a-zA-Z_][a-zA-Z0-9_]*" $term -3;
+identifier
+	: "[a-zA-Z_][a-zA-Z0-9_]*" $term -3
+		{ $$.m_str = new M_TO_STR($n0); }
+	;
 comment: "\/\/[^\n]+";

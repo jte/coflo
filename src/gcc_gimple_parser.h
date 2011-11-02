@@ -30,6 +30,7 @@ class StatementBase;
 struct gcc_gimple_parser_ParseNode_User
 {
 	long m_int;
+	std::string *m_str;
 	Location *m_location;
 	StatementBase *m_statement;
 };
