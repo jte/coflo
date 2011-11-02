@@ -50,6 +50,14 @@ Location::Location(const std::string &location_string)
 	}
 }
 
+Location::Location(const std::string & file_name, long  line, long  column)
+{
+	m_passed_file_path = file_name;
+	m_absolute_file_path = m_passed_file_path;
+	m_line_number = line;
+	m_column = column;
+}
+
 Location::Location(const Location& orig)
 {
 	DeepCopy(orig);

@@ -44,6 +44,9 @@ public:
 	 */
 	explicit Location(const std::string &location_string);
 
+	Location(const std::string &file_name, long line, long column=-1);
+
+
 	/**
 	 * Copy constructor.
 	 *
