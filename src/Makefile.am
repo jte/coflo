@@ -76,6 +76,7 @@ SUFFIX = .g .gdebug
 	TARGET="$(srcdir)/$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
 	INTER="$(srcdir)/$$(basename "$<").gdebug" && \
-	make_dparser $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${TARGET}"
+	make_dparser $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${INTER}" && \
+	sed -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' $${INTER} > $${TARGET} 
 
 # make_dparser $(DPARSER_FLAGS) -R "$${SOURCE}" > "$${INTER}" && 

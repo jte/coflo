@@ -15,26 +15,22 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file Master header for the statements sub-library.
- */
+/** @file */
 
-#ifndef STATEMENTS_H
-#define STATEMENTS_H
-
-#include "Entry.h"
-#include "Exit.h"
 #include "FlowControlBase.h"
-#include "FunctionCall.h"
-#include "FunctionCallResolved.h"
-#include "FunctionCallUnresolved.h"
-#include "Goto.h"
-#include "If.h"
-#include "Merge.h"
-#include "NoOp.h"
-#include "Placeholder.h"
-#include "PseudoStatement.h"
-#include "StatementBase.h"
-#include "Switch.h"
 
-#endif /* STATEMENTS_H */
+FlowControlBase::FlowControlBase(const Location &location) : StatementBase(location)
+{
+
+}
+
+FlowControlBase::FlowControlBase(const FlowControlBase& orig) : StatementBase(orig)
+{
+
+}
+
+FlowControlBase::~FlowControlBase()
+{
+
+}
+
