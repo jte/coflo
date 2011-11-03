@@ -25,8 +25,8 @@ DISTCLEANFILES = atconfig
 MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 CLEANFILES = $(CPP_TEST_SOURCE)
      
-# This appears in the Autoconf/Autotest manual, but see configure.ac.
-# The "AM_MISSING_PROG([AUTOM4TE], [autom4te])" line takes care of that,
+# This line appears in the Autoconf/Autotest manual, but see configure.ac.
+# The "AM_MISSING_PROG([AUTOM4TE], [autom4te])" line takes care of this,
 # though the "AM_MISSING_PROG" macro is not documented.
 #AUTOM4TE = $(SHELL) $(top_srcdir)/build-aux/missing --run autom4te
 
