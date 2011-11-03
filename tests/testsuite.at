@@ -39,12 +39,18 @@ m4_define([AT_COFLO_CHECK],[
 		# no longer appears to exist and/or isn't executable by the current user on this system.
 		AT_XFAIL_IF([AS_VERSION_COMPARE([${GCC_VERSION_STRING_ARRAY@<:@GCC_INDEX@:>@}],[${MIN_GCC_VERSION}],[XF=1],[XF=0],[XF=0]) ; test $XF -eq 1])
 		AT_XFAIL_IF([test -x ${GCC_VERSION_STRING_ARRAY@<:@GCC_INDEX@:>@}])
+		# Capture the contents of the intermediate files if the test fails.
+		dnl AT_CAPTURE_FILE([test_source_file_1.c.coflo.gimple])
+		dnl AT_CAPTURE_FILE([test_source_file_2.c.coflo.gimple])
 		AT_CHECK([
-		USE_GCC_AT_PATH=@S|@{GCC_PATH_ARRAY@<:@GCC_INDEX@:>@}
+		USE_GCC_AT_PATH=$[]{GCC_PATH_ARRAY@<:@GCC_INDEX@:>@}
 		$1],$2,$3,$4,$5,$6)
 		# End this test group.
 		AT_CLEANUP])
 ])
+
+dnl @S|@ = "$"
+dnl @<:@ = "["
 
 ###
 ### Start of the test suite proper.
@@ -67,8 +73,8 @@ m4_include([version.at])
 AT_SETUP([Using default GCC against C code])
 
 # Capture the contents of the intermediate files if the test fails.
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_1.c.coflo.cfg])
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_2.c.coflo.cfg])
+AT_CAPTURE_FILE([test_source_file_1.c.coflo.gimple])
+AT_CAPTURE_FILE([test_source_file_2.c.coflo.gimple])
 
 AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --cfg=main],
 	0,
@@ -96,8 +102,8 @@ AT_BANNER([Compiler Compatibility Tests - C++ code])
 AT_SETUP([Using default GCC against C-style C++ code])
 
 # Capture the contents of the intermediate files if the test fails.
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_1.cpp.coflo.cfg])
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_2.cpp.coflo.cfg])
+AT_CAPTURE_FILE([test_source_file_1.cpp.coflo.gimple])
+AT_CAPTURE_FILE([test_source_file_2.cpp.coflo.gimple])
 
 AT_CHECK([coflo ${abs_top_builddir}/tests/test_source_file_1.cpp ${abs_top_builddir}/tests/test_source_file_2.cpp --cfg=main],
 	0,
@@ -126,7 +132,7 @@ AT_SETUP([Trying to generate CFG of main.cpp::main()])
 AT_XFAIL_IF([true])
 
 # Capture the contents of the intermediate files if the test fails.
-AT_CAPTURE_FILE([${abs_top_srcdir}/src/main.cpp.coflo.cfg])
+AT_CAPTURE_FILE([main.cpp.coflo.gimple])
 
 AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --cfg=main],
 	0,
@@ -145,8 +151,8 @@ AT_BANNER([CoFlo control flow graph analysis checks])
 AT_SETUP([Checking if CoFlo can detect reachability constraint violations])
 
 # Capture the contents of the intermediate files if the test fails.
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_1.c.coflo.cfg])
-AT_CAPTURE_FILE([${abs_top_srcdir}/tests/test_source_file_2.c.coflo.cfg])
+AT_CAPTURE_FILE([test_source_file_1.c.coflo.gimple])
+AT_CAPTURE_FILE([test_source_file_2.c.coflo.gimple])
 
 AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --constraint="main() -x another_level_deep()"],
 	0,
