@@ -20,9 +20,9 @@
 #ifndef IF_H
 #define	IF_H
 
-#include "StatementBase.h"
+#include "FlowControlBase.h"
 
-class If : public StatementBase
+class If : public FlowControlBase
 {
 public:
 	If(const Location &location);

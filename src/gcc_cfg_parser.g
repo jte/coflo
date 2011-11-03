@@ -26,6 +26,7 @@
 #include "gcc_gimple_parser.h"
 
 #include "Location.h"
+#include "controlflowgraph/statements/statements.h"
 
 #define D_ParseNode_User gcc_gimple_parser_ParseNode_User
 
@@ -144,7 +145,7 @@ statement_list
 	;
 	
 statement
-	: location? statement_one_line ';'
+	: statement_one_line ';'
 	| location comment
 		{ std::cout << "Ignoring comment" << std::endl; }
 	| location? statement_possibly_split_across_lines
@@ -158,12 +159,20 @@ post_one_line_statement_text
 	;
 	
 statement_one_line
-	: assignment
-	| 'return' var_id
-	| 'return'
+	: location? assignment
+	| location? 'return' var_id
+	| location? 'return'
 	| function_call
+	| goto_statement
+		{ std::cout << "STATEMENT GOTO: " << $0.m_statement->GetStatementTextDOT() << std::endl; }
+	;
+	
+// A goto that's not part of another statement such as "if" or "switch", but is a stand-alone statement.
+goto_statement
+	: location goto
+		{ $$.m_statement = new Goto(*($0.m_location)); }
 	| goto
-		{ std::cout << "STATEMENT GOTO: " << *($0.m_str) << std::endl; }
+		{ $$.m_statement = new Goto(Location("UNKNOWN", 0, 0)); }
 	;
 	
 statement_possibly_split_across_lines
@@ -186,7 +195,7 @@ assignment
 	| lhs '=' rhs '/' rhs
 	| lhs '=' rhs '%' rhs
 	| lhs '=' '(' decl_spec+ ')' rhs
-	| lhs '=' location? function_call
+	| lhs '=' function_call
 	| lhs '=' 'MIN_EXPR' '<' fc_param_list '>'
 	| lhs '=' condition
 	;
@@ -217,11 +226,12 @@ condition
 	;
 	
 function_call
-	: identifier '(' fc_param_list? ')'
+	: location identifier '(' fc_param_list? ')'
 		{
 			std::cout << "Function Call: " << M_TO_STR($n0) << std::endl;
 			std::cout << "   Param list: " << M_TO_STR($n2) << std::endl; 
 		} 
+	| identifier '(' fc_param_list? ')'
 	;
 
 goto

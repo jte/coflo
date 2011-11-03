@@ -57,6 +57,8 @@ edge_return_value_t ReachabilityVisitor::tree_edge(T_CFG_EDGE_DESC e)
 	// Add this edge to the predecessor list.
 	//std::cout << "push " << e << std::endl;
 	m_predecessor_list->push_back(e);
+
+	return edge_return_value_t::ok;
 }
 
 vertex_return_value_t ReachabilityVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
