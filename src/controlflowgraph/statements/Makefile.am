@@ -28,6 +28,7 @@ libstatements_a_SOURCES = statements.h \
     If.cpp If.h \
     Merge.cpp Merge.h \
     NoOp.cpp NoOp.h \
+    ParseHelpers.cpp ParseHelpers.h \
     Placeholder.cpp Placeholder.h \
     PseudoStatement.cpp PseudoStatement.h \
     StatementBase.cpp StatementBase.h \

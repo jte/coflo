@@ -35,6 +35,11 @@ class Location
 public:
 
 	/**
+	 * Default constructor, creates an "UNKNOWN" location.
+	 */
+	Location();
+
+	/**
 	 * Constructor which takes a string with the following format as a parameter:
 	 * "[filepath : line_no(:column_no)?]".
 	 *

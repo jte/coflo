@@ -26,6 +26,15 @@
 /// Capture 1 is the path, 2 is the line number, and 3 is the possibly-missing column number.
 static const boost::regex f_location_expression("\\[([^\\]]*?)[[:space:]]\\:[[:space:]]([[:digit:]]+)(?:[[:space:]]?\\:[[:space:]]?([[:digit:]]+))?\\]");
 
+
+Location::Location()
+{
+	m_passed_file_path = "UNKNOWN";
+	m_absolute_file_path = m_passed_file_path;
+	m_line_number = 0;
+	m_column = -1;
+}
+
 Location::Location(const std::string &location_string)
 {
 	boost::cmatch capture_results;

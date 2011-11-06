@@ -18,9 +18,9 @@
 #ifndef SWITCH_H
 #define	SWITCH_H
 
-#include "StatementBase.h"
+#include "FlowControlBase.h"
 
-class Switch : public StatementBase
+class Switch : public FlowControlBase
 {
 public:
 	Switch(const Location &location);
