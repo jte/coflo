@@ -31,6 +31,7 @@ class Function;
 class FunctionCall;
 class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+struct FunctionInfo;
 
 /**
  * Class representing a single source file.
@@ -104,6 +105,8 @@ private:
 	void CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,
 						 const std::vector< std::string > &defines,
 						const std::vector< std::string > &include_paths);
+
+	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list);
 
 	/// The source filename.
 	boost::filesystem::path m_source_filename;

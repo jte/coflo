@@ -32,6 +32,7 @@ public:
 	Label(const Label& orig);
 	virtual ~Label();
 
+	virtual std::string GetIdentifier() const { return m_identifier; };
 	virtual std::string GetStatementTextDOT() const { return m_identifier; };
 	virtual std::string GetIdentifierCFG() const { return m_identifier; };
 

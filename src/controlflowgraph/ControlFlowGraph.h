@@ -216,6 +216,9 @@ public:
 	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 	//@}
 
+	T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
+	T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEDGETypeBase *edge_type);
+
 	/// @name Edge attribute accessors.
 	//@{
 
