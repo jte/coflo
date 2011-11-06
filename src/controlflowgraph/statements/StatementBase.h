@@ -69,14 +69,15 @@ public:
      */
 	virtual std::string GetDotSVGColor() const { return "black"; };
 
+	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
+
 	/**
 	 * Returns the Location corresponding to this StatementBase.
 	 * 
      * @return The Location of the StatementBase.
      */
 	const Location GetLocation() const { return m_location; };
-	
-	virtual std::string GetShapeTextDOT() const { return "rectangle"; };
+
 	
 	/// @name Functions for returning info about the statement.
 	//@{

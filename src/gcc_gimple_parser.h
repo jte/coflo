@@ -18,6 +18,9 @@
 #ifndef GCC_GIMPLE_PARSER_H
 #define GCC_GIMPLE_PARSER_H
 
+#include <vector>
+#include <string>
+
 /// Forward declaration of the parse node struct.
 struct D_ParseNode;
 struct D_Parser;
@@ -25,6 +28,24 @@ struct D_Parser;
 // Forward declarations for the User data.
 class Location;
 class StatementBase;
+class TranslationUnit;
+
+struct StatementListEntry
+{
+	StatementBase *m_statement;
+	std::vector< std::string > m_jump_targets;
+
+	explicit StatementListEntry(StatementBase* sbp) { m_statement = sbp; };
+	void AddJumpTarget(const std::string &s) { m_jump_targets.push_back(s); };
+};
+
+struct gcc_gimple_parser_ParseNode_Globals
+{
+	TranslationUnit *m_translation_unit;
+};
+
+typedef std::vector<StatementListEntry*> StatementList;
+typedef std::vector< std::string > StringList;
 
 /// Type of the object that gets passed through the parse tree.
 struct gcc_gimple_parser_ParseNode_User
@@ -33,6 +54,8 @@ struct gcc_gimple_parser_ParseNode_User
 	std::string *m_str;
 	Location *m_location;
 	StatementBase *m_statement;
+	StatementList *m_statement_list;
+	StringList *m_string_list;
 };
 
 D_Parser* new_gcc_gimple_Parser();

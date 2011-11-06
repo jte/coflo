@@ -17,20 +17,5 @@
 
 /** @file */
 
-#ifndef FLOWCONTROLBASE_H
-#define FLOWCONTROLBASE_H
+#include "ParseHelpers.h"
 
-#include "StatementBase.h"
-
-/**
- * Base class for any statements which modify the control flow.
- */
-class FlowControlBase: public StatementBase
-{
-public:
-	FlowControlBase(const Location &location);
-	FlowControlBase(const FlowControlBase& orig);
-	virtual ~FlowControlBase();
-};
-
-#endif /* FLOWCONTROLBASE_H */

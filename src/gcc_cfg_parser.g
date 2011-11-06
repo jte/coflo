@@ -28,15 +28,20 @@
 #include "Location.h"
 #include "controlflowgraph/statements/statements.h"
 
+#define D_ParseNode_Globals gcc_gimple_parser_ParseNode_Globals
 #define D_ParseNode_User gcc_gimple_parser_ParseNode_User
 
 #include <dparse.h>
+
+// Redefine this with C++ casts.
+#define D_PN(_x, _o) (reinterpret_cast<D_ParseNode*>(static_cast<char*>(_x) + _o))
 
 extern D_ParserTables parser_tables_gcc_cfg_parser;
 
 void gcc_cfg_parser_FreeNodeFn(D_ParseNode *d);
 
 #define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
+#define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
 
 D_Parser* new_gcc_gimple_Parser()
 {
@@ -70,11 +75,25 @@ void free_gcc_gimple_Parser(D_Parser *parser)
 	free_D_Parser(parser);
 }
 
-void gcc_cfg_parser_FreeNodeFn(struct D_ParseNode *d)
+void gcc_cfg_parser_FreeNodeFn(D_ParseNode *d)
 {
 	//std::cout << "FREE NODE" << std::endl;
 }
 
+
+void StatementListPrint(StatementList *the_list)
+{
+	StatementList::iterator it;
+	for(it = the_list->begin(); it != the_list->end(); ++it)
+	{
+		std::cout << "Ptr = " << (*it)->m_statement;
+		if((*it)->m_statement != NULL)
+		{
+			std::cout << " : " << (*it)->m_statement->GetIdentifierCFG();
+		}
+		std::cout << std::endl;
+	}
+}
 
 }
 
@@ -96,24 +115,42 @@ file_contents
 	;
 
 function_definition
-	: identifier '(' ')' NL location '{' NL (declaration_list NL)? statement_list? '}'
+	// C code.
+	: identifier '(' ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
 			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
-			std::cout << "  Location: " << *($4.m_location) << std::endl; 
+			std::cout << "  Location: " << *($4.m_location) << std::endl;
+			std::cout << "  Num Statements: " << $8.m_statement_list->size() << std::endl;
+			StatementListPrint($8.m_statement_list);
 		}
-	| identifier '(' param_decls? ')' NL location '{' NL (declaration_list NL)? statement_list? '}'
-		{std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;} 
+	| identifier '(' param_decls? ')' NL location '{' NL (declaration_list NL)? statement_list '}'
+		{
+			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
+			std::cout << "  Location: " << *($5.m_location) << std::endl;
+			std::cout << "  Num Statements: " << $9.m_statement_list->size() << std::endl;
+			StatementListPrint($9.m_statement_list);
+		}
+	// C++ code.
+	| decl_spec+ identifier '(' param_decls? ')' '(' param_decls? ')' NL location '{' NL (declaration_list NL)? statement_list '}'
+		{
+			std::cout << "Found C++ style function definition: " << M_TO_STR($n1) << std::endl;
+			StatementListPrint($14.m_statement_list);
+		}
 	;
 
 location
 	: '[' path ':' integer ':' integer ']'
-		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int, $5.m_int) ; std::cout << *($$.m_location) << std::endl; }
+		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int, $5.m_int); }
 	| '[' path ':' integer ']'
-		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int) ; std::cout << *($$.m_location) << std::endl; }
+		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int); }
+	| /* No location. */
+		{
+			$$.m_location = new Location("UNKNOWN",0);
+		}
 	;
 	
 param_decls
-	: decl_spec* identifier (',' decl_spec* identifier)*
+	: decl_spec+ identifier? (',' decl_spec+ identifier?)*
 	;
 
 declaration_list
@@ -127,7 +164,7 @@ declaration
 	
 var_declaration
 	: decl_spec+ var_id declarator_suffix* ('=' constant)? ';'
-		{ std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl; }
+		{ /*std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;*/ }
 	;
 	
 declarator_suffix
@@ -136,22 +173,38 @@ declarator_suffix
 	
 local_function_declaration
 	: decl_spec+ identifier '(void)' ';'
-		{ std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl; }
+		{ /*std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;*/ }
 	;
 
 statement_list
-	: (statement NL)+
-		{ /*std::cout << $n0 << std::endl;*/ }
+	: statement_list statement NL
+		{
+			/*std::cout << "STATEMENT: \"" << M_TO_STR($n1) << "\"" << std::endl;*/
+			$0.m_statement_list->push_back(new StatementListEntry($1.m_statement));
+			M_PROPAGATE_PTR($0, $$, m_statement_list);
+		}
+	| statement NL
+		{ 
+			/*std::cout << "STATEMENT: \"" << M_TO_STR($n0) << "\"" << std::endl;*/
+			$$.m_statement_list = new StatementList;
+			$$.m_statement_list->push_back(new StatementListEntry($0.m_statement));
+		}
+	| /* Nothing */
+		{
+			/*std::cout << "NO STATEMENT" << std::endl;*/
+		}
 	;
 	
 statement
 	: statement_one_line ';'
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| location comment
-		{ std::cout << "Ignoring comment" << std::endl; }
-	| location? statement_possibly_split_across_lines
+		{ std::cout << "Ignoring comment" << std::endl; $$.m_statement = NULL; }
+	| statement_possibly_split_across_lines
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| scope
 	| label ';'?
-		{ std::cout << "STATEMENT LABEL: " << *($0.m_str) << std::endl; }
+		{ /*std::cout << "STATEMENT LABEL: " << *($0.m_str) << std::endl;*/ }
 	;
 	
 post_one_line_statement_text
@@ -159,28 +212,34 @@ post_one_line_statement_text
 	;
 	
 statement_one_line
-	: location? assignment
-	| location? 'return' var_id
-	| location? 'return'
+	: assignment
+	| return_statement
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| function_call
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| goto_statement
-		{ std::cout << "STATEMENT GOTO: " << $0.m_statement->GetStatementTextDOT() << std::endl; }
+		{ M_PROPAGATE_PTR($0, $$, m_statement);	}
 	;
 	
 // A goto that's not part of another statement such as "if" or "switch", but is a stand-alone statement.
-goto_statement
+/*goto_statement
 	: location goto
-		{ $$.m_statement = new Goto(*($0.m_location)); }
-	| goto
-		{ $$.m_statement = new Goto(Location("UNKNOWN", 0, 0)); }
+		{ $$.m_statement = new Goto(*($1.m_location)); }
+	;
+	*/
+return_statement
+	: location 'return' var_id
+	| location 'return'
 	;
 	
 statement_possibly_split_across_lines
 	: if
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| switch
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	/*| comment*/
 	;
-	
+
 assignment
 	: lhs '=' rhs '>>' rhs
 	| lhs '=' rhs '<<' rhs
@@ -201,19 +260,21 @@ assignment
 	;
 	
 if
-	: 'if' '(' location? condition ')' '{' statement* '}' ('else' '{' statement* '}')?
 	// The style used in 4.5.3.
-	| 'if' '(' condition ')' goto ';' 'else' goto ';'
-		{ std::cout << "DECISION NODE: IF\n"
-			<< "  Condition: " << M_TO_STR($n2) << "\n"
-			<< "  TRUE GOTO: " << *($4.m_str) << "\n"
-			<< "  FALSE GOTO: " << *($7.m_str) << "\n"
-			<< std::endl;
+	: location 'if' '(' condition ')' goto_statement ';' 'else' goto_statement ';'
+		{
+			$$.m_statement_list = new StatementList();
+			StatementListEntry *sb = new StatementListEntry(new FlowControlUnlinked(*($0.m_location),
+					dynamic_cast<GotoUnlinked*>($5.m_statement),
+					dynamic_cast<GotoUnlinked*>($8.m_statement))
+				);
+			/// @todo Get condition in here.
+			$$.m_statement_list->push_back(sb);
 		}
 	;
 	
 scope
-	: location? '{' NL declaration_list? NL statement_list? '}'
+	: location '{' NL declaration_list? NL statement_list '}'
 	;
 	
 condition
@@ -228,17 +289,24 @@ condition
 function_call
 	: location identifier '(' fc_param_list? ')'
 		{
-			std::cout << "Function Call: " << M_TO_STR($n0) << std::endl;
-			std::cout << "   Param list: " << M_TO_STR($n2) << std::endl; 
+			/*std::cout << "Function Call: " << M_TO_STR($n1) << std::endl;
+			std::cout << "   Param list: " << M_TO_STR($n3) << std::endl;*/
+			$$.m_statement = new FunctionCallUnresolved(M_TO_STR($n1), *($0.m_location), M_TO_STR($n3));
 		} 
 	| identifier '(' fc_param_list? ')'
 	;
 
-goto
-	: 'goto' synthetic_label_id
-		{ $$.m_str = $1.m_str; }
-	| 'goto' identifier
-		{ $$.m_str = $1.m_str; }
+goto_statement
+	: location 'goto' synthetic_label_id
+		{
+			/*$$.m_str = $2.m_str;*/
+			$$.m_statement = new GotoUnlinked(*($0.m_location), *($2.m_str));
+		}
+	| location 'goto' identifier
+		{
+			/*$$.m_str = $2.m_str;*/
+			$$.m_statement = new GotoUnlinked(*($0.m_location), *($2.m_str));
+		}
 	;
 	
 label
@@ -246,26 +314,61 @@ label
 		{ $$.m_str = new M_TO_STR($n0); }
 	| location identifier ':'
 		{ $$.m_str = new M_TO_STR($n1); }
-	| identifier ':'
-		{ $$.m_str = new M_TO_STR($n0); }
 	;
 
 switch
-	: 'switch' '(' rhs ')' '{' case* '}'
+	: location 'switch' '(' rhs ')' switch_case_list
+		{
+			$$.m_statement = new SwitchUnlinked(*($0.m_location));
+			$0.m_location = NULL;
+			
+			StatementList::iterator it;
+			for(it=$5.m_statement_list->begin(); it != $5.m_statement_list->end(); ++it)
+			{
+				dynamic_cast<SwitchUnlinked*>($$.m_statement)->InsertCase(dynamic_cast<CaseUnlinked*>((*it)->m_statement));
+			}
+		}
+	;
+	
+switch_case_list
 	// Style used in 4.5.3.
-	| 'switch' '(' rhs ')' '<' case_453 (',' case_453)* '>'
+	: '<' switch_case_list_453  '>'
+		{ M_PROPAGATE_PTR($1, $$, m_statement_list); }
+	// Style used in ??? (4.5.2?)
+	| '{' case* '}'
+		{ std::cerr << "SWITCH CASE STYLE UNIMPLEMENTED" << std::endl; }
+	;
+
+switch_case_list_453
+	: switch_case_list_453 ',' case_453
+		{
+			$0.m_statement_list->push_back(new StatementListEntry($1.m_statement));
+			M_PROPAGATE_PTR($0, $$, m_statement_list);
+		}
+	| case_453
+		{
+			$$.m_statement_list = new StatementList;
+			StatementListEntry *sb = new StatementListEntry($0.m_statement);
+			$$.m_statement_list->push_back(sb);
+		}
 	;
 
 /************************/
 
 case
-	: location? 'case' rhs ':' goto ';'
-	| location? 'default' ':' goto ';'
+	: location 'case' rhs ':' goto_statement ';'
+	| location 'default:' goto_statement ';'
 	;
 	
 case_453
-	: location? 'case' rhs ':' synthetic_label_id
-	| location? 'default' ':' synthetic_label_id
+	: location 'case' rhs ':' synthetic_label_id
+		{
+			$$.m_statement = new CaseUnlinked(*($0.m_location), *($4.m_str));
+		}
+	| location 'default:' synthetic_label_id
+		{
+			$$.m_statement = new CaseUnlinked(*($0.m_location), *($2.m_str));
+		}
 	;
 
 fc_param_list
@@ -308,7 +411,7 @@ lhs
 	;
 	
 rhs
-	: location? unary_expression
+	: location unary_expression
 	;
 	
 unary_expression

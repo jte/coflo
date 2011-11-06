@@ -32,6 +32,7 @@
 #include "If.h"
 #include "Merge.h"
 #include "NoOp.h"
+#include "ParseHelpers.h"
 #include "Placeholder.h"
 #include "PseudoStatement.h"
 #include "StatementBase.h"
