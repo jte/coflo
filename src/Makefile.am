@@ -42,7 +42,7 @@ coflo_SOURCES = main.cpp \
 	TranslationUnit.cpp TranslationUnit.h \
 	safe_enum.h \
 	\
-	gcc_cfg_parser.g gcc_gimple_parser.h
+	gcc_gimple_parser.g gcc_gimple_parser.h
 	
 #BUILT_SOURCES = gcc_cfg_parser.g.d_parser.cpp
 #parse_SOURCES = gcc_cfg_parser.g 
@@ -62,16 +62,13 @@ coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./libexttools/libexttools.a \
 	/usr/local/lib/libdparse.a \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
-	
 
-# Rule to make gcc_cfg_parser.cpp from gcc_cfg_parser.g.
-# Note that the output file is built source, but we don't want the user to have to have dparser installed,
-# so it gets distributed.
-#$(srcdir)/gcc_cfg_parser.g.d_parser.cpp: $(srcdir)/gcc_cfg_parser.g
-#	 make_dparser $(DPARSER_FLAGS) "$<"
 
 SUFFIX = .g .gdebug
 
+# Rule to make *.cpp from *.g using DParser.
+# Note that the output file is built source, but we don't want the user to have to have dparser installed,
+# so it gets distributed.
 .g.cpp:
 	TARGET="$(srcdir)/$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
