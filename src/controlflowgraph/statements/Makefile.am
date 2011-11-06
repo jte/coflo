@@ -26,6 +26,7 @@ libstatements_a_SOURCES = statements.h \
     FunctionCallUnresolved.cpp FunctionCallUnresolved.h \
     Goto.cpp Goto.h \
     If.cpp If.h \
+    Label.cpp Label.h \
     Merge.cpp Merge.h \
     NoOp.cpp NoOp.h \
     ParseHelpers.cpp ParseHelpers.h \

@@ -30,23 +30,24 @@ class Location;
 class StatementBase;
 class TranslationUnit;
 
-struct StatementListEntry
-{
-	StatementBase *m_statement;
-	std::vector< std::string > m_jump_targets;
 
-	explicit StatementListEntry(StatementBase* sbp) { m_statement = sbp; };
-	void AddJumpTarget(const std::string &s) { m_jump_targets.push_back(s); };
+typedef std::vector< StatementBase*> StatementList;
+typedef std::vector< std::string > StringList;
+
+struct FunctionInfo
+{
+	Location *m_location;
+	std::string *m_identifier;
+	StatementList *m_statement_list;
 };
+
+typedef std::vector< FunctionInfo* > FunctionInfoList;
 
 struct gcc_gimple_parser_ParseNode_Globals
 {
 	TranslationUnit *m_translation_unit;
+	FunctionInfoList *m_function_info_list;
 };
-
-typedef std::vector<StatementListEntry*> StatementList;
-typedef std::vector< std::string > StringList;
-
 /// Type of the object that gets passed through the parse tree.
 struct gcc_gimple_parser_ParseNode_User
 {
@@ -56,11 +57,15 @@ struct gcc_gimple_parser_ParseNode_User
 	StatementBase *m_statement;
 	StatementList *m_statement_list;
 	StringList *m_string_list;
+	FunctionInfo *m_function_info;
+	FunctionInfoList *m_function_info_list;
 };
 
 D_Parser* new_gcc_gimple_Parser();
 D_ParseNode* gcc_gimple_dparse(D_Parser *parser, char* buffer, long length);
 long gcc_gimple_parser_GetSyntaxErrorCount(D_Parser *parser);
+gcc_gimple_parser_ParseNode_User* gcc_gimple_parser_GetUserInfo(D_ParseNode *tree);
+gcc_gimple_parser_ParseNode_Globals* gcc_gimple_parser_GetGlobalInfo(D_ParseNode *tree);
 void free_gcc_gimple_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree);
 void free_gcc_gimple_Parser(D_Parser *parser);
 
