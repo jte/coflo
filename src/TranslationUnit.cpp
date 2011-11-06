@@ -176,6 +176,10 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 
 		std::cout << "FIL ptr = " << fil << std::endl;
 		//print_parsetree(parser_tables_gcc_cfg_parser, tree, NULL, NULL);
+
+		// Build the Functions out of the info obtained from the parsing.
+		std::cout << "Building Functions..." << std::endl;
+		BuildFunctionsFromThreeAddressFormStatementLists(*fil);
 	}
 	else
 	{
@@ -409,3 +413,79 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 		exit(1);
 	}
 }
+
+void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > & function_info_list)
+{
+	typedef std::map< std::string, Label*> LabelMap;
+
+	// Go through each FunctionInfo.
+	BOOST_FOREACH(FunctionInfo *fi, function_info_list)
+	{
+
+		std::cout << "Processing FunctionInfo for function \"" << *(fi->m_identifier) << "\"..." << std::endl;
+
+		// Create the function.
+		Function *f = new Function(this, *(fi->m_identifier));
+
+		// Add the new function to the list.
+		m_function_defs.push_back(f);
+
+		LabelMap label_map;
+
+		// Find all the labels in the function.
+		BOOST_FOREACH(StatementBase *sbp, *(fi->m_statement_list))
+		{
+			if(sbp->IsType<Label>())
+			{
+				// This is a label, add it to the map.
+				Label *lp = dynamic_cast<Label*>(sbp);
+				if(label_map.count(lp->GetIdentifier()) != 0)
+				{
+					// There shouldn't be a label with this name already in the map.
+					std::cerr << "WARNING: Detected duplicate label \"" << lp->GetIdentifier()
+							<< "\"in function \"" << fi->m_identifier << "\"" << std::endl;
+				}
+				label_map[lp->GetIdentifier()] = lp;
+				std::cout << "Added label " << lp->GetIdentifier() << std::endl;
+			}
+		}
+
+		/// @todo
+		ControlFlowGraph m_CFG;
+		T_CFG *m_cfg = &m_CFG.GetT_CFG();
+
+		T_CFG_VERTEX_DESC prev_vertex, entry_vertex, exit_vertex;
+
+		// Add the ENTRY and EXIT vertices.
+		Entry *entry_ptr = new Entry(Location("[" + f->GetDefinitionFilePath() + " : 0]"));
+		Exit *exit_ptr = new Exit("[" + f->GetDefinitionFilePath() + " : 0]");
+
+		entry_vertex = m_CFG.AddVertex(entry_ptr, f);
+		exit_vertex = m_CFG.AddVertex(exit_ptr, f);
+
+		prev_vertex = entry_vertex;
+
+		// Add all the statements to the function.
+		BOOST_FOREACH(StatementBase *sbp, *(fi->m_statement_list))
+		{
+			// Add this Statement to the Control Flow Graph.
+			T_CFG_VERTEX_DESC vid;
+			vid = m_CFG.AddVertex(sbp, f);
+
+			// See what kind of edge we need to add.
+			/// @todo
+			m_CFG.AddEdge(prev_vertex, vid, new CFGEDGETypeFallthrough());
+
+			// Now this vertex is the previous vertex.
+			prev_vertex = vid;
+		}
+
+		if(1 /** @todo The last statement wasn't a flow control statement */)
+		{
+			// Add an edge to the EXIT vertex.
+			m_CFG.AddEdge(prev_vertex, exit_vertex, new CFGEDGETypeFallthrough());
+		}
+	}
+}
+
+

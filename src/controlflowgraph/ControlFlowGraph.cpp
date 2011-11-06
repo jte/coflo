@@ -329,6 +329,29 @@ void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_
 {
 }
 
+T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function *containing_function)
+{
+	T_CFG_VERTEX_DESC retval;
+
+	retval = boost::add_vertex(m_cfg);
+	m_cfg[retval].m_statement = statement;
+	m_cfg[retval].m_containing_function = containing_function;
+
+	return retval;
+}
+
+T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEDGETypeBase *edge_type)
+{
+	T_CFG_EDGE_DESC eid;
+	bool ok;
+
+	boost::tie(eid, ok) = boost::add_edge(source, target, m_cfg);
+	// Since this edge is within the block, it is just a fallthrough.
+	m_cfg[eid].m_edge_type = edge_type;
+
+	return eid;
+}
+
 void ControlFlowGraph::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)
 {
 }
