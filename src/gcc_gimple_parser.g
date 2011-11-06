@@ -43,6 +43,9 @@ void gcc_cfg_parser_FreeNodeFn(D_ParseNode *d);
 #define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
 #define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
 
+// The globals.
+static gcc_gimple_parser_ParseNode_Globals TheGlobals;
+
 D_Parser* new_gcc_gimple_Parser()
 {
 	D_Parser *parser = new_D_Parser(&parser_tables_gcc_cfg_parser, sizeof(D_ParseNode_User));
@@ -63,6 +66,16 @@ D_ParseNode* gcc_gimple_dparse(D_Parser *parser, char* buffer, long length)
 long gcc_gimple_parser_GetSyntaxErrorCount(D_Parser *parser)
 {
 	return parser->syntax_errors;
+}
+
+gcc_gimple_parser_ParseNode_User* gcc_gimple_parser_GetUserInfo(D_ParseNode *tree)
+{
+	return &(tree->user);
+}
+
+gcc_gimple_parser_ParseNode_Globals* gcc_gimple_parser_GetGlobalInfo(D_ParseNode *tree)
+{
+	return &TheGlobals;
 }
 
 void free_gcc_gimple_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree)
@@ -86,10 +99,10 @@ void StatementListPrint(StatementList *the_list)
 	StatementList::iterator it;
 	for(it = the_list->begin(); it != the_list->end(); ++it)
 	{
-		std::cout << "Ptr = " << (*it)->m_statement;
-		if((*it)->m_statement != NULL)
+		std::cout << "Ptr = " << (*it);
+		if((*it) != NULL)
 		{
-			std::cout << " : " << (*it)->m_statement->GetIdentifierCFG();
+			std::cout << " : " << (*it)->GetIdentifierCFG();
 		}
 		std::cout << std::endl;
 	}
@@ -101,40 +114,56 @@ void StatementListPrint(StatementList *the_list)
 
 /// Nonterminals.
 
-gcc_cfg_file
+gcc_gimple_file
 	: {
 		//$g = copy_globals($g);
 		//$g->dummy_deleteme = &dummy_deleteme;
-		std::cout << "gcc_cfg_file" << std::endl;
-	} file_contents+
+		std::cout << "gcc_gimple_file" << std::endl;
+	} function_definition_list
+		{
+			std::cout << "DONE" << std::endl;
+			TheGlobals.m_function_info_list = $1.m_function_info_list;
+			M_PROPAGATE_PTR($1, $$, m_function_info_list);
+		}
 	;
 
-file_contents
-	: function_definition
-	| NL
+function_definition_list
+	: function_definition_list function_definition NL+
+		{
+			$0.m_function_info_list->push_back($1.m_function_info);
+			M_PROPAGATE_PTR($0, $$, m_function_info_list);
+			std::cout << "PROP FIL = " << $$.m_function_info_list << std::endl;
+		}
+	| function_definition NL+
+		{
+			$$.m_function_info_list = new FunctionInfoList;
+			std::cout << "NEW FIL = " << $$.m_function_info_list << std::endl;
+			$$.m_function_info_list->push_back($0.m_function_info);
+		}
 	;
 
 function_definition
 	// C code.
-	: identifier '(' ')' NL location '{' NL (declaration_list NL)? statement_list '}'
-		{
-			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
-			std::cout << "  Location: " << *($4.m_location) << std::endl;
-			std::cout << "  Num Statements: " << $8.m_statement_list->size() << std::endl;
-			StatementListPrint($8.m_statement_list);
-		}
-	| identifier '(' param_decls? ')' NL location '{' NL (declaration_list NL)? statement_list '}'
+	: identifier '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
 			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
 			std::cout << "  Location: " << *($5.m_location) << std::endl;
 			std::cout << "  Num Statements: " << $9.m_statement_list->size() << std::endl;
 			StatementListPrint($9.m_statement_list);
+			$$.m_function_info = new FunctionInfo;
+			$$.m_function_info->m_location = $5.m_location;
+			$$.m_function_info->m_identifier = $0.m_str;
+			$$.m_function_info->m_statement_list = $9.m_statement_list;
 		}
 	// C++ code.
-	| decl_spec+ identifier '(' param_decls? ')' '(' param_decls? ')' NL location '{' NL (declaration_list NL)? statement_list '}'
+	| decl_spec+ identifier '(' param_decls_list ')' '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
 			std::cout << "Found C++ style function definition: " << M_TO_STR($n1) << std::endl;
-			StatementListPrint($14.m_statement_list);
+			StatementListPrint($13.m_statement_list);
+			$$.m_function_info = new FunctionInfo;
+			$$.m_function_info->m_location = $9.m_location;
+			$$.m_function_info->m_identifier = $1.m_str;
+			$$.m_function_info->m_statement_list = $13.m_statement_list;
 		}
 	;
 
@@ -149,8 +178,25 @@ location
 		}
 	;
 	
+param_decls_list
+	: param_decls_list ',' param_decls
+		{
+			$0.m_statement_list->push_back(NULL);
+			M_PROPAGATE_PTR($0, $$, m_statement_list);
+		}
+	| param_decls
+		{ 
+			$$.m_statement_list = new StatementList;
+			$$.m_statement_list->push_back(NULL);
+		}
+	| /* Nothing */
+		{
+
+		}
+	;
+	
 param_decls
-	: decl_spec+ identifier? (',' decl_spec+ identifier?)*
+	: decl_spec+ identifier?
 	;
 
 declaration_list
@@ -179,19 +225,16 @@ local_function_declaration
 statement_list
 	: statement_list statement NL
 		{
-			/*std::cout << "STATEMENT: \"" << M_TO_STR($n1) << "\"" << std::endl;*/
-			$0.m_statement_list->push_back(new StatementListEntry($1.m_statement));
+			$0.m_statement_list->push_back($1.m_statement);
 			M_PROPAGATE_PTR($0, $$, m_statement_list);
 		}
 	| statement NL
 		{ 
-			/*std::cout << "STATEMENT: \"" << M_TO_STR($n0) << "\"" << std::endl;*/
 			$$.m_statement_list = new StatementList;
-			$$.m_statement_list->push_back(new StatementListEntry($0.m_statement));
+			$$.m_statement_list->push_back($0.m_statement);
 		}
 	| /* Nothing */
 		{
-			/*std::cout << "NO STATEMENT" << std::endl;*/
 		}
 	;
 	
@@ -203,8 +246,10 @@ statement
 	| statement_possibly_split_across_lines
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| scope
-	| label ';'?
-		{ /*std::cout << "STATEMENT LABEL: " << *($0.m_str) << std::endl;*/ }
+	| label_statement ';'?
+		{
+			M_PROPAGATE_PTR($0, $$, m_statement);
+		}
 	;
 	
 post_one_line_statement_text
@@ -212,7 +257,8 @@ post_one_line_statement_text
 	;
 	
 statement_one_line
-	: assignment
+	: assignment_statement
+		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| return_statement
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| function_call
@@ -221,15 +267,15 @@ statement_one_line
 		{ M_PROPAGATE_PTR($0, $$, m_statement);	}
 	;
 	
-// A goto that's not part of another statement such as "if" or "switch", but is a stand-alone statement.
-/*goto_statement
-	: location goto
-		{ $$.m_statement = new Goto(*($1.m_location)); }
-	;
-	*/
 return_statement
 	: location 'return' var_id
+		{
+			$$.m_statement = new ReturnUnlinked(*($0.m_location), M_TO_STR($n2));
+		}
 	| location 'return'
+		{
+			$$.m_statement = new ReturnUnlinked(*($0.m_location), "");
+		}
 	;
 	
 statement_possibly_split_across_lines
@@ -240,36 +286,56 @@ statement_possibly_split_across_lines
 	/*| comment*/
 	;
 
-assignment
-	: lhs '=' rhs '>>' rhs
-	| lhs '=' rhs '<<' rhs
-	| lhs '=' rhs '|' rhs
-	| lhs '=' rhs '&' rhs
-	| lhs '=' location? rhs
+bitwise_binary_operator
+	: '>>'
+	| '<<'
+	| '|'
+	| '&'
+	| '^'
+	;
+	
+logical_binary_operator
+	: '&&'
+	| '||'
+	;
+	
+arithmetic_binary_operator
+	: '+'
+	| '-'
+	| '*'
+	| '/'
+	| '%'
+	;
+
+assignment_statement
+	: lhs '=' rhs bitwise_binary_operator rhs
+		{ $$.m_statement = new Placeholder(Location()); }
+	| lhs '=' rhs
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '~' rhs
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '-' rhs
-	| lhs '=' rhs '+' rhs
-	| lhs '=' rhs '-' rhs
-	| lhs '=' rhs '*' rhs
-	| lhs '=' rhs '/' rhs
-	| lhs '=' rhs '%' rhs
+		{ $$.m_statement = new Placeholder(Location()); }
+	| lhs '=' rhs arithmetic_binary_operator rhs
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '(' decl_spec+ ')' rhs
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' function_call
+		{ M_PROPAGATE_PTR($2, $$, m_statement); }
 	| lhs '=' 'MIN_EXPR' '<' fc_param_list '>'
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' condition
+		{ $$.m_statement = new Placeholder(Location()); }
 	;
 	
 if
 	// The style used in 4.5.3.
 	: location 'if' '(' condition ')' goto_statement ';' 'else' goto_statement ';'
 		{
-			$$.m_statement_list = new StatementList();
-			StatementListEntry *sb = new StatementListEntry(new FlowControlUnlinked(*($0.m_location),
+			$$.m_statement = new IfUnlinked(*($0.m_location),
 					dynamic_cast<GotoUnlinked*>($5.m_statement),
-					dynamic_cast<GotoUnlinked*>($8.m_statement))
-				);
+					dynamic_cast<GotoUnlinked*>($8.m_statement));
 			/// @todo Get condition in here.
-			$$.m_statement_list->push_back(sb);
 		}
 	;
 	
@@ -278,22 +344,29 @@ scope
 	;
 	
 condition
-	: lhs '>' rhs
-	| lhs '<' rhs
-	| lhs '==' rhs
-	| lhs '>=' rhs
-	| lhs '<=' rhs
-	| rhs '!=' rhs
+	: condition_side comparison_operator condition_side
+	;
+	
+// The GIMPLE output only appears to have var_id's or constants on both sides of the comparison operator.
+condition_side
+	: var_id
+	| constant
+	;
+	
+comparison_operator
+	: '>'
+	| '<'
+	| '=='
+	| '>='
+	| '<='
+	| '!='
 	;
 	
 function_call
 	: location identifier '(' fc_param_list? ')'
 		{
-			/*std::cout << "Function Call: " << M_TO_STR($n1) << std::endl;
-			std::cout << "   Param list: " << M_TO_STR($n3) << std::endl;*/
 			$$.m_statement = new FunctionCallUnresolved(M_TO_STR($n1), *($0.m_location), M_TO_STR($n3));
 		} 
-	| identifier '(' fc_param_list? ')'
 	;
 
 goto_statement
@@ -309,11 +382,15 @@ goto_statement
 		}
 	;
 	
-label
-	: synthetic_label_id ':'
-		{ $$.m_str = new M_TO_STR($n0); }
+label_statement
+	: location synthetic_label_id ':'
+		{
+			$$.m_statement = new Label(*($0.m_location), *($1.m_str));
+		}
 	| location identifier ':'
-		{ $$.m_str = new M_TO_STR($n1); }
+		{
+			$$.m_statement = new Label(*($0.m_location), *($1.m_str));
+		}
 	;
 
 switch
@@ -325,7 +402,7 @@ switch
 			StatementList::iterator it;
 			for(it=$5.m_statement_list->begin(); it != $5.m_statement_list->end(); ++it)
 			{
-				dynamic_cast<SwitchUnlinked*>($$.m_statement)->InsertCase(dynamic_cast<CaseUnlinked*>((*it)->m_statement));
+				dynamic_cast<SwitchUnlinked*>($$.m_statement)->InsertCase(dynamic_cast<CaseUnlinked*>(*it));
 			}
 		}
 	;
@@ -342,14 +419,13 @@ switch_case_list
 switch_case_list_453
 	: switch_case_list_453 ',' case_453
 		{
-			$0.m_statement_list->push_back(new StatementListEntry($1.m_statement));
+			$0.m_statement_list->push_back($1.m_statement);
 			M_PROPAGATE_PTR($0, $$, m_statement_list);
 		}
 	| case_453
 		{
 			$$.m_statement_list = new StatementList;
-			StatementListEntry *sb = new StatementListEntry($0.m_statement);
-			$$.m_statement_list->push_back(sb);
+			$$.m_statement_list->push_back($0.m_statement);
 		}
 	;
 
@@ -407,16 +483,16 @@ storage_class_specifier
 	;
 
 lhs
-	: location? unary_expression
+	: unary_expression
 	;
 	
 rhs
-	: location unary_expression
+	: unary_expression
 	;
 	
 unary_expression
-	: location? postfix_expression
-	| unary_operator location? unary_expression
+	: postfix_expression
+	| location unary_operator unary_expression
 	;
 
 unary_operator : '&' | '*' ;
@@ -429,9 +505,9 @@ postfix_expression
 	)* ;
 
 primary_expression 
-  : var_id
+  : location var_id
   | constant
-  | string_literal+
+  | location string_literal+
   ;
 
 constant
@@ -443,7 +519,9 @@ constant
 
 var_id
 	: identifier_ssa
+		{ M_PROPAGATE_PTR($0, $$, m_str); }
 	| identifier
+		{ M_PROPAGATE_PTR($0, $$, m_str); }
 	;
 	
 synthetic_label_id
@@ -461,7 +539,10 @@ integer_hex: "0x[0-9A-Fa-f]+";
 literal_floating_point: "[0-9]+.[0-9]+(e[\+\-][0-9]+)?";
 string_literal: "\"([^\"\\]|\\[^])*\"";
 path: "[a-zA-Z0-9_\.\-\\\/]+" $term -1;
-identifier_ssa: "[a-zA-Z_][a-zA-Z0-9_]*.[0-9]+" $term -2;
+identifier_ssa
+	: "[a-zA-Z_][a-zA-Z0-9_]*.[0-9]+" $term -2
+		{ $$.m_str = new M_TO_STR($n0); }
+	;
 identifier
 	: "[a-zA-Z_][a-zA-Z0-9_]*" $term -3
 		{ $$.m_str = new M_TO_STR($n0); }

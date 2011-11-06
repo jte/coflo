@@ -15,28 +15,23 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file Master header for the statements sub-library.
- */
+/** @file */
 
-#ifndef STATEMENTS_H
-#define STATEMENTS_H
-
-#include "Entry.h"
-#include "Exit.h"
-#include "FlowControlBase.h"
-#include "FunctionCall.h"
-#include "FunctionCallResolved.h"
-#include "FunctionCallUnresolved.h"
-#include "Goto.h"
-#include "If.h"
 #include "Label.h"
-#include "Merge.h"
-#include "NoOp.h"
-#include "ParseHelpers.h"
-#include "Placeholder.h"
-#include "PseudoStatement.h"
-#include "StatementBase.h"
-#include "Switch.h"
 
-#endif /* STATEMENTS_H */
+Label::Label(const Location &location, const std::string &identifier) : PseudoStatement(location)
+{
+	m_identifier = identifier;
+
+}
+
+Label::Label(const Label& orig) : PseudoStatement(orig)
+{
+	m_identifier = orig.m_identifier;
+}
+
+Label::~Label()
+{
+	// TODO Auto-generated destructor stub
+}
+
