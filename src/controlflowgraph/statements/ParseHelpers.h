@@ -20,11 +20,22 @@
 #ifndef PARSEHELPERS_H
 #define PARSEHELPERS_H
 
+#include <string>
+#include <map>
+
+#include "../ControlFlowGraph.h"
 #include "FlowControlBase.h"
+
+
+class LabelMap;
+
 
 #define M_DEFINE_FLOW_CONTROL_VIRTUALS(name) \
 	virtual std::string GetStatementTextDOT() const { return #name "_UNLINKED"; }; \
 	virtual std::string GetIdentifierCFG() const { return #name "_UNLINKED"; };
+
+#define M_DECLARE_FLOW_CONTROL_VIRTUALS(name) \
+		virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map);
 
 class FlowControlUnlinked : public FlowControlBase
 {
@@ -33,6 +44,16 @@ public:
 	FlowControlUnlinked(const Location &loc) : FlowControlBase(loc)	{ };
 	virtual ~FlowControlUnlinked() {};
 
+	/**
+	 *
+	 * @param cfg
+	 * @param this_vertex
+	 * @param label_map
+	 * @return Pointer to a FlowControlBase-derived object which the caller is to use to replace this object with in the
+	 * 		vertex's CFGVertexProperties.  NULL if all links could not be resolved.
+	 */
+	virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map) = 0;
+
 };
 
 class GotoUnlinked : public FlowControlUnlinked
@@ -40,7 +61,6 @@ class GotoUnlinked : public FlowControlUnlinked
 public:
 	GotoUnlinked() : FlowControlUnlinked(Location())
 	{
-
 	}
 	GotoUnlinked(const Location &loc, const std::string &link_target_name) : FlowControlUnlinked(loc)
 	{
@@ -48,7 +68,11 @@ public:
 	}
 	virtual ~GotoUnlinked() {};
 
+	std::string GetTarget() { return m_link_target_name; };
+
 	M_DEFINE_FLOW_CONTROL_VIRTUALS(GOTO)
+
+	M_DECLARE_FLOW_CONTROL_VIRTUALS(Goto)
 
 private:
 
@@ -70,6 +94,8 @@ public:
 
 	M_DEFINE_FLOW_CONTROL_VIRTUALS(RETURN)
 
+	M_DECLARE_FLOW_CONTROL_VIRTUALS(Return)
+
 private:
 
 	std::string m_return_var_name;
@@ -88,6 +114,8 @@ public:
 
 	M_DEFINE_FLOW_CONTROL_VIRTUALS(IF)
 
+	M_DECLARE_FLOW_CONTROL_VIRTUALS(If)
+
 private:
 
 	GotoUnlinked *m_true;
@@ -104,7 +132,11 @@ public:
 	}
 	virtual ~CaseUnlinked() {};
 
+	std::string GetTarget() { return m_link_target_name; };
+
 	M_DEFINE_FLOW_CONTROL_VIRTUALS(CASE);
+
+	M_DECLARE_FLOW_CONTROL_VIRTUALS(Case)
 
 private:
 	std::string m_link_target_name;
@@ -123,6 +155,8 @@ public:
 	};
 
 	M_DEFINE_FLOW_CONTROL_VIRTUALS(SWITCH)
+
+	M_DECLARE_FLOW_CONTROL_VIRTUALS(Switch)
 
 private:
 

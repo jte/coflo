@@ -41,7 +41,7 @@ struct FunctionInfo;
 class TranslationUnit
 {
 public:
-    TranslationUnit(const std::string &file_path);
+    TranslationUnit(Program *parent_program, const std::string &file_path);
     TranslationUnit(const TranslationUnit& orig);
     virtual ~TranslationUnit();
 
@@ -106,7 +106,11 @@ private:
 						 const std::vector< std::string > &defines,
 						const std::vector< std::string > &include_paths);
 
-	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list);
+	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list,
+			T_ID_TO_FUNCTION_PTR_MAP *function_map);
+
+	/// Pointer to the program which contains this TranslationUnit.
+	Program *m_parent_program;
 
 	/// The source filename.
 	boost::filesystem::path m_source_filename;

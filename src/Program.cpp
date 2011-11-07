@@ -61,7 +61,7 @@ void Program::AddSourceFiles(const std::vector< std::string > &file_paths)
 {
 	BOOST_FOREACH(std::string input_file_path, file_paths)
 	{
-		m_translation_units.push_back(new TranslationUnit(input_file_path));
+		m_translation_units.push_back(new TranslationUnit(this, input_file_path));
 	}
 }
 
@@ -82,7 +82,7 @@ bool Program::Parse(const std::vector< std::string > &defines,
 			std::cerr << "ERROR: Couldn't parse \"" << tu->GetFilePath() << "\"" << std::endl;
 			return false;
 		}
-
+#if 0
 		// Link the blocks in the functions in the file.
 		std::cout << "Linking basic blocks..." << std::endl;
 		retval = tu->LinkBasicBlocks();
@@ -95,8 +95,9 @@ bool Program::Parse(const std::vector< std::string > &defines,
 		// Create the control-flow graphs.
 		std::cout << "Creating function control-flow graphs..." << std::endl;
 		tu->CreateControlFlowGraphs(&m_cfg);
+#endif
 	}
-	
+
 	// Link the function calls.
 	std::cout << "Linking function calls..." << std::endl;
 
@@ -115,7 +116,7 @@ bool Program::Parse(const std::vector< std::string > &defines,
 			std::cout << "[" << fc->GetLocation() << "]: " << fc->GetIdentifier() << std::endl;
 		}
 	}
-	
+
 	// Parsing was successful.
 	return true;
 }

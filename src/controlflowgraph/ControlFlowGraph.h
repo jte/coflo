@@ -217,7 +217,7 @@ public:
 	//@}
 
 	T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
-	T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEDGETypeBase *edge_type);
+	T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEdgeTypeBase *edge_type);
 
 	/// @name Edge attribute accessors.
 	//@{
@@ -249,6 +249,8 @@ public:
 	//@}
 
 	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
+
+	long InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
 
 
 private:
