@@ -29,7 +29,7 @@ public:
 	CFGEdgeTypeIfTrue();
 	virtual ~CFGEdgeTypeIfTrue();
 
-	virtual std::string GetDotLabel() const { return "\\[false\\]"; };
+	virtual std::string GetDotLabel() const { return "\\[true\\]"; };
 };
 
 #endif /* CFGEDGETYPEIFTRUE_H_ */

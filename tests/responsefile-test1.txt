@@ -15,4 +15,4 @@
 
 ; Response file for "make check".
 
-../tests/test_source_file_1.c ../tests/test_source_file_2.c --cfg=main
+../tests/test_source_file_1.c ../tests/test_source_file_2.c -O test_html/
