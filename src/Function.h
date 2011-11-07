@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
+/** @file */
+
 #ifndef FUNCTION_H
 #define FUNCTION_H
  
@@ -32,6 +34,7 @@ class Block;
 class FunctionCall;
 class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+
 
 class Function
 {
@@ -64,6 +67,8 @@ public:
      */
 	bool CreateControlFlowGraph(ControlFlowGraph &cfg);
 	
+	bool CreateControlFlowGraph(ControlFlowGraph &cfg, const std::vector< StatementBase* > &statement_list);
+
 	/**
 	 * Return this Function's identifier.
 	 *
@@ -122,17 +127,21 @@ public:
 	 *
 	 * @return T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function
 	 */
-	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_first_statement; };
+	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
 
 	/**
 	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
 	 *
 	 * @return T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
 	 */
-	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_last_statement; };
+	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
 	
 private:
 	
+	bool CheckForNoInEdges(ControlFlowGraph & cfg,
+			std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
+			std::vector< T_CFG_VERTEX_DESC > *output);
+
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 
@@ -157,12 +166,12 @@ private:
 	std::vector < Block * > m_block_list;
 	
 	/// The first statement in the body of this function.
-	T_CFG_VERTEX_DESC m_first_statement;
-	T_CFG_EDGE_DESC m_first_statement_self_edge;
+	T_CFG_VERTEX_DESC m_entry_vertex_desc;
+	T_CFG_EDGE_DESC m_entry_vertex_self_edge;
 	
 	/// The last statement in the body of this function.
-	T_CFG_VERTEX_DESC m_last_statement;
-	T_CFG_EDGE_DESC m_last_statement_self_edge;
+	T_CFG_VERTEX_DESC m_exit_vertex_desc;
+	T_CFG_EDGE_DESC m_exit_vertex_self_edge;
 	
 	ControlFlowGraph *m_the_cfg;
 	T_CFG *m_cfg;

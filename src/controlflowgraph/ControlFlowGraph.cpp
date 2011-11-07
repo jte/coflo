@@ -340,7 +340,7 @@ T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function
 	return retval;
 }
 
-T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEDGETypeBase *edge_type)
+T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEdgeTypeBase *edge_type)
 {
 	T_CFG_EDGE_DESC eid;
 	bool ok;

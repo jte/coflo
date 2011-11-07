@@ -27,6 +27,7 @@
 
 #include "Location.h"
 #include "controlflowgraph/statements/statements.h"
+#include "controlflowgraph/statements/ParseHelpers.h"
 
 #define D_ParseNode_Globals gcc_gimple_parser_ParseNode_Globals
 #define D_ParseNode_User gcc_gimple_parser_ParseNode_User
@@ -419,7 +420,7 @@ switch_case_list
 switch_case_list_453
 	: switch_case_list_453 ',' case_453
 		{
-			$0.m_statement_list->push_back($1.m_statement);
+			$0.m_statement_list->push_back($2.m_statement);
 			M_PROPAGATE_PTR($0, $$, m_statement_list);
 		}
 	| case_453

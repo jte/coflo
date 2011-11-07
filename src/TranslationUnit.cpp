@@ -79,8 +79,9 @@ static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digi
 
 
 
-TranslationUnit::TranslationUnit(const std::string &file_path)
+TranslationUnit::TranslationUnit(Program *parent_program, const std::string &file_path)
 {
+	m_parent_program = parent_program;
 	m_source_filename = file_path;
 }
 
@@ -164,7 +165,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 
 	// Create a new parser.
 	D_Parser *parser = new_gcc_gimple_Parser();
-	D_ParseNode *tree = gcc_gimple_dparse(parser, (char*)buffer.c_str(), buffer.length());
+	D_ParseNode *tree = gcc_gimple_dparse(parser, const_cast<char*>(buffer.c_str()), buffer.length());
 
 	if (tree && !gcc_gimple_parser_GetSyntaxErrorCount(parser))
 	{
@@ -179,7 +180,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 
 		// Build the Functions out of the info obtained from the parsing.
 		std::cout << "Building Functions..." << std::endl;
-		BuildFunctionsFromThreeAddressFormStatementLists(*fil);
+		BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
 	}
 	else
 	{
@@ -333,7 +334,8 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->Link(function_map, unresolved_function_calls);
+		/// @todo Put linking back.
+		//fp->Link(function_map, unresolved_function_calls);
 	}
 }
 
@@ -414,10 +416,9 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	}
 }
 
-void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > & function_info_list)
+void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > & function_info_list,
+		T_ID_TO_FUNCTION_PTR_MAP *function_map)
 {
-	typedef std::map< std::string, Label*> LabelMap;
-
 	// Go through each FunctionInfo.
 	BOOST_FOREACH(FunctionInfo *fi, function_info_list)
 	{
@@ -430,61 +431,10 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		// Add the new function to the list.
 		m_function_defs.push_back(f);
 
-		LabelMap label_map;
+		// Add the new function to the program-wide function map.
+		(*function_map)[*(fi->m_identifier)] = f;
 
-		// Find all the labels in the function.
-		BOOST_FOREACH(StatementBase *sbp, *(fi->m_statement_list))
-		{
-			if(sbp->IsType<Label>())
-			{
-				// This is a label, add it to the map.
-				Label *lp = dynamic_cast<Label*>(sbp);
-				if(label_map.count(lp->GetIdentifier()) != 0)
-				{
-					// There shouldn't be a label with this name already in the map.
-					std::cerr << "WARNING: Detected duplicate label \"" << lp->GetIdentifier()
-							<< "\"in function \"" << fi->m_identifier << "\"" << std::endl;
-				}
-				label_map[lp->GetIdentifier()] = lp;
-				std::cout << "Added label " << lp->GetIdentifier() << std::endl;
-			}
-		}
-
-		/// @todo
-		ControlFlowGraph m_CFG;
-		T_CFG *m_cfg = &m_CFG.GetT_CFG();
-
-		T_CFG_VERTEX_DESC prev_vertex, entry_vertex, exit_vertex;
-
-		// Add the ENTRY and EXIT vertices.
-		Entry *entry_ptr = new Entry(Location("[" + f->GetDefinitionFilePath() + " : 0]"));
-		Exit *exit_ptr = new Exit("[" + f->GetDefinitionFilePath() + " : 0]");
-
-		entry_vertex = m_CFG.AddVertex(entry_ptr, f);
-		exit_vertex = m_CFG.AddVertex(exit_ptr, f);
-
-		prev_vertex = entry_vertex;
-
-		// Add all the statements to the function.
-		BOOST_FOREACH(StatementBase *sbp, *(fi->m_statement_list))
-		{
-			// Add this Statement to the Control Flow Graph.
-			T_CFG_VERTEX_DESC vid;
-			vid = m_CFG.AddVertex(sbp, f);
-
-			// See what kind of edge we need to add.
-			/// @todo
-			m_CFG.AddEdge(prev_vertex, vid, new CFGEDGETypeFallthrough());
-
-			// Now this vertex is the previous vertex.
-			prev_vertex = vid;
-		}
-
-		if(1 /** @todo The last statement wasn't a flow control statement */)
-		{
-			// Add an edge to the EXIT vertex.
-			m_CFG.AddEdge(prev_vertex, exit_vertex, new CFGEDGETypeFallthrough());
-		}
+		f->CreateControlFlowGraph(*(m_parent_program->GetControlFlowGraphPtr()), *(fi->m_statement_list));
 	}
 }
 
