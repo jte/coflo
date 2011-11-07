@@ -136,6 +136,11 @@ public:
 	 */
 	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
 	
+	/// @name Debugging helpers
+	//@{
+	void DumpCFG();
+	//@}
+
 private:
 	
 	bool CheckForNoInEdges(ControlFlowGraph & cfg,

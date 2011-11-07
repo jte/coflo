@@ -1044,6 +1044,11 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	std::vector< T_CFG_VERTEX_DESC > list_of_statements_with_no_in_edge_yet;
 	std::vector< T_CFG_VERTEX_DESC > list_of_unlinked_flow_control_statements;
 
+	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
+
+	m_the_cfg = &cfg;
+	m_cfg = &cfg.GetT_CFG();
+
 	// Add the ENTRY and EXIT vertices.
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
 	Exit *exit_ptr = new Exit(Location("[" + GetDefinitionFilePath() + " : 0]"));
@@ -1181,5 +1186,10 @@ bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 	}
 
 	return retval;
+}
+
+void Function::DumpCFG()
+{
+
 }
 
