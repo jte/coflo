@@ -67,8 +67,6 @@ public:
 		const std::vector< std::string > &include_paths,
 		bool debug_parse = false);
 
-	bool LinkBasicBlocks();
-	
 	/**
 	 * Link the function calls in this TranslationUnit to the Functions they call.
 	 *

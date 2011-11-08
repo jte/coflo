@@ -38,7 +38,6 @@
 #include "TranslationUnit.h"
 
 #include "Location.h"
-#include "Block.h"
 #include "Function.h"
 
 #include "controlflowgraph/statements/If.h"
@@ -52,31 +51,6 @@
 
 using namespace boost;
 using namespace boost::filesystem;
-
-/// Regex string for matching C and C++ identifiers.
-static const std::string f_identifier_expression("[[:alpha:]_][[:alnum:]_]*");
-
-static const std::string f_qualifiers("const|virtual|static");
-
-/// .+? is the filename.
-static const std::string f_static_destructors("\\(static destructors for .+?\\)");
-
-/// .+? is the filename.
-static const std::string f_static_initializers("\\(static initializers for .+?\\)");
-
-/// Regex for finding C function definitions in gcc *.cfg output.
-static const boost::regex f_c_function_def_expression("^("+f_identifier_expression+") \\(.*?\\)");
-
-/// Regex for finding C++ function definitions in gcc *.cfg output.
-/// - Capture 1 is everything before the function name (i.e. return type, qualifiers, etc.).
-/// - Capture 2 is the function identifier itself.
-/// - Capture 3 is the formal parameter list, just the types.
-/// - Capture 4 is the formal parameter list, just the names.
-static const boost::regex f_cpp_function_def_expression("^([^;]*)[[:space:]]("+f_identifier_expression+")\\(.*\\)[[:space:]]\\(.*\\)");
-
-/// Regex for finding block starts.  Capture 1 is the block number, 2 is the starting line in the file (possibly "-1").
-static const boost::regex f_block_start_expression("[[:space:]]+# BLOCK ([[:digit:]]+)(?:, starting at line ([-]?[[:digit:]]+))?(?:, discriminator [[:digit:]]+)?");
-
 
 
 TranslationUnit::TranslationUnit(Program *parent_program, const std::string &file_path)
@@ -133,7 +107,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		return false;
 	}
 
-#if 1
 
 	// Load the given file into memory.
 	std::string buffer;
@@ -175,9 +148,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 
 		FunctionInfoList *fil = gcc_gimple_parser_GetUserInfo(tree)->m_function_info_list;
 
-		std::cout << "FIL ptr = " << fil << std::endl;
-		//print_parsetree(parser_tables_gcc_cfg_parser, tree, NULL, NULL);
-
 		// Build the Functions out of the info obtained from the parsing.
 		std::cout << "Building Functions..." << std::endl;
 		BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
@@ -186,7 +156,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	{
 		// The parse failed.
 
-		std::cout << "failure: " << gcc_gimple_parser_GetSyntaxErrorCount(parser) << " syntax errors." << std::endl;
+		std::cout << "Failure: " << gcc_gimple_parser_GetSyntaxErrorCount(parser) << " syntax errors." << std::endl;
 	}
 
 	if(tree != NULL)
@@ -196,135 +166,6 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	}
 	// Destroy the parser.
 	free_gcc_gimple_Parser(parser);
-
-	return true;
-
-#else
-	std::string line;
-	std::string in_function_name;
-	bool in_function = false;
-
-	Function *current_function;
-	Block *current_block;
-
-	while(input_file.good())
-	{
-		// Get the next line of input.
-		std::getline(input_file, line);
-
-		boost::cmatch capture_results;
-
-		// Check for and ignore comments.
-		if(line[0] == ';')
-		{
-			continue;
-		}
-
-		static const boost::regex *function_regex;
-		int function_id_offset;
-		
-		// GCC outputs a different function signature depending on file type.
-		// Switch which regex we're using according to the source file's language.
-		if(file_is_cpp)
-		{
-			// This is a C++ file, use the appropriate regex.
-			function_regex = &f_cpp_function_def_expression;
-			function_id_offset = 2;
-		}
-		else
-		{
-			// It's C.
-			function_regex = &f_c_function_def_expression;
-			function_id_offset = 1;
-		}
-		
-		// Look for function definitions.
-		if(regex_match(line.c_str(), capture_results, *function_regex))
-		{
-			in_function_name = capture_results[function_id_offset];
-			dlog_block << "Found function: " << in_function_name << std::endl;
-			current_function = new Function(this, in_function_name);
-
-			(*function_map)[in_function_name] = current_function;
-			
-			// Add the new function to the list.
-			m_function_defs.push_back(current_function);
-
-			in_function = true;
-
-			continue;
-		}
-
-		if(in_function)
-		{
-			// We're inside a function.
-			
-			if(line.compare("}") == 0)
-			{
-				// Found the end of the function.
-				dlog_block << "Found function end" << std::endl;
-				in_function = false;
-				continue;
-			}
-
-			// Look for block starts.
-			if(regex_match(line.c_str(), capture_results, f_block_start_expression))
-			{
-				long block_start_line_no;
-				bool block_parsed_successfully;
-
-				dlog_block << "Found block: " << capture_results[1] << std::endl;
-
-				// See if there was a starting line number for this block.
-				if(capture_results[2].matched)
-				{
-					// There was, pass it to the Block() constructor.
-					block_start_line_no = atoi(capture_results[2].str().c_str());
-					/// @todo For some reason, gcc 4.5.3 will sometimes have a "-1" for the
-					/// block starting line.  Clamp this to zero until/unless we figure out
-					/// if this is actually telling us something useful.
-					if(block_start_line_no < 0)
-					{
-						block_start_line_no = 0;
-					}
-				}
-				else
-				{
-					block_start_line_no = 0;
-				}
-				dlog_block << "BLOCK LINE NO: " << block_start_line_no << std::endl;
-				current_block = new Block(current_function,
-										 atoi(capture_results[1].str().c_str()),
-										 block_start_line_no);
-				
-				block_parsed_successfully = current_block->Parse(input_file);
-				if(!block_parsed_successfully)
-				{
-					std::cerr << "ERROR: Block parse failed." << std::endl;
-				}
-				
-				// Add the block to the current function.
-				current_function->AddBlock(current_block);
-				
-				continue;
-			}
-		}
-	}
-#endif
-
-	return true;
-}
-
-bool TranslationUnit::LinkBasicBlocks()
-{
-	// Go through each function in the translation unit and do the block linking.
-	BOOST_FOREACH(Function* fp, m_function_defs)
-	{
-		fp->LinkBlocks();
-		
-		// Link the basic blocks into a BlockGraph.
-		fp->LinkIntoGraph();
-	}
 
 	return true;
 }
