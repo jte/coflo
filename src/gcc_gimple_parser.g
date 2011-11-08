@@ -192,7 +192,7 @@ param_decls_list
 		}
 	| /* Nothing */
 		{
-
+			$$.m_statement_list = new StatementList;
 		}
 	;
 	
@@ -234,6 +234,15 @@ statement_list
 			$$.m_statement_list = new StatementList;
 			$$.m_statement_list->push_back($0.m_statement);
 		}
+	| statement_list scope NL
+		{
+			std::copy($1.m_statement_list->begin(), $1.m_statement_list->end(), std::back_inserter(*($0.m_statement_list)));
+			M_PROPAGATE_PTR($0, $$, m_statement_list);
+		}
+	| scope NL
+		{
+			M_PROPAGATE_PTR($0, $$, m_statement_list);
+		}
 	| /* Nothing */
 		{
 		}
@@ -246,7 +255,6 @@ statement
 		{ std::cout << "Ignoring comment" << std::endl; $$.m_statement = NULL; }
 	| statement_possibly_split_across_lines
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
-	| scope
 	| label_statement ';'?
 		{
 			M_PROPAGATE_PTR($0, $$, m_statement);
@@ -342,6 +350,7 @@ if
 	
 scope
 	: location '{' NL declaration_list? NL statement_list '}'
+		{ M_PROPAGATE_PTR($5, $$, m_statement_list); }
 	;
 	
 condition

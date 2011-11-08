@@ -335,7 +335,7 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		/// @todo Put linking back.
-		//fp->Link(function_map, unresolved_function_calls);
+		fp->Link(function_map, unresolved_function_calls);
 	}
 }
 
