@@ -99,12 +99,13 @@ Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 
 	// Save our identifier.
 	m_function_id = function_id;
-
+#if 0
 	// Add the entry and exit blocks.
 	m_entry_block = new Block(this, 0, 0);
 	m_exit_block = new Block(this, 1, 0);
 	m_block_list.push_back(m_entry_block);
 	m_block_list.push_back(m_exit_block);
+#endif
 }
 
 Function::~Function()
@@ -122,147 +123,6 @@ bool Function::IsCalled() const
 	// If the first statement (the ENTRY block) has any in-edges
 	// other than its self-edge, it's called by something.
 	return boost::in_degree(m_entry_vertex_desc, *m_cfg) > 1;
-}
-
-void Function::AddBlock(Block *block)
-{
-	m_block_list.push_back(block);
-}
-
-void Function::LinkBlocks()
-{
-	// A map of the blocks constituting this function.
-	T_BLOCK_LINK_MAP linkmap;
-	std::vector<Successor*> successor_list;
-
-	// Add successors to the entry pseudoblock.
-	m_entry_block->AddSuccessors("2 (fallthru)");
-
-	// Go through all the blocks and add them to the link map.
-	BOOST_FOREACH(Block *bp, m_block_list)
-	{
-		// Add this block to the number->Block* map.
-		linkmap[bp->GetBlockNumber()] = bp;
-
-		// Collect all the blocks' Successors into a list.
-		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
-		for (s = bp->successor_begin(); s != bp->successor_end(); s++)
-		{
-			if (NULL != dynamic_cast<SuccessorExit*>(*s))
-			{
-				dlog_block << "INFO: Found EXIT successor." << std::endl;
-				(*s)->SetSuccessorBlockPtr(m_exit_block);
-			}
-			else if (NULL != dynamic_cast<SuccessorNoReturn*>(*s))
-			{
-				dlog_block << "INFO: Found NoReturn successor."
-						<< std::endl;
-				(*s)->SetSuccessorBlockPtr(m_exit_block);
-			}
-			else
-			{
-				successor_list.push_back(*s);
-			}
-		}
-	}
-
-	// Block 2 appears to always be the first block, start with it.
-	/// @todo We really should check for "PRED: ENTRY" to make sure of this.
-	T_BLOCK_LINK_MAP_ITERATOR lmit = linkmap.find(2);
-	if (lmit == linkmap.end())
-	{
-		std::cerr << "ERROR: Can't find Block 2." << std::endl;
-	}
-
-	// Now go through all the Successors and link them to the Blocks they refer to.
-	std::vector<Successor*>::iterator it2;
-	for (it2 = successor_list.begin(); it2 != successor_list.end(); it2++)
-	{
-		long block_no;
-		T_BLOCK_LINK_MAP_ITERATOR linkmap_it;
-
-		block_no = (*it2)->GetSuccessorBlockNumber();
-
-		// Look up the block in the map.
-		linkmap_it = linkmap.find(block_no);
-
-		if (linkmap_it == linkmap.end())
-		{
-			std::cerr << "ERROR: Can't find Block " << block_no
-					<< " in linkmap." << std::endl;
-		}
-		else if (linkmap_it->second == NULL)
-		{
-			std::cerr << "ERROR: Found a Successor with no Block pointer."
-					<< std::endl;
-		}
-		else
-		{
-			// Found the referenced block, assign a pointer directly to it.
-			(*it2)->SetSuccessorBlockPtr(linkmap_it->second);
-		}
-	}
-}
-
-void Function::LinkIntoGraph()
-{
-	// Block*->VertexID map.
-	typedef std::map<Block*, T_BLOCK_GRAPH_VERTEX_DESC> T_BLOCK_MAP;
-	T_BLOCK_MAP block_map;
-
-	// Add the function blocks into the m_block_graph.	
-	BOOST_FOREACH(Block *bp, m_block_list)
-	{
-		// this_block_id is the new Vertex.
-		T_BLOCK_GRAPH_VERTEX_DESC this_block_id = boost::add_vertex(
-				m_block_graph);
-		m_block_graph[this_block_id].m_block = bp;
-
-		// Add the block ID to a temporary map for use in linking below.
-		block_map[bp] = this_block_id;
-	}
-
-	// Iterate over each block again, this time adding the edges between blocks.
-	BOOST_FOREACH(Block *bp, m_block_list)
-	{
-		T_BLOCK_GRAPH_VERTEX_DESC this_block = block_map[bp];
-		T_BLOCK_GRAPH_VERTEX_DESC next_block;
-
-		// Go through all the successors.
-		Block::T_BLOCK_SUCCESSOR_ITERATOR s;
-		for (s = bp->successor_begin(); s != bp->successor_end(); s++)
-		{
-			T_BLOCK_MAP::iterator it;
-			it = block_map.find((*s)->GetSuccessorBlockPtr());
-			if (it != block_map.end())
-			{
-				// Found the next block.
-				next_block = it->second;
-				T_BLOCK_GRAPH_EDGE_DESC edge;
-				bool ok;
-				boost::tie(edge, ok) = boost::add_edge(this_block,
-						next_block, m_block_graph);
-				// Check if there's no error, then set up the edge properties.
-				if (ok)
-				{
-					// Label the edge with whatever the Successor object has
-					// for a label.
-					if ((*s)->HasEdgeLabel())
-					{
-						m_block_graph[edge].m_edge_text =
-								(*s)->GetEdgeLabel();
-					}
-				}
-			}
-			else
-			{
-				// Couldn't find the next block, it's probably EXIT.
-				std::cerr
-						<< "ERROR: Couldn't find next_block in block_map"
-						<< std::endl;
-			}
-		}
-	}
 }
 
 void Function::Link(const std::map<std::string, Function*> &function_map,
@@ -868,111 +728,6 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph &cfg)
 	//
 	// A third step is performed to mark all back-edges in the graph, so we can easily
 	// identify them during traversals later.
-
-	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
-
-	m_the_cfg = &cfg;
-	m_cfg = &cfg.GetT_CFG();
-
-	std::map<T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC> first_statement_of_block;
-	std::vector<T_CFG_VERTEX_DESC> last_statement_of_block;
-	bool ok;
-
-	// Do the first step.
-	T_BLOCK_GRAPH::vertex_iterator vit, vend;
-	for (boost::tie(vit, vend) = boost::vertices(m_block_graph); vit != vend;
-			vit++)
-	{
-		Block::T_STATEMENT_LIST_ITERATOR sit;
-		T_CFG_VERTEX_DESC last_vid;
-		bool is_first = true;
-
-		// Iterate over all Statements in this Block.
-		for (sit = m_block_graph[*vit].m_block->begin();
-				sit != m_block_graph[*vit].m_block->end(); sit++)
-		{
-			// Add this Statement to the Control Flow Graph.
-			T_CFG_VERTEX_DESC vid;
-			vid = boost::add_vertex(*m_cfg);
-			(*m_cfg)[vid].m_statement = *sit;
-			(*m_cfg)[vid].m_containing_function = this;
-
-			if (!is_first)
-			{
-				// Add an edge to its predecessor.
-				T_CFG_EDGE_DESC eid;
-
-				boost::tie(eid, ok) = boost::add_edge(last_vid, vid, *m_cfg);
-				// Since this edge is within the block, it is just a fallthrough.
-				(*m_cfg)[eid].m_edge_type = new CFGEdgeTypeFallthrough();
-			}
-			else
-			{
-				// This is the first statement from this block.  Save it for stage 2.
-				first_statement_of_block[*vit] = vid;
-				is_first = false;
-
-				if (m_block_graph[*vit].m_block->IsENTRY())
-				{
-					// This is the first statement of the ENTRY block.  Save the
-					// vertex_descriptor for use later.
-					m_entry_vertex_desc = vid;
-				}
-			}
-
-			// It's OK to save the vertex descriptor for next time.  Per the Boost
-			// docs, neither add_vertex() nor add_edge() invalidate vertex or edge
-			// descriptors.
-			last_vid = vid;
-		}
-
-		// Save the vertex descriptor of the last statement of this block for the next stage.
-		last_statement_of_block.push_back(last_vid);
-
-		if (m_block_graph[*vit].m_block->IsEXIT())
-		{
-			// This is the last statement of the EXIT block.
-			m_exit_vertex_desc = last_vid;
-		}
-	}
-
-	// Do the second step.
-	std::vector<T_CFG_VERTEX_DESC>::iterator last_statement_it;
-	std::map<T_BLOCK_GRAPH::vertex_descriptor, T_CFG_VERTEX_DESC>::iterator first_statement_it;
-	last_statement_it = last_statement_of_block.begin();
-	for (boost::tie(vit, vend) = boost::vertices(m_block_graph); vit != vend;
-			vit++)
-	{
-		T_BLOCK_GRAPH::out_edge_iterator eit, eend;
-		for (boost::tie(eit, eend) = boost::out_edges(*vit, m_block_graph);
-				eit != eend; eit++)
-		{
-			// Add an edge from the last statement of Block vit to the first statement
-			// of the Block pointed to by eit.
-			T_CFG_VERTEX_DESC target_vertex_descr = boost::target(*eit,
-					m_block_graph);
-
-			first_statement_it = first_statement_of_block.find(
-					target_vertex_descr);
-
-			if (first_statement_it == first_statement_of_block.end())
-			{
-				std::cerr << "ERROR: No first block statement found." << std::endl;
-			}
-			else
-			{
-				// Add the edge.
-				T_CFG_EDGE_DESC new_edge_desc;
-				boost::tie(new_edge_desc, ok) = boost::add_edge(
-						*last_statement_it, first_statement_it->second, *m_cfg);
-
-				/// @todo Stubbing in fallthrough type for now, change this to add the real type.
-				(*m_cfg)[new_edge_desc].m_edge_type =
-						new CFGEdgeTypeFallthrough();
-			}
-		}
-		last_statement_it++;
-	}
 
 	// Add self-edges to the Entry and Exit statements.
 	boost::tie(m_entry_vertex_self_edge, boost::tuples::ignore) = boost::add_edge(m_entry_vertex_desc, m_entry_vertex_desc, (*m_cfg));

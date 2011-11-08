@@ -382,12 +382,10 @@ function_call
 goto_statement
 	: location 'goto' synthetic_label_id
 		{
-			/*$$.m_str = $2.m_str;*/
 			$$.m_statement = new GotoUnlinked(*($0.m_location), *($2.m_str));
 		}
 	| location 'goto' identifier
 		{
-			/*$$.m_str = $2.m_str;*/
 			$$.m_statement = new GotoUnlinked(*($0.m_location), *($2.m_str));
 		}
 	;
