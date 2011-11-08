@@ -27,7 +27,7 @@ public:
 	CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig);
 	virtual ~CFGEdgeTypeFallthrough();
 	
-	virtual std::string GetDotLabel() const { return "Fallthrough"; };
+	virtual std::string GetDotLabel() const { return ""; };
 
 private:
 	

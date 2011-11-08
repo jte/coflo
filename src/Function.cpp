@@ -1076,11 +1076,11 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 			if(label_map.count(lp->GetIdentifier()) != 0)
 			{
 				// There shouldn't be a label with this name already in the map.
-				std::cerr << "WARNING: Detected duplicate label \"" << lp->GetIdentifier()
+				dlog_cfg << "WARNING: Detected duplicate label \"" << lp->GetIdentifier()
 						<< "\"in function \"" << m_function_id << "\"" << std::endl;
 			}
 			label_map[lp->GetIdentifier()] = vid;
-			std::cout << "Added label " << lp->GetIdentifier() << std::endl;
+			dlog_cfg << "Added label " << lp->GetIdentifier() << std::endl;
 		}
 
 		// See what kind of edge we need to add.
@@ -1123,17 +1123,17 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	}
 
 	// Link the FlowControlUnlinked-derived statements.
-	std::cout << "INFO: Linking FlowControlUnlinked-derived statements." << std::endl;
+	dlog_cfg << "INFO: Linking FlowControlUnlinked-derived statements." << std::endl;
 	BOOST_FOREACH(T_CFG_VERTEX_DESC vd, list_of_unlinked_flow_control_statements)
 	{
 		FlowControlUnlinked *fcl = dynamic_cast<FlowControlUnlinked*>(cfg.GetStatementPtr(vd));
-		std::cout << "INFO: Linking " << typeid(*fcl).name() << std::endl;
+		dlog_cfg << "INFO: Linking " << typeid(*fcl).name() << std::endl;
 		StatementBase* replacement_statement = fcl->ResolveLinks(cfg, vd, label_map);
 
 		if(replacement_statement != NULL)
 		{
 			// The ResolveLinks call succeeded.  Replace the *Unlinked() class instance with a suitable linked instance.
-			std::cout << "INFO: Linked " << typeid(*fcl).name() << std::endl;
+			dlog_cfg << "INFO: Linked " << typeid(*fcl).name() << std::endl;
 			cfg.GetT_CFG()[vd].m_statement = replacement_statement;
 			delete fcl;
 		}
@@ -1141,24 +1141,23 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		{
 			// The ResolveLinks call failed.  Not sure we can do much here, but we won't delete the FlowControlUnlinked object since
 			// we don't have anything to replace it with.
-			std::cerr << "ERROR: ResolveLinks() call failed." << std::endl;
+			dlog_cfg << "ERROR: ResolveLinks() call failed." << std::endl;
 		}
 	}
-	std::cout << "INFO: Linking complete." << std::endl;
+	dlog_cfg << "INFO: Linking complete." << std::endl;
 
-	std::cout << "INFO: Checking for unreachable code." << std::endl;
+	dlog_cfg << "INFO: Checking for unreachable code." << std::endl;
 	std::vector< T_CFG_VERTEX_DESC > statements_with_no_in_edge;
 	CheckForNoInEdges(cfg, list_of_statements_with_no_in_edge_yet, &statements_with_no_in_edge);
-	std::cout << "INFO: Check complete." << std::endl;
-
+	dlog_cfg << "INFO: Check complete." << std::endl;
 
 	// Add self edges to the ENTRY and EXIT vertices.
-	m_entry_vertex_self_edge = cfg.AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, new CFGEdgeTypeFallthrough);
-	m_exit_vertex_self_edge = cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, new CFGEdgeTypeFallthrough);
+	m_entry_vertex_self_edge = cfg.AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, new CFGEdgeTypeImpossible);
+	m_exit_vertex_self_edge = cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, new CFGEdgeTypeImpossible);
 
-	std::cout << "INFO: Fixing up back edges." << std::endl;
+	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
 	cfg.FixupBackEdges(this);
-	std::cout << "INFO: Fix up complete." << std::endl;
+	dlog_cfg << "INFO: Fix up complete." << std::endl;
 
 	return true;
 }
@@ -1177,7 +1176,7 @@ bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 
 		if(in_degree == 0)
 		{
-			std::cout << "WARNING: Statement with no in edge." << std::endl;
+			dlog_cfg << "WARNING: Statement with no in edge." << std::endl;
 			output->push_back(vd);
 
 			// We found a statement with no in edges.
