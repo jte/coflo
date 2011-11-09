@@ -119,7 +119,7 @@ gcc_gimple_file
 	: {
 		//$g = copy_globals($g);
 		//$g->dummy_deleteme = &dummy_deleteme;
-		std::cout << "gcc_gimple_file" << std::endl;
+		//std::cout << "gcc_gimple_file" << std::endl;
 	} function_definition_list
 		{
 			std::cout << "DONE" << std::endl;
@@ -133,12 +133,10 @@ function_definition_list
 		{
 			$0.m_function_info_list->push_back($1.m_function_info);
 			M_PROPAGATE_PTR($0, $$, m_function_info_list);
-			std::cout << "PROP FIL = " << $$.m_function_info_list << std::endl;
 		}
 	| function_definition NL+
 		{
 			$$.m_function_info_list = new FunctionInfoList;
-			std::cout << "NEW FIL = " << $$.m_function_info_list << std::endl;
 			$$.m_function_info_list->push_back($0.m_function_info);
 		}
 	;
@@ -169,14 +167,17 @@ function_definition
 	;
 
 location
+	: real_location
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| /* Nothing */
+		{ $$.m_location = new Location(); }
+	;
+
+real_location
 	: '[' path ':' integer ':' integer ']'
 		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int, $5.m_int); }
 	| '[' path ':' integer ']'
 		{ $$.m_location = new Location(M_TO_STR($n1), $3.m_int); }
-	| /* No location. */
-		{
-			$$.m_location = new Location("UNKNOWN",0);
-		}
 	;
 	
 param_decls_list
@@ -249,7 +250,7 @@ statement_list
 	;
 	
 statement
-	: statement_one_line ';'
+	: statement_one_line ';' post_line_text
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| location comment
 		{ std::cout << "Ignoring comment" << std::endl; $$.m_statement = NULL; }
@@ -261,8 +262,11 @@ statement
 		}
 	;
 	
-post_one_line_statement_text
+// Sometimes there is superfluous text after the end of a line.
+// Absorb that here.
+post_line_text
 	: "\[[^\]]+\]"
+	| /* Nothing. */
 	;
 	
 statement_one_line
@@ -298,6 +302,8 @@ statement_possibly_split_across_lines
 bitwise_binary_operator
 	: '>>'
 	| '<<'
+	// gcc 4.5.3 will output this.
+	| 'r<<'
 	| '|'
 	| '&'
 	| '^'
@@ -317,10 +323,18 @@ arithmetic_binary_operator
 	;
 
 assignment_statement
+	: real_location assignment_statement_internals
+		{
+			M_PROPAGATE_PTR($1,$$,m_statement);
+		}
+	;
+
+assignment_statement_internals
 	: lhs '=' rhs bitwise_binary_operator rhs
 		{ $$.m_statement = new Placeholder(Location()); }
-	| lhs '=' rhs
-		{ $$.m_statement = new Placeholder(Location()); }
+	/*| lhs '=' rhs
+	nested_lhs '=' cast_expression
+		{ $$.m_statement = new Placeholder(Location()); }*/
 	| lhs '=' '~' rhs
 		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '-' rhs
@@ -331,10 +345,12 @@ assignment_statement
 		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' function_call
 		{ M_PROPAGATE_PTR($2, $$, m_statement); }
-	| lhs '=' 'MIN_EXPR' '<' fc_param_list '>'
+	| lhs '=' 'MIN_EXPR' '<' argument_expression_list '>'
 		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' condition
 		{ $$.m_statement = new Placeholder(Location()); }
+	| nested_lhs '=' rhs
+	{ $$.m_statement = new Placeholder(*($0.m_location)); }
 	;
 	
 if
@@ -352,13 +368,21 @@ scope
 	: location '{' NL declaration_list? NL statement_list '}'
 		{ M_PROPAGATE_PTR($5, $$, m_statement_list); }
 	;
-	
+
+// The GIMPLE output only appears to have var_id's or constants on both sides of the comparison operator.	
 condition
-	: condition_side comparison_operator condition_side
+	: var_or_constant comparison_operator var_or_constant
 	;
 	
-// The GIMPLE output only appears to have var_id's or constants on both sides of the comparison operator.
-condition_side
+cast_expression
+	: '(' type_name ')' rhs
+	;
+	
+type_name
+	: decl_spec+
+	;
+	
+var_or_constant
 	: var_id
 	| constant
 	;
@@ -373,10 +397,16 @@ comparison_operator
 	;
 	
 function_call
-	: location identifier '(' fc_param_list? ')'
+	: location identifier '(' argument_expression_list ')'
 		{
 			$$.m_statement = new FunctionCallUnresolved(M_TO_STR($n1), *($0.m_location), M_TO_STR($n3));
-		} 
+		}
+	| location identifier_ssa '(' argument_expression_list ')'
+		{
+			// This should pretty much always be a function call through a compiler-generated function
+			// pointer.
+			$$.m_statement = new FunctionCallUnresolved(M_TO_STR($n1), *($0.m_location), M_TO_STR($n3));
+		}
 	;
 
 goto_statement
@@ -402,7 +432,7 @@ label_statement
 	;
 
 switch
-	: location 'switch' '(' rhs ')' switch_case_list
+	: location 'switch' '(' var_or_constant ')' switch_case_list
 		{
 			$$.m_statement = new SwitchUnlinked(*($0.m_location));
 			$0.m_location = NULL;
@@ -437,13 +467,12 @@ switch_case_list_453
 		}
 	;
 
-/************************/
-
 case
 	: location 'case' rhs ':' goto_statement ';'
 	| location 'default:' goto_statement ';'
 	;
 	
+// Case style used by gcc 4.5.3, 4.6.1.
 case_453
 	: location 'case' rhs ':' synthetic_label_id
 		{
@@ -455,8 +484,10 @@ case_453
 		}
 	;
 
-fc_param_list
-	: rhs (',' rhs)*
+argument_expression_list
+	: argument_expression_list ',' rhs
+	| rhs
+	| /* Nothing */
 	;
 
 decl_spec
@@ -469,14 +500,15 @@ decl_spec
 	| 'char'
 	| 'int'
 	| 'long'
+	| 'float'
 	| 'double'
 	| 'void'
 	| '*'
 	| identifier
 	| '[' constant ']'
-	| "\<[A-Za-z]+[0-9]+\>"	/* Not sure what this is, saw it as "<Te8>". */
-	| '(' decl_spec+ ')'
-	| '(' decl_spec+ (',' decl_spec+)+ ')'
+	| "\<[A-Za-z]+[A-Za-z0-9]+\>"	/* Not sure what this is, see it as "<T{hex_number}>" in function pointer decls. */
+	/*| '(' decl_spec+ ')'*/
+	| '(' decl_spec+ (',' decl_spec+)? ')'
 	;
 	
 type_qualifier
@@ -491,11 +523,11 @@ storage_class_specifier
 	;
 
 lhs
-	: unary_expression
+	: nested_lhs /*unary_expression*/
 	;
 	
 rhs
-	: unary_expression
+	: nested_rhs /*unary_expression*/
 	;
 	
 unary_expression
@@ -507,10 +539,46 @@ unary_operator : '&' | '*' ;
 
 postfix_expression
 	: primary_expression
-	('[' postfix_expression ']' 
-	| '.' identifier
-	| '->' identifier
-	)* ;
+		(
+			'[' postfix_expression ']' 
+			| '.' identifier
+			| '->' identifier
+		)* ;
+		
+nested_lhs
+	: real_location nested_lhs '.' identifier
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| real_location nested_lhs '->' identifier
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| real_location nested_lhs '[' var_or_constant ']'
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| location '*' var_id
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| var_id
+		{ $$.m_location = new Location(); }
+	;
+	
+nested_rhs
+	: real_location nested_rhs '.' identifier
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| real_location nested_rhs '->' identifier
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| real_location nested_rhs '[' var_or_constant ']'
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| location '*' nested_rhs
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| real_location '&' nested_rhs
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
+	| var_id
+		{ $$.m_location = new Location(); }
+	| constant | string_literal
+		{ $$.m_location = new Location(); }
+	| real_location var_id
+		{
+			// With gcc 4.5.3, this seems to always be a callback pointer being passed to a function.
+			{ M_PROPAGATE_PTR($0, $$, m_location); }
+		}
+	;
 
 primary_expression 
   : location var_id
@@ -519,7 +587,7 @@ primary_expression
   ;
 
 constant
-	: integer_decimal 'B'? /* Not sure what the 'B' represents.  Seems to always be '0B'. */
+	: integer_decimal 'B'? /* Not sure what the 'B' represents.  Saw '0B', '35B', etc. */
 	| integer_hex
 	| literal_floating_point
 	| '<<< error >>>'
@@ -534,7 +602,11 @@ var_id
 	
 synthetic_label_id
 	: '<' identifier_ssa '>'
-		{ $$.m_str = new M_TO_STR($n1); *($$.m_str) = "<" + *($$.m_str) + ">"; }
+		{
+			$$.m_str = new std::string;
+			*($$.m_str) = "<" + *($1.m_str) + ">";
+			$1.m_str = NULL;
+		}
 	;
 
 /// Terminals.
