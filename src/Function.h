@@ -26,11 +26,9 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
-#include "BasicBlockGraph.h"
 #include "controlflowgraph/ControlFlowGraph.h"
 
 class TranslationUnit;
-class Block;
 class FunctionCall;
 class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
@@ -41,12 +39,6 @@ class Function
 public:
 	Function(TranslationUnit *parent_tu, const std::string &m_function_id);
 	~Function();
-	
-	void AddBlock(Block *block);
-
-	void LinkBlocks();
-
-	void LinkIntoGraph();
 	
 	/**
 	 * Link the unresolved function calls in this Function to the Functions
@@ -150,26 +142,9 @@ private:
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 
-	/// The block graph.
-	T_BLOCK_GRAPH m_block_graph;
-	
-	/// The block graph with all back edges removed.
-	T_BLOCK_GRAPH m_block_graph_no_back_edges;
-
 	/// Function identifier.
 	std::string m_function_id;
 
-	/// Entry block.
-	/// Only valid after LinkBlocks() has been called.
-	Block *m_entry_block;
-	
-	/// Exit block.
-	/// Only valid after LinkBlocks() has been called.
-	Block *m_exit_block;
-	
-	/// Block list.
-	std::vector < Block * > m_block_list;
-	
 	/// The first statement in the body of this function.
 	T_CFG_VERTEX_DESC m_entry_vertex_desc;
 	T_CFG_EDGE_DESC m_entry_vertex_self_edge;
