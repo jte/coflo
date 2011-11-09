@@ -28,8 +28,6 @@ EXTRA_DIST = Doxyfile
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Analyzer.cpp Analyzer.h \
-	BasicBlockGraph.h \
-	Block.cpp Block.h \
 	Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \

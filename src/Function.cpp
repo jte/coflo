@@ -39,7 +39,6 @@
 #include "debug_utils/debug_utils.hpp"
 
 #include "TranslationUnit.h"
-#include "Block.h"
 #include "Function.h"
 #include "SuccessorTypes.h"
 
@@ -99,13 +98,6 @@ Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 
 	// Save our identifier.
 	m_function_id = function_id;
-#if 0
-	// Add the entry and exit blocks.
-	m_entry_block = new Block(this, 0, 0);
-	m_exit_block = new Block(this, 1, 0);
-	m_block_list.push_back(m_entry_block);
-	m_block_list.push_back(m_exit_block);
-#endif
 }
 
 Function::~Function()
@@ -931,7 +923,7 @@ bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 
 		if(in_degree == 0)
 		{
-			dlog_cfg << "WARNING: Statement with no in edge." << std::endl;
+			std::cout << "WARNING: Statement with no in edge." << std::endl;
 			output->push_back(vd);
 
 			// We found a statement with no in edges.
