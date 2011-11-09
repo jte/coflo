@@ -332,9 +332,9 @@ assignment_statement
 assignment_statement_internals
 	: lhs '=' rhs bitwise_binary_operator rhs
 		{ $$.m_statement = new Placeholder(Location()); }
-	/*| lhs '=' rhs
-	nested_lhs '=' cast_expression
-		{ $$.m_statement = new Placeholder(Location()); }*/
+	/*| lhs '=' rhs*/
+	| nested_lhs '=' cast_expression
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '~' rhs
 		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' '-' rhs
@@ -376,6 +376,19 @@ condition
 	
 cast_expression
 	: '(' type_name ')' rhs
+	// Some gcc 4.5.3 builds handle string literals differently than others.  They result in statements which look like this:
+	//
+	// "i686-w64-mingw32-gcc-4.5.3 (GCC) 4.5.3":
+	//   <location> <var_id> = (const char * restrict) &"the string literal"[0];
+	//
+	// var_id is then subsequently passed to a printf() call.  Other builds will dispense with the intermediate var_id and
+	// just pass the literal to the function call directly:
+	// 
+	// "i686-pc-cygwin-gcc-4.5.3 (GCC) 4.5.3" : 
+	//      <location> printf (<location> &<location> "the string literal"[0]);
+	//
+	// The below production is intended to handle the former.
+	| '(' type_name ')' '&' string_literal '[' constant ']'
 	;
 	
 type_name
