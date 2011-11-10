@@ -143,6 +143,12 @@ AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --cfg=main],
 AT_CLEANUP
 
 ###
+### Do some checks of the CFG structuring functionality.
+###
+m4_include([structuring_compound_conditions.at])
+
+
+###
 ### Do some checks of the analysis functionality.
 ###
 AT_BANNER([CoFlo control flow graph analysis checks])

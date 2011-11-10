@@ -1,0 +1,80 @@
+# version.at for CoFlo
+#
+# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+#
+# This file is part of CoFlo.
+#
+# CoFlo is free software: you can redistribute it and/or modify it under the
+# terms of version 3 of the GNU General Public License as published by the Free
+# Software Foundation.
+#
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+# Make sure we can structure short-circuiting conditional constructs correctly.
+
+AT_BANNER([CoFlo control flow graph structuring checks])
+
+AT_SETUP([Compound condition: (x == 1) && (y == 1)])
+
+AT_CAPTURE_FILE([compound_condition_1.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/compound_condition_1.c --cfg=main],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E -z 'main.+?\@<:@.+?if.+?{.+?printf.+?}.+?}.+?\@:>@' stdout],
+	0,
+	ignore,
+	ignore)
+
+AT_CLEANUP
+
+AT_SETUP([Compound condition: (x == 1) || (y == 1)])
+
+AT_CAPTURE_FILE([compound_condition_2.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/compound_condition_2.c --cfg=main],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E -z 'main.+?\@<:@.+?if.+?{.+?printf.+?}.+?}.+?\@:>@' stdout],
+	0,
+	ignore,
+	ignore)
+
+AT_CLEANUP
+
+AT_SETUP([Compound condition: !(x == 1) || (y == 1)])
+
+AT_CAPTURE_FILE([compound_condition_3.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/compound_condition_3.c --cfg=main],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E -z 'main.+?\@<:@.+?if.+?{.+?printf.+?}.+?}.+?\@:>@' stdout],
+	0,
+	ignore,
+	ignore)
+
+AT_CLEANUP
+
+AT_SETUP([Compound condition: !(x == 1) && (y == 1)])
+
+AT_CAPTURE_FILE([compound_condition_4.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/compound_condition_4.c --cfg=main],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E -z 'main.+?\@<:@.+?if.+?{.+?printf.+?}.+?}.+?\@:>@' stdout],
+	0,
+	ignore,
+	ignore)
+
+AT_CLEANUP
