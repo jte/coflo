@@ -61,6 +61,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 
 # The .at files which make up the test suite.
 TESTSUITE_AT = \
+	structuring_compound_conditions.at \
 	testsuite.at \
 	version.at
 
@@ -108,7 +109,12 @@ installcheck-local: atconfig atlocal $(TESTSUITE) $(CPP_TEST_SOURCE)
 ###
 
 # The C test files.
-C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c $(srcdir)/loop_test_1.c
+C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c $(srcdir)/loop_test_1.c \
+	compound_condition_1.c \
+	compound_condition_2.c \
+	compound_condition_3.c \
+	compound_condition_4.c
+	
 # The built C++ test files.
 CPP_TEST_SOURCE = test_source_file_1.cpp test_source_file_2.cpp
 
