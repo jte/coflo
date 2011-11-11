@@ -250,6 +250,12 @@ public:
 
 	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
 
+	/**
+	 * Return the in degree of vertex @a v.
+	 *
+	 * @param v
+	 * @return The in degree of @v.
+	 */
 	long InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
 
 

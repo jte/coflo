@@ -211,7 +211,7 @@ declaration
 	;
 	
 var_declaration
-	: decl_spec+ var_id declarator_suffix* ('=' constant)? ';'
+	: decl_spec+ var_id declarator_suffix* ('=' (constant | string_literal))? ';'
 		{ /*std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;*/ }
 	;
 	
@@ -220,7 +220,7 @@ declarator_suffix
 	;
 	
 local_function_declaration
-	: decl_spec+ identifier '(void)' ';'
+	: decl_spec+ identifier '(' param_decls_list ')' ';'
 		{ /*std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;*/ }
 	;
 
@@ -252,8 +252,13 @@ statement_list
 statement
 	: statement_one_line ';' post_line_text
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
+	// gcc 4.5.3 will emit "comment statements", in particular:
+	// <location> '// predicted unlikely by continue predictor.'
 	| location comment
-		{ std::cout << "Ignoring comment" << std::endl; $$.m_statement = NULL; }
+		{
+			std::cout << "Ignoring comment" << std::endl;
+			$$.m_statement = new NoOp(Location());
+		}
 	| statement_possibly_split_across_lines
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| label_statement ';'?
@@ -347,6 +352,8 @@ assignment_statement_internals
 		{ M_PROPAGATE_PTR($2, $$, m_statement); }
 	| lhs '=' 'MIN_EXPR' '<' argument_expression_list '>'
 		{ $$.m_statement = new Placeholder(Location()); }
+	| lhs '=' real_location 'BIT_FIELD_REF' '<' rhs ',' constant ',' constant '>'
+		{ $$.m_statement = new Placeholder(Location()); }
 	| lhs '=' condition
 		{ $$.m_statement = new Placeholder(Location()); }
 	| nested_lhs '=' rhs
@@ -371,7 +378,7 @@ scope
 
 // The GIMPLE output only appears to have var_id's or constants on both sides of the comparison operator.	
 condition
-	: var_or_constant comparison_operator var_or_constant
+	: var_or_constant comparison_operator rhs //var_or_constant
 	;
 	
 cast_expression
@@ -522,6 +529,8 @@ decl_spec
 	| "\<[A-Za-z]+[A-Za-z0-9]+\>"	/* Not sure what this is, see it as "<T{hex_number}>" in function pointer decls. */
 	/*| '(' decl_spec+ ')'*/
 	| '(' decl_spec+ (',' decl_spec+)? ')'
+	// gcc 4.5.3 emits this one in some C code.  First encountered it when running against make 3.82 sources.
+	| '<unnamed type>'
 	;
 	
 type_qualifier
@@ -559,9 +568,9 @@ postfix_expression
 		)* ;
 		
 nested_lhs
-	: real_location nested_lhs '.' identifier
+	: real_location nested_lhs '.' var_id
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
-	| real_location nested_lhs '->' identifier
+	| location nested_lhs '->' identifier
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	| real_location nested_lhs '[' var_or_constant ']'
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
@@ -572,9 +581,9 @@ nested_lhs
 	;
 	
 nested_rhs
-	: real_location nested_rhs '.' identifier
+	: real_location nested_rhs '.' var_id
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
-	| real_location nested_rhs '->' identifier
+	| location nested_rhs '->' identifier
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	| real_location nested_rhs '[' var_or_constant ']'
 		{ M_PROPAGATE_PTR($0, $$, m_location); }

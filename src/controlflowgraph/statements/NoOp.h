@@ -23,9 +23,9 @@
 #include "PseudoStatement.h"
 
 /**
- * NoOp statement.  Used primarily to give basic blocks which have no actual Statements
- * at least one Statement, so that graph manipulations can work while retaining these
- * "empty" blocks.
+ * NoOp statement.  Used primarily to as a statement type for statements that aren't relevant to the CFG
+ * structure or analysis, such as the "Comment statements" emitted by GCC 4.5.3 of the form:
+ * "[<location>] // predicted unlikely by continue predictor.".
  */
 class NoOp : public PseudoStatement
 {
