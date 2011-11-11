@@ -363,4 +363,40 @@ void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
 
 void ControlFlowGraph::StructureCompoundConditionals(Function *f)
 {
+#if 0
+	// ... postorder traversal...
+	T_CFG_VERTEX_DESC v;
+	T_FILTERED_GRAPH fg;
+	If *if_ptr, *if_ptr2;
+
+	if(fg[v].m_statement->IsType<If>())
+	{
+		// This is an If vertex, see if we need to restructure it.
+		true_successor = if_ptr->GetTrueSuccessor();
+		false_successor = if_ptr->GetFalseSuccessor();
+
+		if(GetStatementPtr(true_successor)->IsType<If>()
+				&& InDegree(true_successor) == 1)
+		{
+			if_ptr2 = GetStatementPtr(true_successor);
+
+			if(if_ptr2->GetTrueSuccessor() == false_successor)
+			{
+				// The structure is (t,f):
+				//      1
+				//     / \
+				//    2   |
+				//   / \ /
+				//  t   f
+
+				// The structure is (t,f):
+				//      1
+				//     / \
+				//    2   |
+				//   / \ /
+				//  t   f
+			}
+		}
+	}
+#endif
 }
