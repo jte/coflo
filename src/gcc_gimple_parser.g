@@ -145,7 +145,7 @@ function_definition
 	// C code.
 	: identifier '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
-			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
+			std::cout << "Found function definition: " << *($0.m_str) << std::endl;
 			std::cout << "  Location: " << *($5.m_location) << std::endl;
 			std::cout << "  Num Statements: " << $9.m_statement_list->size() << std::endl;
 			StatementListPrint($9.m_statement_list);
@@ -157,7 +157,7 @@ function_definition
 	// C++ code.
 	| decl_spec+ identifier '(' param_decls_list ')' '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
-			std::cout << "Found C++ style function definition: " << M_TO_STR($n1) << std::endl;
+			std::cout << "Found C++ style function definition: " << *($1.m_str) << std::endl;
 			StatementListPrint($13.m_statement_list);
 			$$.m_function_info = new FunctionInfo;
 			$$.m_function_info->m_location = $9.m_location;
@@ -246,6 +246,7 @@ statement_list
 		}
 	| /* Nothing */
 		{
+			$$.m_statement_list = new StatementList;
 		}
 	;
 	
@@ -288,7 +289,7 @@ statement_one_line
 return_statement
 	: location 'return' var_id
 		{
-			$$.m_statement = new ReturnUnlinked(*($0.m_location), M_TO_STR($n2));
+			$$.m_statement = new ReturnUnlinked(*($0.m_location), *($2.m_str));
 		}
 	| location 'return'
 		{
@@ -301,7 +302,6 @@ statement_possibly_split_across_lines
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
 	| switch
 		{ M_PROPAGATE_PTR($0, $$, m_statement); }
-	/*| comment*/
 	;
 
 bitwise_binary_operator
@@ -330,6 +330,7 @@ arithmetic_binary_operator
 assignment_statement
 	: real_location assignment_statement_internals
 		{
+			// @todo Location is more appropriately the "real_location" here.
 			M_PROPAGATE_PTR($1,$$,m_statement);
 		}
 	;
@@ -356,7 +357,7 @@ assignment_statement_internals
 	| lhs '=' condition
 		{ $$.m_statement = new Placeholder(Location()); }
 	| nested_lhs '=' rhs
-	{ $$.m_statement = new Placeholder(*($0.m_location)); }
+		{ $$.m_statement = new Placeholder(Location()); }
 	;
 	
 if
@@ -543,30 +544,17 @@ storage_class_specifier
 	;
 
 lhs
-	: nested_lhs /*unary_expression*/
+	: nested_lhs
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	;
 	
 rhs
-	: nested_rhs /*unary_expression*/
+	: nested_rhs
+		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	;
 	
-unary_expression
-	: postfix_expression
-	| location unary_operator unary_expression
-	;
-
-unary_operator : '&' | '*' ;
-
-postfix_expression
-	: primary_expression
-		(
-			'[' postfix_expression ']' 
-			| '.' identifier
-			| '->' identifier
-		)* ;
-		
 nested_lhs
-	: real_location nested_lhs '.' var_id
+	: location nested_lhs '.' var_id
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	| location nested_lhs '->' identifier
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
@@ -579,7 +567,7 @@ nested_lhs
 	;
 	
 nested_rhs
-	: real_location nested_rhs '.' var_id
+	: location nested_rhs '.' var_id
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
 	| location nested_rhs '->' identifier
 		{ M_PROPAGATE_PTR($0, $$, m_location); }
@@ -602,12 +590,6 @@ nested_rhs
 		}
 	;
 
-primary_expression 
-  : location var_id
-  | constant
-  | location string_literal+
-  ;
-
 constant
 	: integer_decimal 'B'? /* Not sure what the 'B' represents.  Saw '0B', '35B', etc. */
 	| integer_hex
@@ -620,6 +602,9 @@ var_id
 		{ M_PROPAGATE_PTR($0, $$, m_str); }
 	| identifier
 		{ M_PROPAGATE_PTR($0, $$, m_str); }
+	// gcc 4.5.3 sometimes outputs '<retval>' in returns which return a value.
+	| '<retval>'
+		{ $$.m_str = new std::string("<retval>"); }
 	;
 	
 synthetic_label_id
