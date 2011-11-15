@@ -60,6 +60,12 @@ AC_REQUIRE_AUX_FILE([svn-version-gen])
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
 
+
+#
+# Defines for the config.h.
+#
+
+
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
@@ -100,6 +106,10 @@ AM_INIT_AUTOMAKE([check-news
 #              [],
 #              [enable_libcwd=yes])
 
+# The configure variable which contains the DParser make_dparser program.
+AC_ARG_VAR([MAKE_DPARSER],[DParser parser builder command.])
+AC_DEFINE_UNQUOTED([PROG_MAKE_DPARSER],[$MAKE_DPARSER],[The make_dparser found at configure time.])
+
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
@@ -119,6 +129,8 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ###
 ### Checks for the programs we need to do a build.
 ###
+AC_CHECK_PROGS([MAKE_DPARSER], [make_dparser])
+AS_IF([test -z "$MAKE_DPARSER"], [AC_MSG_ERROR([Cannot find a usable make_dparser.])])
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
