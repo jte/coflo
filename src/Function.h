@@ -32,6 +32,8 @@ class TranslationUnit;
 class FunctionCall;
 class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+/// Map of function call identifiers to FunctionCallUnresolved instances.
+typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP;
 
 
 class Function
@@ -49,7 +51,7 @@ public:
 	 * @param[out] unresolved_function_calls List of function calls we weren't able to resolve.
      */
 	void Link(const std::map< std::string, Function* > &function_map,
-			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
+			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 	
 	/**
 	 * Add the control flow graph of this Function to \a cfg.
@@ -155,6 +157,12 @@ private:
 	
 	ControlFlowGraph *m_the_cfg;
 	T_CFG *m_cfg;
+
+	/// @name Static properties of this function.
+	/// These are properties of the function determined at analysis-time which are invariant, such as
+	/// whether it is known to terminate, its complexity, etc.
+	//@{
+	//@}
 };
  
 #endif // FUNCTION_H

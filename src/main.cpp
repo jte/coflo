@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
 			the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
 
 			// Parse the program.
-			std::vector< FunctionCallUnresolved* > unresolved_function_calls;
+			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP unresolved_function_calls;
 			if(!the_program->Parse(
 				*defines,
 				*includes,
@@ -345,6 +345,8 @@ int main(int argc, char* argv[])
 				// Parse failed.
 				return 1;
 			}
+
+			the_program->PrintUnresolvedFunctionCalls(&unresolved_function_calls);
 		}
 		catch( boost::exception & e )
 		{

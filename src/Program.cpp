@@ -15,7 +15,6 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Program.h"
 
 #include <fstream>
 #include <iostream>
@@ -24,6 +23,7 @@
 
 #include <boost/foreach.hpp>
 
+#include "Program.h"
 #include "TranslationUnit.h"
 #include "RuleReachability.h"
 #include "controlflowgraph/statements/FunctionCall.h"
@@ -67,7 +67,7 @@ void Program::AddSourceFiles(const std::vector< std::string > &file_paths)
 
 bool Program::Parse(const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
-		std::vector< FunctionCallUnresolved* > *unresolved_function_calls,
+		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls,
 		bool debug_parse)
 {
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
@@ -82,20 +82,6 @@ bool Program::Parse(const std::vector< std::string > &defines,
 			std::cerr << "ERROR: Couldn't parse \"" << tu->GetFilePath() << "\"" << std::endl;
 			return false;
 		}
-#if 0
-		// Link the blocks in the functions in the file.
-		std::cout << "Linking basic blocks..." << std::endl;
-		retval = tu->LinkBasicBlocks();
-		if(retval == false)
-		{
-			std::cerr << "ERROR: Couldn't parse \"" << tu->GetFilePath() << "\"" << std::endl;
-			return false;
-		}
-
-		// Create the control-flow graphs.
-		std::cout << "Creating function control-flow graphs..." << std::endl;
-		tu->CreateControlFlowGraphs(&m_cfg);
-#endif
 	}
 
 	// Link the function calls.
@@ -104,17 +90,6 @@ bool Program::Parse(const std::vector< std::string > &defines,
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
 		tu->Link(m_function_map, unresolved_function_calls);
-	}
-
-	// See if we have any unresolved calls.
-	if(unresolved_function_calls->size() > 0)
-	{
-		// We couldn't link some function calls.
-		std::cout << "WARNING: Unresolved function calls at the following locations:" << std::endl;
-		BOOST_FOREACH(FunctionCallUnresolved *fc, *unresolved_function_calls)
-		{
-			std::cout << "[" << fc->GetLocation() << "]: " << fc->GetIdentifier() << std::endl;
-		}
 	}
 
 	// Parsing was successful.
@@ -170,6 +145,34 @@ void Program::Print(const std::string &output_path)
 "\
 </body>\n\
 </html>" << std::endl;
+}
+
+void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
+{
+	/// @todo Pass in.
+	bool only_list_ids = true;
+
+	// See if we have any unresolved calls.
+	if(unresolved_function_calls->size() > 0)
+	{
+		// We couldn't link some function calls.
+		std::cout << "WARNING: Unresolved function calls:" << std::endl;
+		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP::iterator it;
+		for(it=(*unresolved_function_calls).begin(); it!=(*unresolved_function_calls).end();)
+		{
+			FunctionCallUnresolved *fc = it->second;
+			if(!only_list_ids)
+			{
+				std::cout << "[" << fc->GetLocation() << "]: " << fc->GetIdentifier() << std::endl;
+				++it;
+			}
+			else
+			{
+				std::cout << fc->GetIdentifier() << std::endl;
+				it = unresolved_function_calls->upper_bound(fc->GetIdentifier());
+			}
+		}
+	}
 }
 
 bool Program::PrintFunctionCFG(const std::string &function_identifier, bool cfg_verbose, bool cfg_vertex_ids)

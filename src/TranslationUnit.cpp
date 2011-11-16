@@ -171,11 +171,10 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 }
 
 void TranslationUnit::Link(const std::map< std::string, Function* > &function_map,
-		T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
+		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		/// @todo Put linking back.
 		fp->Link(function_map, unresolved_function_calls);
 	}
 }

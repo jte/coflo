@@ -118,7 +118,7 @@ bool Function::IsCalled() const
 }
 
 void Function::Link(const std::map<std::string, Function*> &function_map,
-		T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls)
+		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
@@ -145,7 +145,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 			if (it == function_map.end())
 			{
 				// Couldn't resolve it.  Add it to the unresolved call list.
-				unresolved_function_calls->push_back(fcu);
+				unresolved_function_calls->insert(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP::value_type(fcu->GetIdentifier(), fcu));
 			}
 			else
 			{

@@ -45,7 +45,8 @@ AC_PREREQ([2.67])
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
 #AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+#m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
+AC_INIT([CoFlo], [0.0.1.svnversion], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -64,7 +65,7 @@ AC_CONFIG_MACRO_DIR([m4])
 #
 # Defines for the config.h.
 #
-
+#AC_DEFINE(SVN_REVISION, "svnversion", [SVN Revision])
 
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
@@ -108,7 +109,6 @@ AM_INIT_AUTOMAKE([check-news
 
 # The configure variable which contains the DParser make_dparser program.
 AC_ARG_VAR([MAKE_DPARSER],[DParser parser builder command.])
-AC_DEFINE_UNQUOTED([PROG_MAKE_DPARSER],[$MAKE_DPARSER],[The make_dparser found at configure time.])
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
@@ -130,7 +130,8 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ### Checks for the programs we need to do a build.
 ###
 AC_CHECK_PROGS([MAKE_DPARSER], [make_dparser])
-AS_IF([test -z "$MAKE_DPARSER"], [AC_MSG_ERROR([Cannot find a usable make_dparser.])])
+AM_CONDITIONAL([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[test -z "$MAKE_DPARSER"]) 
+AM_COND_IF([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[AC_MSG_ERROR([Cannot find a usable make_dparser.])])
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -153,6 +154,7 @@ DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
+AC_DEFINE_UNQUOTED([DOT_PATH],[$DOT_PATH],[Define as the absolute path to the Graphviz dot program.])
 
 ###
 ### Checks for libraries
