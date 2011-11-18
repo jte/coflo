@@ -114,7 +114,6 @@ AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
-#-Weffc++
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
 # specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
@@ -124,7 +123,7 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
 # Similar thing for LDFLAGS.  This is to get AC_CHECK_LIB to also look in /usr/local/lib for libdparser.a. 
-: ${LDFLAGS=-L/usr/local/lib}
+: ${LDFLAGS="-L/usr/local/lib"}
 
 ###
 ### Checks for the programs we need to do a build.
