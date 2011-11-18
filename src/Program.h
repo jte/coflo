@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "controlflowgraph/ControlFlowGraph.h"
 
@@ -32,6 +33,9 @@ class ToolDot;
 
 /// Map of identifiers to pointers to the Function objects the correspond to.
 typedef std::map< std::string, Function* > T_ID_TO_FUNCTION_PTR_MAP;
+
+/// Map of function call identifiers to FunctionCallUnresolved instances.
+typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP;
 
 /**
  * Encapsulates the concept of an entire program, consisting of one or more
@@ -52,9 +56,11 @@ public:
 	
 	bool Parse(const std::vector< std::string > &defines,
 		const std::vector< std::string > &include_paths,
-		std::vector< FunctionCallUnresolved* > *unresolved_function_calls,
+		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls,
 		bool debug_parse = 0);
 	
+	void PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
+
 	/**
 	 * Return a pointer to the Function object corresponding to the given identifier.
 	 *
