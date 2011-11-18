@@ -36,6 +36,9 @@ AT_CLEANUP
 
 AT_SETUP([Compound condition: (x == 1) || (y == 1)])
 
+# We don't expect to be able to do this yet.
+AT_XFAIL_IF([true])
+
 AT_CAPTURE_FILE([compound_condition_2.c.coflo.gimple])
 
 AT_CHECK([coflo ${abs_top_srcdir}/tests/compound_condition_2.c --cfg=main],
@@ -50,6 +53,9 @@ AT_CHECK([grep -E -z 'main.+?\@<:@.+?if.+?{.+?printf.+?}.+?}.+?\@:>@' stdout],
 AT_CLEANUP
 
 AT_SETUP([Compound condition: !(x == 1) || (y == 1)])
+
+# We don't expect to be able to do this yet.
+AT_XFAIL_IF([true])
 
 AT_CAPTURE_FILE([compound_condition_3.c.coflo.gimple])
 

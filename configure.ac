@@ -46,7 +46,7 @@ AC_PREREQ([2.67])
 # of this mechanism.
 #AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 #m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
-AC_INIT([CoFlo], [0.0.1.svnversion], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -107,8 +107,6 @@ AM_INIT_AUTOMAKE([check-news
 #              [],
 #              [enable_libcwd=yes])
 
-# The configure variable which contains the DParser make_dparser program.
-AC_ARG_VAR([MAKE_DPARSER],[DParser parser builder command.])
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
@@ -125,11 +123,14 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
+# Similar thing for LDFLAGS.  This is to get AC_CHECK_LIB to also look in /usr/local/lib for libdparser.a. 
+: ${LDFLAGS=-L/usr/local/lib}
 
 ###
 ### Checks for the programs we need to do a build.
 ###
-AC_CHECK_PROGS([MAKE_DPARSER], [make_dparser])
+# The DParser make_dparser program.
+AX_WITH_PROG([MAKE_DPARSER], [make_dparser])
 AM_CONDITIONAL([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[test -z "$MAKE_DPARSER"]) 
 AM_COND_IF([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[AC_MSG_ERROR([Cannot find a usable make_dparser.])])
 AC_PROG_CC
@@ -156,9 +157,13 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
 AC_DEFINE_UNQUOTED([DOT_PATH],[$DOT_PATH],[Define as the absolute path to the Graphviz dot program.])
 
+
 ###
 ### Checks for libraries
 ###
+
+# Make sure we have the DParser library available.
+AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
 
 # Make sure we have a usable Boost version.
 AX_BOOST_BASE([1.42.0])
@@ -166,6 +171,7 @@ AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
+
 
 ###
 ### Checks for some library functions we need.
