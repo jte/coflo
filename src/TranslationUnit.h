@@ -74,7 +74,7 @@ public:
 	 * @param[out] unresolved_function_calls The returned list of FunctionCalls that could not be resolved.
 	 */
 	void Link(const std::map< std::string, Function* > &function_map,
-			T_UNRESOLVED_FUNCTION_CALL_MAP *unresolved_function_calls);
+			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 	
 	/**
 	 * Generate the control flow graphs of all functions in this translation unit, and add them to cfg.

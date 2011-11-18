@@ -45,6 +45,7 @@ AC_PREREQ([2.67])
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
 #AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+#m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
 AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -59,6 +60,12 @@ AC_REQUIRE_AUX_FILE([svn-version-gen])
 
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
+
+
+#
+# Defines for the config.h.
+#
+#AC_DEFINE(SVN_REVISION, "svnversion", [SVN Revision])
 
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
@@ -100,13 +107,13 @@ AM_INIT_AUTOMAKE([check-news
 #              [],
 #              [enable_libcwd=yes])
 
+
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
-#-Weffc++
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
 # specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
@@ -115,10 +122,16 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
+# Similar thing for LDFLAGS.  This is to get AC_CHECK_LIB to also look in /usr/local/lib for libdparser.a. 
+: ${LDFLAGS="-L/usr/local/lib"}
 
 ###
 ### Checks for the programs we need to do a build.
 ###
+# The DParser make_dparser program.
+AX_WITH_PROG([MAKE_DPARSER], [make_dparser])
+AM_CONDITIONAL([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[test -z "$MAKE_DPARSER"]) 
+AM_COND_IF([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[AC_MSG_ERROR([Cannot find a usable make_dparser.])])
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -141,10 +154,15 @@ DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
+AC_DEFINE_UNQUOTED([DOT_PATH],[$DOT_PATH],[Define as the absolute path to the Graphviz dot program.])
+
 
 ###
 ### Checks for libraries
 ###
+
+# Make sure we have the DParser library available.
+AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
 
 # Make sure we have a usable Boost version.
 AX_BOOST_BASE([1.42.0])
@@ -152,6 +170,7 @@ AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
+
 
 ###
 ### Checks for some library functions we need.
