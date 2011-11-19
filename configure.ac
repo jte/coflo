@@ -130,8 +130,9 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ###
 # The DParser make_dparser program.
 AX_WITH_PROG([MAKE_DPARSER], [make_dparser])
-AM_CONDITIONAL([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[test -z "$MAKE_DPARSER"]) 
-AM_COND_IF([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[AC_MSG_ERROR([Cannot find a usable make_dparser.])])
+if test -z "$MAKE_DPARSER"; then
+	AC_MSG_ERROR([Cannot find a usable make_dparser.])
+fi 
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
