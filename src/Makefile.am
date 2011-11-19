@@ -42,11 +42,8 @@ coflo_SOURCES = main.cpp \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
 	
-#BUILT_SOURCES = gcc_cfg_parser.g.d_parser.cpp
-#parse_SOURCES = gcc_cfg_parser.g 
-#parse_LDADD = /usr/local/lib/libdparse.a
 # Flags for make_dparser.
-DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_cfg_parser
+DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
 coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CFLAGS)
@@ -59,8 +56,6 @@ coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
-
-#/usr/local/lib/libdparse.a \#
 
 SUFFIX = .g .gdebug
 
