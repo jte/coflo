@@ -1,0 +1,56 @@
+# constraints.at for CoFlo
+#
+# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+#
+# This file is part of CoFlo.
+#
+# CoFlo is free software: you can redistribute it and/or modify it under the
+# terms of version 3 of the GNU General Public License as published by the Free
+# Software Foundation.
+#
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+AT_BANNER([CoFlo control flow graph analysis checks])
+
+# Start a test group.
+AT_SETUP([Function reachable from Function, same translation unit])
+
+# Capture the contents of the intermediate files if the test fails.
+AT_CAPTURE_FILE([test_source_file_1.c.coflo.gimple])
+AT_CAPTURE_FILE([test_source_file_2.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --constraint="main() -x another_level_deep()"],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E 'warning.*?constraint violation.*?another_level_deep' stdout],
+	0,
+	ignore,
+	ignore)
+	
+# End this test group.
+AT_CLEANUP
+
+# Start a test group.
+AT_SETUP([Function reachable from Function, other translation unit])
+
+# Capture the contents of the intermediate files if the test fails.
+AT_CAPTURE_FILE([test_source_file_1.c.coflo.gimple])
+AT_CAPTURE_FILE([test_source_file_2.c.coflo.gimple])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/test_source_file_1.c ${abs_top_srcdir}/tests/test_source_file_2.c --constraint="main() -x calculate()"],
+	0,
+	stdout,
+	ignore)
+AT_CHECK([grep -E 'warning.*?constraint violation.*?calculate' stdout],
+	0,
+	ignore,
+	ignore)
+
+# End this test group.
+AT_CLEANUP
