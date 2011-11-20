@@ -31,19 +31,13 @@
 class StatementBase
 {
 public:
+	StatementBase() {};
 	StatementBase(const Location &location);
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
-
-
-	/**
-	 * Parse the next statement out of input_stream.
-	 * 
-     * @param input_stream
-     * @return
-     */
-	static StatementBase* Parse(std::istream &input_stream);
 	
+	void SetLocation(const Location &new_location) { m_location = new_location; };
+
 	/**
 	 * Get text suitable for setting the statement's attributes in a dot file.
 	 *

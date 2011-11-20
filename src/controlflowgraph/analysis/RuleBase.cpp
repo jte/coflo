@@ -15,24 +15,25 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <boost/regex.hpp>
+#include "RuleBase.h"
 
-#include "StatementBase.h"
-#include "If.h"
-#include "Switch.h"
-#include "FunctionCallUnresolved.h"
-#include "../../Location.h"
-
-StatementBase::StatementBase(const Location &location) : m_location(location)
+RuleBase::RuleBase() 
 {
 }
 
-StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
+RuleBase::RuleBase(const RuleBase& orig) 
 {
-	// Do a deep copy of the Location object.
 }
 
-StatementBase::~StatementBase()
+RuleBase::~RuleBase()
 {
+}
+
+void RuleBase::indent(long i)
+{
+	while (i > 0)
+	{
+		std::cout << "    ";
+		i--;
+	};
 }

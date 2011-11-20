@@ -15,24 +15,30 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <boost/regex.hpp>
+#ifndef RULEBASE_H
+#define	RULEBASE_H
 
-#include "StatementBase.h"
-#include "If.h"
-#include "Switch.h"
-#include "FunctionCallUnresolved.h"
-#include "../../Location.h"
+#include "../ControlFlowGraph.h"
 
-StatementBase::StatementBase(const Location &location) : m_location(location)
+/**
+ * Abstract base class for all rules.
+ */
+class RuleBase
 {
-}
 
-StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
-{
-	// Do a deep copy of the Location object.
-}
+public:
+	RuleBase();
+	RuleBase(const RuleBase& orig);
+	virtual ~RuleBase();
+	
+	virtual bool RunRule() = 0;
+	
+protected:
 
-StatementBase::~StatementBase()
-{
-}
+	static void indent(long i);
+
+private:
+
+};
+
+#endif	/* RULEBASE_H */

@@ -85,7 +85,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// Check if it's a C++ file.
 	if(filename.extension() == ".cpp")
 	{
-		dlog_block << "File is C++" << std::endl;
+		dlog_parse_gimple << "File is C++" << std::endl;
 		file_is_cpp = true;
 	}
 	
@@ -144,7 +144,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	{
 		// Parsed the .coflo.gimple file successfully.
 
-		std::cout << "File \"" << filename.generic_string() << "\" parsed successfully." << std::endl;
+		dlog_parse_gimple << "File \"" << filename.generic_string() << "\" parsed successfully." << std::endl;
 
 		FunctionInfoList *fil = gcc_gimple_parser_GetUserInfo(tree)->m_function_info_list;
 
@@ -263,7 +263,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 	BOOST_FOREACH(FunctionInfo *fi, function_info_list)
 	{
 
-		std::cout << "Processing FunctionInfo for function \"" << *(fi->m_identifier) << "\"..." << std::endl;
+		dlog_parse_gimple << "Processing FunctionInfo for function \"" << *(fi->m_identifier) << "\"..." << std::endl;
 
 		// Create the function.
 		Function *f = new Function(this, *(fi->m_identifier));

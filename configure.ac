@@ -129,8 +129,8 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ### Checks for the programs we need to do a build.
 ###
 # The DParser make_dparser program.
-AX_WITH_PROG([MAKE_DPARSER], [make_dparser])
-if test -z "$MAKE_DPARSER"; then
+AX_WITH_PROG([PROG_MAKE_DPARSER_ABSPATH], [make_dparser])
+if test -z "$PROG_MAKE_DPARSER_ABSPATH"; then
 	AC_MSG_ERROR([Cannot find a usable make_dparser.])
 fi 
 AC_PROG_CC
@@ -155,7 +155,14 @@ DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
-AC_DEFINE_UNQUOTED([DOT_PATH],[$DOT_PATH],[Define as the absolute path to the Graphviz dot program.])
+
+# Check for Graphviz dot at configure-time. 
+AX_WITH_PROG([PROG_DOT_ABSPATH], [dot])
+if test -z "$PROG_DOT_ABSPATH"; then
+	AC_MSG_WARN([Cannot find a usable Graphviz dot program.])
+fi
+# Put whatever we may hav found in config.h.
+AC_DEFINE_UNQUOTED([PROG_DOT_ABSPATH],["$PROG_DOT_ABSPATH"],[Define to the absolute path to the Graphviz dot program.])
 
 
 ###
@@ -214,6 +221,7 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 AC_CONFIG_FILES([Makefile
 	src/Makefile
 	src/controlflowgraph/Makefile
+	src/controlflowgraph/analysis/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile
 	src/controlflowgraph/visitors/Makefile

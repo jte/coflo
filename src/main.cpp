@@ -35,7 +35,7 @@
 #include "Program.h"
 #include "libexttools/ToolCompiler.h"
 #include "libexttools/ToolDot.h"
-#include "Analyzer.h"
+#include "controlflowgraph/analysis/Analyzer.h"
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 		{
 			// Enable/disable debug output.
 			/// @todo Add debug_link control.
-			dlog_block.enable(debug_parse);
+			dlog_parse_gimple.enable(debug_parse);
 			dlog_function.enable(debug_parse);
 			dlog_cfg.enable(debug_cfg);
 

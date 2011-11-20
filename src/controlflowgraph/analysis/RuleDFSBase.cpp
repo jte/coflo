@@ -15,24 +15,28 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <boost/regex.hpp>
+/** @file */
 
-#include "StatementBase.h"
-#include "If.h"
-#include "Switch.h"
-#include "FunctionCallUnresolved.h"
-#include "../../Location.h"
 
-StatementBase::StatementBase(const Location &location) : m_location(location)
+#include "../ControlFlowGraph.h"
+
+#include "RuleDFSBase.h"
+
+RuleDFSBase::RuleDFSBase(ControlFlowGraph &cfg) : m_cfg(cfg)
+{
+
+}
+
+RuleDFSBase::RuleDFSBase(const RuleDFSBase& orig) : RuleBase(orig), m_cfg(orig.m_cfg)
 {
 }
 
-StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
+RuleDFSBase::~RuleDFSBase() 
 {
-	// Do a deep copy of the Location object.
 }
 
-StatementBase::~StatementBase()
+
+bool RuleDFSBase::RunRule()
 {
+	return true;
 }
