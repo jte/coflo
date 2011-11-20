@@ -37,9 +37,9 @@
 // Redefine this with C++ casts.
 #define D_PN(_x, _o) (reinterpret_cast<D_ParseNode*>(static_cast<char*>(_x) + _o))
 
-extern D_ParserTables parser_tables_gcc_cfg_parser;
+extern D_ParserTables parser_tables_gcc_gimple_parser;
 
-void gcc_cfg_parser_FreeNodeFn(D_ParseNode *d);
+void gcc_gimple_parser_FreeNodeFn(D_ParseNode *d);
 
 #define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
 #define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
@@ -49,8 +49,8 @@ static gcc_gimple_parser_ParseNode_Globals TheGlobals;
 
 D_Parser* new_gcc_gimple_Parser()
 {
-	D_Parser *parser = new_D_Parser(&parser_tables_gcc_cfg_parser, sizeof(D_ParseNode_User));
-	parser->free_node_fn = gcc_cfg_parser_FreeNodeFn;
+	D_Parser *parser = new_D_Parser(&parser_tables_gcc_gimple_parser, sizeof(D_ParseNode_User));
+	parser->free_node_fn = gcc_gimple_parser_FreeNodeFn;
 	parser->commit_actions_interval = 0;
 	parser->error_recovery = 1;
 	parser->save_parse_tree = 1;
@@ -89,7 +89,7 @@ void free_gcc_gimple_Parser(D_Parser *parser)
 	free_D_Parser(parser);
 }
 
-void gcc_cfg_parser_FreeNodeFn(D_ParseNode *d)
+void gcc_gimple_parser_FreeNodeFn(D_ParseNode *d)
 {
 	//std::cout << "FREE NODE" << std::endl;
 }
@@ -100,12 +100,12 @@ void StatementListPrint(StatementList *the_list)
 	StatementList::iterator it;
 	for(it = the_list->begin(); it != the_list->end(); ++it)
 	{
-		std::cout << "Ptr = " << (*it);
+		dlog_parse_gimple << "Ptr = " << (*it);
 		if((*it) != NULL)
 		{
-			std::cout << " : " << (*it)->GetIdentifierCFG();
+			dlog_parse_gimple << " : " << (*it)->GetIdentifierCFG();
 		}
-		std::cout << std::endl;
+		dlog_parse_gimple << std::endl;
 	}
 }
 
@@ -122,7 +122,7 @@ gcc_gimple_file
 		//std::cout << "gcc_gimple_file" << std::endl;
 	} function_definition_list
 		{
-			std::cout << "DONE" << std::endl;
+			//std::cout << "DONE" << std::endl;
 			TheGlobals.m_function_info_list = $1.m_function_info_list;
 			M_PROPAGATE_PTR($1, $$, m_function_info_list);
 		}
@@ -145,9 +145,9 @@ function_definition
 	// C code.
 	: identifier '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
-			std::cout << "Found function definition: " << *($0.m_str) << std::endl;
-			std::cout << "  Location: " << *($5.m_location) << std::endl;
-			std::cout << "  Num Statements: " << $9.m_statement_list->size() << std::endl;
+			dlog_parse_gimple << "Found function definition: " << *($0.m_str) << std::endl;
+			dlog_parse_gimple << "  Location: " << *($5.m_location) << std::endl;
+			dlog_parse_gimple << "  Num Statements: " << $9.m_statement_list->size() << std::endl;
 			StatementListPrint($9.m_statement_list);
 			$$.m_function_info = new FunctionInfo;
 			$$.m_function_info->m_location = $5.m_location;
@@ -157,7 +157,7 @@ function_definition
 	// C++ code.
 	| decl_spec+ identifier '(' param_decls_list ')' '(' param_decls_list ')' NL location '{' NL (declaration_list NL)? statement_list '}'
 		{
-			std::cout << "Found C++ style function definition: " << *($1.m_str) << std::endl;
+			dlog_parse_gimple << "Found C++ style function definition: " << *($1.m_str) << std::endl;
 			StatementListPrint($13.m_statement_list);
 			$$.m_function_info = new FunctionInfo;
 			$$.m_function_info->m_location = $9.m_location;
@@ -330,7 +330,7 @@ arithmetic_binary_operator
 assignment_statement
 	: real_location assignment_statement_internals
 		{
-			// @todo Location is more appropriately the "real_location" here.
+			$1.m_statement->SetLocation(*($0.m_location));
 			M_PROPAGATE_PTR($1,$$,m_statement);
 		}
 	;

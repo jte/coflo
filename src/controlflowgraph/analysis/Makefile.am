@@ -1,4 +1,4 @@
-# Second-level Makefile.am for CoFlo, ./controlflowgraph directory.
+# Third-level Makefile.am for CoFlo, ./analysis directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -15,20 +15,15 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = analysis edges statements visitors
-
-noinst_LIBRARIES = libcontrolflowgraph.a
-libcontrolflowgraph_a_SOURCES = \
-	SparsePropertyMap.h \
-	CallStackFrameBase.cpp CallStackFrameBase.h \
-	ControlFlowGraph.cpp ControlFlowGraph.h \
-	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
-	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
-	depth_first_traversal.hpp \
-	topological_visit_kahn.h
+noinst_LIBRARIES = libanalysis.a
+libanalysis_a_SOURCES = \
+	Analyzer.cpp Analyzer.h \
+	RuleBase.cpp RuleBase.h \
+	RuleDFSBase.cpp RuleDFSBase.h \
+	RuleReachability.cpp RuleReachability.h
 	
 
-libcontrolflowgraph_a_CPPFLAGS = $(AM_CPPFLAGS)
-libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
-libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
+libanalysis_a_CPPFLAGS = $(AM_CPPFLAGS)
+libanalysis_a_CFLAGS = $(AM_CFLAGS)
+libanalysis_a_CXXFLAGS = $(AM_CXXFLAGS)
 

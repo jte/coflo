@@ -10,29 +10,46 @@
  * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
+#ifndef ANALYZER_H
+#define	ANALYZER_H
+
+#include <vector>
 #include <string>
-#include <boost/regex.hpp>
 
-#include "StatementBase.h"
-#include "If.h"
-#include "Switch.h"
-#include "FunctionCallUnresolved.h"
-#include "../../Location.h"
+#include "../ControlFlowGraph.h"
 
-StatementBase::StatementBase(const Location &location) : m_location(location)
+class Program;
+class RuleBase;
+
+class Analyzer
 {
-}
 
-StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
-{
-	// Do a deep copy of the Location object.
-}
+public:
+	Analyzer();
+	Analyzer(const Analyzer& orig);
+	virtual ~Analyzer();
+	
+	void AddConstraints(const std::vector< std::string > &vector_of_constraint_strings);
+	
+	void AttachToProgram(Program *p) { m_program = p; };
+	
+	bool Analyze();
+	
+private:
 
-StatementBase::~StatementBase()
-{
-}
+	/// Pointer to the program to analyze.
+	Program *m_program;
+	
+	/// The list of constraints to check m_program against.
+	std::vector< RuleBase* > m_constraints;
+};
+
+#endif	/* ANALYZER_H */
+

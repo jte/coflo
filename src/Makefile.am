@@ -20,21 +20,19 @@ SUBDIRS = controlflowgraph debug_utils libexttools
 
 # Make sure to distribute the Doxygen configuration file and the parser built source.
 EXTRA_DIST = Doxyfile 
-#$(srcdir)/gcc_cfg_parser.cpp
+# @todo Currently we need to have DParser installed in order to build (need its library), so there's
+# not much point in distributing the .cpp files it generates.
+#$(srcdir)/gcc_gimple_parser.cpp
 
 # The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files. 
-#MAINTAINERCLEANFILES = $(srcdir)/gcc_cfg_parser.cpp
+#MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
-	Analyzer.cpp Analyzer.h \
 	Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
-	RuleBase.cpp RuleBase.h \
-	RuleDFSBase.cpp RuleDFSBase.h \
-	RuleReachability.cpp RuleReachability.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
@@ -45,11 +43,12 @@ coflo_SOURCES = main.cpp \
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
-coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_CPPFLAGS)
+coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS)
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(AM_LDFLAGS) $(BOOST_LDFLAGS)
-coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
+coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
+	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
 	./controlflowgraph/edges/libedges.a \
 	./controlflowgraph/visitors/libvisitors.a \
@@ -57,7 +56,7 @@ coflo_LDADD = ./controlflowgraph/libcontrolflowgraph.a \
 	./libexttools/libexttools.a \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 
-SUFFIX = .g .gdebug
+SUFFIX = .g
 
 # Rule to make *.cpp from *.g using DParser.
 # Note that the output file is built source, but we don't want the user to have to have dparser installed,
@@ -66,6 +65,7 @@ SUFFIX = .g .gdebug
 	TARGET="$(srcdir)/$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
 	INTER="$(srcdir)/$$(basename "$<").gdebug" && \
-	"$(MAKE_DPARSER)" $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${INTER}" && \
-	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' $${INTER} > $${TARGET} 
+	"$(PROG_MAKE_DPARSER_ABSPATH)" $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${INTER}" && \
+	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' $${INTER} > $${TARGET}-temp && \
+	mv $${TARGET}-temp $${TARGET}
 

@@ -17,18 +17,20 @@
 
 /** @file */
 
+
 #include "ReachabilityVisitor.h"
 
-#include "../../RuleReachability.h"
 
-ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_EDGE_DESC> *predecessor_list)
-	: ControlFlowGraphVisitorBase(g), m_source(source), m_sink(sink)
+//ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_EDGE_DESC> *predecessor_list)
+ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source,
+		T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<T_CFG_EDGE_DESC> *predecessor_list)
+	: ControlFlowGraphVisitorBase(g), m_source(source), m_inspect_vertex(inspect_vertex)
 {
 	m_predecessor_list = predecessor_list;
 }
 
 ReachabilityVisitor::ReachabilityVisitor(const ReachabilityVisitor & orig) : ControlFlowGraphVisitorBase(orig),
-		m_source(orig.m_source), m_sink(orig.m_sink)
+		m_source(orig.m_source), m_inspect_vertex(orig.m_inspect_vertex)
 {
 	m_predecessor_list = orig.m_predecessor_list;
 }
@@ -43,9 +45,10 @@ vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 					// Print the vertex ID.
 					<< " [" << u << "]" << " <" << m_graph[u].m_statement->GetLocation() << ">" << std::endl;*/
 
-	if(u == m_sink)
+	if(m_inspect_vertex(m_cfg, u) == true)
+	//if(u == m_sink)
 	{
-		// We found the sink, terminate the search.
+		// We found the vertex we were looking for, terminate the search.
 		return vertex_return_value_t::terminate_search;
 	}
 

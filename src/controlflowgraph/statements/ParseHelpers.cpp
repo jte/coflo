@@ -113,18 +113,20 @@ FlowControlBase* SwitchUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTE
 {
 	bool resolved_any_links = false;
 
+	/** @todo Delete
 	std::cout << "INFO: Num switch cases = " << m_case_list.size() << std::endl;
 	BOOST_FOREACH(CaseUnlinked *cu, m_case_list)
 	{
 		std::cout << "INFO: Switch case = " << cu << std::endl;
 	}
+	*/
 	BOOST_FOREACH(CaseUnlinked *cu, m_case_list)
 	{
 		// Look up our target.
 		LabelMap::iterator it;
 		it = label_map.find(cu->GetTarget());
 
-		std::cout << "INFO: Switch case target = " << cu->GetTarget() << std::endl;
+		//std::cout << "INFO: Switch case target = " << cu->GetTarget() << std::endl;
 
 		if(it == label_map.end())
 		{
