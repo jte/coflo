@@ -61,6 +61,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 
 # The .at files which make up the test suite.
 TESTSUITE_AT = \
+	constraints.at \
 	structuring_compound_conditions.at \
 	testsuite.at \
 	version.at
