@@ -179,7 +179,6 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
-
 ###
 ### Checks for some library functions we need.
 ###
