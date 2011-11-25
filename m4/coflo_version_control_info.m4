@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-#serial 1
+#serial 2
 
 # Define an M4 macro which will get the working copy's current version info via "svnversion".
 m4_define([SVN_VERSION], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]))dnl
