@@ -41,12 +41,12 @@ AC_PREREQ([2.67])
 #   - Append the revision number of the packager's working copy.
 # The package is reconfigured as necessary, in particular when what's in .version doesn't match what is reported by
 # svnversion.
-# There is considerable mechanism required to make this work properly.  See the "build-aux/svn-version-gen" script,
+# There is considerable mechanism required to make this work properly.  See the "build-aux/coflo_version_control_info" script,
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
-#AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], m4_esyscmd_s([build-aux/coflo_version_control_info "0.0.1" .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 #m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
-AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+#AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -56,7 +56,7 @@ AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
 AC_CONFIG_AUX_DIR([build-aux])
 
 # Require our source control version checking script. 
-AC_REQUIRE_AUX_FILE([svn-version-gen])
+AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
@@ -71,7 +71,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
 # and the config.h file.  
-#AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
+AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on

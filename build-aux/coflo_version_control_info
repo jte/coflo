@@ -21,9 +21,12 @@ scriptversion=2011-08-27.01; # UTC
 
 # Functionality based on Autoconf's own git-version-gen script.
 
-tarball_version_file=$1;
+user_version="$1";
 
-# The svnversion executable.
+# Save the name of the tarball version info file which was passed in. 
+tarball_version_file="$2";
+
+# Find the svnversion executable.
 SVNVERSION=`which svnversion`;
 if test $? -ne 0;
 then
@@ -36,37 +39,46 @@ fi
 # Does the specified tarball version file exist?
 if test -f "$tarball_version_file";
 then
-	echo "$0: INFO: Getting rev info from $tarball_version_file" 1>&2;
-	version_string=`cat $tarball_version_file` || exit 1;
+	echo "$0: INFO: Getting version info from $tarball_version_file" 1>&2;
+	complete_version_string=`cat $tarball_version_file` || complete_version_string=
+	if test -z "$complete_version_string";
+	then
+		echo "$0 WARNING: $tarball_version_file is missing or damaged." 1>&2;
+	fi
 fi
 
 # Did we get a version string?
-if test -z "$version_string";
+if test -z "$complete_version_string";
 then
 	# No, try svnversion.
 	# Can we execute $SVNVERSION?
 	if test -x $SVNVERSION;
 	then
 		# We should be able to execute $SVNVERSION.
-		version_string=`$SVNVERSION -n` \
-			|| { version_string=UNKNOWN; echo "$0: WARNING: svnversion -n failed" 1>&2; };
-		version_string=`echo $version_string | tr ':' '.'`;
-		if test "x$version_string" = "xexported";
+		version_control_version_string=`$SVNVERSION -n` \
+			|| { version_control_version_string=UNKNOWN; echo "$0: WARNING: svnversion -n failed" 1>&2; };
+		version_control_version_string=`echo $version_control_version_string | sed -r 's/\r\n//g'`;
+		# Check if it's a valid Subversion version string.
+		version_control_version_string_is_valid=$(echo "$version_control_version_string" | grep -E -c '^[0-9:MSP]+$'); 
+		if [ "$version_control_version_string_is_valid" = "0" ];
 		then
-			version_string=UNKNOWN
+			echo "$0 WARNING: svnversion reports \"$version_control_version_string\", looks like an unversioned directory." 1>&2;
+			version_control_version_string=UNKNOWN
 		fi
+		complete_version_string="$user_version".r"$version_control_version_string"
 	else
 		# We aren't able to execute $SVNVERSION, or it doesn't exist.
 		echo "$0: WARNING: Can't execute $SVNVERSION" 1>&2;
 	fi
 fi
 
-if test -z "$version_string"
+if test -z "$complete_version_string"
 then
 	# Can't get a version string.
-	version_string=UNKNOWN
+	version_control_version_string=UNKNOWN
+	complete_version_string="$user_version".r"$version_control_version_string"
 fi
 
-echo "$0: INFO: Determined version info: $version_string" 1>&2;
+echo "$0: INFO: Determined version info: $complete_version_string" 1>&2;
 
-echo "$version_string"
+echo -n "${complete_version_string}"
