@@ -44,9 +44,8 @@ AC_PREREQ([2.67])
 # There is considerable mechanism required to make this work properly.  See the "build-aux/coflo_version_control_info" script,
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
-AC_INIT([CoFlo], m4_esyscmd_s([build-aux/coflo_version_control_info "0.0.1" .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-#m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
-#AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+#AC_INIT([CoFlo], , [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -65,13 +64,15 @@ AC_CONFIG_MACRO_DIR([m4])
 #
 # Defines for the config.h.
 #
-#AC_DEFINE(SVN_REVISION, "svnversion", [SVN Revision])
+AC_SUBST([VC_REV], [m4_esyscmd_s([build-aux/coflo_version_control_info "" .tarball-version])])
+AC_DEFINE_UNQUOTED([VERSION_CONTROL_REVISION], ["$VC_REV"],
+	[Revision of source repository which was the initial origin of this distribution.])
 
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
 # and the config.h file.  
-AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/.version'])
+AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
@@ -93,19 +94,9 @@ AM_INIT_AUTOMAKE([std-options
 # @TODO This is causing autoconf to fail for some reason.
 #AM_INSTALLCHECK_STD_OPTIONS_EXEMPT=
 
-# Enable the configure remake rules.
-#AM_MAINTAINER_MODE([enable])
-
 ###
 ### Manual configure options.
 ###
-
-# Should we link with Libcwd?
-#AC_ARG_ENABLE([libcwd], [AS_HELP_STRING([--enable-libcwd],
-#               [Link with the Libcwd debugging library (default is no)])],
-#              [],
-#              [enable_libcwd=yes])
-
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
@@ -186,22 +177,7 @@ AC_CHECK_FUNC(glob)
 ###
 ### Checks for optional libraries.
 ###
-# Check if we have libcwd, $enable_debugging can be "yes", "no" or empty (auto).
-#test -n "$enable_debugging" || enable_debugging=no	# Set the default to an explicit "no".
-# This sets 'cw_use_libcwd' to "yes" if libcwd is actually used; CXXFLAGS and LDFLAGS are updated.
-#CW_LIB_LIBCWD([debugging], [$enable_debugging], [no])
-#LIBCWD=
-#AS_IF([test "x$enable_libcwd" != xno],
-#		[AC_CHECK_LIB([cwd], [__libcwd_version],
-#		[AC_SUBST([LIBCWD], ["-lcwd"])
-#			AC_DEFINE([HAVE_LIBCWD], [1], [Define if you have libcwd])
-#  ],
-#  [AC_MSG_FAILURE([libcwd test failed (--disable-libcwd to disable)])],
-#  [-lcwd])])
-#PKG_CHECK_MODULES([LIBCWD], [libcwd >= 1.0.4])
-## pkg-config's earlier than 0.24 don't AC_SUBST the discovered variables.
-#AC_SUBST([LIBCWD_CFLAGS])
-#AC_SUBST([LIBCWD_LIBS])
+
 
 ###
 ### Initialize the test suite.
