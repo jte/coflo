@@ -76,8 +76,7 @@ AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/.version'])
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
 # what the various settings do.
-AM_INIT_AUTOMAKE([check-news
-	std-options
+AM_INIT_AUTOMAKE([std-options
 	subdir-objects
     color-tests
     tar-pax

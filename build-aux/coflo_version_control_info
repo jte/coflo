@@ -57,9 +57,9 @@ then
 		# We should be able to execute $SVNVERSION.
 		version_control_version_string=`$SVNVERSION -n` \
 			|| { version_control_version_string=UNKNOWN; echo "$0: WARNING: svnversion -n failed" 1>&2; };
-		version_control_version_string=`echo $version_control_version_string | sed -r 's/\r\n//g'`;
+		version_control_version_string=`echo $version_control_version_string | sed -r -e 's/[\r\n]//g' -e 's/:/to/g'`;
 		# Check if it's a valid Subversion version string.
-		version_control_version_string_is_valid=$(echo "$version_control_version_string" | grep -E -c '^[0-9:MSP]+$'); 
+		version_control_version_string_is_valid=$(echo "$version_control_version_string" | grep -E -c '^[0-9toMSP]+$'); 
 		if [ "$version_control_version_string_is_valid" = "0" ];
 		then
 			echo "$0 WARNING: svnversion reports \"$version_control_version_string\", looks like an unversioned directory." 1>&2;
