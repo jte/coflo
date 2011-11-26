@@ -21,11 +21,15 @@ SUBDIRS = controlflowgraph debug_utils libexttools
 # Make sure to distribute the Doxygen configuration file and the parser built source.
 EXTRA_DIST = Doxyfile 
 # @todo Currently we need to have DParser installed in order to build (need its library), so there's
-# not much point in distributing the .cpp files it generates.
+# not much point in distributing the .cpp files it generates.  We'll put this back once we figure out how to
+# avoid the configure-time dependency on an installed DParser.
 #$(srcdir)/gcc_gimple_parser.cpp
 
-# The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files. 
+# The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files.
+# @todo Put this back once we figure out how to avoid the configure-time dependency on an installed DParser.  For now we're
+# always building them, so they go in MOSTLYCLEANFILES.
 #MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
+MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug
 
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
@@ -43,10 +47,10 @@ coflo_SOURCES = main.cpp \
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
-coflo_CPPFLAGS = $(AM_CPPFLAGS) $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS)
+coflo_CPPFLAGS = $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
-coflo_LDFLAGS = $(AM_LDFLAGS) $(BOOST_LDFLAGS)
+coflo_LDFLAGS = $(BOOST_LDFLAGS) $(AM_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
@@ -59,13 +63,16 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 SUFFIX = .g
 
 # Rule to make *.cpp from *.g using DParser.
-# Note that the output file is built source, but we don't want the user to have to have dparser installed,
-# so it gets distributed.
+# Note:
+# - The output file (*.cpp) is built source, but we don't want the user to have to have dparser installed,
+# so it is created under $(srcdir) and gets distributed.
+# - @TODO Actually, at the moment we're going to require the user to have DParser, so we won't do either.
+# - The intermediate file in the rule below, *.g.gdebug, is generated under $(bindir) so as not to cause "make distcheck" to fail.
 .g.cpp:
-	TARGET="$(srcdir)/$$(basename "$@")" && \
+	TARGET="$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
-	INTER="$(srcdir)/$$(basename "$<").gdebug" && \
-	"$(PROG_MAKE_DPARSER_ABSPATH)" $(DPARSER_FLAGS) "$${SOURCE}" "--output=$${INTER}" && \
-	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' $${INTER} > $${TARGET}-temp && \
-	mv $${TARGET}-temp $${TARGET}
+	INTER="$$(basename "$<").gdebug" && \
+	"$(PROG_MAKE_DPARSER_ABSPATH)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
+	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
+	mv "$${TARGET}-temp" "$${TARGET}"
 

@@ -28,41 +28,51 @@ include $(top_srcdir)/aminclude_doxygen.am
 SUBDIRS = src doc tests
 
 # We want to distribute .version.
-#EXTRA_DIST = .version
+EXTRA_DIST = $(top_srcdir)/.version $(top_srcdir)/.stamp-pre_distcheck
 
 # .version is built source.  We want it to be built before anything else
 # so that it will trigger a reconfigure at the earliest possible time.
-#BUILT_SOURCES = $(top_srcdir)/.version
+BUILT_SOURCES = $(top_srcdir)/.version $(top_srcdir)/.stamp-pre_distcheck
 #DISTCLEANFILES = $(top_srcdir)/.version
 
 # The make rule for building .version.
-# Note that we force this to always run.
-#$(top_srcdir)/.version: FORCE
-#	@# Get svn-version-gen's idea of what the right version number is.
-#	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > temp.version
-#	@# If .version doesn't exist, create it.
-#	@if ! test -f "$@"; \
-#	then \
-#		echo "Creating .version file..."; \
-#		mv temp.version "$@"; \
-#		echo "Done."; \
-#	: If temp.version differs from .version, update .version. ; \
-#	elif ! cmp "$@" temp.version; then \
-#		echo "Updating .version file..."; \
-#		mv temp.version "$@"; \
-#		echo "Done."; \
-#	else \
-#		echo "No need to create or update .version file."; \
-#		rm temp.version; \
-#	fi;
-#FORCE:
+$(top_srcdir)/.version:	FORCE
+	@# Get coflo_version_control_info's idea of what the right version number is.
+	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "0.0.1" .tarball-version) > .version-temp
+	@# If .version doesn't exist, create it.
+	@if ! test -f "$@"; \
+	then \
+		echo "Creating .version file..."; \
+		mv ".version-temp" "$@"; \
+		echo "Done."; \
+	: If .version-temp differs from .version, update .version. ; \
+	elif ! cmp "$@" ".version-temp"; then \
+		echo "Updating .version file..."; \
+		mv ".version-temp" "$@"; \
+		echo "Done."; \
+	else \
+		echo "No need to create or update .version file."; \
+		rm ".version-temp"; \
+	fi;
+
+FORCE:
 
 # The dist-hook for building .tarball-version.
 # This is invoked when we do a "make dist", and simply
 # creates a file which contains the value of $(VERSION)
 # which was current at that time.
-#dist-hook:
-#	@echo $$(cd $(top_srcdir) && build-aux/svn-version-gen .tarball-version) > $(distdir)/.tarball-version
+dist-hook:
+	: # Create the .tarball-version file.
+	@echo $(PACKAGE_VERSION) > $(distdir)/.tarball-version
+
+# This exists solely to get the version control version into the NEWS file so that distcheck
+# doesn't fail.  Probably more trouble than its worth.
+.stamp-pre_distcheck:
+	: # Put the current version control revision into the NEWS file.
+	@VCVER=$$(echo $(PACKAGE_VERSION) | sed -r -n 's/.+(\.r[0-9]+)/\1/p') &&\
+	cat $(top_srcdir)/NEWS.in | sed -r 's/[@]VC_VERSION[@]/$${VCVER}/' > $(top_srcdir)/NEWS-temp
+	mv $(top_srcdir)/NEWS-temp $(top_srcdir)/NEWS
+	echo timestamp > .stamp-pre_distcheck	
 
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
