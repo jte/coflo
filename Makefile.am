@@ -28,11 +28,11 @@ include $(top_srcdir)/aminclude_doxygen.am
 SUBDIRS = src doc tests
 
 # We want to distribute .version.
-EXTRA_DIST = $(top_srcdir)/.version $(top_srcdir)/.stamp-pre_distcheck
+EXTRA_DIST = $(top_srcdir)/.version
 
 # .version is built source.  We want it to be built before anything else
 # so that it will trigger a reconfigure at the earliest possible time.
-BUILT_SOURCES = $(top_srcdir)/.version $(top_srcdir)/.stamp-pre_distcheck
+BUILT_SOURCES = $(top_srcdir)/.version
 #DISTCLEANFILES = $(top_srcdir)/.version
 
 # The make rule for building .version.
@@ -65,14 +65,14 @@ dist-hook:
 	: # Create the .tarball-version file.
 	@echo $(PACKAGE_VERSION) > $(distdir)/.tarball-version
 
-# This exists solely to get the version control version into the NEWS file so that distcheck
-# doesn't fail.  Probably more trouble than its worth.
-.stamp-pre_distcheck:
-	: # Put the current version control revision into the NEWS file.
-	@VCVER=$$(echo $(PACKAGE_VERSION) | sed -r -n 's/.+(\.r[0-9]+)/\1/p') &&\
-	cat $(top_srcdir)/NEWS.in | sed -r 's/[@]VC_VERSION[@]/$${VCVER}/' > $(top_srcdir)/NEWS-temp
-	mv $(top_srcdir)/NEWS-temp $(top_srcdir)/NEWS
-	echo timestamp > .stamp-pre_distcheck	
+## This exists solely to get the version control version into the NEWS file so that distcheck
+## doesn't fail.  Probably more trouble than its worth.
+#.stamp-pre_distcheck:
+#	: # Put the current version control revision into the NEWS file.
+#	@VCVER=$$(echo $(PACKAGE_VERSION) | sed -r -n 's/.+(\.r[0-9]+)/\1/p') &&\
+#	cat $(top_srcdir)/NEWS.in | sed -r 's/[@]VC_VERSION[@]/$${VCVER}/' > $(top_srcdir)/NEWS-temp
+#	mv $(top_srcdir)/NEWS-temp $(top_srcdir)/NEWS
+#	echo timestamp > .stamp-pre_distcheck	
 
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
