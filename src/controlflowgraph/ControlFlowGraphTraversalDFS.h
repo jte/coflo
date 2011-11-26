@@ -15,6 +15,8 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
 #ifndef CONTROLFLOWGRAPHTRAVERSALDFS_H_
 #define CONTROLFLOWGRAPHTRAVERSALDFS_H_
 
@@ -22,8 +24,8 @@
 
 class ControlFlowGraphVisitorBase;
 
-/*
- *
+/**
+ * Depth-first search traversal of the CFG.
  */
 class ControlFlowGraphTraversalDFS : public ControlFlowGraphTraversalBase
 {

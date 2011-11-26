@@ -35,10 +35,11 @@ EXTRA_DIST = $(top_srcdir)/.version
 BUILT_SOURCES = $(top_srcdir)/.version
 #DISTCLEANFILES = $(top_srcdir)/.version
 
-# The make rule for building .version.
+# The rule for building .version.
+# We only update it based on content, not file time.
 $(top_srcdir)/.version:	FORCE
 	@# Get coflo_version_control_info's idea of what the right version number is.
-	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "0.0.1" .tarball-version) > .version-temp
+	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .version-temp
 	@# If .version doesn't exist, create it.
 	@if ! test -f "$@"; \
 	then \
@@ -63,7 +64,7 @@ FORCE:
 # which was current at that time.
 dist-hook:
 	: # Create the .tarball-version file.
-	@echo $(PACKAGE_VERSION) > $(distdir)/.tarball-version
+	@echo $(VC_REV) > $(distdir)/.tarball-version
 
 ## This exists solely to get the version control version into the NEWS file so that distcheck
 ## doesn't fail.  Probably more trouble than its worth.
