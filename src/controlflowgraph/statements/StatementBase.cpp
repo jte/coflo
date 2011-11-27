@@ -36,3 +36,13 @@ StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_loc
 StatementBase::~StatementBase()
 {
 }
+
+std::string StatementBase::EscapeifyForUseInDotLabel(const std::string & str)
+{
+	static const boost::regex expr("(\\\"|\\\\n)");
+	std::string retval;
+	retval = boost::regex_replace(str, expr, "\\\\$1",  boost::match_default | boost::format_perl);
+	return retval;
+}
+
+

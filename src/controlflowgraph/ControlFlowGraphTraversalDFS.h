@@ -33,10 +33,23 @@ public:
 	ControlFlowGraphTraversalDFS(ControlFlowGraph &control_flow_graph);
 	virtual ~ControlFlowGraphTraversalDFS();
 
+	/**
+	 * Perform a depth-first traversal of the CFG.
+	 *
+	 * @param source  The vertex to start the traversal from.
+	 * @param visitor The visitor which will visit the vertices in depth-first order during the search.
+	 */
 	virtual void Traverse(typename boost::graph_traits<T_CFG>::vertex_descriptor source,
 			ControlFlowGraphVisitorBase *visitor);
 
 protected:
+
+	/**
+	 * Check if edge @a e is one we want to ignore during the traversal.
+	 *
+	 * @param e
+	 * @return true if the edge should be ignored as if it wasn't in the graph.
+	 */
 	virtual bool SkipEdge(typename boost::graph_traits<T_CFG>::edge_descriptor e);
 };
 

@@ -104,12 +104,19 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 /// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
 struct graph_property_writer
 {
+	graph_property_writer(std::string function_name) : m_function_name(function_name) {};
+
 	void operator()(std::ostream& out) const
 	{
 		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
+		out << "subgraph cluster0 {" << std::endl;
+		out << "label = \"" << m_function_name << "\";" << std::endl;
+		out << "labeljust = \"l\";" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
 	}
+
+	std::string m_function_name;
 };
 
 /**

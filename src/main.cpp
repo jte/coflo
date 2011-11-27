@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 		// See if the user is asking for help, or didn't pass any parameters at all.
 		if (vm.count(CLP_HELP) || argc < 2)
 		{
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << std::endl;
 			std::cout << "Usage: coflo [options] file..." << std::endl;
 			std::cout << non_hidden_cmdline_options << std::endl;
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
 		{
 			// Print version info per GNU Coding Standards <http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dversion>.
 			// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y".
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
 			std::cout << "License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>" << std::endl;
 			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
 		// See of the user is requesting build info.
 		if(vm.count(CLP_BUILD_INFO))
 		{
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
 			std::cout << std::endl;
 			std::cout << "Build info:" << std::endl;

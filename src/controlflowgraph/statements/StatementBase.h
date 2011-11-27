@@ -105,6 +105,8 @@ public:
 
 	//@}
 
+	static std::string EscapeifyForUseInDotLabel(const std::string &str);
+
 private:
 
 	/// The Location of this statement.
