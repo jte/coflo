@@ -701,7 +701,9 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 
 	boost::write_graphviz(outfile, graph_of_this_function,
 			cfg_vertex_property_writer(*m_cfg),
-			cfg_edge_property_writer(*m_cfg), graph_property_writer());
+			cfg_edge_property_writer(*m_cfg), graph_property_writer(GetIdentifier()));
+
+	outfile << "\n}" << std::endl;
 
 	outfile.close();
 

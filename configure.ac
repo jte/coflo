@@ -65,7 +65,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # Defines for the config.h.
 #
 AC_SUBST([VC_REV], [m4_esyscmd_s([build-aux/coflo_version_control_info "" .tarball-version])])
-AC_DEFINE_UNQUOTED([VERSION_CONTROL_REVISION], ["$VC_REV"],
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_CONTROL_REVISION], ["$VC_REV"],
 	[Revision of source repository which was the initial origin of this distribution.])
 
 # Make sure we re-autoconf when the version changes.
