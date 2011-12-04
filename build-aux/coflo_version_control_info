@@ -20,6 +20,14 @@ scriptversion=2011-08-27.01; # UTC
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Functionality based on Autoconf's own git-version-gen script.
+# Notes:
+# - This script must be run in the top_srcdir directory, mainly because we need
+# svnversion to tell us what the versioning status is of the entire source tree.
+# Unfortunately, top_srcdir isn't defined in here, so we can't give svnversion
+# that as a parameter.  Fortunately, the way it gets rigged into the
+# Autoconf/Automake machinery, the cwd is always top_srcdir, and we're OK.
+# If this becomes a problem for some reason, we can always pass in another
+# arg to the script containing top_srcdir.
 
 user_version="$1";
 

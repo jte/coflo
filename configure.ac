@@ -56,6 +56,8 @@ AC_CONFIG_AUX_DIR([build-aux])
 
 # Require our source control version checking script. 
 AC_REQUIRE_AUX_FILE([coflo_version_control_info])
+# Require our move-if-file-contents-differ script.
+AC_REQUIRE_AUX_FILE([move-if-change])
 
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])

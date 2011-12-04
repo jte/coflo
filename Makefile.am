@@ -40,21 +40,10 @@ BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:	FORCE
 	@# Get coflo_version_control_info's idea of what the right version number is.
 	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .version-temp
-	@# If .version doesn't exist, create it.
-	@if ! test -f "$@"; \
-	then \
-		echo "Creating .version file..."; \
-		mv ".version-temp" "$@"; \
-		echo "Done."; \
-	: If .version-temp differs from .version, update .version. ; \
-	elif ! cmp "$@" ".version-temp"; then \
-		echo "Updating .version file..."; \
-		mv ".version-temp" "$@"; \
-		echo "Done."; \
-	else \
-		echo "No need to create or update .version file."; \
-		rm ".version-temp"; \
-	fi;
+	@# If the contents differ or the target file doesn't exist, move .version-temp to its final name (.version).
+	@# If the contents are the same, do a "pretend move", and simply delete the source file,
+	@# leaving the destination file's timestamp untouched.  This avoids spurious rebuilds. 
+	$(top_srcdir)/build-aux/move-if-change ".version-temp" "$@"
 
 FORCE:
 
@@ -63,7 +52,7 @@ FORCE:
 # creates a file which contains the value of $(VERSION)
 # which was current at that time.
 dist-hook:
-	: # Create the .tarball-version file.
+	@# Create the .tarball-version file.
 	@echo $(VC_REV) > $(distdir)/.tarball-version
 
 ## This exists solely to get the version control version into the NEWS file so that distcheck
