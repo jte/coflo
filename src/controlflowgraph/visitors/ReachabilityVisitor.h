@@ -33,7 +33,6 @@
 class ReachabilityVisitor: public ControlFlowGraphVisitorBase
 {
 public:
-	//ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source, T_CFG_VERTEX_DESC sink, std::deque<T_CFG_EDGE_DESC> *predecessor_list);
 
 	typedef std::tr1::function<bool (ControlFlowGraph &, T_CFG_VERTEX_DESC &)> T_VERTEX_VISITOR_PREDICATE;
 

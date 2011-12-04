@@ -100,11 +100,48 @@ bool RuleReachability::RunRule()
 void RuleReachability::PrintCallChain()
 {
 	long indent_level = 0;
+	long bypass_call_depth = 0;
+	bool ignore_function_call = false;
+
+	std::deque<T_CFG_EDGE_DESC> m_new_predecessors;
+
+	// First strip the call chain of all calls that returned with no matches.
+	BOOST_REVERSE_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
+	{
+		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		if(sb->IsType<Exit>())
+		{
+			// Seeing an exit vertex means we're at a return from a successful call.
+			// We don't care about these here.
+			bypass_call_depth++;
+		}
+		else if(sb->IsType<Entry>() && bypass_call_depth>0)
+		{
+			bypass_call_depth--;
+			// The previous predecessor will be a FunctionCall, ignore it.
+			ignore_function_call = true;
+		}
+		else if (ignore_function_call)
+		{
+			ignore_function_call = false;
+		}
+		else if (sb->IsType<FunctionCallUnresolved>())
+		{
+			// By definition, unresolved calls will never be in our call stack.
+			continue;
+		}
+		else if(bypass_call_depth == 0)
+		{
+			m_new_predecessors.push_front(pred);
+		}
+	}
+
+	m_predecessors.swap(m_new_predecessors);
 
 	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
 		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
-		if(sb->IsType<FunctionCall>())
+		if(sb->IsType<FunctionCall>() || sb->IsDecisionStatement())
 		{
 			PrintStatement(sb, indent_level);
 		}
