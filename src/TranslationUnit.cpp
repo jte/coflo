@@ -271,7 +271,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		// Add the new function to the list.
 		m_function_defs.push_back(f);
 
-		// Add the new function to the program-wide function map.
+		// Add the new Function to the program-wide function map.
 		(*function_map)[*(fi->m_identifier)] = f;
 
 		f->CreateControlFlowGraph(*(m_parent_program->GetControlFlowGraphPtr()), *(fi->m_statement_list));
