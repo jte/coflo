@@ -682,6 +682,83 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 #endif
 }
 
+/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
+struct graph_property_writer
+{
+	graph_property_writer(Function * function) : m_function(function) {};
+
+	void operator()(std::ostream& out) const
+	{
+		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
+		out << "subgraph cluster0 {" << std::endl;
+		out << "label = \"" << m_function->GetIdentifier() << "\";" << std::endl;
+		out << "labeljust = \"l\";" << std::endl;
+		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
+		out << "edge [style=solid]" << std::endl;
+		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor() << "; }" << std::endl;
+		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor() << "; }" << std::endl;
+	}
+
+	Function* m_function;
+};
+
+/**
+ * Class for a vertex property writer, for use with write_graphviz().
+ */
+class cfg_vertex_property_writer
+{
+public:
+	cfg_vertex_property_writer(T_CFG g) :	m_graph(g)	{ };
+
+	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
+	{
+		if (m_graph[v].m_statement != NULL)
+		{
+			out << "[label=\"";
+			out << v << " " << m_graph[v].m_statement->GetStatementTextDOT();
+			out << "\\n" << m_graph[v].m_statement->GetLocation() << "\"";
+			out << ", color=" << m_graph[v].m_statement->GetDotSVGColor();
+			out << ", shape=" << m_graph[v].m_statement->GetShapeTextDOT();
+			out << "]";
+		}
+		else
+		{
+			out << "[label=\"NULL STMNT\"]";
+		}
+	}
+private:
+
+	/// The graph whose vertices we're writing the properties of.
+	T_CFG& m_graph;
+};
+
+/**
+ * Class for an edge property writer, for use with write_graphviz().
+ */
+class cfg_edge_property_writer
+{
+public:
+	cfg_edge_property_writer(T_CFG _g) :
+			m_graph(_g)
+	{
+	}
+	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
+	{
+		// Set the edge attributes.
+		out << "[";
+		out << "label=\"" << m_graph[e].m_edge_type->GetDotLabel() << "\"";
+		out << ", color=" << m_graph[e].m_edge_type->GetDotSVGColor();
+		out << ", style=" << m_graph[e].m_edge_type->GetDotStyle();
+		out << "]";
+	}
+	;
+private:
+
+	/// The graph whose edges we're writing the properties of.
+	T_CFG& m_graph;
+};
+
+
 void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir)
 {
 	std::string dot_filename;
@@ -701,8 +778,11 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 
 	boost::write_graphviz(outfile, graph_of_this_function,
 			cfg_vertex_property_writer(*m_cfg),
-			cfg_edge_property_writer(*m_cfg), graph_property_writer(GetIdentifier()));
+			cfg_edge_property_writer(*m_cfg),
+			graph_property_writer(this));
 
+	// graph_property_writer() added a subgraph, which "uses up" the "}" that write_graphviz streams out.
+	// Terminate the graph appropriately.
 	outfile << "\n}" << std::endl;
 
 	outfile.close();

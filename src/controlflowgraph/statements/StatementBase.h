@@ -105,6 +105,13 @@ public:
 
 	//@}
 
+	/**
+	 * Utility function for escaping literal "\n" and double quotes in a string so that they
+	 * can be used in a dot label.
+	 *
+	 * @param str
+	 * @return
+	 */
 	static std::string EscapeifyForUseInDotLabel(const std::string &str);
 
 private:

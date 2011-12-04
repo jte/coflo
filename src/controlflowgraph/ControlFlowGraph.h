@@ -101,82 +101,6 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 }
 
 
-/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
-struct graph_property_writer
-{
-	graph_property_writer(std::string function_name) : m_function_name(function_name) {};
-
-	void operator()(std::ostream& out) const
-	{
-		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
-		out << "subgraph cluster0 {" << std::endl;
-		out << "label = \"" << m_function_name << "\";" << std::endl;
-		out << "labeljust = \"l\";" << std::endl;
-		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
-		out << "edge [style=solid]" << std::endl;
-	}
-
-	std::string m_function_name;
-};
-
-/**
- * Class for a vertex property writer, for use with write_graphviz().
- */
-class cfg_vertex_property_writer
-{
-public:
-	cfg_vertex_property_writer(T_CFG _g) :
-			m_graph(_g)
-	{
-	}
-
-	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
-	{
-		if (m_graph[v].m_statement != NULL)
-		{
-			out << "[label=\"";
-			out << v << " " << m_graph[v].m_statement->GetStatementTextDOT();
-			out << "\\n" << m_graph[v].m_statement->GetLocation() << "\"";
-			out << ", color=" << m_graph[v].m_statement->GetDotSVGColor();
-			out << ", shape=" << m_graph[v].m_statement->GetShapeTextDOT();
-			out << "]";
-		}
-		else
-		{
-			out << "[label=\"NULL STMNT\"]";
-		}
-	}
-private:
-
-	/// The graph whose vertices we're writing the properties of.
-	T_CFG& m_graph;
-};
-
-/**
- * Class for an edge property writer, for use with write_graphviz().
- */
-class cfg_edge_property_writer
-{
-public:
-	cfg_edge_property_writer(T_CFG _g) :
-			m_graph(_g)
-	{
-	}
-	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
-	{
-		// Set the edge attributes.
-		out << "[";
-		out << "label=\"" << m_graph[e].m_edge_type->GetDotLabel() << "\"";
-		out << ", color=" << m_graph[e].m_edge_type->GetDotSVGColor();
-		out << ", style=" << m_graph[e].m_edge_type->GetDotStyle();
-		out << "]";
-	}
-	;
-private:
-
-	/// The graph whose edges we're writing the properties of.
-	T_CFG& m_graph;
-};
 
 
 /**
@@ -188,7 +112,6 @@ class ControlFlowGraph : boost::noncopyable
 {
 public:
 	ControlFlowGraph();
-	ControlFlowGraph(const ControlFlowGraph& other);
 	~ControlFlowGraph();
 
 

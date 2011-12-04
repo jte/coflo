@@ -178,6 +178,8 @@ AC_CHECK_FUNC(glob)
 ### Checks for optional libraries.
 ###
 
+# Allow the user to build with dmalloc.
+AX_WITH_DMALLOC
 
 ###
 ### Initialize the test suite.
