@@ -61,6 +61,7 @@ namespace po = boost::program_options;
 #define CLP_USE_FILTER "use-filter"
 
 #define CLP_PRINT_FUNCTION_CFG "cfg"
+#define CLP_CFG_FMT "cfg-fmt"
 #define CLP_CFG_VERBOSE "cfg-verbose"
 #define CLP_CFG_VERTEX_IDS "cfg-vertex-ids"
 
@@ -183,6 +184,10 @@ int main(int argc, char* argv[])
 		;
 		cfg_options.add_options()
 		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
+		(CLP_CFG_FMT, po::value< std::string >(), "Specifies the control flow graph output format.\n"
+				"Valid values are:\n"
+				"  text: \tPrints a textual representation of the CFG to stdout.\n"
+				"  dot:  \tGenerates a graphical representation of the CFG using the Graphviz dot program.")
 		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
 				"Output all statements and nodes CoFlo finds in the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
 		(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
