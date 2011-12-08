@@ -25,12 +25,11 @@
 
 int main(int argc, char *argv[])
 {
-	int i;
+	int i = 6;
 
 	printf("Start.\n");
 
-	//for(i=0; i<100; i++)
-	if(argc > 6)
+	while(argc > 6)
 	{
 		printf("i = %d\n", i);
 	}
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
 
 	printf("Finished.\n");
 	
-	dummy(1,3,4,5.3,"hello");
+	dummy(1,3,4,5,"hello");
 
 	return 0;
 }

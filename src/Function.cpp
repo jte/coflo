@@ -759,10 +759,8 @@ private:
 };
 
 
-void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir)
+void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
-	std::string dot_filename;
-
 	T_VERTEX_PROPERTY_MAP vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, *m_cfg);
 
@@ -770,11 +768,9 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> graph_of_this_function(
 			*m_cfg, boost::keep_all(), the_filter);
 
-	dot_filename = (output_dir / (m_function_id + ".dot")).generic_string();
+	std::clog << "Creating " << output_filename << std::endl;
 
-	std::clog << "Creating " << dot_filename << std::endl;
-
-	std::ofstream outfile(dot_filename.c_str());
+	std::ofstream outfile(output_filename.c_str());
 
 	boost::write_graphviz(outfile, graph_of_this_function,
 			cfg_vertex_property_writer(*m_cfg),
@@ -786,9 +782,20 @@ void Function::PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& outp
 	outfile << "\n}" << std::endl;
 
 	outfile.close();
+}
 
-	std::clog << "Compiling " << dot_filename << std::endl;
-	the_dot->CompileDotToPNG(dot_filename);
+
+void Function::PrintControlFlowGraphBitmap(ToolDot *the_dot, const boost::filesystem::path& output_filename)
+{
+	boost::filesystem::path dot_filename;
+
+	dot_filename = output_filename;
+	dot_filename.replace_extension(".dot");
+
+	PrintControlFlowGraphDot(true, true, dot_filename.generic_string());
+
+	std::clog << "Compiling " << dot_filename.generic_string() << " to " << output_filename.generic_string() << std::endl;
+	the_dot->CompileDotToPNG(dot_filename.generic_string(), output_filename.generic_string());
 }
 
 bool Function::CreateControlFlowGraph(ControlFlowGraph &cfg)
