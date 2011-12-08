@@ -218,9 +218,11 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->PrintDotCFG(the_dot, output_dir);
+		std::string png_filename;
+		png_filename = fp->GetIdentifier()+".png";
+		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
-		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
+		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}
 }
 

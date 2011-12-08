@@ -31,9 +31,7 @@ public:
 	ToolDot(const ToolDot& orig);
 	virtual ~ToolDot();
 	
-	//virtual std::string GetVersion() const;
-	
-	bool CompileDotToPNG(const std::string &dot_filename) const;
+	bool CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename) const;
 	
 protected:
 	
