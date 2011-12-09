@@ -85,7 +85,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	// Check if it's a C++ file.
 	if(filename.extension() == ".cpp")
 	{
-		dlog_block << "File is C++" << std::endl;
+		dlog_parse_gimple << "File is C++" << std::endl;
 		file_is_cpp = true;
 	}
 	
@@ -144,7 +144,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	{
 		// Parsed the .coflo.gimple file successfully.
 
-		std::cout << "File \"" << filename.generic_string() << "\" parsed successfully." << std::endl;
+		dlog_parse_gimple << "File \"" << filename.generic_string() << "\" parsed successfully." << std::endl;
 
 		FunctionInfoList *fil = gcc_gimple_parser_GetUserInfo(tree)->m_function_info_list;
 
@@ -218,9 +218,11 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		fp->PrintDotCFG(the_dot, output_dir);
+		std::string png_filename;
+		png_filename = fp->GetIdentifier()+".png";
+		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
 		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
-		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".dot.png"+"\" ALT=\"image\"></div></p>" << std::endl;
+		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".png"+"\" ALT=\"image\"></div></p>" << std::endl;
 	}
 }
 
@@ -263,7 +265,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 	BOOST_FOREACH(FunctionInfo *fi, function_info_list)
 	{
 
-		std::cout << "Processing FunctionInfo for function \"" << *(fi->m_identifier) << "\"..." << std::endl;
+		dlog_parse_gimple << "Processing FunctionInfo for function \"" << *(fi->m_identifier) << "\"..." << std::endl;
 
 		// Create the function.
 		Function *f = new Function(this, *(fi->m_identifier));
@@ -271,7 +273,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		// Add the new function to the list.
 		m_function_defs.push_back(f);
 
-		// Add the new function to the program-wide function map.
+		// Add the new Function to the program-wide function map.
 		(*function_map)[*(fi->m_identifier)] = f;
 
 		f->CreateControlFlowGraph(*(m_parent_program->GetControlFlowGraphPtr()), *(fi->m_statement_list));

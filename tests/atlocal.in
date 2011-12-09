@@ -36,23 +36,19 @@ GCCS_FOUND_AT_TESTSUITE_RUN_TIME=
 echo "Getting a list of gcc installations...";
 #todo This is duplicated in ./tests/testsuite.at, should figure out a way to make this a single definition.
 MAX_GCCS_TO_TEST=16;
-for (( i=0; $i<${MAX_GCCS_TO_TEST}; i++ )); do
-	# Initialize all GCC_VERSION_ARRAY entries to 0, so the skip tests works correctly.
-	GCC_VERSION_ARRAY[$i]="0";
-done;
+
 # Get the paths to gcc's.
 GCC_PATH_ARRAY=($(find /usr/bin -regextype posix-extended -iregex '.*-.*-.*-gcc-.*(\.exe)?$' -or -iregex '.*/gcc(\.exe)?$'));
 NUM_GCCS_FOUND=${#GCC_PATH_ARRAY[*]};
 for (( i=0; $i<${NUM_GCCS_FOUND}; i++ )); do
 	# Get the version string from the compiler.
 	GCC_VERSION_STRING_LINE_ARRAY[$i]="$("${GCC_PATH_ARRAY[$i]}" --version | head -n 1)";
-	echo "Found binary: ${GCC_VERSION_STRING_LINE_ARRAY[$i]}";
-	# Extract just the "X.Y.Z".
-	GCC_VERSION_STRING_ARRAY[$i]="$(echo "${GCC_VERSION_STRING_LINE_ARRAY[$i]}" | sed -r -n -e 's/.+ ([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)( .+)?$/\1/p')";
+	# Now get just the "X.Y.Z" version.
+	GCC_VERSION_STRING_ARRAY[$i]="$("${GCC_PATH_ARRAY[$i]}" -dumpversion)";
+	# Report what we've found.
+	echo "Found the following gcc binary: ${GCC_PATH_ARRAY[$i]}";
 	echo "  Version: ${GCC_VERSION_STRING_ARRAY[$i]}";
-	# Extract the major version number (the "X" from "X.Y.Z").
-	GCC_VERSION_ARRAY[$i]="$(echo "${GCC_VERSION_STRING_ARRAY[$i]}" | sed -r -n -e 's/.+ ([[:digit:]]+)\.[[:digit:]]+\.[[:digit:]]+( .+)?$/\1/p')";
-	echo "Found the following gcc binary: ${GCC_PATH_ARRAY[$i]} (major version ${GCC_VERSION_ARRAY[$i]})";
+	echo "  Version string: ${GCC_VERSION_STRING_LINE_ARRAY[$i]}";
 done;
 # Initialize the remaining GCC path slots to "NONE" so the skipped test message looks better.
 for (( ; $i<${MAX_GCCS_TO_TEST}; i++ )); do

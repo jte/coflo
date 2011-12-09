@@ -10,35 +10,46 @@
  * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RULEBASE_H
-#define	RULEBASE_H
+/** @file */
 
-#include "controlflowgraph/ControlFlowGraph.h"
+#ifndef ANALYZER_H
+#define	ANALYZER_H
 
-/**
- * Abstract base class for all rules.
- */
-class RuleBase
+#include <vector>
+#include <string>
+
+#include "../ControlFlowGraph.h"
+
+class Program;
+class RuleBase;
+
+class Analyzer
 {
 
 public:
-	RuleBase();
-	RuleBase(const RuleBase& orig);
-	virtual ~RuleBase();
+	Analyzer();
+	Analyzer(const Analyzer& orig);
+	virtual ~Analyzer();
 	
-	virtual bool RunRule() = 0;
+	void AddConstraints(const std::vector< std::string > &vector_of_constraint_strings);
 	
-protected:
-
-	static void indent(long i);
-
+	void AttachToProgram(Program *p) { m_program = p; };
+	
+	bool Analyze();
+	
 private:
 
+	/// Pointer to the program to analyze.
+	Program *m_program;
+	
+	/// The list of constraints to check m_program against.
+	std::vector< RuleBase* > m_constraints;
 };
 
-#endif	/* RULEBASE_H */
+#endif	/* ANALYZER_H */
+

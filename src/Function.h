@@ -72,6 +72,9 @@ public:
 	
 	std::string GetDefinitionFilePath() const;
 
+	/// @name Control Flow Graph Rendering Functions
+	//@{
+
 	/**
 	 * Prints the control flow graph of this function to stdout.
 	 *
@@ -83,14 +86,25 @@ public:
 	void PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids);
 	
 	/**
+	 * Writes the control flow graph of this function as a Graphviz dot file to @a output_filename.
+	 *
+	 * @param cfg_verbose
+	 * @param cfg_vertex_ids
+	 * @param output_filename
+	 */
+	void PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string &output_filename);
+
+	/**
 	 * Print the control flow graph of this function to a dot file in @a output_dir, and
 	 * run the dot too to generate the resulting png file.
 	 *
 	 * @param the_dot
-	 * @param output_dir The output directory where the dot and png files should be placed.
+	 * @param output_filename The filename of the generated png file.
 	 */
-	void PrintDotCFG(ToolDot *the_dot, const boost::filesystem::path& output_dir);
+	void PrintControlFlowGraphBitmap(ToolDot *the_dot, const boost::filesystem::path& output_filename);
 	
+	//@}
+
 	/// @name Function Properties
 	/// These are various properties of the function represented by this class instance.
 	/// They may have been determined by CoFlow analytically, stated by the user through

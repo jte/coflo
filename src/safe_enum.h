@@ -21,34 +21,8 @@
 #define	SAFE_ENUM_H
 
 /**
- * Type-safe enumeration class template.
- */
-template <typename def>
-class safe_enum : public def
-{
-	typedef typename def::value_type value_type;
-	
-public:
-	safe_enum() {};
-	safe_enum(value_type value) : m_value(value) {};
-	// Note: No destructor since it's trivial.  We'll let the compiler determine the
-	// best way to destroy us.
-	
-	/// @name Operators
-	//@{
-	bool operator == (const safe_enum & other) const { return m_value == other.m_value; }
-	bool operator != (const safe_enum & other) const { return m_value != other.m_value; }
-	//@}
-	
-	value_type as_enum() const { return m_value; };
-
-private:
-	/// The actual representation of the enum.
-	value_type m_value;
-};
-
-
-/**
+ * @macro DECLARE_ENUM_CLASS Type-safe enumeration class macro.
+ *
  * Macro for backwards- and forwards-compatible support of C++0x's "Strongly Typed Enums",
  * i.e. "enum class E { E1, E2, ...};"
  * 
@@ -56,8 +30,31 @@ private:
  * to an enum class {}; in that regard.
  */
 #define DECLARE_ENUM_CLASS(enum_class_name, ...) \
-	struct enum_class_name##_declaration { enum value_type { __VA_ARGS__ }; }; \
-	typedef safe_enum<enum_class_name##_declaration> enum_class_name;
+class enum_class_name \
+{\
+public:\
+	/** The underlying value type, which is still an enum. */ \
+	enum value_type { __VA_ARGS__ };\
+\
+	enum_class_name() {};\
+	enum_class_name(value_type value) : m_value(value) {};\
+\
+	/** @name Comparison operators */ \
+	/**@{*/\
+	bool operator == (const enum_class_name & other) const { return m_value == other.m_value; }\
+	bool operator != (const enum_class_name & other) const { return m_value != other.m_value; }\
+	bool operator == (const value_type & other) const { return m_value == other; }\
+	bool operator != (const value_type & other) const { return m_value != other; }\
+	/**@}*/\
+\
+	/** An accessor to return the underlying integral type.  Unfortunately there isn't \
+	  * any real way around this if we want to support switch statements. */ \
+	value_type as_enum() const { return m_value; };\
+\
+private:\
+	/** The stored value type. */ \
+	value_type m_value;\
+};
 
 #endif	/* SAFE_ENUM_H */
 

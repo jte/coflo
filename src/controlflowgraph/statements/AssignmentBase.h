@@ -15,44 +15,21 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
+#ifndef ASSIGNMENTBASE_H_
+#define ASSIGNMENTBASE_H_
+
+#include "StatementBase.h"
+
 /**
- * A simple program to test CoFlo's loop handling.
- *
- * @param argc
- * @param argv
- * @return
+ * Base class for all assignment statements.
  */
-
-int main(int argc, char *argv[])
+class AssignmentBase: public StatementBase
 {
-	int i = 6;
+public:
+	AssignmentBase();
+	virtual ~AssignmentBase();
+};
 
-	printf("Start.\n");
-
-	while(argc > 6)
-	{
-		printf("i = %d\n", i);
-	}
-
-	if(argc > 1)
-	{
-		if(i>0)
-		{
-			i--;
-			printf("i = %d\n", i);
-
-			if(i+argc > 7)
-			{
-				printf("here\n");
-			}
-		}
-	}
-
-	printf("Finished.\n");
-	
-	dummy(1,3,4,5,"hello");
-
-	return 0;
-}
-
-
+#endif /* ASSIGNMENTBASE_H_ */

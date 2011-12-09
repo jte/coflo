@@ -15,44 +15,7 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * A simple program to test CoFlo's loop handling.
- *
- * @param argc
- * @param argv
- * @return
- */
+/** @file */
 
-int main(int argc, char *argv[])
-{
-	int i = 6;
-
-	printf("Start.\n");
-
-	while(argc > 6)
-	{
-		printf("i = %d\n", i);
-	}
-
-	if(argc > 1)
-	{
-		if(i>0)
-		{
-			i--;
-			printf("i = %d\n", i);
-
-			if(i+argc > 7)
-			{
-				printf("here\n");
-			}
-		}
-	}
-
-	printf("Finished.\n");
-	
-	dummy(1,3,4,5,"hello");
-
-	return 0;
-}
-
+#include "CallStackBase.h"
 

@@ -22,14 +22,13 @@
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/foreach.hpp>
 
-#include "controlflowgraph/ControlFlowGraph.h"
-//#include "controlflowgraph/depth_first_traversal.hpp"
-#include "controlflowgraph/ControlFlowGraphTraversalDFS.h"
-#include "controlflowgraph/visitors/ReachabilityVisitor.h"
-#include "controlflowgraph/statements/Entry.h"
-#include "Function.h"
+#include "../ControlFlowGraph.h"
+#include "../ControlFlowGraphTraversalDFS.h"
+#include "../visitors/ReachabilityVisitor.h"
+#include "../statements/Entry.h"
+#include "../../Function.h"
 #include "RuleReachability.h"
-#include "controlflowgraph/statements/Entry.h"
+#include "../statements/Entry.h"
 
 RuleReachability::RuleReachability(ControlFlowGraph &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {
@@ -47,6 +46,24 @@ RuleReachability::~RuleReachability()
 {
 }
 
+struct ReachabilityPredicateSpecificVertex
+{
+	ReachabilityPredicateSpecificVertex(T_CFG_VERTEX_DESC sink) { m_sink = sink; };
+
+	bool operator()(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC &v)
+	{
+		if(v == m_sink)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/// The vertex we're trying to find.
+	T_CFG_VERTEX_DESC m_sink;
+};
+
 bool RuleReachability::RunRule()
 {
 	T_CFG_VERTEX_DESC starting_vertex_desc;
@@ -54,7 +71,8 @@ bool RuleReachability::RunRule()
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
 
 	// Set up a visitor.
-	ReachabilityVisitor v(m_cfg, starting_vertex_desc, m_sink->GetEntryVertexDescriptor(), &m_predecessors);
+	ReachabilityPredicateSpecificVertex pred(m_sink->GetEntryVertexDescriptor());
+	ReachabilityVisitor v(m_cfg, starting_vertex_desc, pred, &m_predecessors);
 
 	// Create a depth-first-search graph traversal object.
 	ControlFlowGraphTraversalDFS traversal(m_cfg);
@@ -82,11 +100,48 @@ bool RuleReachability::RunRule()
 void RuleReachability::PrintCallChain()
 {
 	long indent_level = 0;
+	long bypass_call_depth = 0;
+	bool ignore_function_call = false;
+
+	std::deque<T_CFG_EDGE_DESC> m_new_predecessors;
+
+	// First strip the call chain of all calls that returned with no matches.
+	BOOST_REVERSE_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
+	{
+		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		if(sb->IsType<Exit>())
+		{
+			// Seeing an exit vertex means we're at a return from a successful call.
+			// We don't care about these here.
+			bypass_call_depth++;
+		}
+		else if(sb->IsType<Entry>() && bypass_call_depth>0)
+		{
+			bypass_call_depth--;
+			// The previous predecessor will be a FunctionCall, ignore it.
+			ignore_function_call = true;
+		}
+		else if (ignore_function_call)
+		{
+			ignore_function_call = false;
+		}
+		else if (sb->IsType<FunctionCallUnresolved>())
+		{
+			// By definition, unresolved calls will never be in our call stack.
+			continue;
+		}
+		else if(bypass_call_depth == 0)
+		{
+			m_new_predecessors.push_front(pred);
+		}
+	}
+
+	m_predecessors.swap(m_new_predecessors);
 
 	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
 		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
-		if(sb->IsType<FunctionCall>())
+		if(sb->IsType<FunctionCall>() || sb->IsDecisionStatement())
 		{
 			PrintStatement(sb, indent_level);
 		}

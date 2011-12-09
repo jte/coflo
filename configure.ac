@@ -41,11 +41,10 @@ AC_PREREQ([2.67])
 #   - Append the revision number of the packager's working copy.
 # The package is reconfigured as necessary, in particular when what's in .version doesn't match what is reported by
 # svnversion.
-# There is considerable mechanism required to make this work properly.  See the "build-aux/svn-version-gen" script,
+# There is considerable mechanism required to make this work properly.  See the "build-aux/coflo_version_control_info" script,
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
-#AC_INIT([CoFlo], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]), [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-#m4_define([svnversion], esyscmd([sh -c "svnversion -n"]))dnl
+#AC_INIT([CoFlo], , [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 AC_INIT([CoFlo], [0.0.1], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -56,7 +55,9 @@ AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
 AC_CONFIG_AUX_DIR([build-aux])
 
 # Require our source control version checking script. 
-AC_REQUIRE_AUX_FILE([svn-version-gen])
+AC_REQUIRE_AUX_FILE([coflo_version_control_info])
+# Require our move-if-file-contents-differ script.
+AC_REQUIRE_AUX_FILE([move-if-change])
 
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
@@ -65,19 +66,20 @@ AC_CONFIG_MACRO_DIR([m4])
 #
 # Defines for the config.h.
 #
-#AC_DEFINE(SVN_REVISION, "svnversion", [SVN Revision])
+AC_SUBST([VC_REV], [m4_esyscmd_s([build-aux/coflo_version_control_info "" .tarball-version])])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_CONTROL_REVISION], ["$VC_REV"],
+	[Revision of source repository which was the initial origin of this distribution.])
 
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
 # and the config.h file.  
-#AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
+AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
 # what the various settings do.
-AM_INIT_AUTOMAKE([check-news
-	std-options
+AM_INIT_AUTOMAKE([std-options
 	subdir-objects
     color-tests
     tar-pax
@@ -94,19 +96,9 @@ AM_INIT_AUTOMAKE([check-news
 # @TODO This is causing autoconf to fail for some reason.
 #AM_INSTALLCHECK_STD_OPTIONS_EXEMPT=
 
-# Enable the configure remake rules.
-#AM_MAINTAINER_MODE([enable])
-
 ###
 ### Manual configure options.
 ###
-
-# Should we link with Libcwd?
-#AC_ARG_ENABLE([libcwd], [AS_HELP_STRING([--enable-libcwd],
-#               [Link with the Libcwd debugging library (default is no)])],
-#              [],
-#              [enable_libcwd=yes])
-
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
@@ -129,9 +121,10 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ### Checks for the programs we need to do a build.
 ###
 # The DParser make_dparser program.
-AX_WITH_PROG([MAKE_DPARSER], [make_dparser])
-AM_CONDITIONAL([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[test -z "$MAKE_DPARSER"]) 
-AM_COND_IF([CONDITIONAL_HAVE_PROG_MAKE_DPARSER],[AC_MSG_ERROR([Cannot find a usable make_dparser.])])
+AX_WITH_PROG([PROG_MAKE_DPARSER_ABSPATH], [make_dparser])
+if test -z "$PROG_MAKE_DPARSER_ABSPATH"; then
+	AC_MSG_ERROR([Cannot find a usable make_dparser.])
+fi 
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -154,7 +147,14 @@ DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
-AC_DEFINE_UNQUOTED([DOT_PATH],[$DOT_PATH],[Define as the absolute path to the Graphviz dot program.])
+
+# Check for Graphviz dot at configure-time. 
+AX_WITH_PROG([PROG_DOT_ABSPATH], [dot])
+if test -z "$PROG_DOT_ABSPATH"; then
+	AC_MSG_WARN([Cannot find a usable Graphviz dot program.])
+fi
+# Put whatever we may hav found in config.h.
+AC_DEFINE_UNQUOTED([PROG_DOT_ABSPATH],["$PROG_DOT_ABSPATH"],[Define to the absolute path to the Graphviz dot program.])
 
 
 ###
@@ -171,7 +171,6 @@ AX_BOOST_REGEX
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
-
 ###
 ### Checks for some library functions we need.
 ###
@@ -180,22 +179,9 @@ AC_CHECK_FUNC(glob)
 ###
 ### Checks for optional libraries.
 ###
-# Check if we have libcwd, $enable_debugging can be "yes", "no" or empty (auto).
-#test -n "$enable_debugging" || enable_debugging=no	# Set the default to an explicit "no".
-# This sets 'cw_use_libcwd' to "yes" if libcwd is actually used; CXXFLAGS and LDFLAGS are updated.
-#CW_LIB_LIBCWD([debugging], [$enable_debugging], [no])
-#LIBCWD=
-#AS_IF([test "x$enable_libcwd" != xno],
-#		[AC_CHECK_LIB([cwd], [__libcwd_version],
-#		[AC_SUBST([LIBCWD], ["-lcwd"])
-#			AC_DEFINE([HAVE_LIBCWD], [1], [Define if you have libcwd])
-#  ],
-#  [AC_MSG_FAILURE([libcwd test failed (--disable-libcwd to disable)])],
-#  [-lcwd])])
-#PKG_CHECK_MODULES([LIBCWD], [libcwd >= 1.0.4])
-## pkg-config's earlier than 0.24 don't AC_SUBST the discovered variables.
-#AC_SUBST([LIBCWD_CFLAGS])
-#AC_SUBST([LIBCWD_LIBS])
+
+# Allow the user to build with dmalloc.
+AX_WITH_DMALLOC
 
 ###
 ### Initialize the test suite.
@@ -213,6 +199,7 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 AC_CONFIG_FILES([Makefile
 	src/Makefile
 	src/controlflowgraph/Makefile
+	src/controlflowgraph/analysis/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile
 	src/controlflowgraph/visitors/Makefile

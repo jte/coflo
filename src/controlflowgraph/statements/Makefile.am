@@ -18,6 +18,7 @@
 
 noinst_LIBRARIES = libstatements.a
 libstatements_a_SOURCES = statements.h \
+	AssignmentBase.cpp AssignmentBase.h \
 	Entry.cpp Entry.h \
     Exit.cpp Exit.h \
     FlowControlBase.cpp FlowControlBase.h \

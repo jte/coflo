@@ -1,4 +1,4 @@
-# Obtain the working copy's version from the source control system.
+# Third-level Makefile.am for CoFlo, ./analysis directory.
 #
 # Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
@@ -15,7 +15,15 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-#serial 1
+noinst_LIBRARIES = libanalysis.a
+libanalysis_a_SOURCES = \
+	Analyzer.cpp Analyzer.h \
+	RuleBase.cpp RuleBase.h \
+	RuleDFSBase.cpp RuleDFSBase.h \
+	RuleReachability.cpp RuleReachability.h
+	
 
-# Define an M4 macro which will get the working copy's current version info via "svnversion".
-m4_define([SVN_VERSION], m4_esyscmd_s([build-aux/svn-version-gen .tarball-version]))dnl
+libanalysis_a_CPPFLAGS = $(AM_CPPFLAGS)
+libanalysis_a_CFLAGS = $(AM_CFLAGS)
+libanalysis_a_CXXFLAGS = $(AM_CXXFLAGS)
+

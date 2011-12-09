@@ -26,8 +26,8 @@
 
 class CallStackFrameBase;
 
-/*
- *
+/**
+ * Base class for ControlFlowGraph traversals.
  */
 class ControlFlowGraphTraversalBase
 {
@@ -35,17 +35,43 @@ public:
 	ControlFlowGraphTraversalBase(ControlFlowGraph &control_flow_graph);
 	virtual ~ControlFlowGraphTraversalBase();
 
+	/**
+	 * Traverse the control flow graph, starting at vertex @a source and continuing until @a visitor tells the
+	 * traversal to stop.  The actual traversal algorithm is defined in derived classes.
+	 *
+	 * @param source  The vertex to start the traversal from.
+	 * @param visitor The ControlFlowGraphVisitorBase()-derived visitor which will examine the nodes traversed and stop the traversal.
+	 */
 	virtual void Traverse(typename boost::graph_traits<T_CFG>::vertex_descriptor source,
 			ControlFlowGraphVisitorBase *visitor) = 0;
 
 protected:
 
+	/// @name Interface for maintaining a call stack.
+	//@{
+
+	/**
+	 * Push a new stack frame onto the call stack.
+	 * @param cfsb
+	 */
 	void PushCallStack(CallStackFrameBase* cfsb);
+
+	/**
+	 * Pop the topmost stack frame off the call stack.
+	 */
 	void PopCallStack();
+
+	/**
+	 * Access the topmost stack frame of the call stack.
+	 * @return
+	 */
 	CallStackFrameBase* TopCallStack();
 	bool IsCallStackEmpty() const;
 	bool AreWeRecursing(Function* function);
 
+	//@}
+
+	/// Reference to the ControlFlowGraph we're visiting.
 	ControlFlowGraph &m_control_flow_graph;
 
 private:
