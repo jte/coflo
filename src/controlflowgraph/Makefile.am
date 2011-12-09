@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = statements edges visitors
+SUBDIRS = analysis edges statements visitors
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	SparsePropertyMap.h \
+	CallStackBase.cpp CallStackBase.h \
 	CallStackFrameBase.cpp CallStackFrameBase.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \

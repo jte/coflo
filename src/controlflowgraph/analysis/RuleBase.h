@@ -15,28 +15,30 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+#ifndef RULEBASE_H
+#define	RULEBASE_H
 
+#include "../ControlFlowGraph.h"
 
-#include "controlflowgraph/ControlFlowGraph.h"
-
-#include "RuleDFSBase.h"
-
-RuleDFSBase::RuleDFSBase(ControlFlowGraph &cfg) : m_cfg(cfg)
+/**
+ * Abstract base class for all rules.
+ */
+class RuleBase
 {
 
-}
+public:
+	RuleBase();
+	RuleBase(const RuleBase& orig);
+	virtual ~RuleBase();
+	
+	virtual bool RunRule() = 0;
+	
+protected:
 
-RuleDFSBase::RuleDFSBase(const RuleDFSBase& orig) : RuleBase(orig), m_cfg(orig.m_cfg)
-{
-}
+	static void indent(long i);
 
-RuleDFSBase::~RuleDFSBase() 
-{
-}
+private:
 
+};
 
-bool RuleDFSBase::RunRule()
-{
-	return true;
-}
+#endif	/* RULEBASE_H */

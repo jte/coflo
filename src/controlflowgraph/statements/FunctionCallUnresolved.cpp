@@ -34,5 +34,5 @@ FunctionCallUnresolved::~FunctionCallUnresolved()
 
 std::string FunctionCallUnresolved::GetStatementTextDOT() const
 {
-	return m_identifier+"()";
+	return GetIdentifier() + "(" + EscapeifyForUseInDotLabel(m_params) + ")";
 }

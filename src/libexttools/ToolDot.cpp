@@ -31,9 +31,9 @@ ToolDot::ToolDot(const ToolDot& orig) : ToolBase(orig) { }
 
 ToolDot::~ToolDot() { }
 
-bool ToolDot::CompileDotToPNG(const std::string &dot_filename) const
+bool ToolDot::CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename) const
 {
-	System((" -O -Tpng "+dot_filename).c_str());
+	System((" -o"+output_filename+" -Tpng "+dot_filename).c_str());
 	
 	/// @todo Handle errors.
 	return true;

@@ -21,7 +21,7 @@
 #include <boost/regex.hpp>
 
 #include "Analyzer.h"
-#include "Program.h"
+#include "../../Program.h"
 #include "RuleBase.h"
 #include "RuleReachability.h"
 

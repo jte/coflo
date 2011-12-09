@@ -1,0 +1,92 @@
+#!/bin/sh
+# Print a version string containing the Subversion repo version info.
+
+scriptversion=2011-08-27.01; # UTC
+
+#
+# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+#
+# This file is part of CoFlo.
+#
+# CoFlo is free software: you can redistribute it and/or modify it under the
+# terms of version 3 of the GNU General Public License as published by the Free
+# Software Foundation.
+#
+# CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+
+# Functionality based on Autoconf's own git-version-gen script.
+# Notes:
+# - This script must be run in the top_srcdir directory, mainly because we need
+# svnversion to tell us what the versioning status is of the entire source tree.
+# Unfortunately, top_srcdir isn't defined in here, so we can't give svnversion
+# that as a parameter.  Fortunately, the way it gets rigged into the
+# Autoconf/Automake machinery, the cwd is always top_srcdir, and we're OK.
+# If this becomes a problem for some reason, we can always pass in another
+# arg to the script containing top_srcdir.
+
+user_version="$1";
+
+# Save the name of the tarball version info file which was passed in. 
+tarball_version_file="$2";
+
+# Find the svnversion executable.
+SVNVERSION=`which svnversion`;
+if test $? -ne 0;
+then
+	# Couldn't find an svnversion on PATH.
+	# This is only a problem if we don't have a valid .tarball-version.
+	# Stub in "svnversion" here, but it will probably fail below.
+	SVNVERSION=svnversion;
+fi
+
+# Does the specified tarball version file exist?
+if test -f "$tarball_version_file";
+then
+	echo "$0: INFO: Getting version info from $tarball_version_file" 1>&2;
+	complete_version_string=`cat $tarball_version_file` || complete_version_string=
+	if test -z "$complete_version_string";
+	then
+		echo "$0 WARNING: $tarball_version_file is missing or damaged." 1>&2;
+	fi
+fi
+
+# Did we get a version string?
+if test -z "$complete_version_string";
+then
+	# No, try svnversion.
+	# Can we execute $SVNVERSION?
+	if test -x $SVNVERSION;
+	then
+		# We should be able to execute $SVNVERSION.
+		version_control_version_string=`$SVNVERSION -n` \
+			|| { version_control_version_string=UNKNOWN; echo "$0: WARNING: svnversion -n failed" 1>&2; };
+		version_control_version_string=`echo $version_control_version_string | sed -r -e 's/[\r\n]//g' -e 's/:/to/g'`;
+		# Check if it's a valid Subversion version string.
+		version_control_version_string_is_valid=$(echo "$version_control_version_string" | grep -E -c '^[0-9toMSP]+$'); 
+		if [ "$version_control_version_string_is_valid" = "0" ];
+		then
+			echo "$0 WARNING: svnversion reports \"$version_control_version_string\", looks like an unversioned directory." 1>&2;
+			version_control_version_string=UNKNOWN
+		fi
+		complete_version_string="$user_version".r"$version_control_version_string"
+	else
+		# We aren't able to execute $SVNVERSION, or it doesn't exist.
+		echo "$0: WARNING: Can't execute $SVNVERSION" 1>&2;
+	fi
+fi
+
+if test -z "$complete_version_string"
+then
+	# Can't get a version string.
+	version_control_version_string=UNKNOWN
+	complete_version_string="$user_version".r"$version_control_version_string"
+fi
+
+echo "$0: INFO: Determined version info: $complete_version_string" 1>&2;
+
+echo -n "${complete_version_string}"

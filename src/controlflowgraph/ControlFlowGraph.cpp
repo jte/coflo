@@ -76,10 +76,6 @@ ControlFlowGraph::ControlFlowGraph()
 
 }
 
-ControlFlowGraph::ControlFlowGraph(const ControlFlowGraph & other) : m_cfg(other.m_cfg)
-{
-}
-
 ControlFlowGraph::~ControlFlowGraph()
 {
 

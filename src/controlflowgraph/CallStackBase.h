@@ -15,44 +15,27 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file */
+
+#ifndef CALLSTACKBASE_H
+#define CALLSTACKBASE_H
+
+class FunctionCallResolved;
+class Function;
+
 /**
- * A simple program to test CoFlo's loop handling.
- *
- * @param argc
- * @param argv
- * @return
+ * Abstract base class for call stacks used in the various graph traversals.
  */
-
-int main(int argc, char *argv[])
+class CallStackBase
 {
-	int i = 6;
+public:
+	virtual ~CallStackBase() = 0;
 
-	printf("Start.\n");
+	virtual void PushCallStack(FunctionCallResolved* pushing_function_call) = 0;
+	virtual void PopCallStack() = 0;
+	virtual FunctionCallResolved* TopCallStack() = 0;
+	virtual bool IsCallStackEmpty() const = 0;
+	virtual bool AreWeRecursing(Function* function) = 0;
+};
 
-	while(argc > 6)
-	{
-		printf("i = %d\n", i);
-	}
-
-	if(argc > 1)
-	{
-		if(i>0)
-		{
-			i--;
-			printf("i = %d\n", i);
-
-			if(i+argc > 7)
-			{
-				printf("here\n");
-			}
-		}
-	}
-
-	printf("Finished.\n");
-	
-	dummy(1,3,4,5,"hello");
-
-	return 0;
-}
-
-
+#endif /* CALLSTACKBASE_H */

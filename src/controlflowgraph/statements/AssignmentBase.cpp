@@ -15,44 +15,18 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * A simple program to test CoFlo's loop handling.
- *
- * @param argc
- * @param argv
- * @return
- */
+/** @file */
 
-int main(int argc, char *argv[])
+#include "AssignmentBase.h"
+
+AssignmentBase::AssignmentBase()
 {
-	int i = 6;
+	// TODO Auto-generated constructor stub
 
-	printf("Start.\n");
-
-	while(argc > 6)
-	{
-		printf("i = %d\n", i);
-	}
-
-	if(argc > 1)
-	{
-		if(i>0)
-		{
-			i--;
-			printf("i = %d\n", i);
-
-			if(i+argc > 7)
-			{
-				printf("here\n");
-			}
-		}
-	}
-
-	printf("Finished.\n");
-	
-	dummy(1,3,4,5,"hello");
-
-	return 0;
 }
 
+AssignmentBase::~AssignmentBase()
+{
+	// TODO Auto-generated destructor stub
+}
 

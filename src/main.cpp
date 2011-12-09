@@ -32,10 +32,11 @@
 
 #include "ResponseFileParser.h"
 
+#include "Function.h"
 #include "Program.h"
 #include "libexttools/ToolCompiler.h"
 #include "libexttools/ToolDot.h"
-#include "Analyzer.h"
+#include "controlflowgraph/analysis/Analyzer.h"
 
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
@@ -61,8 +62,10 @@ namespace po = boost::program_options;
 #define CLP_USE_FILTER "use-filter"
 
 #define CLP_PRINT_FUNCTION_CFG "cfg"
+#define CLP_CFG_FMT "cfg-fmt"
 #define CLP_CFG_VERBOSE "cfg-verbose"
 #define CLP_CFG_VERTEX_IDS "cfg-vertex-ids"
+#define CLP_CFG_OUTPUT_FILENAME "cfg-output-file,o"
 
 #define CLP_CONSTRAINT "constraint"
 
@@ -115,6 +118,12 @@ int main(int argc, char* argv[])
 
 	// The HTML report output directory.
 	std::string report_output_directory;
+
+	// The output filename.
+	std::string output_filename;
+
+	// The CFG output format.
+	std::string cfg_fmt;
 
 	// Debug settings.
 	bool debug_parse = false;
@@ -183,6 +192,13 @@ int main(int argc, char* argv[])
 		;
 		cfg_options.add_options()
 		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
+		(CLP_CFG_FMT, po::value< std::string >(&cfg_fmt), "Specifies the control flow graph output format.\n"
+				"Valid values are:\n"
+				"  txt: \tPrints a textual representation of the CFG to stdout.\n"
+				"  dot: \tGenerates a dot file which can be used as input to the Graphviz dot program.\n"
+				"  img: \tGenerates a graphical representation of the CFG using the Graphviz dot program.  Image file format is PNG."
+				)
+		(CLP_CFG_OUTPUT_FILENAME, po::value<std::string>(&output_filename), "Output filename.")
 		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
 				"Output all statements and nodes CoFlo finds in the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
 		(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
@@ -235,7 +251,7 @@ int main(int argc, char* argv[])
 		// See if the user is asking for help, or didn't pass any parameters at all.
 		if (vm.count(CLP_HELP) || argc < 2)
 		{
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << std::endl;
 			std::cout << "Usage: coflo [options] file..." << std::endl;
 			std::cout << non_hidden_cmdline_options << std::endl;
@@ -249,7 +265,7 @@ int main(int argc, char* argv[])
 		{
 			// Print version info per GNU Coding Standards <http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dversion>.
 			// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y".
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
 			std::cout << "License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>" << std::endl;
 			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
@@ -260,7 +276,7 @@ int main(int argc, char* argv[])
 		// See of the user is requesting build info.
 		if(vm.count(CLP_BUILD_INFO))
 		{
-			std::cout << PACKAGE_STRING << std::endl;
+			std::cout << PACKAGE_STRING << PACKAGE_VERSION_CONTROL_REVISION << std::endl;
 			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
 			std::cout << std::endl;
 			std::cout << "Build info:" << std::endl;
@@ -278,22 +294,24 @@ int main(int argc, char* argv[])
 	{
 		// Something went wrong while trying to parse the command line.
 		// Print an error message and exit.
-		std::cout << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
+		std::cerr << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
 		return 1;
 	}
 	catch(...)
 	{
-		std::cout << "ERROR: Unknown exception" << std::endl;
+		std::cerr << "ERROR: Unknown exception" << std::endl;
 		return 1;
 	}
 
+	// Were any source files given on the command line?
 	if(vm.count(CLP_INPUT_FILE)>0)
 	{
+		// Yes, try to parse them and generate a CFG.
 		try
 		{
 			// Enable/disable debug output.
 			/// @todo Add debug_link control.
-			dlog_block.enable(debug_parse);
+			dlog_parse_gimple.enable(debug_parse);
 			dlog_function.enable(debug_parse);
 			dlog_cfg.enable(debug_cfg);
 
@@ -346,6 +364,7 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 
+			// Print any function calls that we couldn't link.
 			the_program->PrintUnresolvedFunctionCalls(&unresolved_function_calls);
 		}
 		catch( boost::exception & e )
@@ -360,31 +379,65 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	// Now we've parsed the source code and generated the CFG internally.
+	// What does the caller want us to do with this info?
 
 	if(vm.count(CLP_PRINT_FUNCTION_CFG))
 	{
 		// User wants a control flow graph.
-		if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose, cfg_vertex_ids))
+
+		// First see if the specified function exists.
+		Function *fp = the_program->LookupFunction(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>());
+		if(fp == NULL)
 		{
-			// Something went wrong.
+			std::cerr << "ERROR: Unable to find function with identifier \"" << vm[CLP_PRINT_FUNCTION_CFG].as<std::string>() << "\"";
 			return 1;
+		}
+
+		// Check if they want it as text, a Graphviz dot input file, or a png generated by dot.
+		if(cfg_fmt == "img")
+		{
+			if(output_filename.empty())
+			{
+				std::cerr << "ERROR: Must specify output filename with img format." << std::endl;
+			}
+			ToolDot *tool_dot = new ToolDot(the_dot);
+			fp->PrintControlFlowGraphBitmap(tool_dot, output_filename);
+		}
+		else if (cfg_fmt == "dot")
+		{
+			if(output_filename.empty())
+			{
+				std::cerr << "ERROR: Must specify output filename with dot format." << std::endl;
+			}
+			fp->PrintControlFlowGraphDot(cfg_verbose, cfg_vertex_ids, output_filename);
+		}
+		else
+		{
+			if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose, cfg_vertex_ids))
+			{
+				// Something went wrong.
+				return 1;
+			}
 		}
 	}
 
-	the_analyzer->AttachToProgram(the_program);
-
 	if(vm.count(CLP_CONSTRAINT) > 0)
 	{
+		// User wants to run some analysis.
+
+		the_analyzer->AttachToProgram(the_program);
+
 		// Add the given constraints to the analysis.
 		the_analyzer->AddConstraints(vm[CLP_CONSTRAINT].as< std::vector<std::string> >());
+
+		// Perform the analysis.
+		the_analyzer->Analyze();
 	}
-	
-	// Perform the analysis.
-	the_analyzer->Analyze();
 	
 	if(!report_output_directory.empty())
 	{
-		// User wants HTML output.
+		// User wants HTML output of the CFGs of all the functions.
 		ToolDot *tool_dot = new ToolDot(the_dot);
 		the_program->SetTheDot(tool_dot);
 		std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
