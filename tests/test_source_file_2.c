@@ -24,3 +24,8 @@ int calculate(int x)
 {
 	return x*x;
 }
+
+long last_function_called_by_main(long var)
+{
+	return var/5;
+}

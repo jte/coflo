@@ -44,6 +44,7 @@ double function_that_we_will_call_through_a_ptr(void)
  */
 extern void do_this();
 extern void do_that();
+extern long last_function_called_by_main(long);
 
 int another_level_deep() { return 1; };
 int function_a() { another_level_deep(); return 1; };
@@ -175,6 +176,8 @@ Label1:
 	{
 		printf("OR Test\n");
 	}
+
+	last_function_called_by_main(88);
 
 	return retval;
 }
