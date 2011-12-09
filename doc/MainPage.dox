@@ -3,41 +3,24 @@
 @mainpage
 
 @section copyright_sec Copyright
+@verbatim
 
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
- *
- * This file is part of CoFlo.
- *
- * CoFlo is free software: you can redistribute it and/or modify it under the
- * terms of version 3 of the GNU General Public License as published by the Free
- * Software Foundation.
- *
- * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ 
+This file is part of CoFlo.
+ 
+CoFlo is free software: you can redistribute it and/or modify it under the
+terms of version 3 of the GNU General Public License as published by the Free
+Software Foundation.
+ 
+CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+You should have received a copy of the GNU General Public License along with
+CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+@endverbatim
 @section intro_sec Introduction
-
-Hello.
-
-@section audience_sec Audience
-
-@section installation_sec Installation
-
-@subsection prereq_sec Prerequisites
-
-@subsubsection build_prereq_sec Build Prerequisites
-
-- The Boost libraries, version 1.42.0 or greater\n
-  The specific libraries used by CoFlo are:
-  - The Boost Graph Library
-  - Boost.Regex
-  - Boost.Program_options
-  - Boost.Filesystem
-
-@subsubsection runtime_prereq_sec Runtime Prerequisites
 
 */

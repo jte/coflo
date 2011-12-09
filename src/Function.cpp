@@ -485,7 +485,7 @@ public:
 
 		if (u == m_last_statement)
 		{
-			std::clog << "INFO: Found last statement of function" << std::endl;
+			//std::clog << "INFO: Found last statement of function" << std::endl;
 			// We've reached the end of the function, terminate the search.
 			// We should never have to do this, the topological search should always
 			// terminate on the EXIT vertex unless there is a branch which erroneously terminates.
