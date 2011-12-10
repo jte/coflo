@@ -28,22 +28,28 @@ include $(top_srcdir)/aminclude_doxygen.am
 SUBDIRS = src doc tests
 
 # We want to distribute .version.
-EXTRA_DIST = $(top_srcdir)/.version
+#EXTRA_DIST = $(top_srcdir)/.version
 
 # .version is built source.  We want it to be built before anything else
 # so that it will trigger a reconfigure at the earliest possible time.
-BUILT_SOURCES = $(top_srcdir)/.version
-#DISTCLEANFILES = $(top_srcdir)/.version
+#BUILT_SOURCES = $(top_srcdir)/.version
+##DISTCLEANFILES = $(top_srcdir)/.version
+
+#if HAVE_TARBALL_VERSION_INFO
+#VC_REV = "1.2.3"
+#else
+#VC_REV = "4.5.6"
+#endif
 
 # The rule for building .version.
 # We only update it based on content, not file time.
-$(top_srcdir)/.version:	FORCE
-	@# Get coflo_version_control_info's idea of what the right version number is.
-	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .version-temp
-	@# If the contents differ or the target file doesn't exist, move .version-temp to its final name (.version).
-	@# If the contents are the same, do a "pretend move", and simply delete the source file,
-	@# leaving the destination file's timestamp untouched.  This avoids spurious rebuilds. 
-	$(top_srcdir)/build-aux/move-if-change ".version-temp" "$@"
+#$(top_srcdir)/.version:	FORCE
+#	@# Get coflo_version_control_info's idea of what the right version number is.
+#	@echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .version-temp
+#	@# If the contents differ or the target file doesn't exist, move .version-temp to its final name (.version).
+#	@# If the contents are the same, do a "pretend move", and simply delete the source file,
+#	@# leaving the destination file's timestamp untouched.  This avoids spurious rebuilds. 
+#	$(top_srcdir)/build-aux/move-if-change ".version-temp" "$@"
 
 FORCE:
 
@@ -51,11 +57,11 @@ FORCE:
 # This is invoked when we do a "make dist", and simply
 # creates a file which contains the value of $(VERSION)
 # which was current at that time.
-dist-hook:
-	@# Create the .tarball-version file.
-	@echo $(VC_REV) > .tarball-version-temp
-	$(top_srcdir)/build-aux/move-if-change ".tarball-version-temp" "$(distdir)/.tarball-version"
-	@#echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .tarball-version
+#dist-hook:
+#	@# Create the .tarball-version file.
+#	@echo $(VC_REV) > .tarball-version-temp
+#	$(top_srcdir)/build-aux/move-if-change ".tarball-version-temp" "$(distdir)/.tarball-version"
+#	@#echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .tarball-version
 
 ## This exists solely to get the version control version into the NEWS file so that distcheck
 ## doesn't fail.  Probably more trouble than its worth.
