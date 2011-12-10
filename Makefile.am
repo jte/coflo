@@ -53,7 +53,9 @@ FORCE:
 # which was current at that time.
 dist-hook:
 	@# Create the .tarball-version file.
-	@echo $(VC_REV) > $(distdir)/.tarball-version
+	@echo $(VC_REV) > .tarball-version-temp
+	$(top_srcdir)/build-aux/move-if-change ".tarball-version-temp" "$(distdir)/.tarball-version"
+	@#echo $$(cd $(top_srcdir) && build-aux/coflo_version_control_info "" .tarball-version) > .tarball-version
 
 ## This exists solely to get the version control version into the NEWS file so that distcheck
 ## doesn't fail.  Probably more trouble than its worth.
