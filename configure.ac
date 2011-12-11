@@ -55,9 +55,9 @@ AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
 AC_CONFIG_AUX_DIR([build-aux])
 
 # Require our source control version checking script. 
-AC_REQUIRE_AUX_FILE([coflo_version_control_info])
+#AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 # Require our move-if-file-contents-differ script.
-AC_REQUIRE_AUX_FILE([move-if-change])
+#AC_REQUIRE_AUX_FILE([move-if-change])
 
 # Additional Autoconf macros are in m4/.
 AC_CONFIG_MACRO_DIR([m4])
@@ -66,15 +66,16 @@ AC_CONFIG_MACRO_DIR([m4])
 #
 # Defines for the config.h.
 #
-AC_SUBST([VC_REV], [m4_esyscmd_s([build-aux/coflo_version_control_info "" .tarball-version])])
-AC_DEFINE_UNQUOTED([PACKAGE_VERSION_CONTROL_REVISION], ["$VC_REV"],
-	[Revision of source repository which was the initial origin of this distribution.])
+#AC_SUBST([VC_REV], [m4_esyscmd_s([build-aux/coflo_version_control_info "" .tarball-version])])
+#AC_DEFINE_UNQUOTED([PACKAGE_VERSION_CONTROL_REVISION], ["$VC_REV"],
+#	[Revision of source repository which was the initial origin of this distribution.])
+#AM_CONDITIONAL([HAVE_TARBALL_VERSION_INFO], [test -f "$(top_srcdir)/.tarball-version"])
 
 # Make sure we re-autoconf when the version changes.
 # This adds a dependency to the configure rule in the ultimately resulting Makefile.  This
 # rule reruns autoconf, so the new .version info will get picked up by both the packaging mechanisms
 # and the config.h file.  
-AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
+#AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/.version'])
 
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
