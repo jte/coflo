@@ -1,5 +1,5 @@
 ======================
-README for CoFlo 0.1.0
+README for CoFlo 0.0.1
 ======================
 
 Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
@@ -21,6 +21,18 @@ CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 Introduction
 ------------
 
-Example
--------
+CoFlo is a Free and Open Source source code analysis tool which generates and
+analyzes control flow graphs from C and C++ source.
+
+CoFlo is distributed under the terms of the GNU General Public License Version 3.
+See the files whose names start with COPYING for copying permission.  The manual
+is distributed under different terms; see the manual at the locations below for details.
+
+
+Documentation
+-------------
+
+For documentation on how to install and use CoFlo, see the CoFlo manual included
+with this distribution.  The CoFlo manual is available in HTML format in the
+doc/index.html file, and online at <http://coflo.sourceforge.net/manuals/0.0.1/index.html>.
 
