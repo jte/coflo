@@ -16,7 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # The non-built HTML documentation.
-dist_html_DATA = index.html
+dist_html_DATA = index.html img/loop_test_1.png
 
 # The non-generated documentation.
 EXTRA_DIST=doxygen_filter.sh MainPage.dox
