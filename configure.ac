@@ -130,7 +130,7 @@ AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
 AC_PROG_CXX
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
 # Some other tools we'll need.
@@ -165,12 +165,17 @@ AC_DEFINE_UNQUOTED([PROG_DOT_ABSPATH],["$PROG_DOT_ABSPATH"],[Define to the absol
 # Make sure we have the DParser library available.
 AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
 
-# Make sure we have a usable Boost version.
-AX_BOOST_BASE([1.46.1])
-AX_BOOST_PROGRAM_OPTIONS
-AX_BOOST_REGEX
-AX_BOOST_SYSTEM
-AX_BOOST_FILESYSTEM
+# Make sure we have a Boost version we can use.
+BOOST_REQUIRE([1.46.1])
+# Header-only libs
+BOOST_FOREACH
+BOOST_UTILITY
+# Libs requiring linking
+BOOST_PROGRAM_OPTIONS
+BOOST_REGEX
+BOOST_SYSTEM
+BOOST_FILESYSTEM
+
 
 ###
 ### Checks for some library functions we need.
