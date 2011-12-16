@@ -58,7 +58,7 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
-	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+	$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
 
 SUFFIX = .g
 
