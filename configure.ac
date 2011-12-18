@@ -45,7 +45,7 @@ AC_PREREQ([2.67])
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
 #AC_INIT([CoFlo], , [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-AC_INIT([CoFlo], [0.0.2], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.0.3], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -59,7 +59,10 @@ AC_CONFIG_AUX_DIR([build-aux])
 # Require our move-if-file-contents-differ script.
 #AC_REQUIRE_AUX_FILE([move-if-change])
 
-# Additional Autoconf macros are in m4/.
+# If/when we need to use any AC_REPLACE_FUNCS, we'll put them in ./portable. 
+#AC_CONFIG_LIBOBJ_DIR([portable])
+
+# Additional Autoconf macros are in ./m4.
 AC_CONFIG_MACRO_DIR([m4])
 
 
@@ -80,13 +83,15 @@ AC_CONFIG_MACRO_DIR([m4])
 # Initialize Automake.
 # See <http://www.gnu.org/software/automake/manual/automake.html#Options> for details on
 # what the various settings do.
-AM_INIT_AUTOMAKE([std-options
+AM_INIT_AUTOMAKE([1.11.1
+	check-news
+    silent-rules
 	subdir-objects
-    color-tests
     tar-pax
     dist-bzip2
+    color-tests
     parallel-tests
-    1.11.1
+    std-options
     -Wall
     -Werror
 ])
@@ -122,8 +127,8 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ### Checks for the programs we need to do a build.
 ###
 # The DParser make_dparser program.
-AX_WITH_PROG([PROG_MAKE_DPARSER_ABSPATH], [make_dparser])
-if test -z "$PROG_MAKE_DPARSER_ABSPATH"; then
+AX_WITH_PROG([PROG_ABSPATH_MAKE_DPARSER], [make_dparser])
+if test -z "$PROG_ABSPATH_MAKE_DPARSER"; then
 	AC_MSG_ERROR([Cannot find a usable make_dparser.])
 fi 
 AC_PROG_CC
