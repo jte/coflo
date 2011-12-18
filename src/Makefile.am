@@ -72,7 +72,7 @@ SUFFIX = .g
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
 	INTER="$$(basename "$<").gdebug" && \
-	"$(PROG_MAKE_DPARSER_ABSPATH)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
+	"$(PROG_ABSPATH_MAKE_DPARSER)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
 	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
 	mv "$${TARGET}-temp" "$${TARGET}"
 
