@@ -50,7 +50,9 @@ DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 coflo_CPPFLAGS = $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
-coflo_LDFLAGS = $(BOOST_LDFLAGS) $(AM_LDFLAGS)
+coflo_LDFLAGS = $(BOOST_LDFLAGS) \
+	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
+	$(AM_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
