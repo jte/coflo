@@ -1,4 +1,4 @@
-﻿# boost.m4: Locate Boost headers and libraries for autoconf-based projects.
+# boost.m4: Locate Boost headers and libraries for autoconf-based projects.
 # Copyright (C) 2007, 2008, 2009, 2010, 2011  Benoit Sigoure <tsuna@lrde.epita.fr>
 #
 # This program is free software: you can redistribute it and/or modify

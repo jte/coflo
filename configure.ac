@@ -58,6 +58,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 #AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 # Require our move-if-file-contents-differ script.
 #AC_REQUIRE_AUX_FILE([move-if-change])
+#AC_REQUIRE_AUX_FILE([config.guess])
 
 # If/when we need to use any AC_REPLACE_FUNCS, we'll put them in ./portable. 
 #AC_CONFIG_LIBOBJ_DIR([portable])
@@ -95,6 +96,15 @@ AM_INIT_AUTOMAKE([1.11.1
     -Wall
     -Werror
 ])
+
+# Get canonical Build and Host system types.
+# This is mainly for issue reports.
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
+# Put the triples we found in config.h as #define'd string literals.
+AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_BUILD],["$build"],[Define to the build triple.])
+AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_HOST],["$host"],[Define to the host triple.])
+
 
 # Programs and scripts to exempt from the "installcheck" rule introduced by "std-options".
 # List programs and scripts which don't support --help or --version here.
@@ -155,12 +165,12 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [src/Doxyfile])
 
 # Check for Graphviz dot at configure-time. 
-AX_WITH_PROG([PROG_DOT_ABSPATH], [dot])
-if test -z "$PROG_DOT_ABSPATH"; then
+AX_WITH_PROG([PROG_ABSPATH_DOT], [dot])
+if test -z "$PROG_ABSPATH_DOT"; then
 	AC_MSG_WARN([Cannot find a usable Graphviz dot program.])
 fi
-# Put whatever we may hav found in config.h.
-AC_DEFINE_UNQUOTED([PROG_DOT_ABSPATH],["$PROG_DOT_ABSPATH"],[Define to the absolute path to the Graphviz dot program.])
+# Put whatever we may have found in config.h.
+AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absolute path to the Graphviz dot program.])
 
 
 ###

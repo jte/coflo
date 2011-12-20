@@ -1,5 +1,12 @@
 CoFlo NEWS
 
+Version 0.0.3 - Gary R. Van Sickle, 2011-12-18
+
+* Minor bugfix release:
+- Using new Autoconf macros to detect Boost, and using Libtool to link with Boost non-header-only libraries,
+  in order to better support different types of Boost installations on more systems.
+- Added build and host triples to the output of "--build-info".  
+
 Version 0.0.2 - Gary R. Van Sickle, 2011-12-13
 
 * Minor bugfix release:
