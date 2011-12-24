@@ -185,15 +185,23 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
 
 # Make sure we have a Boost version we can use.
-BOOST_REQUIRE([1.46.1])
+# Use the Autoconf Macro Archive macros.
+AX_BOOST_BASE([1.46.1])
+AX_BOOST_PROGRAM_OPTIONS
+AX_BOOST_REGEX
+AX_BOOST_SYSTEM
+AX_BOOST_FILESYSTEM
+
+# Use the boost.m4 macro.
+#BOOST_REQUIRE([1.46.1])
 # Header-only libs
-BOOST_FOREACH
-BOOST_UTILITY
+#BOOST_FOREACH
+#BOOST_UTILITY
 # Libs requiring linking
-BOOST_PROGRAM_OPTIONS
-BOOST_REGEX
-BOOST_SYSTEM
-BOOST_FILESYSTEM
+#BOOST_PROGRAM_OPTIONS
+#BOOST_REGEX
+#BOOST_SYSTEM
+#BOOST_FILESYSTEM
 
 
 ###
