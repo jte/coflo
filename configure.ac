@@ -54,6 +54,9 @@ AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
 AC_CONFIG_AUX_DIR([build-aux])
 
+###
+### AC_REQUIRE some helper scripts etc.  This both ensures they exist and causes them to be distributed.
+###
 # Require our source control version checking script. 
 #AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 # Require our move-if-file-contents-differ script.
@@ -118,7 +121,8 @@ AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_HOST],["$host"],[Define to the host triple.])
 
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
-AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra"])
+# For Boost.Filesystem, set CPP flags to the Version 3 interface and to remove all deprecated interfaces.
+AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra -DBOOST_FILESYSTEM_NO_DEPRECATED=1 -DBOOST_FILESYSTEM_VERSION=3"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
