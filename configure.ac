@@ -20,14 +20,20 @@
 # Require the newest autoconf which is commonly deployed on our targeted platforms.
 # Current defaults are:
 # - Ubuntu:
-#    autoconf 2.67
+#    autoconf 2.68
+#    automake 1.11.1
 # - Cygwin:
 #    autoconf 2.68
 #    automake 1.11.1
 # - Fedora:
 #    autoconf 2.68
 #    automake 1.11.1
-AC_PREREQ([2.67])
+AC_PREREQ([2.68])
+# Require the newest libtool in common between all platforms we currently anticipate CoFlo will be developed on
+# ("developed on", not "distributed for": libtool isn't necessary to build distributions).
+# Both Cygwin and Ubuntu ship libtool 2.4 as of this writing.
+LT_PREREQ([2.4])
+
 
 # Define an M4 macro which will get the working copy's current version info via "svnversion".
 #m4_include([m4/coflo_source_control_version.m4])
@@ -144,13 +150,21 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 AX_WITH_PROG([PROG_ABSPATH_MAKE_DPARSER], [make_dparser])
 if test -z "$PROG_ABSPATH_MAKE_DPARSER"; then
 	AC_MSG_ERROR([Cannot find a usable make_dparser.])
-fi 
+fi
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+AC_PROG_AWK
+AC_PROG_CPP
 AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_MKDIR_P
+# Initialize Libtool.
+LT_INIT
+# Create a variable for updating the libtool script if it gets out of date.
+AC_SUBST([LIBTOOL_DEPS])
 
 # Some other tools we'll need.
 AC_PROG_SED
@@ -203,6 +217,10 @@ AX_BOOST_FILESYSTEM
 #BOOST_SYSTEM
 #BOOST_FILESYSTEM
 
+
+AS_ECHO(["After AX_BOOST $BOOST_LDFLAGS"])
+AC_SUBST([BOOST_RPATH], [`echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
+AS_ECHO(["BOOST_RPATH=$BOOST_RPATH"])
 
 ###
 ### Checks for some library functions we need.

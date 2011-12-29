@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory, and also copies
+# Make sure autotools pick up the M4 macros in the ./m4 directory, and also copy
 # any third-party macros (e.g. the system-wide ax_* Autoconf Macro Archive ones
 # in /usr/share/aclocal) to ./m4 so they get distributed and automatically updated.
 # Only useful in the top-level Makefile.am (see http://sources.redhat.com/automake/automake.html#Rebuilding).
