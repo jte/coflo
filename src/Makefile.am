@@ -31,6 +31,7 @@ EXTRA_DIST = Doxyfile
 #MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
 MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug
 
+# The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Function.cpp Function.h \
@@ -42,7 +43,8 @@ coflo_SOURCES = main.cpp \
 	TranslationUnit.cpp TranslationUnit.h \
 	safe_enum.h \
 	\
-	gcc_gimple_parser.g gcc_gimple_parser.h
+	gcc_gimple_parser.g gcc_gimple_parser.h \
+	libtool
 	
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
@@ -58,7 +60,7 @@ coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
 # so they'll evaluate to empty when we're using the latter.
-coflo_LDFLAGS = $(BOOST_LDFLAGS) \
+coflo_LDFLAGS = -rpath $(BOOST_RPATH) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
@@ -86,3 +88,6 @@ SUFFIX = .g
 	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
 	mv "$${TARGET}-temp" "$${TARGET}"
 
+# Rule to remake the libtool script if it gets out of date.
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) $(top_builddir)/config.status libtool
