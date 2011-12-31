@@ -16,6 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # The non-built HTML documentation.
+# nobase == Don't strip off the subdirectories from filenames on install. 
 nobase_dist_html_DATA = index.html img/loop_test_1.png
 
 # The non-generated documentation.
