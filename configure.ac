@@ -141,16 +141,16 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
 # Similar thing for LDFLAGS.  This is to get AC_CHECK_LIB to also look in /usr/local/lib for libdparser.a. 
-: ${LDFLAGS="-L/usr/local/lib"}
+#: ${LDFLAGS="-L/usr/local/lib"}
 
 ###
 ### Checks for the programs we need to do a build.
 ###
 # The DParser make_dparser program.
-AX_WITH_PROG([PROG_ABSPATH_MAKE_DPARSER], [make_dparser])
-if test -z "$PROG_ABSPATH_MAKE_DPARSER"; then
-	AC_MSG_ERROR([Cannot find a usable make_dparser.])
-fi
+#AX_WITH_PROG([PROG_ABSPATH_MAKE_DPARSER], [make_dparser])
+#if test -z "$PROG_ABSPATH_MAKE_DPARSER"; then
+#	AC_MSG_ERROR([Cannot find a usable make_dparser.])
+#fi
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -196,7 +196,7 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 ###
 
 # Make sure we have the DParser library available.
-AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
+#AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
 
 # Make sure we have a Boost version we can use.
 # Use the Autoconf Macro Archive macros.
@@ -248,6 +248,7 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 ### Create the Makefiles for the program.
 ###
 AC_CONFIG_FILES([Makefile
+	doc/Makefile
 	src/Makefile
 	src/controlflowgraph/Makefile
 	src/controlflowgraph/analysis/Makefile
@@ -256,6 +257,6 @@ AC_CONFIG_FILES([Makefile
 	src/controlflowgraph/visitors/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
-	doc/Makefile])
+	third_party/Makefile])
 AC_OUTPUT
 

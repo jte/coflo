@@ -25,7 +25,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 include $(top_srcdir)/aminclude_doxygen.am
 
 # The subdirectories containing the source code, docs, and tests.
-SUBDIRS = src doc tests
+SUBDIRS = doc third_party src tests
 
 # We want to distribute .version.
 #EXTRA_DIST = $(top_srcdir)/.version
@@ -74,7 +74,6 @@ FORCE:
 
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
-MOSTLYCLEANFILES = $(DX_CLEANFILES) $(AX_INSTALL_FILES_CLEANFILES)
+MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
-# Target for generating a list of the files that will be installed.
-install-files: $(top_builddir)/install_files
+

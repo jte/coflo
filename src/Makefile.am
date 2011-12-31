@@ -46,6 +46,8 @@ coflo_SOURCES = main.cpp \
 	gcc_gimple_parser.g gcc_gimple_parser.h \
 	libtool
 	
+# Path to the make_dparser executable.
+PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
@@ -55,7 +57,7 @@ ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LI
 # boost.m4 vars.
 #ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
 
-coflo_CPPFLAGS = $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
@@ -70,6 +72,7 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
+	$(top_builddir)/third_party/libdparse.a \
 	$(ALLBOOSTLIBS)
 
 SUFFIX = .g
@@ -89,5 +92,5 @@ SUFFIX = .g
 	mv "$${TARGET}-temp" "$${TARGET}"
 
 # Rule to remake the libtool script if it gets out of date.
-libtool: $(LIBTOOL_DEPS)
-	$(SHELL) $(top_builddir)/config.status libtool
+$(top_builddir)/libtool: $(LIBTOOL_DEPS)
+	$(SHELL) $(top_builddir)/config.status $(top_builddir)/libtool
