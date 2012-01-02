@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo, ./src directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -31,6 +31,7 @@ EXTRA_DIST = Doxyfile
 #MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
 MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug
 
+# The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp \
 	Function.cpp Function.h \
@@ -43,14 +44,27 @@ coflo_SOURCES = main.cpp \
 	safe_enum.h \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
+coflo_DEPENDENCIES = $(top_builddir)/libtool
 	
+# Path to the make_dparser executable.
+PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
-coflo_CPPFLAGS = $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+# Collect all the Boost libraries we found into a single variable.
+# Autoconf Macro Archive vars.
+ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+# boost.m4 vars.
+#ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
+
+coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
-coflo_LDFLAGS = $(BOOST_LDFLAGS) $(AM_LDFLAGS)
+# Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
+# so they'll evaluate to empty when we're using the latter.
+coflo_LDFLAGS = -rpath $(BOOST_RPATH) $(BOOST_LDFLAGS) \
+	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
+	$(AM_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
@@ -58,7 +72,8 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
-	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+	$(top_builddir)/third_party/libdparse.a \
+	$(ALLBOOSTLIBS)
 
 SUFFIX = .g
 
@@ -72,7 +87,7 @@ SUFFIX = .g
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
 	INTER="$$(basename "$<").gdebug" && \
-	"$(PROG_MAKE_DPARSER_ABSPATH)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
+	"$(PROG_ABSPATH_MAKE_DPARSER)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
 	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
 	mv "$${TARGET}-temp" "$${TARGET}"
 
