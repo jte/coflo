@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo, ./src directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -43,8 +43,8 @@ coflo_SOURCES = main.cpp \
 	TranslationUnit.cpp TranslationUnit.h \
 	safe_enum.h \
 	\
-	gcc_gimple_parser.g gcc_gimple_parser.h \
-	libtool
+	gcc_gimple_parser.g gcc_gimple_parser.h
+coflo_DEPENDENCIES = $(top_builddir)/libtool
 	
 # Path to the make_dparser executable.
 PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
@@ -91,6 +91,3 @@ SUFFIX = .g
 	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
 	mv "$${TARGET}-temp" "$${TARGET}"
 
-# Rule to remake the libtool script if it gets out of date.
-$(top_builddir)/libtool: $(LIBTOOL_DEPS)
-	$(SHELL) $(top_builddir)/config.status $(top_builddir)/libtool
