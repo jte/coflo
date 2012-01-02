@@ -148,32 +148,33 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 ###
 
 # The DParser distribution's tarball.
-AC_ARG_WITH([dparser-tarball],
-	[AS_HELP_STRING([--with-dparser-tarball=@<:@PATH@:>@],
-		[Path to the dparser 1.26 source distribution tarball.])], [], [with_dparser_tarball=no])
+COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_TARBALL], [dparser-tarball], [dparser 1.26 source distribution tarball])
+#AC_ARG_WITH([dparser-tarball],
+#	[AS_HELP_STRING([--with-dparser-tarball=@<:@PATH@:>@],
+#		[Path to the dparser 1.26 source distribution tarball.])], [], [with_dparser_tarball=no])
 
 # Check if the user specified a filename.
-AC_MSG_CHECKING([if DParser distribution tarball was specified])
-AS_IF([test "x$with_dparser_tarball" = "xno" || test "x$with_dparser_tarball" = "xyes"],
-	[AC_MSG_RESULT([no])
-		AC_MSG_FAILURE([--with-dparser-tarball=@<:@PATH@:>@ must be specified])],
-	[AC_MSG_RESULT([yes])])
+#AC_MSG_CHECKING([if DParser distribution tarball was specified])
+#AS_IF([test "x$with_dparser_tarball" = "xno" || test "x$with_dparser_tarball" = "xyes"],
+#	[AC_MSG_RESULT([no])
+#		AC_MSG_FAILURE([--with-dparser-tarball=@<:@PATH@:>@ must be specified])],
+#	[AC_MSG_RESULT([yes])])
 
 # Check if the specified filename is a real file and that we can read it.	
-AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" exists])
-AS_IF([test -f "$with_dparser_tarball"],
-	[AC_MSG_RESULT([yes])],
-	[AC_MSG_RESULT([no])
-		AC_MSG_FAILURE([file does not exist or is not a regular file: $with_dparser_tarball])])
-
-AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" is readable])
-AS_IF([test -r "$with_dparser_tarball"],
-	[AC_MSG_RESULT([yes])],
-	[AC_MSG_RESULT([no])
-		AC_MSG_FAILURE([file is not readable: $with_dparser_tarball])])
+#AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" exists])
+#AS_IF([test -f "$with_dparser_tarball"],
+#	[AC_MSG_RESULT([yes])],
+#	[AC_MSG_RESULT([no])
+#		AC_MSG_FAILURE([file does not exist or is not a regular file: $with_dparser_tarball])])
+#
+#AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" is readable])
+#AS_IF([test -r "$with_dparser_tarball"],
+#	[AC_MSG_RESULT([yes])],
+#	[AC_MSG_RESULT([no])
+#		AC_MSG_FAILURE([file is not readable: $with_dparser_tarball])])
 		
 # File checks out, AC_SUBST a variable for it.
-AC_SUBST([FILE_PATH_DPARSER_TARBALL], [$with_dparser_tarball])
+#AC_SUBST([FILE_PATH_DPARSER_TARBALL], [$with_dparser_tarball])
 AC_MSG_NOTICE([FILE_PATH_DPARSER_TARBALL=$FILE_PATH_DPARSER_TARBALL, abs_top_srcdir=$abs_top_srcdir])
 
 # The DParser make_dparser program.
