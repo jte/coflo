@@ -1,6 +1,6 @@
 # Top-level Makefile.am for CoFlo
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# Make sure autotools pick up the M4 macros in the ./m4 directory, and also copies
+# Make sure autotools pick up the M4 macros in the ./m4 directory, and also copy
 # any third-party macros (e.g. the system-wide ax_* Autoconf Macro Archive ones
 # in /usr/share/aclocal) to ./m4 so they get distributed and automatically updated.
 # Only useful in the top-level Makefile.am (see http://sources.redhat.com/automake/automake.html#Rebuilding).
@@ -25,7 +25,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 include $(top_srcdir)/aminclude_doxygen.am
 
 # The subdirectories containing the source code, docs, and tests.
-SUBDIRS = src doc tests
+SUBDIRS = doc third_party src tests
 
 # We want to distribute .version.
 #EXTRA_DIST = $(top_srcdir)/.version
@@ -75,3 +75,9 @@ FORCE:
 # Add the doxygen-doc files to the MOSTLYCLEANFILES variable so they can be cleaned.
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
+
+
+# Rule to remake the libtool script if it gets out of date.
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
+
