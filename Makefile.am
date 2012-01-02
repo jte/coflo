@@ -1,6 +1,6 @@
 # Top-level Makefile.am for CoFlo
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -76,4 +76,8 @@ FORCE:
 # Per <http://www.gnu.org/software/autoconf-archive/ax_prog_doxygen.html#ax_prog_doxygen>
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
+
+# Rule to remake the libtool script if it gets out of date.
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
 

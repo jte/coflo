@@ -1,6 +1,6 @@
 # configure.ac for CoFlo
 #
-# Copyright 2011,2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -140,65 +140,28 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
-# Similar thing for LDFLAGS.  This is to get AC_CHECK_LIB to also look in /usr/local/lib for libdparser.a. 
-#: ${LDFLAGS="-L/usr/local/lib"}
+
 
 ###
 ### Checks for the programs we need to do a build.
 ###
 
-# The DParser distribution's tarball.
-COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_TARBALL], [dparser-tarball], [dparser 1.26 source distribution tarball])
-#AC_ARG_WITH([dparser-tarball],
-#	[AS_HELP_STRING([--with-dparser-tarball=@<:@PATH@:>@],
-#		[Path to the dparser 1.26 source distribution tarball.])], [], [with_dparser_tarball=no])
-
-# Check if the user specified a filename.
-#AC_MSG_CHECKING([if DParser distribution tarball was specified])
-#AS_IF([test "x$with_dparser_tarball" = "xno" || test "x$with_dparser_tarball" = "xyes"],
-#	[AC_MSG_RESULT([no])
-#		AC_MSG_FAILURE([--with-dparser-tarball=@<:@PATH@:>@ must be specified])],
-#	[AC_MSG_RESULT([yes])])
-
-# Check if the specified filename is a real file and that we can read it.	
-#AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" exists])
-#AS_IF([test -f "$with_dparser_tarball"],
-#	[AC_MSG_RESULT([yes])],
-#	[AC_MSG_RESULT([no])
-#		AC_MSG_FAILURE([file does not exist or is not a regular file: $with_dparser_tarball])])
-#
-#AC_MSG_CHECKING([if specified DParser distribution tarball \"$with_dparser_tarball\" is readable])
-#AS_IF([test -r "$with_dparser_tarball"],
-#	[AC_MSG_RESULT([yes])],
-#	[AC_MSG_RESULT([no])
-#		AC_MSG_FAILURE([file is not readable: $with_dparser_tarball])])
-		
-# File checks out, AC_SUBST a variable for it.
-#AC_SUBST([FILE_PATH_DPARSER_TARBALL], [$with_dparser_tarball])
-AC_MSG_NOTICE([FILE_PATH_DPARSER_TARBALL=$FILE_PATH_DPARSER_TARBALL, abs_top_srcdir=$abs_top_srcdir])
-
-# The DParser make_dparser program.
-#AX_WITH_PROG([PROG_ABSPATH_MAKE_DPARSER], [make_dparser])
-#if test -z "$PROG_ABSPATH_MAKE_DPARSER"; then
-#	AC_MSG_ERROR([Cannot find a usable make_dparser.])
-#fi
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
 AC_PROG_CXX
+AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
-# Initialize Libtool.
+# Initialize Libtool.  This looks like it doesn't belong here, but thing go awry if it's moved
+# up by AC_INIT.
 LT_INIT
 # Create a variable for updating the libtool script if it gets out of date.
 AC_SUBST([LIBTOOL_DEPS])
-
-# Some other tools we'll need.
-AC_PROG_SED
 
 # Look for Doxygen and configure it if it does exist.
 DX_DOXYGEN_FEATURE(ON)
@@ -226,8 +189,26 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 ### Checks for libraries
 ###
 
-# Make sure we have the DParser library available.
-#AC_CHECK_LIB([dparse], [dparse], [], [AC_MSG_ERROR([DParser runtime library not found.])])
+
+# The DParser source distribution's tarball.
+# To avoid requiring the user to build and install DParser on their system, we'll take the tarball
+# as a configure parameter and build it with the parameters we need.
+COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_SOURCE_TARBALL], [dparser-tarball], [dparser 1.26 source distribution tarball])
+AC_MSG_NOTICE([FILE_PATH_DPARSER_SOURCE_TARBALL=$FILE_PATH_DPARSER_SOURCE_TARBALL])
+
+# The Boost source distribution's tarball.
+# If the user doesn't already have a suitable Boost installation, we'll do something similar to what we do
+# for DParser, and build it from the source tarball and link to it statically.
+# The reason here though is more complex:
+#   1. Boost (as of 1.48.0) wants to install into the wrong /lib directory on some systems, notably some x86_64 systems.
+#   2. Neither of the Autoconf macro packages for detecting Boost that I've tried works completely correctly when
+#      more than one Boost installation is on a system, e.g. one in /usr/lib and one in /usr/local/lib. E.g., if an
+#      old copy is in /usr/include & /usr/lib and a suitable copy is in /usr/local/include and /usr/local/lib, both
+#      will by default find the correct paths, but ultimately make the program try to link with the libs in /usr/lib
+#      even though it's correctly using the headers in /usr/local/include.
+COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost source distribution tarball],
+	[],[AC_MSG_WARN([No Boost source tarball specified.])])
+
 
 # Make sure we have a Boost version we can use.
 # Use the Autoconf Macro Archive macros.
@@ -249,9 +230,9 @@ AX_BOOST_FILESYSTEM
 #BOOST_FILESYSTEM
 
 
-AS_ECHO(["BOOST_LDFLAGS=$BOOST_LDFLAGS"])
+AC_MSG_NOTICE(["BOOST_LDFLAGS=$BOOST_LDFLAGS"])
 AC_SUBST([BOOST_RPATH], [`echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
-AS_ECHO(["BOOST_RPATH=$BOOST_RPATH"])
+AC_MSG_NOTICE(["BOOST_RPATH=$BOOST_RPATH"])
 
 ###
 ### Checks for some library functions we need.

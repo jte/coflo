@@ -16,7 +16,8 @@
 #
 # SYNOPSIS
 #
-#   COFLO_ARG_WITH_FILE([VARIABLE], [with-option-suffix], [description of the file])
+#   COFLO_ARG_WITH_FILE([VARIABLE], [with-option-suffix], [description of the file],
+#      [ACTION_IF_FOUND], [ACTION_IF_NOT_FOUND])
 #
 # DESCRIPTION
 #
@@ -38,6 +39,11 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 	pushdef([VARIABLE],$1)
 	pushdef([ARG_TEXT],$2)
 	pushdef([VAR_AND_OPT_DESCRIPTION],$3)
+	pushdef([ACTION_IF_FOUND],$4)
+	pushdef([ACTION_IF_NOT_FOUND],$5)
+	
+	dnl Temp vars.
+	coflo_exit_no_path_specified=no
 	
 	dnl Add the precious variable and associated help text.
 	AC_ARG_VAR(VARIABLE,Absolute path to VAR_AND_OPT_DESCRIPTION.)
@@ -51,11 +57,11 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 		[
 			dnl The option was passed, but check if the user didn't provide a value for PATH,
 			dnl or gave a "yes" or "no" instead of a path. 
-			AS_IF([test "$withval" != yes && test "$withval" != no],
+			AS_IF([test "$withval" != yes && test "$withval" != no && test -n "$withval"],
 			[
 				dnl The provided path was something other than empty, "yes", or "no".
 				VARIABLE="$withval"
-				AC_MSG_RESULT(yes: \"$VARIABLE\")
+				AC_MSG_RESULT([yes: "$VARIABLE"])
 			],
 			[
 				dnl Nothing that might be a path was provided.
@@ -67,36 +73,49 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 	
 	AS_IF([test -z "$VARIABLE"],
 	[
-		dnl If VARIABLE is empty at this point, we didn't get it from either AC_ARG_VAR or AC_ARG_WITH,
-		dnl so we have to abort.
-		AC_MSG_FAILURE([Either --with-ARG_TEXT=PATH or VARIABLE=PATH must be specified.])
+		dnl If VARIABLE is empty at this point, we didn't get it from either AC_ARG_VAR or AC_ARG_WITH.
+		dnl Has the caller specified an action to invoke in this situation?
+		m4_ifblank([ACTION_IF_NOT_FOUND],
+		[
+			dnl No, substitute code which will abort with an error message.
+			AC_MSG_FAILURE([Either --with-ARG_TEXT=PATH or VARIABLE=PATH must be specified.])
+		],
+		[
+			dnl Yes, substitute the action.
+			ACTION_IF_NOT_FOUND
+			coflo_exit_no_path_specified=yes
+		])
 	],[])
 	
-	dnl If we haven't failed yet, make sure the path we return is an absolute path.
-	VARIABLE=`readlink -f "$VARIABLE"`		
+	if test "x$coflo_exit_no_path_specified" != "xyes"; then
+		dnl If we haven't failed yet, make sure the path we return is an absolute path.
+		VARIABLE=`readlink -f "$VARIABLE"`		
+		
+		dnl Check if the specified file exists and is a regular file.
+		AC_MSG_CHECKING([if specified VAR_AND_OPT_DESCRIPTION \"$VARIABLE\" exists and is a regular file])
+		AS_IF([test -f "$VARIABLE"],
+		[
+			AC_MSG_RESULT([yes])
+		],
+		[
+			AC_MSG_RESULT([no])
+			AC_MSG_FAILURE([file does not exist or is not a regular file: "$VARIABLE"])
+		])
+		
+		dnl Check if the specified file is readable by us.
+		AC_MSG_CHECKING([if specified VAR_AND_OPT_DESCRIPTION \"$VARIABLE\" is readable])
+		AS_IF([test -r "$VARIABLE"],
+		[
+			AC_MSG_RESULT([yes])
+		],
+		[
+			AC_MSG_RESULT([no])
+			AC_MSG_FAILURE([file is not readable: $VARIABLE])
+		])
+	fi
 	
-	dnl Check if the specified file exists and is a regular file.
-	AC_MSG_CHECKING([if specified VAR_AND_OPT_DESCRIPTION \"$VARIABLE\" exists and is a regular file])
-	AS_IF([test -f "$VARIABLE"],
-	[
-		AC_MSG_RESULT([yes])
-	],
-	[
-		AC_MSG_RESULT([no])
-		AC_MSG_FAILURE([file does not exist or is not a regular file: \"$VARIABLE\"])
-	])
-	
-	dnl Check if the specified file is readable by us.
-	AC_MSG_CHECKING([if specified VAR_AND_OPT_DESCRIPTION \"$VARIABLE\" is readable])
-	AS_IF([test -r "$VARIABLE"],
-	[
-		AC_MSG_RESULT([yes])
-	],
-	[
-		AC_MSG_RESULT([no])
-		AC_MSG_FAILURE([file is not readable: \"$VARIABLE\"])
-	])
-	
+	popdef([ACTION_IF_NOT_FOUND])
+	popdef([ACTION_IF_FOUND])
 	popdef([VAR_AND_OPT_DESCRIPTION])
 	popdef([ARG_TEXT])
 	popdef([VARIABLE])
