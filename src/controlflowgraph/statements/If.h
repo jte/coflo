@@ -22,6 +22,10 @@
 
 #include "FlowControlBase.h"
 
+
+/**
+ * Class representing a 2-option (true/false) decision vertex.
+ */
 class If : public FlowControlBase
 {
 public:

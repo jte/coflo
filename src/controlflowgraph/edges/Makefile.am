@@ -29,6 +29,10 @@ libedges_a_SOURCES = \
 	CFGEdgeTypeImpossible.cpp CFGEdgeTypeImpossible.h \
 	CFGEdgeTypeReturn.cpp CFGEdgeTypeReturn.h
 
+# Propagate any AM_*FLAGS to the per-target flags.
+# We need to do this because per the Automake manual, "In compilations with per-target flags,
+# the ordinary ‘AM_’ form of the flags variable is not automatically included in the compilation
+# (however, the user form of the variable is included)."
 libedges_a_CPPFLAGS = $(AM_CPPFLAGS)
 libedges_a_CFLAGS = $(AM_CFLAGS)
 libedges_a_CXXFLAGS = $(AM_CXXFLAGS)
