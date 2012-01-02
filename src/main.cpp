@@ -94,7 +94,7 @@ std::pair<std::string, std::string> at_option_parser(const std::string &s)
 /**
  * Prints the versions of the various libraries we were compiled against.
  */
-static void print_lib_versions();
+static void print_build_info();
 
 /**
  * CoFlo entry point.
@@ -282,13 +282,8 @@ int main(int argc, char* argv[])
 			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
 			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
 			std::cout << std::endl;
-			std::cout << "Build info:" << std::endl;
-			print_lib_versions();
-			/// @todo Should add:
-			/// - Build options
-			/// - Build date
-			/// - Build type (e.g. "Release", "Snapshot", etc.)
-			/// - ???
+			std::cout << "Build info:" << std::endl << std::endl;
+			print_build_info();
 			return 0;
 		}
 
@@ -450,11 +445,22 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-static void print_lib_versions()
+static void print_build_info()
 {
+	/// @todo Should add:
+	/// - Build options
+	/// - Build date
+	/// - Build type (e.g. "Release", "Snapshot", etc.)
+	/// - Compiler used
+	/// - ???
+
 	using std::cout;
 	using std::endl;
 
+	cout << "System triples:" << endl;
+	cout << "  Build...............: " << SYSTEM_TRIPLE_BUILD << endl;
+	cout << "  Host................: " << SYSTEM_TRIPLE_HOST << endl;
+	cout << endl;
 	cout << "Boost library info:" << endl;
 	cout << "  Version.............: " << (BOOST_VERSION / 100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << endl;
 	cout << "  Compiler string.....: " << BOOST_COMPILER << endl;

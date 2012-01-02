@@ -5,377 +5,526 @@
 
 
   
-  <meta http-equiv="content-type" content="text/html;
-
-      charset=ISO-8859-1"><title>CoFlo 0.0.1 User's Manual</title>
-  <meta content="Gary R. Van Sickle" name="author">
-  <meta content="User's manual for version 0.0.1 of the CoFlo program" name="description">
-</head><body>
-<br>
-
-<big><big><big> CoFlo 0.0.1 User's Manual<br>
-</big></big></big>
-<hr style="width: 100%; height: 2px;"><br>
-Copyright © 2011 Gary R. Van Sickle<br>
-<br>
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.3 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, no Front-Cover Texts and no Back-Cover Texts. A
-copy of the license is included in the section entitled "<a href="#GFDL">GNU Free
-Documentation License</a>".<br>
-<br>
-<big><big><big>Table of Contents<br>
-<span class=""></span></big></big></big>
-<hr style="width: 100%; height: 2px;"><br>
-<br>
-<big><big><big> </big></big></big>
-<ul class="readonly" id="mozToc"><!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><li><a href="#mozTocId488084">CoFlo</a></li><li><a href="#mozTocId57560">Audience
-</a></li><li><a href="#mozTocId469110">Obtaining CoFlo</a></li><li><a href="#mozTocId462954">Installation
-</a><ul><li><a href="#mozTocId789159">Supported Platforms</a></li><li><a href="#mozTocId238704">Prerequisites</a><ul><li><a href="#mozTocId69420"> Build Prerequisites</a><ul><li><a href="#mozTocId313168"> Required</a></li><li><a href="#mozTocId730131">Recommended</a></li><li><a href="#mozTocId533138"> Optional</a></li></ul></li><li><a href="#mozTocId660312">Runtime Prerequisites</a><ul><li><a href="#mozTocId632904">Required</a></li><li><a href="#mozTocId705378">Recommended</a></li></ul></li></ul></li><li><a href="#mozTocId94009"> Building and Installation
-</a><ul><li><a href="#mozTocId595724">
-  Download, Build, and Install DParser</a></li><li><a href="#mozTocId152064">Install the Boost Libraries</a></li><li><a href="#mozTocId872559">Download, Build (if necessary), and Install Graphviz</a></li><li><a href="#mozTocId413505">Configure, Build, and Install CoFlo</a></li></ul></li></ul></li><li><a href="#mozTocId696388">Using CoFlo
-</a><ul><li><a href="#mozTocId252599">Quick Start</a><ul><li><a href="#mozTocId292926">Getting CoFlo to
-Parse Your Source Code</a></li><li><a href="#mozTocId565655">Control Flow Graph
-Output</a><ul><li><a href="#mozTocId775058">PNG Control Flow Graphs, Single Function
-</a></li><li><a href="#mozTocId256025">PNG Control Flow Graphs, All Functions</a></li><li><a href="#mozTocId276001">Textual representation of Control Flow Graphs, Single Function</a></li></ul></li><li><a href="#mozTocId748357">Control Flow Graph
-Analysis</a></li></ul></li></ul></li><li><a href="#mozTocId785006">Known Issues</a></li><li><a href="#mozTocId54603">GNU Free Documentation License
-</a></li></ul>
-
-<br>
-<hr style="width: 100%; height: 2px;">
-
-<h1><a class="mozTocH1" name="mozTocId488084"></a>CoFlo</h1>
-<hr style="width: 100%; height: 2px;">CoFlo is a Free and Open Source source code analysis
-tool which generates and analyzes control flow graphs from C and C++
-source.&nbsp; CoFlo is distributed under the terms of the GNU General Public License Version 3.<br>
-<br>
-The CoFlo home page is graciously hosted by SourceForge at the following URL: <a href="http://coflo.sourceforge.net">http://coflo.sourceforge.net/</a>.<br>
-
-<h1><a class="mozTocH1" name="mozTocId57560"></a>Audience<br>
-</h1>
-<hr style="width: 100%; height: 2px;">CoFlo's ultimate target audience
-is all developers in need of a deeper inspection, analysis, and
-understanding of their C and C++ source code.&nbsp; As of this first
-alpha release however, CoFlo's target audience is early adopters who
-fit the prior description: Version 0.0.1 of CoFlo, while usable and
-arguably even useful, is very much in its early stages of
-development.&nbsp; Expect CoFlo's abilities to improve dramatically
-over the next several releases.<br>
-<h1><a class="mozTocH1" name="mozTocId469110"></a>Obtaining CoFlo<br>
-</h1>
-<hr style="width: 100%; height: 2px;">The CoFlo 0.0.1 source distribution is available from <a href="http://sourceforge.net/projects/coflo/files/">http://sourceforge.net/projects/coflo/files/</a>.&nbsp; Precompiled binaries are not available at this time.<br>
-<br>
-
-<h1><a class="mozTocH1" name="mozTocId462954"></a>Installation<br>
-</h1>
-<hr style="width: 100%; height: 2px;">The CoFlo distribution is fully
-Autoconfiscated and installs easily.&nbsp; There are few prerequisites,
-listed below, all of which also are easy to install.<br>
-<h2><a class="mozTocH2" name="mozTocId789159"></a>Supported Platforms</h2>
-CoFlo has been tested and is known to function on the following platforms:<br>
-<ul>
-  <li>Cygwin (latest version as of this writing)</li>
-  <li>Ubuntu 11.10 (both x86 and x86_64)</li>
-  <li>Fedora 15 (x86)</li>
-</ul>
-It should build and run on any POSIX platform which supports the prerequisites below.<br>
-
-<h2><a class="mozTocH2" name="mozTocId238704"></a>Prerequisites</h2>
-
-<h3><a class="mozTocH3" name="mozTocId69420"></a> Build Prerequisites</h3>
-
-<h4><a class="mozTocH4" name="mozTocId313168"></a> Required</h4>
-
-<ul>
-
-  <li>A POSIX environment<br>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1"><title>CoFlo 0.0.3 User's Manual</title>
+    
+    <meta content="Gary R. Van Sickle" name="author">
+    <meta content="User's manual for version 0.0.3 of the CoFlo program" name="description"></head><body>
     <br>
-CoFlo currently only builds on POSIX platforms.&nbsp; Primary
-development is done on Cygwin, but distributions are tested on Ubuntu
-and Fedora as well.<br>
+    <big><big><big> CoFlo 0.0.3 User's Manual<br>
+        </big></big></big>
+    <hr style="width: 100%; height: 2px;"><br>
+    Copyright © 2011 Gary R. Van Sickle<br>
     <br>
-  </li>
-  
-  <li>The <a href="http://dparser.sourceforge.net/">DParser</a> parser
-generator, version 1.26.<br>
-    <br>CoFlo
-uses DParser for some of its source parsing needs.&nbsp; Currently, the
-DParser parser generator and its library must be installed
-separately prior to building CoFlo proper.&nbsp; This simple procedure
-is detailed in the installation instructions.<br>
+    Permission is granted to copy, distribute and/or modify this
+    document
+    under the terms of the GNU Free Documentation License, Version 1.3
+    or
+    any later version published by the Free Software Foundation; with no
+    Invariant Sections, no Front-Cover Texts and no Back-Cover Texts. A
+    copy of the license is included in the section entitled "<a href="#GFDL">GNU Free
+      Documentation License</a>".<br>
     <br>
-  </li>
-  
-  <li>The <a href="http://www.boost.org/">Boost libraries</a>, version 1.42.0 or greater<br>
+    <big><big><big>Table of Contents<br>
+          <span class=""></span></big></big></big>
+    <hr style="width: 100%; height: 2px;"><br>
     <br>
-CoFlo makes extensive use of the Boost libraries, in particular:<br>
+    <big><big><big> </big></big></big>
+    <ul class="readonly" id="mozToc"><!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><li><a href="#mozTocId488084">CoFlo</a></li><li><a href="#mozTocId57560">Audience
+    </a></li><li><a href="#mozTocId469110">Obtaining CoFlo
+    </a></li><li><a href="#mozTocId462954">Installation
+    </a><ul><li><a href="#mozTocId789159">Supported
+      Platforms</a></li><li><a href="#mozTocId238704">Prerequisites</a><ul><li><a href="#mozTocId69420"> Build
+      Prerequisites</a><ul><li><a href="#mozTocId313168"> Required</a></li><li><a href="#mozTocId730131">Recommended</a></li><li><a href="#mozTocId533138"> Optional</a></li></ul></li><li><a href="#mozTocId660312">Runtime
+      Prerequisites</a><ul><li><a href="#mozTocId632904">Required</a></li><li><a href="#mozTocId705378">Recommended</a></li></ul></li></ul></li><li><a href="#mozTocId94009"> Building and
+      Installation
+    </a><ul><li><a href="#mozTocId595724"> Download, Build,
+      and Install DParser</a></li><li><a href="#mozTocId152064">Install the Boost
+      Libraries</a><ul><li><a href="#mozTocId525374">If Pre-Built Boost Libraries Are Not Available</a></li></ul></li><li><a href="#mozTocId872559">Download, Build
+      (if necessary), and Install Graphviz</a></li><li><a href="#mozTocId413505">Configure, Build,
+      and Install CoFlo</a></li></ul></li></ul></li><li><a href="#mozTocId696388">Using CoFlo
+    </a><ul><li><a href="#mozTocId252599">Quick Start</a><ul><li><a href="#mozTocId292926">Getting CoFlo to
+      Parse Your Source Code</a></li><li><a href="#mozTocId565655">Control Flow Graph
+      Output</a><ul><li><a href="#mozTocId775058">PNG Control Flow
+      Graphs, Single Function
+    </a></li><li><a href="#mozTocId256025">PNG Control Flow
+      Graphs, All Functions</a></li><li><a href="#mozTocId276001">Textual
+      representation of Control Flow Graphs, Single Function</a></li></ul></li><li><a href="#mozTocId748357">Control Flow Graph
+      Analysis</a></li></ul></li></ul></li><li><a href="#mozTocId785006">Known Issues</a></li><li><a href="#mozTocId54603">GNU
+      Free Documentation License
+    </a></li></ul>
     <br>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a class="mozTocH1" name="mozTocId488084"></a>CoFlo</h1>
+    <hr style="width: 100%; height: 2px;">CoFlo is a Free and Open
+    Source source code analysis
+    tool which generates and analyzes control flow graphs from C and C++
+    source.&nbsp; CoFlo is distributed under the terms of the GNU
+    General Public License Version 3.<br>
+    <br>
+    The CoFlo home page is graciously hosted by SourceForge at the
+    following URL: <a href="http://coflo.sourceforge.net">http://coflo.sourceforge.net/</a>.<br>
+    <h1><a class="mozTocH1" name="mozTocId57560"></a>Audience<br>
+    </h1>
+    <hr style="width: 100%; height: 2px;">CoFlo's ultimate target
+    audience
+    is all developers in need of a deeper inspection, analysis, and
+    understanding of their C and C++ source code.&nbsp; As of this
+    alpha release however, CoFlo's target audience is early adopters who
+    fit the prior description: Version 0.0.3 of CoFlo, while usable and
+    arguably even useful, is very much in its early stages of
+    development.&nbsp; Expect CoFlo's abilities to improve dramatically
+    over the next several releases.<br>
+    <h1><a class="mozTocH1" name="mozTocId469110"></a>Obtaining CoFlo<br>
+    </h1>
+    <hr style="width: 100%; height: 2px;">The CoFlo 0.0.3 source
+    distribution is available from <a href="http://sourceforge.net/projects/coflo/files/">http://sourceforge.net/projects/coflo/files/</a>.&nbsp;
+    Precompiled binaries are not available at this time.<br>
+    <br>
+    <h1><a class="mozTocH1" name="mozTocId462954"></a>Installation<br>
+    </h1>
+    <hr style="width: 100%; height: 2px;">The CoFlo distribution is
+    fully
+    Autoconfiscated and installs easily.&nbsp; There are few
+    prerequisites,
+    listed below, all of which also are easy to install.<br>
+    <h2><a class="mozTocH2" name="mozTocId789159"></a>Supported
+      Platforms</h2>
+    CoFlo has been tested and is known to function on the following
+    platforms:<br>
     <ul>
-      <li>The <a href="http://www.boost.org/doc/libs/1_48_0/libs/graph/doc/index.html">Boost Graph Library</a></li>
-      <li><a href="http://www.boost.org/doc/libs/1_48_0/libs/regex/doc/html/index.html">Boost.Regex</a></li>
-      <li><a href="http://www.boost.org/doc/libs/1_48_0/doc/html/program_options.html">Boost.Program_options</a></li>
-      <li><a href="http://www.boost.org/doc/libs/1_48_0/libs/filesystem/v3/doc/index.htm">Boost.Filesystem</a><br>
+      <li>Cygwin (latest version as of this writing)</li>
+      <li>Ubuntu 11.10 (both x86 and x86_64)</li>
+      <li>Fedora 15 (x86)</li>
+    </ul>
+    It should build and run on any POSIX platform which supports the
+    prerequisites below.<br>
+    <h2><a class="mozTocH2" name="mozTocId238704"></a>Prerequisites</h2>
+    <h3><a class="mozTocH3" name="mozTocId69420"></a> Build
+      Prerequisites</h3>
+    <h4><a class="mozTocH4" name="mozTocId313168"></a> Required</h4>
+    <ul>
+      <li>A POSIX environment<br>
+        <br>
+        CoFlo currently only builds on POSIX platforms.&nbsp; Primary
+        development is done on Cygwin, but distributions are tested on
+        Ubuntu, Fedora, and openSUSE as well.<br>
+        <br>
+      </li>
+      <li>The <a href="http://dparser.sourceforge.net/">DParser</a>
+        parser
+        generator, version 1.26.<br>
+        <br>
+        CoFlo
+        uses DParser for some of its source parsing needs.&nbsp;
+        Currently, the
+        DParser parser generator and its library must be installed
+        separately prior to building CoFlo proper.&nbsp; This simple
+        procedure
+        is detailed in the installation instructions.<br>
+        <br>
+      </li>
+      
+  <li>The <a href="http://www.boost.org/">Boost libraries</a>,
+        version 1.46.1 or greater (1.47.0 or greater recommended).<br>
+        <br>
+        CoFlo makes extensive use of the Boost libraries, in particular:<br>
+        <br>
+        <ul>
+          <li>The <a href="http://www.boost.org/doc/libs/1_48_0/libs/graph/doc/index.html">Boost
+              Graph Library</a></li>
+          <li><a href="http://www.boost.org/doc/libs/1_48_0/libs/regex/doc/html/index.html">Boost.Regex</a></li>
+          <li><a href="http://www.boost.org/doc/libs/1_48_0/doc/html/program_options.html">Boost.Program_options</a></li>
+          <li><a href="http://www.boost.org/doc/libs/1_48_0/libs/filesystem/v3/doc/index.htm">Boost.Filesystem</a><br>
+          </li>
+        </ul>
+        <br>Most
+currently supported platforms provide suitable Boost packages through
+their respective package managers.&nbsp; For those that don't, a recent
+version of Boost must be built and installed as described in XXXXX.<br>
+    <br>
+Note that there is a <a href="https://svn.boost.org/trac/boost/ticket/4688">bug in Boost.Filesystem prior to 1.47.0</a>
+which causes an exception to be thrown if the current locale as
+specified in the LANG environment variable is anything other than
+"C".&nbsp; For that reason, Boost 1.47.0 or greater is recommended.<br>
+      </li>
+
+    </ul>
+    <h4><a class="mozTocH4" name="mozTocId730131"></a>Recommended</h4>
+    <ul>
+      <li><a href="http://www.graphviz.org/">Graphviz</a> 2.26.3 or
+        later.<br>
+        <br>
+        While not required for the build itself, CoFlo's configure
+        script
+        checks for dot at configure-time and will use the dot it finds
+        as the default
+        when generating graphical control flow graphs.<br>
       </li>
     </ul>
-<br>
-All currently supported platforms provide suitable Boost packages through their respective package managers.<br>
-  </li>
-</ul>
-<h4><a class="mozTocH4" name="mozTocId730131"></a>Recommended</h4>
-<ul>
-
-  <li><a href="http://www.graphviz.org/">Graphviz</a> 2.26.3 or later.<br>
+    <h4><a class="mozTocH4" name="mozTocId533138"></a> Optional</h4>
+    <ul>
+      <li>If you wish to generate Doxygen documentation of the source
+        code, you must have <a href="http://www.stack.nl/%7Edimitri/doxygen/">Doxygen</a> and
+        the <a href="http://www.graphviz.org/">Graphviz</a> dot program
+        installed.<br>
+      </li>
+    </ul>
+    <h3><a class="mozTocH3" name="mozTocId660312"></a>Runtime
+      Prerequisites</h3>
+    <h4><a class="mozTocH4" name="mozTocId632904"></a>Required</h4>
+    <dl>
+    </dl>
+    <ul>
+      <li><a href="http://gcc.gnu.org/">GCC</a> 4.5.0 or later.<br>
+        <br>
+        Currently, CoFlo uses GCC for both preprocessing and
+        decomposition of
+        the input program into three-address code.&nbsp; Versions
+        earlier than 4.5.0 do
+        not provide access to the latter feature.<br>
+      </li>
+    </ul>
+    <h4><a class="mozTocH4" name="mozTocId705378"></a>Recommended</h4>
+    <dl>
+    </dl>
+    <ul>
+      <li>Graphviz 2.26.3 or later<br>
+        <br>
+        The <a href="http://www.graphviz.org/">Graphviz</a> dot program
+        is required if you wish to generate graphical
+        control flow graphs.<br>
+      </li>
+    </ul>
+    <h2><a class="mozTocH2" name="mozTocId94009"></a> Building and
+      Installation<br>
+    </h2>
+    <h3><a class="mozTocH3" name="mozTocId595724"></a> Download, Build,
+      and Install DParser</h3>
+    <a href="http://dparser.sourceforge.net/">DParser</a> builds and
+    installs easily.&nbsp; Download the tarball from <a href="http://sourceforge.net/projects/dparser/files/">here</a>,
+    untar it, and do:<br>
     <br>
-While not required for the build itself, CoFlo's configure script
-checks for dot at configure-time and will use the dot it finds as the default
-when generating graphical control flow graphs.<br>
-
-  </li>
-  
-</ul>
-
-
-<h4><a class="mozTocH4" name="mozTocId533138"></a> Optional</h4>
-<ul>
-  <li>If you wish to generate Doxygen documentation of the source code, you must have <a href="http://www.stack.nl/%7Edimitri/doxygen/">Doxygen</a> and the <a href="http://www.graphviz.org/">Graphviz</a> dot program installed.<br>
-
-
-  </li>
-</ul>
-<h3><a class="mozTocH3" name="mozTocId660312"></a>Runtime Prerequisites</h3>
-
-<h4><a class="mozTocH4" name="mozTocId632904"></a>Required</h4>
-
-<dl>
-
-</dl>
-
-<ul>
-
-  <li><a href="http://gcc.gnu.org/">GCC</a> 4.5.2 or later.<br>
-    <br>
-Currently, CoFlo uses GCC for both preprocessing and decomposition of
-the input program into three-address code.&nbsp; Versions earlier than 4.x do
-not provide access to the latter feature.<br>
-  </li>
-</ul>
-
-<h4><a class="mozTocH4" name="mozTocId705378"></a>Recommended</h4>
-
-<dl>
-
-</dl>
-
-<ul>
-
-  <li>Graphviz 2.26.3 or later<br>
-    <br>
-The <a href="http://www.graphviz.org/">Graphviz</a> dot program is required if you wish to generate graphical
-control flow graphs.<br>
-  </li>
-</ul>
-
-<h2><a class="mozTocH2" name="mozTocId94009"></a> Building and Installation<br>
-</h2>
-<h3><a class="mozTocH3" name="mozTocId595724"></a>
-  Download, Build, and Install DParser</h3><a href="http://dparser.sourceforge.net/">DParser</a> builds and installs easily.&nbsp; Download the tarball from <a href="http://sourceforge.net/projects/dparser/files/">here</a>, untar it, and do:<br>
+    <pre style="margin-left: 40px;">make<br>make install<br></pre>
+    You may need to "sudo" in for the install step.&nbsp; Note that
+    DParser currently has no configure step.<br>
+    <h3><a class="mozTocH3" name="mozTocId152064"></a>Install the Boost
+      Libraries</h3>
+<h4>If Pre-Built Boost Libraries Are Available</h4>
+Most supported platforms have a suitable Boost developer package available
+    through
+    their respective package managers.&nbsp; This is the easiest way to get Boost, so install the latest
+    available
+    version.<br>
+<h4><a class="mozTocH4" name="mozTocId525374"></a>If Pre-Built Boost Libraries Are Not Available</h4>
+If your platform does not have a suitable pre-built Boost developer
+package available, you must build and install it.&nbsp; This is
+relatively simple, but there are a few important details that are not
+obvious nor documented in the Boost Getting Started guide.&nbsp; You
+should have no trouble if you follow these step-by-step instructions:<br>
 <br>
-
-<pre style="margin-left: 40px;">make<br>make install<br></pre>You may need to "sudo" in for the install step.&nbsp; Note that DParser currently has no configure step.<br>
-
-<h3><a class="mozTocH3" name="mozTocId152064"></a>Install the Boost Libraries</h3>
-All supported platforms have a suitable Boost package available through
-their respective package managers.&nbsp; Install the latest available
-version of the Boost libraries.<br>
-<h3><a class="mozTocH3" name="mozTocId872559"></a>Download, Build (if necessary), and Install Graphviz</h3>
-It's probable that your platform has a Graphviz package available via
-its standard package distribution methods (both Ubuntu and Fedora do as
-of this writing).&nbsp; While Cygwin does not have a "Cygwin native"
-Graphviz available, the Windows-native version downloadable from <a href="http://www.graphviz.org/">the Graphviz site here</a>
-works fine.&nbsp; Download and install one of these pre-compiled
-binaries if possible.&nbsp; If not possible, follow the instructions on
-the Graphviz site on how to download, build, and install Graphviz from
-source.<br>
-<h3><a class="mozTocH3" name="mozTocId413505"></a>Configure, Build, and Install CoFlo</h3>
-Once the above prerequisite packages are installed properly, the CoFlo
-distribution should build and install without any problems with the
-standard:<br>
-<br>
-
-
-<pre style="margin-left: 40px;">./configure<br>make<br>make install</pre>
-The CoFlo package has a small test suite.&nbsp; After the "make" and
-before the "make install", it would be prudent to run this test suite
-with a "make check".&nbsp; There should be no unexpected failures
-reported by the test suite (there will however be a few expected
-failures).<br>
-<br>
-Please note that a checkout of the source from Subversion will not
-build as easily, since the Autoconf/Automake-generated scripts are not
-maintained in the source repository.&nbsp; Please use the distribution
-tarballs.<br>
-<ul>
-  
-  
-</ul>
-
-
-
-
-<h1><a class="mozTocH1" name="mozTocId696388"></a>Using CoFlo<br>
-</h1>
-<hr style="width: 100%; height: 2px;"><h2><a class="mozTocH2" name="mozTocId252599"></a><a name="QUICK_START"></a>Quick Start</h2>CoFlo
-ships with a few simple test files which you can use to get a feel for
-using CoFlo with the minimum amount of effort.&nbsp; These files are
-located in the &lt;coflo_root&gt;/tests directory.&nbsp; Once you've
-built CoFlo, point it at one of these files like so:<br>
-<br>
-<pre>./src/coflo.exe ../tests/compound_condition_1.c --cfg=main</pre>
-This will generate the following textual representation of the control flow graph:<br>
-<br>
-<pre>Using GCC version: 4.5.3<br>Parsing "../tests/loop_test_1.c"...<br>Building Functions...<br>Linking function calls...<br>WARNING: Unresolved function calls:<br>dummy<br>printf<br>Control Flow Graph of function main:<br>[<br>    printf( [../tests/loop_test_1.c : 30] &amp;[../tests/loop_test_1.c : 30] "Start.\n"[0] ) &lt;../tests/loop_test_1.c:30:8&gt;<br>    if() &lt;../tests/loop_test_1.c:32:7&gt;<br>    {<br>        printf( [../tests/loop_test_1.c : 34] &amp;[../tests/loop_test_1.c : 34] "i = %d\n"[0], i ) &lt;../tests/loop_test_1.c:34:9&gt;<br>    }<br>    if() &lt;../tests/loop_test_1.c:37:4&gt;<br>    {<br>        if() &lt;../tests/loop_test_1.c:39:5&gt;<br>        {<br>            printf( [../tests/loop_test_1.c : 42] &amp;[../tests/loop_test_1.c : 42] "i = %d\n"[0], i ) &lt;../tests/loop_test_1.c:42:10&gt;<br>            if() &lt;../tests/loop_test_1.c:44:6&gt;<br>            {<br>                printf( [../tests/loop_test_1.c : 46] &amp;[../tests/loop_test_1.c : 46] "here\n"[0] ) &lt;../tests/loop_test_1.c:46:11&gt;<br>            }<br>        }<br>    }<br>    printf( [../tests/loop_test_1.c : 51] &amp;[../tests/loop_test_1.c : 51] "Finished.\n"[0] ) &lt;../tests/loop_test_1.c:51:8&gt;<br>    dummy( 1, 3, 4, 5, [../tests/loop_test_1.c : 53] &amp;[../tests/loop_test_1.c : 53] "hello"[0] ) &lt;../tests/loop_test_1.c:53:7&gt;<br>]<br></pre>
-Other styles of control flow graph output, such as PNG renderings of
-the graph, as well as analyses CoFlo can perform, are described below.<br>
-
-
-
-<h3><a class="mozTocH3" name="mozTocId292926"></a>Getting CoFlo to
-Parse Your Source Code</h3>CoFlo
-must be able to fully parse the source files you give it, which means
-that any necessary command-line defines and include paths must be
-specified.&nbsp; Do this by passing -D and -I parameters as necessary
-on the command line.&nbsp; It is best to write a small shell script to
-for this purpose, like this one which allows CoFlo to process the
-main.c file of GNU Make 3.82 (once the GNU Make source tree has been configured):<br>
-<br>
-<pre><code>#! /bin/sh<br><br># Create a subdirectory in the root of the make-3.82 source tree and run this script from it.<br><br>TOP_SRCDIR="..";<br><br>prefix=/usr/local<br>datadir=/usr/local/share<br>localedir="${datadir}/locale"<br>libdir=${prefix}/lib<br><br>DEFAULT_INCLUDES="-I. -I${TOP_SRCDIR}"<br>DEFS="-DLOCALEDIR='\"'${localedir}'\"' -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\" -DHAVE_CONFIG_H"<br><br># Run CoFlo.<br>coflo ${DEFS} ${DEFAULT_INCLUDES} ${INCLUDES} ${TOP_SRCDIR}/main.c -O html_out/</code><br></pre>
-Note that currently it is not possible to specify different -D or -I
-options for different source files in a single invocation of CoFlo.<br>
-
-<h3><a class="mozTocH3" name="mozTocId565655"></a>Control Flow Graph
-Output</h3>
-
-<h4><a class="mozTocH4" name="mozTocId775058"></a>PNG Control Flow Graphs, Single Function<br>
-</h4>
-
-
-If you have the Graphviz dot program installed, you can generate
-control flow diagrams in PNG format.&nbsp; For example, the following command line:<br>
-
-<br>
-<pre>./src/coflo.exe ../tests/loop_test_1.c --cfg=main --cfg-fmt=img -o loop_test_1.png</pre>
-...turns this code:<br>
-<pre>int main(int argc, char *argv[])<br>{<br>	int i = 6;<br><br>	printf("Start.\n");<br><br>	while(argc &gt; 6)<br>	{<br>		printf("i = %d\n", i);<br>	}<br><br>	if(argc &gt; 1)<br>	{<br>		if(i&gt;0)<br>		{<br>			i--;<br>			printf("i = %d\n", i);<br><br>			if(i+argc &gt; 7)<br>			{<br>				printf("here\n");<br>			}<br>		}<br>	}<br><br>	printf("Finished.\n");<br>	<br>	dummy(1,3,4,5,"hello");<br><br>	return 0;<br>}<br></pre>
-...into this control flow graph:<br>
-<br>
-<div style="text-align: center;"><img style="width: 821px; height: 3121px;" alt="PNG control flow graph of loop_test_1.png" src="img/loop_test_1.png"><br>
-</div>
-
-
-<br>
-
-Note a few things about this graph:<br>
 <ol>
-  <li>Each node in the graph corresponds to an expression or statement
-in the program after it has been transformed by gcc into a three-address code form.&nbsp; There is generally not a direct
-1-to-1 correspondence between this and the original program text.&nbsp;
-For example, the original code contained no explicit GOTOs, while the graph contains
-two.</li>
-  <li>The
-text in each node has a simple 2-line format.&nbsp; The first
-line indicates the node number followed by what the node represents,
-and the second line indicates its location in the original program
-text.&nbsp; The locations are currently extracted from the
-three-address code representation generated by GCC, which doesn't
-always provide such
-information, so some of the nodes indicate "UNKNOWN:0", i.e. their
-location could not be determined.<br>
+  <li>Download the latest Boost source distribution from <a href="http://www.boost.org/users/download/">here</a>.</li>
+  <li>Extract it into a suitable build directory.</li>
+  <li>cd into the directory you extracted Boost into.<br>
   </li>
-  <li>The elements in red are function calls which CoFlo was unable to
-link to their targets.&nbsp; This generally indicates that the
-translation unit defining the called function was not passed on the
-command line.</li>
-  <li>The nodes marked "PLACEHOLDER" are really three-address code
-expressions.&nbsp; A near-future release of CoFlo will handle and
-display these in a more appropriate manner.</li>
-  <li>Back edges in the graph are represented as dashed lines.&nbsp;
-The while loop in the above code induces one such back edge in the
-graph, as can be seen between nodes 6 and 7.</li>
-  <li>To maintain navigability of the graph for certain algorithms,
-CoFlo introduces Impossible edges during its back edge detection
-phase.&nbsp; One such edge can be seen between nodes 6 and 9 above.<br>
+  <li>Configure Boost with the following command line:<br>
+    <br>
+    <pre>./bootstrap.sh --libdir=/usr/local/&lt;lib_or_lib64&gt; --with-libraries="system,filesystem,graph,program_options,regex"</pre>
+    <br>
+Where "&lt;lib_or_lib64&gt;" is either "lib" or "lib64", depending on your platform.<br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <th style="vertical-align: top;">Platform<br>
+
+          </th>
+
+          <th style="vertical-align: top;">Value of &lt;lib_or_lib64&gt;<br>
+
+          </th>
+
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">All 32-bit platforms<br>
+          </td>
+          <td style="vertical-align: top;">lib<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;">Ubuntu<br>
+          </td>
+          <td style="vertical-align: top;">lib<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">Fedora<br>
+          </td>
+          <td style="vertical-align: top;">???<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">openSUSE<br>
+          </td>
+          <td style="vertical-align: top;">lib64<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>The
+libraries listed after the "--with-libraries" argument are only those
+required by CoFlo.&nbsp; Feel free to add more libraries to this list
+if you so choose.<br>
   </li>
-  <li>CoFlo
-does not yet perform much simplification of the control
-flow graph.&nbsp; For example, all the gcc-generated jump labels (i.e.
-the
-"&lt;D.nnnn&gt;" nodes) and the GOTOs in the above control flow graph
-could potentially be eliminated with no loss of information, markedly
-increasing the
-readability of the graph.&nbsp; Again, this will be addressed in a
-near-future release.<br>
+  <li><br>
   </li>
 </ol>
-<h4><a class="mozTocH4" name="mozTocId256025"></a>PNG Control Flow Graphs, All Functions</h4>
-CoFlo can also generate the control flow graphs of all functions in all
-the source files it is given and put them on an HTML page.&nbsp; Simply
-point it at a directory in which to put the output, like so:<br>
-<br>
-<pre>./src/coflo ../tests/test_source_file_1.c ../tests/test_source_file_2.c -O test_html</pre>
-Be prepared for a lot of large PNGs!<br>
-<h4><a class="mozTocH4" name="mozTocId276001"></a>Textual representation of Control Flow Graphs, Single Function</h4>
-As shown in the <a href="#QUICK_START">Quick Start</a> section above,
-CoFlo can also print the control flow graph in a textual format.&nbsp;
-Perhaps surprisingly, properly formatting a control flow graph as
-indented text is quite difficult, and CoFlo is not yet able to format
-certain constructs correctly.&nbsp; Expect to see some oddly-formatted
-textual control flow graphs until this is rectified.<br>
-<br>
 
-
-<h3><a class="mozTocH3" name="mozTocId748357"></a>Control Flow Graph
-Analysis</h3>CoFlo
-is also capable of performing some analyses of the control flow
-graph.&nbsp; As of this release, just one analysis is available,
-inter-function reachability.&nbsp; This works across translation units
-and through any number of intermediate calls.&nbsp; Here is an example:<br>
+    <h3><a class="mozTocH3" name="mozTocId872559"></a>Download, Build
+      (if necessary), and Install Graphviz</h3>
+    It's probable that your platform has a Graphviz package available
+    via
+    its standard package distribution methods (both Ubuntu and Fedora do
+    as
+    of this writing).&nbsp; While Cygwin does not have a "Cygwin native"
+    Graphviz available, the Windows-native version downloadable from <a href="http://www.graphviz.org/">the Graphviz site here</a>
+    works well with CoFlo.&nbsp; Download and install one of these pre-compiled
+    binaries if possible.&nbsp; If not possible, follow the instructions
+    on
+    the Graphviz site on how to download, build, and install Graphviz
+    from
+    source.<br>
+    <h3><a class="mozTocH3" name="mozTocId413505"></a>Configure, Build,
+      and Install CoFlo</h3>
+    Once the above prerequisite packages are installed properly, the
+    CoFlo
+    distribution should build and install without any problems with the
+    standard:<br>
+    <br>
+    <pre style="margin-left: 40px;">./configure --with-boost=??????<br>make<br>make install</pre>
+    The CoFlo package has a small test suite.&nbsp; After the "make" and
+    before the "make install", it would be prudent to run this test
+    suite
+    with a "make check".&nbsp; There should be no unexpected failures
+    reported by the test suite (there will however be a few expected
+    failures).<br>
+    <br>
+    Please note that a checkout of the source from Subversion will not
+    build as easily, since the Autoconf/Automake-generated scripts are
+    not
+    maintained in the source repository.&nbsp; Please use the
+    distribution
+    tarballs.<br>
+    <ul>
+    </ul>
+    <h1><a class="mozTocH1" name="mozTocId696388"></a>Using CoFlo<br>
+    </h1>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a class="mozTocH2" name="mozTocId252599"></a><a name="QUICK_START"></a>Quick Start</h2>
+    CoFlo
+    ships with a few simple test files which you can use to get a feel
+    for
+    using CoFlo with the minimum amount of effort.&nbsp; These files are
+    located in the &lt;coflo_root&gt;/tests directory.&nbsp; Once you've
+    built CoFlo, point it at one of these files like so:<br>
+    <br>
+    <pre>./src/coflo.exe ../tests/compound_condition_1.c --cfg=main</pre>
+    This will generate the following textual representation of the
+    control flow graph:<br>
+    <br>
+    <pre>Using GCC version: 4.5.3<br>Parsing "../tests/loop_test_1.c"...<br>Building Functions...<br>Linking function calls...<br>WARNING: Unresolved function calls:<br>dummy<br>printf<br>Control Flow Graph of function main:<br>[<br>    printf( [../tests/loop_test_1.c : 30] &amp;[../tests/loop_test_1.c : 30] "Start.\n"[0] ) &lt;../tests/loop_test_1.c:30:8&gt;<br>    if() &lt;../tests/loop_test_1.c:32:7&gt;<br>    {<br>        printf( [../tests/loop_test_1.c : 34] &amp;[../tests/loop_test_1.c : 34] "i = %d\n"[0], i ) &lt;../tests/loop_test_1.c:34:9&gt;<br>    }<br>    if() &lt;../tests/loop_test_1.c:37:4&gt;<br>    {<br>        if() &lt;../tests/loop_test_1.c:39:5&gt;<br>        {<br>            printf( [../tests/loop_test_1.c : 42] &amp;[../tests/loop_test_1.c : 42] "i = %d\n"[0], i ) &lt;../tests/loop_test_1.c:42:10&gt;<br>            if() &lt;../tests/loop_test_1.c:44:6&gt;<br>            {<br>                printf( [../tests/loop_test_1.c : 46] &amp;[../tests/loop_test_1.c : 46] "here\n"[0] ) &lt;../tests/loop_test_1.c:46:11&gt;<br>            }<br>        }<br>    }<br>    printf( [../tests/loop_test_1.c : 51] &amp;[../tests/loop_test_1.c : 51] "Finished.\n"[0] ) &lt;../tests/loop_test_1.c:51:8&gt;<br>    dummy( 1, 3, 4, 5, [../tests/loop_test_1.c : 53] &amp;[../tests/loop_test_1.c : 53] "hello"[0] ) &lt;../tests/loop_test_1.c:53:7&gt;<br>]<br></pre>
+    Other styles of control flow graph output, such as PNG renderings of
+    the graph, as well as analyses CoFlo can perform, are described
+    below.<br>
+    <h3><a class="mozTocH3" name="mozTocId292926"></a>Getting CoFlo to
+      Parse Your Source Code</h3>
+    CoFlo
+    must be able to fully parse the source files you give it, which
+    means
+    that any necessary command-line defines and include paths must be
+    specified.&nbsp; Do this by passing -D and -I parameters as
+    necessary
+    on the command line.&nbsp; It is best to write a small shell script
+    to
+    for this purpose, like this one which allows CoFlo to process the
+    main.c file of GNU Make 3.82 (once the GNU Make source tree has been
+    configured):<br>
+    <br>
+    <pre><code>#! /bin/sh<br><br># Create a subdirectory in the root of the make-3.82 source tree and run this script from it.<br><br>TOP_SRCDIR="..";<br><br>prefix=/usr/local<br>datadir=/usr/local/share<br>localedir="${datadir}/locale"<br>libdir=${prefix}/lib<br><br>DEFAULT_INCLUDES="-I. -I${TOP_SRCDIR}"<br>DEFS="-DLOCALEDIR='\"'${localedir}'\"' -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\" -DHAVE_CONFIG_H"<br><br># Run CoFlo.<br>coflo ${DEFS} ${DEFAULT_INCLUDES} ${INCLUDES} ${TOP_SRCDIR}/main.c -O html_out/</code><br></pre>
+    Note that currently it is not possible to specify different -D or -I
+    options for different source files in a single invocation of CoFlo.<br>
+    <h3><a class="mozTocH3" name="mozTocId565655"></a>Control Flow Graph
+      Output</h3>
+    <h4><a class="mozTocH4" name="mozTocId775058"></a>PNG Control Flow
+      Graphs, Single Function<br>
+    </h4>
+    If you have the Graphviz dot program installed, you can generate
+    control flow diagrams in PNG format.&nbsp; For example, the
+    following command line:<br>
+    <br>
+    <pre>./src/coflo.exe ../tests/loop_test_1.c --cfg=main --cfg-fmt=img -o loop_test_1.png</pre>
+    ...turns this code:<br>
+    <pre>int main(int argc, char *argv[])<br>{<br>	int i = 6;<br><br>	printf("Start.\n");<br><br>	while(argc &gt; 6)<br>	{<br>		printf("i = %d\n", i);<br>	}<br><br>	if(argc &gt; 1)<br>	{<br>		if(i&gt;0)<br>		{<br>			i--;<br>			printf("i = %d\n", i);<br><br>			if(i+argc &gt; 7)<br>			{<br>				printf("here\n");<br>			}<br>		}<br>	}<br><br>	printf("Finished.\n");<br>	<br>	dummy(1,3,4,5,"hello");<br><br>	return 0;<br>}<br></pre>
+    ...into this control flow graph:<br>
+    <br>
+    <div style="text-align: center;"><img style="width: 821px; height: 3121px;" alt="PNG control flow graph of loop_test_1.png" src="img/loop_test_1.png"><br>
+    </div>
+    <br>
+    Note a few things about this graph:<br>
+    <ol>
+      <li>Each node in the graph corresponds to an expression or
+        statement
+        in the program after it has been transformed by gcc into a
+        three-address code form.&nbsp; There is generally not a direct
+        1-to-1 correspondence between this and the original program
+        text.&nbsp;
+        For example, the original code contained no explicit GOTOs,
+        while the graph contains
+        two.</li>
+      <li>The
+        text in each node has a simple 2-line format.&nbsp; The first
+        line indicates the node number followed by what the node
+        represents,
+        and the second line indicates its location in the original
+        program
+        text.&nbsp; The locations are currently extracted from the
+        three-address code representation generated by GCC, which
+        doesn't
+        always provide such
+        information, so some of the nodes indicate "UNKNOWN:0", i.e.
+        their
+        location could not be determined.<br>
+      </li>
+      <li>The elements in red are function calls which CoFlo was unable
+        to
+        link to their targets.&nbsp; This generally indicates that the
+        translation unit defining the called function was not passed on
+        the
+        command line.</li>
+      <li>The nodes marked "PLACEHOLDER" are really three-address code
+        expressions.&nbsp; A near-future release of CoFlo will handle
+        and
+        display these in a more appropriate manner.</li>
+      <li>Back edges in the graph are represented as dashed lines.&nbsp;
+        The while loop in the above code induces one such back edge in
+        the
+        graph, as can be seen between nodes 6 and 7.</li>
+      <li>To maintain navigability of the graph for certain algorithms,
+        CoFlo introduces Impossible edges during its back edge detection
+        phase.&nbsp; One such edge can be seen between nodes 6 and 9
+        above.<br>
+      </li>
+      <li>CoFlo
+        does not yet perform much simplification of the control
+        flow graph.&nbsp; For example, all the gcc-generated jump labels
+        (i.e.
+        the
+        "&lt;D.nnnn&gt;" nodes) and the GOTOs in the above control flow
+        graph
+        could potentially be eliminated with no loss of information,
+        markedly
+        increasing the
+        readability of the graph.&nbsp; Again, this will be addressed in
+        a
+        near-future release.<br>
+      </li>
+    </ol>
+    <h4><a class="mozTocH4" name="mozTocId256025"></a>PNG Control Flow
+      Graphs, All Functions</h4>
+    CoFlo can also generate the control flow graphs of all functions in
+    all
+    the source files it is given and put them on an HTML page.&nbsp;
+    Simply
+    point it at a directory in which to put the output, like so:<br>
+    <br>
+    <pre>./src/coflo ../tests/test_source_file_1.c ../tests/test_source_file_2.c -O test_html</pre>
+    Be prepared for a lot of large PNGs!<br>
+    <h4><a class="mozTocH4" name="mozTocId276001"></a>Textual
+      representation of Control Flow Graphs, Single Function</h4>
+    As shown in the <a href="#QUICK_START">Quick Start</a> section
+    above,
+    CoFlo can also print the control flow graph in a textual
+    format.&nbsp;
+    Perhaps surprisingly, properly formatting a control flow graph as
+    indented text is quite difficult, and CoFlo is not yet able to
+    format
+    certain constructs correctly.&nbsp; Expect to see some
+    oddly-formatted
+    textual control flow graphs until this is rectified.<br>
+    <br>
+    <h3><a class="mozTocH3" name="mozTocId748357"></a>Control Flow Graph
+      Analysis</h3>
+    CoFlo
+    is also capable of performing some analyses of the control flow
+    graph.&nbsp; As of this release, just one analysis is available,
+    inter-function reachability.&nbsp; This works across translation
+    units
+    and through any number of intermediate calls.&nbsp; Here is an
+    example:<br>
+    <br>
+    <pre>./src/coflo.exe ../tests/test_source_file_1.c ../tests/test_source_file_2.c --constraint="main() -x last_function_called_by_main()"<br><br>Using GCC version: 4.5.3<br>Parsing "../tests/test_source_file_1.c"...<br>Building Functions...<br>Parsing "../tests/test_source_file_2.c"...<br>Building Functions...<br>Linking function calls...<br>WARNING: Unresolved function calls:<br>a_function_ptr<br>do_that<br>do_this<br>exit<br>printf<br>pthread_mutex_lock<br>pthread_mutex_unlock<br>INFO: Adding constraints...<br>INFO: Adding constraint: f1() -x f2().<br>../tests/test_source_file_1.c: In function main:<br>../tests/test_source_file_1.c:180:30: warning: constraint violation: path exists in control flow graph to last_function_called_by_main( 88 )<br>../tests/test_source_file_1.c:180:30: warning: violating path follows<br>../tests/test_source_file_1.c:180:30: warning:     last_function_called_by_main( 88 )<br></pre>
+    Note that this is not function-to-function-<span style="font-style: italic;">call</span>
+    reachability, but rather function-entry-to-function-entry
+    reachability
+    - CoFlo must be able to resolve the function calls or it will not
+    detect the path.&nbsp; Note further that it is the call <span style="font-style: italic;">site</span>
+    which is reported, even though what was detected was the ENTRY node
+    of
+    the function being called.&nbsp; This is done with the idea that the
+    call site, which contains the parameters passed to the function, is
+    the
+    important thing to report.<br>
+    <h1><a class="mozTocH1" name="mozTocId785006"></a>Known Issues</h1>
+    Version 0.0.3 is an early alpha release of CoFlo, and as such there
+    are
+    more known issues than it makes sense to list here.&nbsp; These are
+    a few of
+    the major ones:
+      <br>
 <br>
-<pre>./src/coflo.exe ../tests/test_source_file_1.c ../tests/test_source_file_2.c --constraint="main() -x last_function_called_by_main()"<br><br>Using GCC version: 4.5.3<br>Parsing "../tests/test_source_file_1.c"...<br>Building Functions...<br>Parsing "../tests/test_source_file_2.c"...<br>Building Functions...<br>Linking function calls...<br>WARNING: Unresolved function calls:<br>a_function_ptr<br>do_that<br>do_this<br>exit<br>printf<br>pthread_mutex_lock<br>pthread_mutex_unlock<br>INFO: Adding constraints...<br>INFO: Adding constraint: f1() -x f2().<br>../tests/test_source_file_1.c: In function main:<br>../tests/test_source_file_1.c:180:30: warning: constraint violation: path exists in control flow graph to last_function_called_by_main( 88 )<br>../tests/test_source_file_1.c:180:30: warning: violating path follows<br>../tests/test_source_file_1.c:180:30: warning:     last_function_called_by_main( 88 )<br></pre>
-Note that this is not function-to-function-<span style="font-style: italic;">call</span>
-reachability, but rather function-entry-to-function-entry reachability
-- CoFlo must be able to resolve the function calls or it will not
-detect the path.&nbsp; Note further that it is the call <span style="font-style: italic;">site</span>
-which is reported, even though what was detected was the ENTRY node of
-the function being called.&nbsp; This is done with the idea that the
-call site, which contains the parameters passed to the function, is the
-important thing to report.<br>
-<h1><a class="mozTocH1" name="mozTocId785006"></a>Known Issues</h1>Version 0.0.1 is the first alpha release of CoFlo, and as such there are
-more known issues than it makes sense to list here.&nbsp; These are a few of
-the major ones:<br>
+<h2>Boost.Filesystem vs. non-"C" locale bug</h2>
+There is a <a href="https://svn.boost.org/trac/boost/ticket/4688">bug in Boost.Filesystem prior to 1.47.0</a>
+which causes the following exception to be thrown if the current locale as
+specified in the LANG environment variable is anything other than "C":<span style="font-family: monospace;"><br>
+<br>
+</span>
+<pre style="margin-left: 40px;">terminate called after throwing an instance of 'std::runtime_error'<br>&nbsp; what():&nbsp; locale::facet::_S_create_c_locale name not valid<br><span style="font-family: monospace;"></span>Aborted</pre>
+<span class="searchword3"></span>There are two workarounds for this issue:<br>
 <ul>
-
-  <li>Some constructs, in particular compound conditional statements which early-out, may not be formatted correctly.</li>
-  <li>Infinite loops are not yet handled correctly.&nbsp; Generally
-this will result in a function's graph containing two disjoint
-components.<br>
-  </li>
-
-  <li>Decision nodes (e.g. if() statements) do not display the condition.</li>
-  <li>While CoFlo can handle C quite well, only simple C++ can currently be
-handled.&nbsp; E.g., CoFlo 0.0.1 cannot successfully parse it's own
-main.cpp.</li>
-  <li>Redundant nodes need to be eliminated.</li>
-  <li>Expression handling needs to be improved beyond simple "placeholdering".<br>
-  </li>
-  <li>More (and more useful) analyses need to be added, e.g. function-to-function-call reachability.<br>
-  </li>
-
-
+  <li>Set "LANG=C" prior to running CoFlo.</li>
+  <li>Install Boost 1.47.0 or greater.</li>
 </ul>
-
-<h1><a class="mozTocH1" name="mozTocId54603"></a><a name="GFDL"></a>GNU Free Documentation License<br>
-</h1>
-<pre>                GNU Free Documentation License<br>                 Version 1.3, 3 November 2008<br><br><br> Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.<br>     &lt;http://fsf.org/&gt;<br> Everyone is permitted to copy and distribute verbatim copies<br> of this license document, but changing it is not allowed.<br><br>0. PREAMBLE<br><br>The purpose of this License is to make a manual, textbook, or other<br>functional and useful document "free" in the sense of freedom: to<br>assure everyone the effective freedom to copy and redistribute it,<br>with or without modifying it, either commercially or noncommercially.<br>Secondarily, this License preserves for the author and publisher a way<br>to get credit for their work, while not being considered responsible<br>for modifications made by others.<br><br>This License is a kind of "copyleft", which means that derivative<br>works of the document must themselves be free in the same sense.  It<br>complements the GNU General Public License, which is a copyleft<br>license designed for free software.<br><br>We have designed this License in order to use it for manuals for free<br>software, because free software needs free documentation: a free<br>program should come with manuals providing the same freedoms that the<br>software does.  But this License is not limited to software manuals;<br>it can be used for any textual work, regardless of subject matter or<br>whether it is published as a printed book.  We recommend this License<br>principally for works whose purpose is instruction or reference.<br><br><br>1. APPLICABILITY AND DEFINITIONS<br><br>This License applies to any manual or other work, in any medium, that<br>contains a notice placed by the copyright holder saying it can be<br>distributed under the terms of this License.  Such a notice grants a<br>world-wide, royalty-free license, unlimited in duration, to use that<br>work under the conditions stated herein.  The "Document", below,<br>refers to any such manual or work.  Any member of the public is a<br>licensee, and is addressed as "you".  You accept the license if you<br>copy, modify or distribute the work in a way requiring permission<br>under copyright law.<br><br>A "Modified Version" of the Document means any work containing the<br>Document or a portion of it, either copied verbatim, or with<br>modifications and/or translated into another language.<br><br>A "Secondary Section" is a named appendix or a front-matter section of<br>the Document that deals exclusively with the relationship of the<br>publishers or authors of the Document to the Document's overall<br>subject (or to related matters) and contains nothing that could fall<br>directly within that overall subject.  (Thus, if the Document is in<br>part a textbook of mathematics, a Secondary Section may not explain<br>any mathematics.)  The relationship could be a matter of historical<br>connection with the subject or with related matters, or of legal,<br>commercial, philosophical, ethical or political position regarding<br>them.<br><br>The "Invariant Sections" are certain Secondary Sections whose titles<br>are designated, as being those of Invariant Sections, in the notice<br>that says that the Document is released under this License.  If a<br>section does not fit the above definition of Secondary then it is not<br>allowed to be designated as Invariant.  The Document may contain zero<br>Invariant Sections.  If the Document does not identify any Invariant<br>Sections then there are none.<br><br>The "Cover Texts" are certain short passages of text that are listed,<br>as Front-Cover Texts or Back-Cover Texts, in the notice that says that<br>the Document is released under this License.  A Front-Cover Text may<br>be at most 5 words, and a Back-Cover Text may be at most 25 words.<br><br>A "Transparent" copy of the Document means a machine-readable copy,<br>represented in a format whose specification is available to the<br>general public, that is suitable for revising the document<br>straightforwardly with generic text editors or (for images composed of<br>pixels) generic paint programs or (for drawings) some widely available<br>drawing editor, and that is suitable for input to text formatters or<br>for automatic translation to a variety of formats suitable for input<br>to text formatters.  A copy made in an otherwise Transparent file<br>format whose markup, or absence of markup, has been arranged to thwart<br>or discourage subsequent modification by readers is not Transparent.<br>An image format is not Transparent if used for any substantial amount<br>of text.  A copy that is not "Transparent" is called "Opaque".<br><br>Examples of suitable formats for Transparent copies include plain<br>ASCII without markup, Texinfo input format, LaTeX input format, SGML<br>or XML using a publicly available DTD, and standard-conforming simple<br>HTML, PostScript or PDF designed for human modification.  Examples of<br>transparent image formats include PNG, XCF and JPG.  Opaque formats<br>include proprietary formats that can be read and edited only by<br>proprietary word processors, SGML or XML for which the DTD and/or<br>processing tools are not generally available, and the<br>machine-generated HTML, PostScript or PDF produced by some word<br>processors for output purposes only.<br><br>The "Title Page" means, for a printed book, the title page itself,<br>plus such following pages as are needed to hold, legibly, the material<br>this License requires to appear in the title page.  For works in<br>formats which do not have any title page as such, "Title Page" means<br>the text near the most prominent appearance of the work's title,<br>preceding the beginning of the body of the text.<br><br>The "publisher" means any person or entity that distributes copies of<br>the Document to the public.<br><br>A section "Entitled XYZ" means a named subunit of the Document whose<br>title either is precisely XYZ or contains XYZ in parentheses following<br>text that translates XYZ in another language.  (Here XYZ stands for a<br>specific section name mentioned below, such as "Acknowledgements",<br>"Dedications", "Endorsements", or "History".)  To "Preserve the Title"<br>of such a section when you modify the Document means that it remains a<br>section "Entitled XYZ" according to this definition.<br><br>The Document may include Warranty Disclaimers next to the notice which<br>states that this License applies to the Document.  These Warranty<br>Disclaimers are considered to be included by reference in this<br>License, but only as regards disclaiming warranties: any other<br>implication that these Warranty Disclaimers may have is void and has<br>no effect on the meaning of this License.<br><br>2. VERBATIM COPYING<br><br>You may copy and distribute the Document in any medium, either<br>commercially or noncommercially, provided that this License, the<br>copyright notices, and the license notice saying this License applies<br>to the Document are reproduced in all copies, and that you add no<br>other conditions whatsoever to those of this License.  You may not use<br>technical measures to obstruct or control the reading or further<br>copying of the copies you make or distribute.  However, you may accept<br>compensation in exchange for copies.  If you distribute a large enough<br>number of copies you must also follow the conditions in section 3.<br><br>You may also lend copies, under the same conditions stated above, and<br>you may publicly display copies.<br><br><br>3. COPYING IN QUANTITY<br><br>If you publish printed copies (or copies in media that commonly have<br>printed covers) of the Document, numbering more than 100, and the<br>Document's license notice requires Cover Texts, you must enclose the<br>copies in covers that carry, clearly and legibly, all these Cover<br>Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on<br>the back cover.  Both covers must also clearly and legibly identify<br>you as the publisher of these copies.  The front cover must present<br>the full title with all words of the title equally prominent and<br>visible.  You may add other material on the covers in addition.<br>Copying with changes limited to the covers, as long as they preserve<br>the title of the Document and satisfy these conditions, can be treated<br>as verbatim copying in other respects.<br><br>If the required texts for either cover are too voluminous to fit<br>legibly, you should put the first ones listed (as many as fit<br>reasonably) on the actual cover, and continue the rest onto adjacent<br>pages.<br><br>If you publish or distribute Opaque copies of the Document numbering<br>more than 100, you must either include a machine-readable Transparent<br>copy along with each Opaque copy, or state in or with each Opaque copy<br>a computer-network location from which the general network-using<br>public has access to download using public-standard network protocols<br>a complete Transparent copy of the Document, free of added material.<br>If you use the latter option, you must take reasonably prudent steps,<br>when you begin distribution of Opaque copies in quantity, to ensure<br>that this Transparent copy will remain thus accessible at the stated<br>location until at least one year after the last time you distribute an<br>Opaque copy (directly or through your agents or retailers) of that<br>edition to the public.<br><br>It is requested, but not required, that you contact the authors of the<br>Document well before redistributing any large number of copies, to<br>give them a chance to provide you with an updated version of the<br>Document.<br><br><br>4. MODIFICATIONS<br><br>You may copy and distribute a Modified Version of the Document under<br>the conditions of sections 2 and 3 above, provided that you release<br>the Modified Version under precisely this License, with the Modified<br>Version filling the role of the Document, thus licensing distribution<br>and modification of the Modified Version to whoever possesses a copy<br>of it.  In addition, you must do these things in the Modified Version:<br><br>A. Use in the Title Page (and on the covers, if any) a title distinct<br>   from that of the Document, and from those of previous versions<br>   (which should, if there were any, be listed in the History section<br>   of the Document).  You may use the same title as a previous version<br>   if the original publisher of that version gives permission.<br>B. List on the Title Page, as authors, one or more persons or entities<br>   responsible for authorship of the modifications in the Modified<br>   Version, together with at least five of the principal authors of the<br>   Document (all of its principal authors, if it has fewer than five),<br>   unless they release you from this requirement.<br>C. State on the Title page the name of the publisher of the<br>   Modified Version, as the publisher.<br>D. Preserve all the copyright notices of the Document.<br>E. Add an appropriate copyright notice for your modifications<br>   adjacent to the other copyright notices.<br>F. Include, immediately after the copyright notices, a license notice<br>   giving the public permission to use the Modified Version under the<br>   terms of this License, in the form shown in the Addendum below.<br>G. Preserve in that license notice the full lists of Invariant Sections<br>   and required Cover Texts given in the Document's license notice.<br>H. Include an unaltered copy of this License.<br>I. Preserve the section Entitled "History", Preserve its Title, and add<br>   to it an item stating at least the title, year, new authors, and<br>   publisher of the Modified Version as given on the Title Page.  If<br>   there is no section Entitled "History" in the Document, create one<br>   stating the title, year, authors, and publisher of the Document as<br>   given on its Title Page, then add an item describing the Modified<br>   Version as stated in the previous sentence.<br>J. Preserve the network location, if any, given in the Document for<br>   public access to a Transparent copy of the Document, and likewise<br>   the network locations given in the Document for previous versions<br>   it was based on.  These may be placed in the "History" section.<br>   You may omit a network location for a work that was published at<br>   least four years before the Document itself, or if the original<br>   publisher of the version it refers to gives permission.<br>K. For any section Entitled "Acknowledgements" or "Dedications",<br>   Preserve the Title of the section, and preserve in the section all<br>   the substance and tone of each of the contributor acknowledgements<br>   and/or dedications given therein.<br>L. Preserve all the Invariant Sections of the Document,<br>   unaltered in their text and in their titles.  Section numbers<br>   or the equivalent are not considered part of the section titles.<br>M. Delete any section Entitled "Endorsements".  Such a section<br>   may not be included in the Modified Version.<br>N. Do not retitle any existing section to be Entitled "Endorsements"<br>   or to conflict in title with any Invariant Section.<br>O. Preserve any Warranty Disclaimers.<br><br>If the Modified Version includes new front-matter sections or<br>appendices that qualify as Secondary Sections and contain no material<br>copied from the Document, you may at your option designate some or all<br>of these sections as invariant.  To do this, add their titles to the<br>list of Invariant Sections in the Modified Version's license notice.<br>These titles must be distinct from any other section titles.<br><br>You may add a section Entitled "Endorsements", provided it contains<br>nothing but endorsements of your Modified Version by various<br>parties--for example, statements of peer review or that the text has<br>been approved by an organization as the authoritative definition of a<br>standard.<br><br>You may add a passage of up to five words as a Front-Cover Text, and a<br>passage of up to 25 words as a Back-Cover Text, to the end of the list<br>of Cover Texts in the Modified Version.  Only one passage of<br>Front-Cover Text and one of Back-Cover Text may be added by (or<br>through arrangements made by) any one entity.  If the Document already<br>includes a cover text for the same cover, previously added by you or<br>by arrangement made by the same entity you are acting on behalf of,<br>you may not add another; but you may replace the old one, on explicit<br>permission from the previous publisher that added the old one.<br><br>The author(s) and publisher(s) of the Document do not by this License<br>give permission to use their names for publicity for or to assert or<br>imply endorsement of any Modified Version.<br><br><br>5. COMBINING DOCUMENTS<br><br>You may combine the Document with other documents released under this<br>License, under the terms defined in section 4 above for modified<br>versions, provided that you include in the combination all of the<br>Invariant Sections of all of the original documents, unmodified, and<br>list them all as Invariant Sections of your combined work in its<br>license notice, and that you preserve all their Warranty Disclaimers.<br><br>The combined work need only contain one copy of this License, and<br>multiple identical Invariant Sections may be replaced with a single<br>copy.  If there are multiple Invariant Sections with the same name but<br>different contents, make the title of each such section unique by<br>adding at the end of it, in parentheses, the name of the original<br>author or publisher of that section if known, or else a unique number.<br>Make the same adjustment to the section titles in the list of<br>Invariant Sections in the license notice of the combined work.<br><br>In the combination, you must combine any sections Entitled "History"<br>in the various original documents, forming one section Entitled<br>"History"; likewise combine any sections Entitled "Acknowledgements",<br>and any sections Entitled "Dedications".  You must delete all sections<br>Entitled "Endorsements".<br><br><br>6. COLLECTIONS OF DOCUMENTS<br><br>You may make a collection consisting of the Document and other<br>documents released under this License, and replace the individual<br>copies of this License in the various documents with a single copy<br>that is included in the collection, provided that you follow the rules<br>of this License for verbatim copying of each of the documents in all<br>other respects.<br><br>You may extract a single document from such a collection, and<br>distribute it individually under this License, provided you insert a<br>copy of this License into the extracted document, and follow this<br>License in all other respects regarding verbatim copying of that<br>document.<br><br><br>7. AGGREGATION WITH INDEPENDENT WORKS<br><br>A compilation of the Document or its derivatives with other separate<br>and independent documents or works, in or on a volume of a storage or<br>distribution medium, is called an "aggregate" if the copyright<br>resulting from the compilation is not used to limit the legal rights<br>of the compilation's users beyond what the individual works permit.<br>When the Document is included in an aggregate, this License does not<br>apply to the other works in the aggregate which are not themselves<br>derivative works of the Document.<br><br>If the Cover Text requirement of section 3 is applicable to these<br>copies of the Document, then if the Document is less than one half of<br>the entire aggregate, the Document's Cover Texts may be placed on<br>covers that bracket the Document within the aggregate, or the<br>electronic equivalent of covers if the Document is in electronic form.<br>Otherwise they must appear on printed covers that bracket the whole<br>aggregate.<br><br><br>8. TRANSLATION<br><br>Translation is considered a kind of modification, so you may<br>distribute translations of the Document under the terms of section 4.<br>Replacing Invariant Sections with translations requires special<br>permission from their copyright holders, but you may include<br>translations of some or all Invariant Sections in addition to the<br>original versions of these Invariant Sections.  You may include a<br>translation of this License, and all the license notices in the<br>Document, and any Warranty Disclaimers, provided that you also include<br>the original English version of this License and the original versions<br>of those notices and disclaimers.  In case of a disagreement between<br>the translation and the original version of this License or a notice<br>or disclaimer, the original version will prevail.<br><br>If a section in the Document is Entitled "Acknowledgements",<br>"Dedications", or "History", the requirement (section 4) to Preserve<br>its Title (section 1) will typically require changing the actual<br>title.<br><br><br>9. TERMINATION<br><br>You may not copy, modify, sublicense, or distribute the Document<br>except as expressly provided under this License.  Any attempt<br>otherwise to copy, modify, sublicense, or distribute it is void, and<br>will automatically terminate your rights under this License.<br><br>However, if you cease all violation of this License, then your license<br>from a particular copyright holder is reinstated (a) provisionally,<br>unless and until the copyright holder explicitly and finally<br>terminates your license, and (b) permanently, if the copyright holder<br>fails to notify you of the violation by some reasonable means prior to<br>60 days after the cessation.<br><br>Moreover, your license from a particular copyright holder is<br>reinstated permanently if the copyright holder notifies you of the<br>violation by some reasonable means, this is the first time you have<br>received notice of violation of this License (for any work) from that<br>copyright holder, and you cure the violation prior to 30 days after<br>your receipt of the notice.<br><br>Termination of your rights under this section does not terminate the<br>licenses of parties who have received copies or rights from you under<br>this License.  If your rights have been terminated and not permanently<br>reinstated, receipt of a copy of some or all of the same material does<br>not give you any rights to use it.<br><br><br>10. FUTURE REVISIONS OF THIS LICENSE<br><br>The Free Software Foundation may publish new, revised versions of the<br>GNU Free Documentation License from time to time.  Such new versions<br>will be similar in spirit to the present version, but may differ in<br>detail to address new problems or concerns.  See<br>http://www.gnu.org/copyleft/.<br><br>Each version of the License is given a distinguishing version number.<br>If the Document specifies that a particular numbered version of this<br>License "or any later version" applies to it, you have the option of<br>following the terms and conditions either of that specified version or<br>of any later version that has been published (not as a draft) by the<br>Free Software Foundation.  If the Document does not specify a version<br>number of this License, you may choose any version ever published (not<br>as a draft) by the Free Software Foundation.  If the Document<br>specifies that a proxy can decide which future versions of this<br>License can be used, that proxy's public statement of acceptance of a<br>version permanently authorizes you to choose that version for the<br>Document.<br><br>11. RELICENSING<br><br>"Massive Multiauthor Collaboration Site" (or "MMC Site") means any<br>World Wide Web server that publishes copyrightable works and also<br>provides prominent facilities for anybody to edit those works.  A<br>public wiki that anybody can edit is an example of such a server.  A<br>"Massive Multiauthor Collaboration" (or "MMC") contained in the site<br>means any set of copyrightable works thus published on the MMC site.<br><br>"CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0 <br>license published by Creative Commons Corporation, a not-for-profit <br>corporation with a principal place of business in San Francisco, <br>California, as well as future copyleft versions of that license <br>published by that same organization.<br><br>"Incorporate" means to publish or republish a Document, in whole or in <br>part, as part of another Document.<br><br>An MMC is "eligible for relicensing" if it is licensed under this <br>License, and if all works that were first published under this License <br>somewhere other than this MMC, and subsequently incorporated in whole or <br>in part into the MMC, (1) had no cover texts or invariant sections, and <br>(2) were thus incorporated prior to November 1, 2008.<br><br>The operator of an MMC Site may republish an MMC contained in the site<br>under CC-BY-SA on the same site at any time before August 1, 2009,<br>provided the MMC is eligible for relicensing.<br><br><br>ADDENDUM: How to use this License for your documents<br><br>To use this License in a document you have written, include a copy of<br>the License in the document and put the following copyright and<br>license notices just after the title page:<br><br>    Copyright (c)  YEAR  YOUR NAME.<br>    Permission is granted to copy, distribute and/or modify this document<br>    under the terms of the GNU Free Documentation License, Version 1.3<br>    or any later version published by the Free Software Foundation;<br>    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.<br>    A copy of the license is included in the section entitled "GNU<br>    Free Documentation License".<br><br>If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,<br>replace the "with...Texts." line with this:<br><br>    with the Invariant Sections being LIST THEIR TITLES, with the<br>    Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.<br><br>If you have Invariant Sections without Cover Texts, or some other<br>combination of the three, merge those two alternatives to suit the<br>situation.<br><br>If your document contains nontrivial examples of program code, we<br>recommend releasing these examples in parallel under your choice of<br>free software license, such as the GNU General Public License,<br>to permit their use in free software.<br></pre>
+Installing Boost 1.47.0 or greater is preferred.<br>
 <br>
-</body></html>
+<h2>Incomplete or Unimplemented Features</h2>
+<ul>
+  <li>Some constructs, in particular compound conditional statements
+        which early-out, may not be formatted correctly.</li>
+
+      <li>Infinite loops are not yet handled correctly.&nbsp; Generally
+        this will result in a function's graph containing two disjoint
+        components.<br>
+      </li>
+      <li>Decision nodes (e.g. if() statements) do not display the
+        condition.</li>
+      <li>While CoFlo can handle C quite well, only simple C++ can
+        currently be
+        handled.&nbsp; E.g., CoFlo 0.0.3 cannot successfully parse it's
+        own
+        main.cpp.</li>
+      <li>Redundant nodes need to be eliminated.</li>
+      <li>Expression handling needs to be improved beyond simple
+        "placeholdering".<br>
+      </li>
+      <li>More (and more useful) analyses need to be added, e.g.
+        function-to-function-call reachability.<br>
+      </li>
+    </ul>
+    <h1><a class="mozTocH1" name="mozTocId54603"></a><a name="GFDL"></a>GNU
+      Free Documentation License<br>
+    </h1>
+    <pre>                GNU Free Documentation License<br>                 Version 1.3, 3 November 2008<br><br><br> Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.<br>     &lt;http://fsf.org/&gt;<br> Everyone is permitted to copy and distribute verbatim copies<br> of this license document, but changing it is not allowed.<br><br>0. PREAMBLE<br><br>The purpose of this License is to make a manual, textbook, or other<br>functional and useful document "free" in the sense of freedom: to<br>assure everyone the effective freedom to copy and redistribute it,<br>with or without modifying it, either commercially or noncommercially.<br>Secondarily, this License preserves for the author and publisher a way<br>to get credit for their work, while not being considered responsible<br>for modifications made by others.<br><br>This License is a kind of "copyleft", which means that derivative<br>works of the document must themselves be free in the same sense.  It<br>complements the GNU General Public License, which is a copyleft<br>license designed for free software.<br><br>We have designed this License in order to use it for manuals for free<br>software, because free software needs free documentation: a free<br>program should come with manuals providing the same freedoms that the<br>software does.  But this License is not limited to software manuals;<br>it can be used for any textual work, regardless of subject matter or<br>whether it is published as a printed book.  We recommend this License<br>principally for works whose purpose is instruction or reference.<br><br><br>1. APPLICABILITY AND DEFINITIONS<br><br>This License applies to any manual or other work, in any medium, that<br>contains a notice placed by the copyright holder saying it can be<br>distributed under the terms of this License.  Such a notice grants a<br>world-wide, royalty-free license, unlimited in duration, to use that<br>work under the conditions stated herein.  The "Document", below,<br>refers to any such manual or work.  Any member of the public is a<br>licensee, and is addressed as "you".  You accept the license if you<br>copy, modify or distribute the work in a way requiring permission<br>under copyright law.<br><br>A "Modified Version" of the Document means any work containing the<br>Document or a portion of it, either copied verbatim, or with<br>modifications and/or translated into another language.<br><br>A "Secondary Section" is a named appendix or a front-matter section of<br>the Document that deals exclusively with the relationship of the<br>publishers or authors of the Document to the Document's overall<br>subject (or to related matters) and contains nothing that could fall<br>directly within that overall subject.  (Thus, if the Document is in<br>part a textbook of mathematics, a Secondary Section may not explain<br>any mathematics.)  The relationship could be a matter of historical<br>connection with the subject or with related matters, or of legal,<br>commercial, philosophical, ethical or political position regarding<br>them.<br><br>The "Invariant Sections" are certain Secondary Sections whose titles<br>are designated, as being those of Invariant Sections, in the notice<br>that says that the Document is released under this License.  If a<br>section does not fit the above definition of Secondary then it is not<br>allowed to be designated as Invariant.  The Document may contain zero<br>Invariant Sections.  If the Document does not identify any Invariant<br>Sections then there are none.<br><br>The "Cover Texts" are certain short passages of text that are listed,<br>as Front-Cover Texts or Back-Cover Texts, in the notice that says that<br>the Document is released under this License.  A Front-Cover Text may<br>be at most 5 words, and a Back-Cover Text may be at most 25 words.<br><br>A "Transparent" copy of the Document means a machine-readable copy,<br>represented in a format whose specification is available to the<br>general public, that is suitable for revising the document<br>straightforwardly with generic text editors or (for images composed of<br>pixels) generic paint programs or (for drawings) some widely available<br>drawing editor, and that is suitable for input to text formatters or<br>for automatic translation to a variety of formats suitable for input<br>to text formatters.  A copy made in an otherwise Transparent file<br>format whose markup, or absence of markup, has been arranged to thwart<br>or discourage subsequent modification by readers is not Transparent.<br>An image format is not Transparent if used for any substantial amount<br>of text.  A copy that is not "Transparent" is called "Opaque".<br><br>Examples of suitable formats for Transparent copies include plain<br>ASCII without markup, Texinfo input format, LaTeX input format, SGML<br>or XML using a publicly available DTD, and standard-conforming simple<br>HTML, PostScript or PDF designed for human modification.  Examples of<br>transparent image formats include PNG, XCF and JPG.  Opaque formats<br>include proprietary formats that can be read and edited only by<br>proprietary word processors, SGML or XML for which the DTD and/or<br>processing tools are not generally available, and the<br>machine-generated HTML, PostScript or PDF produced by some word<br>processors for output purposes only.<br><br>The "Title Page" means, for a printed book, the title page itself,<br>plus such following pages as are needed to hold, legibly, the material<br>this License requires to appear in the title page.  For works in<br>formats which do not have any title page as such, "Title Page" means<br>the text near the most prominent appearance of the work's title,<br>preceding the beginning of the body of the text.<br><br>The "publisher" means any person or entity that distributes copies of<br>the Document to the public.<br><br>A section "Entitled XYZ" means a named subunit of the Document whose<br>title either is precisely XYZ or contains XYZ in parentheses following<br>text that translates XYZ in another language.  (Here XYZ stands for a<br>specific section name mentioned below, such as "Acknowledgements",<br>"Dedications", "Endorsements", or "History".)  To "Preserve the Title"<br>of such a section when you modify the Document means that it remains a<br>section "Entitled XYZ" according to this definition.<br><br>The Document may include Warranty Disclaimers next to the notice which<br>states that this License applies to the Document.  These Warranty<br>Disclaimers are considered to be included by reference in this<br>License, but only as regards disclaiming warranties: any other<br>implication that these Warranty Disclaimers may have is void and has<br>no effect on the meaning of this License.<br><br>2. VERBATIM COPYING<br><br>You may copy and distribute the Document in any medium, either<br>commercially or noncommercially, provided that this License, the<br>copyright notices, and the license notice saying this License applies<br>to the Document are reproduced in all copies, and that you add no<br>other conditions whatsoever to those of this License.  You may not use<br>technical measures to obstruct or control the reading or further<br>copying of the copies you make or distribute.  However, you may accept<br>compensation in exchange for copies.  If you distribute a large enough<br>number of copies you must also follow the conditions in section 3.<br><br>You may also lend copies, under the same conditions stated above, and<br>you may publicly display copies.<br><br><br>3. COPYING IN QUANTITY<br><br>If you publish printed copies (or copies in media that commonly have<br>printed covers) of the Document, numbering more than 100, and the<br>Document's license notice requires Cover Texts, you must enclose the<br>copies in covers that carry, clearly and legibly, all these Cover<br>Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on<br>the back cover.  Both covers must also clearly and legibly identify<br>you as the publisher of these copies.  The front cover must present<br>the full title with all words of the title equally prominent and<br>visible.  You may add other material on the covers in addition.<br>Copying with changes limited to the covers, as long as they preserve<br>the title of the Document and satisfy these conditions, can be treated<br>as verbatim copying in other respects.<br><br>If the required texts for either cover are too voluminous to fit<br>legibly, you should put the first ones listed (as many as fit<br>reasonably) on the actual cover, and continue the rest onto adjacent<br>pages.<br><br>If you publish or distribute Opaque copies of the Document numbering<br>more than 100, you must either include a machine-readable Transparent<br>copy along with each Opaque copy, or state in or with each Opaque copy<br>a computer-network location from which the general network-using<br>public has access to download using public-standard network protocols<br>a complete Transparent copy of the Document, free of added material.<br>If you use the latter option, you must take reasonably prudent steps,<br>when you begin distribution of Opaque copies in quantity, to ensure<br>that this Transparent copy will remain thus accessible at the stated<br>location until at least one year after the last time you distribute an<br>Opaque copy (directly or through your agents or retailers) of that<br>edition to the public.<br><br>It is requested, but not required, that you contact the authors of the<br>Document well before redistributing any large number of copies, to<br>give them a chance to provide you with an updated version of the<br>Document.<br><br><br>4. MODIFICATIONS<br><br>You may copy and distribute a Modified Version of the Document under<br>the conditions of sections 2 and 3 above, provided that you release<br>the Modified Version under precisely this License, with the Modified<br>Version filling the role of the Document, thus licensing distribution<br>and modification of the Modified Version to whoever possesses a copy<br>of it.  In addition, you must do these things in the Modified Version:<br><br>A. Use in the Title Page (and on the covers, if any) a title distinct<br>   from that of the Document, and from those of previous versions<br>   (which should, if there were any, be listed in the History section<br>   of the Document).  You may use the same title as a previous version<br>   if the original publisher of that version gives permission.<br>B. List on the Title Page, as authors, one or more persons or entities<br>   responsible for authorship of the modifications in the Modified<br>   Version, together with at least five of the principal authors of the<br>   Document (all of its principal authors, if it has fewer than five),<br>   unless they release you from this requirement.<br>C. State on the Title page the name of the publisher of the<br>   Modified Version, as the publisher.<br>D. Preserve all the copyright notices of the Document.<br>E. Add an appropriate copyright notice for your modifications<br>   adjacent to the other copyright notices.<br>F. Include, immediately after the copyright notices, a license notice<br>   giving the public permission to use the Modified Version under the<br>   terms of this License, in the form shown in the Addendum below.<br>G. Preserve in that license notice the full lists of Invariant Sections<br>   and required Cover Texts given in the Document's license notice.<br>H. Include an unaltered copy of this License.<br>I. Preserve the section Entitled "History", Preserve its Title, and add<br>   to it an item stating at least the title, year, new authors, and<br>   publisher of the Modified Version as given on the Title Page.  If<br>   there is no section Entitled "History" in the Document, create one<br>   stating the title, year, authors, and publisher of the Document as<br>   given on its Title Page, then add an item describing the Modified<br>   Version as stated in the previous sentence.<br>J. Preserve the network location, if any, given in the Document for<br>   public access to a Transparent copy of the Document, and likewise<br>   the network locations given in the Document for previous versions<br>   it was based on.  These may be placed in the "History" section.<br>   You may omit a network location for a work that was published at<br>   least four years before the Document itself, or if the original<br>   publisher of the version it refers to gives permission.<br>K. For any section Entitled "Acknowledgements" or "Dedications",<br>   Preserve the Title of the section, and preserve in the section all<br>   the substance and tone of each of the contributor acknowledgements<br>   and/or dedications given therein.<br>L. Preserve all the Invariant Sections of the Document,<br>   unaltered in their text and in their titles.  Section numbers<br>   or the equivalent are not considered part of the section titles.<br>M. Delete any section Entitled "Endorsements".  Such a section<br>   may not be included in the Modified Version.<br>N. Do not retitle any existing section to be Entitled "Endorsements"<br>   or to conflict in title with any Invariant Section.<br>O. Preserve any Warranty Disclaimers.<br><br>If the Modified Version includes new front-matter sections or<br>appendices that qualify as Secondary Sections and contain no material<br>copied from the Document, you may at your option designate some or all<br>of these sections as invariant.  To do this, add their titles to the<br>list of Invariant Sections in the Modified Version's license notice.<br>These titles must be distinct from any other section titles.<br><br>You may add a section Entitled "Endorsements", provided it contains<br>nothing but endorsements of your Modified Version by various<br>parties--for example, statements of peer review or that the text has<br>been approved by an organization as the authoritative definition of a<br>standard.<br><br>You may add a passage of up to five words as a Front-Cover Text, and a<br>passage of up to 25 words as a Back-Cover Text, to the end of the list<br>of Cover Texts in the Modified Version.  Only one passage of<br>Front-Cover Text and one of Back-Cover Text may be added by (or<br>through arrangements made by) any one entity.  If the Document already<br>includes a cover text for the same cover, previously added by you or<br>by arrangement made by the same entity you are acting on behalf of,<br>you may not add another; but you may replace the old one, on explicit<br>permission from the previous publisher that added the old one.<br><br>The author(s) and publisher(s) of the Document do not by this License<br>give permission to use their names for publicity for or to assert or<br>imply endorsement of any Modified Version.<br><br><br>5. COMBINING DOCUMENTS<br><br>You may combine the Document with other documents released under this<br>License, under the terms defined in section 4 above for modified<br>versions, provided that you include in the combination all of the<br>Invariant Sections of all of the original documents, unmodified, and<br>list them all as Invariant Sections of your combined work in its<br>license notice, and that you preserve all their Warranty Disclaimers.<br><br>The combined work need only contain one copy of this License, and<br>multiple identical Invariant Sections may be replaced with a single<br>copy.  If there are multiple Invariant Sections with the same name but<br>different contents, make the title of each such section unique by<br>adding at the end of it, in parentheses, the name of the original<br>author or publisher of that section if known, or else a unique number.<br>Make the same adjustment to the section titles in the list of<br>Invariant Sections in the license notice of the combined work.<br><br>In the combination, you must combine any sections Entitled "History"<br>in the various original documents, forming one section Entitled<br>"History"; likewise combine any sections Entitled "Acknowledgements",<br>and any sections Entitled "Dedications".  You must delete all sections<br>Entitled "Endorsements".<br><br><br>6. COLLECTIONS OF DOCUMENTS<br><br>You may make a collection consisting of the Document and other<br>documents released under this License, and replace the individual<br>copies of this License in the various documents with a single copy<br>that is included in the collection, provided that you follow the rules<br>of this License for verbatim copying of each of the documents in all<br>other respects.<br><br>You may extract a single document from such a collection, and<br>distribute it individually under this License, provided you insert a<br>copy of this License into the extracted document, and follow this<br>License in all other respects regarding verbatim copying of that<br>document.<br><br><br>7. AGGREGATION WITH INDEPENDENT WORKS<br><br>A compilation of the Document or its derivatives with other separate<br>and independent documents or works, in or on a volume of a storage or<br>distribution medium, is called an "aggregate" if the copyright<br>resulting from the compilation is not used to limit the legal rights<br>of the compilation's users beyond what the individual works permit.<br>When the Document is included in an aggregate, this License does not<br>apply to the other works in the aggregate which are not themselves<br>derivative works of the Document.<br><br>If the Cover Text requirement of section 3 is applicable to these<br>copies of the Document, then if the Document is less than one half of<br>the entire aggregate, the Document's Cover Texts may be placed on<br>covers that bracket the Document within the aggregate, or the<br>electronic equivalent of covers if the Document is in electronic form.<br>Otherwise they must appear on printed covers that bracket the whole<br>aggregate.<br><br><br>8. TRANSLATION<br><br>Translation is considered a kind of modification, so you may<br>distribute translations of the Document under the terms of section 4.<br>Replacing Invariant Sections with translations requires special<br>permission from their copyright holders, but you may include<br>translations of some or all Invariant Sections in addition to the<br>original versions of these Invariant Sections.  You may include a<br>translation of this License, and all the license notices in the<br>Document, and any Warranty Disclaimers, provided that you also include<br>the original English version of this License and the original versions<br>of those notices and disclaimers.  In case of a disagreement between<br>the translation and the original version of this License or a notice<br>or disclaimer, the original version will prevail.<br><br>If a section in the Document is Entitled "Acknowledgements",<br>"Dedications", or "History", the requirement (section 4) to Preserve<br>its Title (section 1) will typically require changing the actual<br>title.<br><br><br>9. TERMINATION<br><br>You may not copy, modify, sublicense, or distribute the Document<br>except as expressly provided under this License.  Any attempt<br>otherwise to copy, modify, sublicense, or distribute it is void, and<br>will automatically terminate your rights under this License.<br><br>However, if you cease all violation of this License, then your license<br>from a particular copyright holder is reinstated (a) provisionally,<br>unless and until the copyright holder explicitly and finally<br>terminates your license, and (b) permanently, if the copyright holder<br>fails to notify you of the violation by some reasonable means prior to<br>60 days after the cessation.<br><br>Moreover, your license from a particular copyright holder is<br>reinstated permanently if the copyright holder notifies you of the<br>violation by some reasonable means, this is the first time you have<br>received notice of violation of this License (for any work) from that<br>copyright holder, and you cure the violation prior to 30 days after<br>your receipt of the notice.<br><br>Termination of your rights under this section does not terminate the<br>licenses of parties who have received copies or rights from you under<br>this License.  If your rights have been terminated and not permanently<br>reinstated, receipt of a copy of some or all of the same material does<br>not give you any rights to use it.<br><br><br>10. FUTURE REVISIONS OF THIS LICENSE<br><br>The Free Software Foundation may publish new, revised versions of the<br>GNU Free Documentation License from time to time.  Such new versions<br>will be similar in spirit to the present version, but may differ in<br>detail to address new problems or concerns.  See<br>http://www.gnu.org/copyleft/.<br><br>Each version of the License is given a distinguishing version number.<br>If the Document specifies that a particular numbered version of this<br>License "or any later version" applies to it, you have the option of<br>following the terms and conditions either of that specified version or<br>of any later version that has been published (not as a draft) by the<br>Free Software Foundation.  If the Document does not specify a version<br>number of this License, you may choose any version ever published (not<br>as a draft) by the Free Software Foundation.  If the Document<br>specifies that a proxy can decide which future versions of this<br>License can be used, that proxy's public statement of acceptance of a<br>version permanently authorizes you to choose that version for the<br>Document.<br><br>11. RELICENSING<br><br>"Massive Multiauthor Collaboration Site" (or "MMC Site") means any<br>World Wide Web server that publishes copyrightable works and also<br>provides prominent facilities for anybody to edit those works.  A<br>public wiki that anybody can edit is an example of such a server.  A<br>"Massive Multiauthor Collaboration" (or "MMC") contained in the site<br>means any set of copyrightable works thus published on the MMC site.<br><br>"CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0 <br>license published by Creative Commons Corporation, a not-for-profit <br>corporation with a principal place of business in San Francisco, <br>California, as well as future copyleft versions of that license <br>published by that same organization.<br><br>"Incorporate" means to publish or republish a Document, in whole or in <br>part, as part of another Document.<br><br>An MMC is "eligible for relicensing" if it is licensed under this <br>License, and if all works that were first published under this License <br>somewhere other than this MMC, and subsequently incorporated in whole or <br>in part into the MMC, (1) had no cover texts or invariant sections, and <br>(2) were thus incorporated prior to November 1, 2008.<br><br>The operator of an MMC Site may republish an MMC contained in the site<br>under CC-BY-SA on the same site at any time before August 1, 2009,<br>provided the MMC is eligible for relicensing.<br><br><br>ADDENDUM: How to use this License for your documents<br><br>To use this License in a document you have written, include a copy of<br>the License in the document and put the following copyright and<br>license notices just after the title page:<br><br>    Copyright (c)  YEAR  YOUR NAME.<br>    Permission is granted to copy, distribute and/or modify this document<br>    under the terms of the GNU Free Documentation License, Version 1.3<br>    or any later version published by the Free Software Foundation;<br>    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.<br>    A copy of the license is included in the section entitled "GNU<br>    Free Documentation License".<br><br>If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,<br>replace the "with...Texts." line with this:<br><br>    with the Invariant Sections being LIST THEIR TITLES, with the<br>    Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.<br><br>If you have Invariant Sections without Cover Texts, or some other<br>combination of the three, merge those two alternatives to suit the<br>situation.<br><br>If your document contains nontrivial examples of program code, we<br>recommend releasing these examples in parallel under your choice of<br>free software license, such as the GNU General Public License,<br>to permit their use in free software.<br></pre>
+    <br>
+  </body></html>
