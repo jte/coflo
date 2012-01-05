@@ -114,6 +114,10 @@ AC_CANONICAL_HOST
 AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_BUILD],["$build"],[Define to the build triple.])
 AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_HOST],["$host"],[Define to the host triple.])
 
+# Determine how many CPUs we have on the build machine.
+# We use this for building Boost with multiple jobs.
+AX_COUNT_CPUS
+AC_SUBST([CPU_COUNT])
 
 # Programs and scripts to exempt from the "installcheck" rule introduced by "std-options".
 # List programs and scripts which don't support --help or --version here.
@@ -209,30 +213,48 @@ AC_MSG_NOTICE([FILE_PATH_DPARSER_SOURCE_TARBALL=$FILE_PATH_DPARSER_SOURCE_TARBAL
 COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost source distribution tarball],
 	[],[AC_MSG_WARN([No Boost source tarball specified.])])
 
+AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
 
-# Make sure we have a Boost version we can use.
-# Use the Autoconf Macro Archive macros.
-AX_BOOST_BASE([1.46.1])
-AX_BOOST_PROGRAM_OPTIONS
-AX_BOOST_REGEX
-AX_BOOST_SYSTEM
-AX_BOOST_FILESYSTEM
+# The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand...
+AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
+# ...and that Boost's b2 can understand.
+COFLO_BOOST_LIBS_WITH=$(echo "--with-${COFLO_BOOST_LIBS}" | sed 's/,/ --with-/g')
+AC_SUBST([COFLO_BOOST_LIBS_WITH])
 
-# Use the boost.m4 macro.
-#BOOST_REQUIRE([1.46.1])
-# Header-only libs
-#BOOST_FOREACH
-#BOOST_UTILITY
-# Libs requiring linking
-#BOOST_PROGRAM_OPTIONS
-#BOOST_REGEX
-#BOOST_SYSTEM
-#BOOST_FILESYSTEM
+AM_COND_IF([BOOST_USE_BUILT_BOOST],
+[
+	# A path to a boost source tarball was specified.
+	# Populate the necessary variables.
+	AC_SUBST([BOOST_CPPFLAGS],['-I $(abs_top_builddir)/third_party/boost_1_48_0'])
+	AM_CPPFLAGS="$AM_CPPFLAGS $BOOST_CPPFLAGS"
+	AC_SUBST([BOOST_LDFLAGS],[""])
+	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
+],
+[
+	# Try to find a Boost version we can use.
+	# Use the Autoconf Macro Archive macros.
+	AX_BOOST_BASE([1.46.1])
+	AX_BOOST_PROGRAM_OPTIONS
+	AX_BOOST_REGEX
+	AX_BOOST_SYSTEM
+	AX_BOOST_FILESYSTEM
+	
+	# Use the boost.m4 macro.
+	#BOOST_REQUIRE([1.46.1])
+	# Header-only libs
+	#BOOST_FOREACH
+	#BOOST_UTILITY
+	# Libs requiring linking
+	#BOOST_PROGRAM_OPTIONS
+	#BOOST_REGEX
+	#BOOST_SYSTEM
+	#BOOST_FILESYSTEM
+	
+	AC_MSG_NOTICE(["BOOST_LDFLAGS=$BOOST_LDFLAGS"])
+	AC_SUBST([BOOST_LIBTOOL_FLAGS], [-rpath `echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
+	AC_MSG_NOTICE(["BOOST_LIBTOOL_FLAGS=$BOOST_LIBTOOL_FLAGS"])
+])
 
-
-AC_MSG_NOTICE(["BOOST_LDFLAGS=$BOOST_LDFLAGS"])
-AC_SUBST([BOOST_RPATH], [`echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
-AC_MSG_NOTICE(["BOOST_RPATH=$BOOST_RPATH"])
 
 ###
 ### Checks for some library functions we need.
