@@ -71,6 +71,7 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 		])
 	])
 	
+	dnl See if we now have a defined and non-empty VARIABLE.
 	AS_IF([test -z "$VARIABLE"],
 	[
 		dnl If VARIABLE is empty at this point, we didn't get it from either AC_ARG_VAR or AC_ARG_WITH.
