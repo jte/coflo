@@ -1,13 +1,16 @@
 CoFlo NEWS
 
-Version 0.0.3 - Gary R. Van Sickle, 2011-12-18
+Version 0.0.3 - Gary R. Van Sickle, 2012-01-07
 
-* Minor bugfix release:
-- Using Libtool to link with Boost libraries which aren't header-only,
-  in order to better support different types of Boost installations on more systems.
+* Major installation improvements:
+- Reworked Autotools infrastructure to build and statically link to DParser and Boost libraries
+  from source tarballs if necessary.
+  Unlike in prior releases, it is no longer necessary to separately build and install DParser or Boost.
+  As of 0.0.3, CoFlo will automatically build the necessary components from the libraries' source distribution tarballs.
+- Libtoolized the project in order to better support different shared object linking requirements on more systems.
 - Manually added a "BOOST_RPATH" configure-time variable which gets passed to libtool at link-time.
-  The AX_BOOST_<...> macros weren't adding this automatically.
-- Added build and host triples to the output of "--build-info".  
+  The AX_BOOST_<...> macros don't add this automatically.
+- Added build and host triples to the output of "--build-info".
 
 Version 0.0.2 - Gary R. Van Sickle, 2011-12-13
 
