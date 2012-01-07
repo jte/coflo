@@ -44,7 +44,7 @@ coflo_SOURCES = main.cpp \
 	safe_enum.h \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
-coflo_DEPENDENCIES = $(top_builddir)/libtool
+coflo_DEPENDENCIES = $(top_builddir)/libtool ../third_party/stamp_boost_src_installed ../third_party/stamp_dparser_installed
 	
 # Path to the make_dparser executable.
 PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
@@ -52,17 +52,26 @@ PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
 # Collect all the Boost libraries we found into a single variable.
+if BOOST_USE_BUILT_BOOST
+BOOST_LOCAL_LIB = $(abs_top_builddir)/third_party/boost_1_48_0/stage/lib
+ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
+	$(BOOST_LOCAL_LIB)/libboost_program_options.a \
+	$(BOOST_LOCAL_LIB)/libboost_regex.a \
+	$(BOOST_LOCAL_LIB)/libboost_system.a \
+	$(BOOST_LOCAL_LIB)/libboost_filesystem.a
+else
 # Autoconf Macro Archive vars.
 ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 # boost.m4 vars.
 #ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
+endif
 
-coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party/dparser/local/include $(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
 # so they'll evaluate to empty when we're using the latter.
-coflo_LDFLAGS = -rpath $(BOOST_RPATH) $(BOOST_LDFLAGS) \
+coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
 coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
@@ -72,9 +81,10 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
-	$(top_builddir)/third_party/libdparse.a \
+	$(top_builddir)/third_party/dparser/local/lib/libdparse.a \
 	$(ALLBOOSTLIBS)
 
+# Suffix for DParser grammars.
 SUFFIX = .g
 
 # Rule to make *.cpp from *.g using DParser.
