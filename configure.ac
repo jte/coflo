@@ -135,7 +135,8 @@ AC_SUBST([CPU_COUNT])
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra -DBOOST_FILESYSTEM_NO_DEPRECATED=1 -DBOOST_FILESYSTEM_VERSION=3"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
-AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0 -Wold-style-cast -fno-pretty-templates"])
+# -Wold-style-cast
+AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
 # specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
@@ -215,32 +216,36 @@ COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost so
 
 AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
 
-# The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand...
+# The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
-# ...and that Boost's b2 can understand.
-COFLO_BOOST_LIBS_WITH=$(echo "--with-${COFLO_BOOST_LIBS}" | sed 's/,/ --with-/g')
-AC_SUBST([COFLO_BOOST_LIBS_WITH])
+# The "boost_1_4x_x" part of the filename.
+BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
+AC_SUBST([BOOST_TARBALL_DIRNAME])
 
 AM_COND_IF([BOOST_USE_BUILT_BOOST],
 [
 	# A path to a boost source tarball was specified.
 	# Populate the necessary variables.
-	AC_SUBST([BOOST_CPPFLAGS],['-I $(abs_top_builddir)/third_party/boost_1_48_0'])
+	AC_SUBST([BOOST_CPPFLAGS],['-I $(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)'])
 	AM_CPPFLAGS="$AM_CPPFLAGS $BOOST_CPPFLAGS"
 	AC_SUBST([BOOST_LDFLAGS],[""])
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
 ],
 [
+	AC_MSG_ERROR([Linking with system Boost libraries is currently unsupported.  Please download the Boost 1.48.0 source tarball and reconfigure using --with-boost-tarball.])
 	# Try to find a Boost version we can use.
 	# Use the Autoconf Macro Archive macros.
-	AX_BOOST_BASE([1.46.1])
+	# Note that there is a bug in Boost.Filesystem prior to 1.47.0 which causes an exception to be thrown if the
+	# current locale as specified in the LANG environment variable is anything other than "C" (see
+	# <https://svn.boost.org/trac/boost/ticket/4688>).  For that reason, Boost 1.47.0 or greater is required.
+	AX_BOOST_BASE([1.47.0])
 	AX_BOOST_PROGRAM_OPTIONS
 	AX_BOOST_REGEX
 	AX_BOOST_SYSTEM
 	AX_BOOST_FILESYSTEM
 	
 	# Use the boost.m4 macro.
-	#BOOST_REQUIRE([1.46.1])
+	#BOOST_REQUIRE([1.47.0])
 	# Header-only libs
 	#BOOST_FOREACH
 	#BOOST_UTILITY

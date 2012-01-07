@@ -21,9 +21,8 @@
 # Some Boost lib directory variables.
 BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
 BOOST_LOCAL = $(abs_builddir)/boost_local
-#BOOST_LOCAL_LIB = $(BOOST_LOCAL)/lib
-BOOST_STAGE_DIR = $(abs_builddir)/boost_1_48_0/stage
-BOOST_LOCAL_LIB = $(abs_builddir)/boost_1_48_0/stage/lib
+BOOST_STAGE_DIR = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage
+BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
 BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
 
 # DParser directory vars.
@@ -31,31 +30,24 @@ DPARSER_PREFIX = $(abs_builddir)/dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
-# We only need these during the build, so instead of requiring the user to install DParser, we'll build it.
-# 
+# We only need these during the build, so instead of requiring the user to install DParser, we'll build them
+# from the DParser source tarball.
 noinst_PROGRAMS = make_dparser
 make_dparser_SOURCES =
 make_dparser_DEPENDENCIES = stamp_dparser_installed stamp_boost_src_installed
 make_dparser_LINK = $(INSTALL_PROGRAM) $(builddir)/d/make_dparser$(EXEEXT) $(builddir)/make_dparser$(EXEEXT)
 
+# These headers are only built in the sense that they get untarred into the ./d directory.
 LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 	$(DPARSER_INCLUDE_DIR)/dparse_tables.h \
 	$(DPARSER_INCLUDE_DIR)/dsymtab.h \
 	$(DPARSER_INCLUDE_DIR)/dparse_tree.h
 
-#noinst_LIBRARIES = libdparse.a libboost.a
-
-# \
-#	boost_1_48_0/stage/lib/libboost_program_options.la \
-#	boost_1_48_0/stage/lib/libboost_regex.la \
-#	boost_1_48_0/stage/lib/libboost_system.la \
-#	boost_1_48_0/stage/lib/libboost_filesystem.la
-#libdparse_a_LIBADD = d/libdparse.a
-#libdparse_a_SOURCES = $(LIBDPARSE_BUILT_HEADER_LIST)
-#libdparse_a_DEPENDENCIES = stamp_dparser_installed
-
+# Delete all the stamps except for the untarring ones for any clean.
 MOSTLYCLEANFILES = stamp_dparser_built stamp_dparser_installed \
 	 stamp_boost_src_configured stamp_boost_src_built stamp_boost_src_installed
+	 
+# 
 CLEANFILES = stamp_dparser_src_untarred stamp_boost_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 
 # Untar the DParser source tarball and create a stamp file indicating that we did it.
@@ -111,41 +103,15 @@ stamp_boost_src_installed: stamp_boost_src_configured
 	cd boost_1_48_0 && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 		link=static threading=$(COFLO_BOOST_THREADING)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
-	
+
+# @todo I'd still like to install this to a local directory (i.e. ./boost_local), but AFAICT it's nothing more
+# than a copy, and bjam takes way too long to do it.  For now we'll use the headers and libs in situ. 	
 #stamp_boost_src_installed: stamp_boost_src_built
 #	rm -f $@-temp
 #	cd boost_1_48_0 && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 #		link=static threading=$(COFLO_BOOST_THREADING) install
 #	echo "`date -u`" > $@-temp && mv $@-temp $@
 
-#libboost_a_SOURCES =
-#libboost_a_LIBADD = boost_1_48_0/stage/lib/libboost_graph.a \
-#	boost_1_48_0/stage/lib/libboost_program_options.a \
-#	boost_1_48_0/stage/lib/libboost_regex.a \
-#	boost_1_48_0/stage/lib/libboost_system.a \
-#	boost_1_48_0/stage/lib/libboost_filesystem.a
-#libboost_a_DEPENDENCIES = stamp_boost_src_installed
-
-
-#stamp_boost_src_installed: stamp_boost_src_built
-#	rm -f $@-temp && echo "`date -u`" > $@-temp
-#	@: 'cp $(BOOST_LOCAL_LIB)/libboost_graph.a ./'
-#	cp $(BOOST_LOCAL_LIB)/libboost_program_options.a ./
-#	cp $(BOOST_LOCAL_LIB)/libboost_regex.a ./
-#	cp $(BOOST_LOCAL_LIB)/libboost_system.a ./
-#	cp $(BOOST_LOCAL_LIB)/libboost_filesystem.a ./
-#	mv $@-temp $@
-
-#$(BOOST_LOCAL_LIB)/libboost_graph.a: stamp_boost_src_installed
-#	echo "Built $@"
-#$(BOOST_LOCAL_LIB)/libboost_program_options.a: stamp_boost_src_installed
-#	echo "Built $@"
-#$(BOOST_LOCAL_LIB)/libboost_regex.a: stamp_boost_src_installed
-#	echo "Built $@"
-#$(BOOST_LOCAL_LIB)/libboost_system.a: stamp_boost_src_installed
-#	echo "Built $@"
-#$(BOOST_LOCAL_LIB)/libboost_filesystem.a: stamp_boost_src_installed
-#	echo "Built $@"
 
 # Hook "mostlyclean" to avoid rm'ing the boost tarball when we don't have to.
 mostlyclean-local:
@@ -163,4 +129,4 @@ clean-local:
 	@: 'Remove the DParser local install tree.'
 	test ! -d "$(DPARSER_PREFIX)" || rm -rf "$(DPARSER_PREFIX)"
  
-# Nothing in here to install or check, so no other -local hooks.
+# Nothing in here to install or check, so no other *-local hooks.
