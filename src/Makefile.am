@@ -59,7 +59,6 @@ ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_regex.a \
 	$(BOOST_LOCAL_LIB)/libboost_system.a \
 	$(BOOST_LOCAL_LIB)/libboost_filesystem.a
-#ALLBOOSTLIBS = $(top_builddir)/third_party/libboost.a
 else
 # Autoconf Macro Archive vars.
 ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
@@ -85,6 +84,7 @@ coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
 	$(top_builddir)/third_party/dparser/local/lib/libdparse.a \
 	$(ALLBOOSTLIBS)
 
+# Suffix for DParser grammars.
 SUFFIX = .g
 
 # Rule to make *.cpp from *.g using DParser.
