@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -27,6 +27,7 @@ CFGEdgeTypeBase::CFGEdgeTypeBase()
 
 CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig)
 {
+	m_is_back_edge = orig.m_is_back_edge;
 }
 
 CFGEdgeTypeBase::~CFGEdgeTypeBase() 

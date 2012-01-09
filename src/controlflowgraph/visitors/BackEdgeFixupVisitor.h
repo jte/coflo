@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -24,7 +24,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
-#include "../ControlFlowGraph.h"
+#include "ControlFlowGraph.h"
 
 #include "../../debug_utils/debug_utils.hpp"
 

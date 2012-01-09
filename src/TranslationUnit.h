@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -75,14 +75,6 @@ public:
 	 */
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
-	
-	/**
-	 * Generate the control flow graphs of all functions in this translation unit, and add them to cfg.
-	 *
-	 * @param cfg The Program's ControlFlowGraph object.
-	 * @return
-	 */
-	bool CreateControlFlowGraphs(ControlFlowGraph *cfg);
 
 	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
 	

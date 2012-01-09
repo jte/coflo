@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -24,13 +24,14 @@
 
 #include "CFGEdgeTypeBase.h"
 #include "CFGEdgeTypeExceptional.h"
+#include "CFGEdgeTypeImpossible.h"
 #include "CFGEdgeTypeFunctionCallBypass.h"
 #include "CFGEdgeTypeFallthrough.h"
 #include "CFGEdgeTypeFunctionCall.h"
 #include "CFGEdgeTypeGoto.h"
 #include "CFGEdgeTypeIfTrue.h"
 #include "CFGEdgeTypeIfFalse.h"
-#include "CFGEdgeTypeImpossible.h"
+
 #include "CFGEdgeTypeReturn.h"
 
 

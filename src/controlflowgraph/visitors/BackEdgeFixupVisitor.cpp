@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -20,7 +20,7 @@
 #include <vector>
 #include <boost/unordered_set.hpp>
 
-#include "../../debug_utils/debug_utils.hpp"
+#include "debug_utils.hpp"
 #include "BackEdgeFixupVisitor.h"
 
 

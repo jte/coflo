@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,12 +17,14 @@
 
 /** @file */
 
-#include <utility>
+/// Always include a .cpp file's header first.  This ensures that the header file is
+/// idempotent at compile time.  If it isn't, the compile will fail, alerting you to the problem.
+#include "ControlFlowGraph.h"
 
+#include <utility>
 #include <boost/foreach.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
-#include "ControlFlowGraph.h"
 #include "visitors/BackEdgeFixupVisitor.h"
 #include "visitors/MergeNodeInsertionVisitor.h"
 #include "edges/edge_types.h"
@@ -126,7 +128,7 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 	// std::vector<> above.
 	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
 
-	// Mark the edges back edges we found.
+	// Mark the edges we found as back edges.
 	BOOST_FOREACH(BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo fixinfo, back_edges)
 	{
 		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
@@ -323,6 +325,7 @@ void ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VER
 
 void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & target)
 {
+	/// @todo Implement this.
 }
 
 T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function *containing_function)

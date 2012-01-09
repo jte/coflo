@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -16,6 +16,8 @@
  */
 
 /** @file */
+
+#include "Function.h"
 
 #include <iostream>
 #include <fstream>
@@ -39,7 +41,6 @@
 #include "debug_utils/debug_utils.hpp"
 
 #include "TranslationUnit.h"
-#include "Function.h"
 #include "SuccessorTypes.h"
 
 #include "controlflowgraph/statements/statements.h"
@@ -798,75 +799,6 @@ void Function::PrintControlFlowGraphBitmap(ToolDot *the_dot, const boost::filesy
 	the_dot->CompileDotToPNG(dot_filename.generic_string(), output_filename.generic_string());
 }
 
-bool Function::CreateControlFlowGraph(ControlFlowGraph &cfg)
-{
-	// We create the Control Flow Graph in two stages:
-	//
-	// - First we go through each basic block and add all Statements to m_cfg,
-	//   adding an edge linking each to its predecessor as we go.  We exclude in-edges
-	//   and out-edges for the first and last Statement in each block, resp.
-	// - Second, we link the last Statement of each block to the first Statement(s) of its Successor(s).
-	//
-	// A third step is performed to mark all back-edges in the graph, so we can easily
-	// identify them during traversals later.
-
-	// Add self-edges to the Entry and Exit statements.
-	boost::tie(m_entry_vertex_self_edge, boost::tuples::ignore) = boost::add_edge(m_entry_vertex_desc, m_entry_vertex_desc, (*m_cfg));
-	(*m_cfg)[m_entry_vertex_self_edge].m_edge_type = new CFGEdgeTypeImpossible();
-	boost::tie(m_exit_vertex_self_edge, boost::tuples::ignore) = boost::add_edge(m_exit_vertex_desc, m_exit_vertex_desc, (*m_cfg));
-	(*m_cfg)[m_exit_vertex_self_edge].m_edge_type = new CFGEdgeTypeImpossible();
-
-	// Third step.  CFG is created.  Look for back edges and set their edge types appropriately.
-	cfg.FixupBackEdges(this);
-
-	// Insert Merge nodes where needed.
-	//cfg.InsertMergeNodes(this);
-
-	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, *m_cfg);
-	vertex_filter_predicate the_vertex_filter(vpm, this);
-
-	// Check CFG for inconsistencies and clean up the ones we can.
-	{
-		typedef boost::filtered_graph<T_CFG, boost::keep_all,
-				vertex_filter_predicate> T_FILTERED_GRAPH;
-		T_FILTERED_GRAPH graph_of_this_function(*m_cfg, boost::keep_all(),
-				the_vertex_filter);
-
-		boost::graph_traits<T_FILTERED_GRAPH>::vertex_iterator vit, vend;
-		boost::tie(vit, vend) = boost::vertices(graph_of_this_function);
-		for (; vit != vend; ++vit)
-		{
-			long id, od;
-			id = boost::in_degree(*vit, graph_of_this_function);
-			od = boost::out_degree(*vit, graph_of_this_function);
-
-			if ((id == 0) && (*vit != m_entry_vertex_desc))
-			{
-				T_CFG_EDGE_DESC newedge;
-				std::cerr << "WARNING: Non-ENTRY vertex with in-degree of 0 in function \""
-						<< GetIdentifier() << "\", adding Impossible edge to ENTRY." << std::endl;
-				boost::tie(newedge, boost::tuples::ignore) =
-						boost::add_edge(m_entry_vertex_desc, *vit, *m_cfg);
-				(*m_cfg)[newedge].m_edge_type = new CFGEdgeTypeImpossible;
-			}
-
-			if ((od == 0) && (*vit != m_exit_vertex_desc))
-			{
-				std::cerr
-						<< "ERROR: Non-EXIT vertex with out-degree of 0 in function \""
-						<< GetIdentifier() << "\"" << std::endl;
-			}
-		}
-
-		cfg.SplitCriticalEdges(this);
-	}
-
-	return true;
-}
-
-
 class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
 {
 
@@ -877,6 +809,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	LabelMap label_map;
 	T_CFG_VERTEX_DESC prev_vertex;
 	bool prev_vertex_ended_basic_block = false;
+
+	// A list of basic block leader info.
+	std::vector< BasicBlockLeaderInfo > list_of_leader_info;
 	std::vector< T_CFG_VERTEX_DESC > list_of_statements_with_no_in_edge_yet;
 	std::vector< T_CFG_VERTEX_DESC > list_of_unlinked_flow_control_statements;
 
@@ -885,7 +820,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	m_the_cfg = &cfg;
 	m_cfg = &cfg.GetT_CFG();
 
-	// Add the ENTRY and EXIT vertices.
+	// Create ENTRY and EXIT vertices.
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
 	Exit *exit_ptr = new Exit(Location("[" + GetDefinitionFilePath() + " : 0]"));
 
@@ -897,7 +832,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 
 	prev_vertex = m_entry_vertex_desc;
 
-	// Add all the statements to the function.
+	// Add all the statements to the Function's CFG.
 	BOOST_FOREACH(StatementBase *sbp, statement_list)
 	{
 		// Add this Statement to the Control Flow Graph.
@@ -928,11 +863,17 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		}
 		else
 		{
-			// The previous vertex did end its basic block.  This means it was a flow control statement, such as an 'if', 'switch', or 'goto'.
+			// The previous vertex did end its basic block.  This means it was a control transfer statement, such as an 'if', 'switch', or 'goto',
+			// and that this vertex is a block leader.
 			// We therefore don't add an edge into this statement, because the only way we'll get here is by an explicit jump via a
 			// similar flow control statement.  This should be taken care of when we do the Label linking.  We'll add this vertex to a "watch list"
 			// and check it at the end to make sure it has such an in-edge.
 			list_of_statements_with_no_in_edge_yet.push_back(vid);
+
+			// Record the basic block leaders.  We also capture the vertex which ended the immediately-preceding basic block, in case we
+			// end up with no control transfers to this block.  In that case, we'll add an Impossible edge between the two to maintain
+			// the invariant that EXIT post-dominates all vertices of the function.
+			list_of_leader_info.push_back(BasicBlockLeaderInfo(vid, prev_vertex));
 		}
 
 		// Did the current statement end its basic block?
@@ -952,13 +893,20 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		prev_vertex = vid;
 	}
 
+	// Was the last vertex in the list *not* a flow control statement?
 	if(prev_vertex_ended_basic_block == false)
 	{
+		// It wasn't, which means it falls through to the EXIT vertex.
 		// Add an edge to the EXIT vertex.
 		cfg.AddEdge(prev_vertex, m_exit_vertex_desc, new CFGEdgeTypeFallthrough());
 	}
 
-	// Link the FlowControlUnlinked-derived statements.
+	//
+	// At this point, we've created the basic blocks and at the same time added all the fallthrough edges.
+	// Now we must link the basic blocks together.
+	//
+
+	// Link the FlowControlUnlinked-derived statements (i.e. link jumps to their targets).
 	dlog_cfg << "INFO: Linking FlowControlUnlinked-derived statements." << std::endl;
 	BOOST_FOREACH(T_CFG_VERTEX_DESC vd, list_of_unlinked_flow_control_statements)
 	{
@@ -982,6 +930,15 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	}
 	dlog_cfg << "INFO: Linking complete." << std::endl;
 
+	// Now we have to add Impossible in edges for any leader vertices which we haven't already linked above.
+	// This happens in the following cases:
+	//  - Infinite loops
+	//  - Dead code that's been "unlinked" by gcc before we get a chance to look at it.
+	dlog_cfg << "INFO: Adding impossible edges." << std::endl;
+	AddImpossibleEdges(cfg, list_of_leader_info);
+	dlog_cfg << "INFO: Impossible edge addition complete." << std::endl;
+
+
 	dlog_cfg << "INFO: Checking for unreachable code." << std::endl;
 	std::vector< T_CFG_VERTEX_DESC > statements_with_no_in_edge;
 	CheckForNoInEdges(cfg, list_of_statements_with_no_in_edge_yet, &statements_with_no_in_edge);
@@ -998,6 +955,26 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	return true;
 }
 
+void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlockLeaderInfo> & leader_info_list)
+{
+	BOOST_FOREACH(BasicBlockLeaderInfo p, leader_info_list)
+	{
+		// Check if the leader has been linked.
+		long in_degree;
+
+		in_degree = cfg.InDegree(p.m_leader);
+
+		if(in_degree != 0)
+		{
+			// It's been linked, skip it.
+			continue;
+		}
+
+		// Link it to its immediate predecessor with an Impossible edge.
+		cfg.AddEdge(p.m_immediate_predecessor, p.m_leader, new CFGEdgeTypeImpossible);
+	}
+}
+
 bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 		std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
 		std::vector< T_CFG_VERTEX_DESC > *output)
@@ -1012,7 +989,7 @@ bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 
 		if(in_degree == 0)
 		{
-			std::cout << "WARNING: Statement with no in edge." << std::endl;
+			std::cerr << "WARNING: CFG of function " << GetIdentifier() << " is not connected." << std::endl;
 			output->push_back(vd);
 
 			// We found a statement with no in edges.
