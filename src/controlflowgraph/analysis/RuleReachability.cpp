@@ -141,7 +141,7 @@ void RuleReachability::PrintCallChain()
 	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
 		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
-		if(sb->IsType<FunctionCall>() /*|| sb->IsDecisionStatement()*/)
+		if(sb->IsType<FunctionCall>() || sb->IsDecisionStatement())
 		{
 			PrintStatement(sb, indent_level);
 		}
