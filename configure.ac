@@ -51,11 +51,11 @@ LT_PREREQ([2.4])
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
 #AC_INIT([CoFlo], , [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-AC_INIT([CoFlo], [0.0.3], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.0.4], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
-AC_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
+AC_COPYRIGHT([Copyright (C) 2011, 2012 Gary R. Van Sickle])
 
 # Use the auxilliary build tools (e.g. install-sh, config.sub, etc.) in ./build-aux.
 AC_CONFIG_AUX_DIR([build-aux])
@@ -145,6 +145,12 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
+
+# Check if the C++ compiler supports some flags we'd like to set.
+# Append them to AM_CXXFLAGS if it does. 
+AC_LANG_PUSH([C++])
+AX_APPEND_COMPILE_FLAGS([-fno-pretty-templates],[AM_CXXFLAGS])
+AC_LANG_POP([C++])
 
 
 ###

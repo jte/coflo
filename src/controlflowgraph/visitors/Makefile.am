@@ -1,6 +1,6 @@
 # Non-root Makefile.am for CoFlo, /CoFlo/src/controlflowgraph/visitors/Makefile.am directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -28,6 +28,6 @@ BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
 # the ordinary ‘AM_’ form of the flags variable is not automatically included in the compilation
 # (however, the user form of the variable is included)."
-libvisitors_a_CPPFLAGS = $(AM_CPPFLAGS)
+libvisitors_a_CPPFLAGS = -I $(abs_top_srcdir)/src/controlflowgraph -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libvisitors_a_CFLAGS = $(AM_CFLAGS)
 libvisitors_a_CXXFLAGS = $(AM_CXXFLAGS)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -53,10 +53,16 @@ struct CFGEdgeProperties
 
 /// Typedef for the CFG graph.
 typedef boost::adjacency_list
-		<boost::vecS,
+		<
+		/// Selector type to specify the out edge list storage type.
 		boost::vecS,
+		/// Selector type to specify the Vertex list storage type.
+		boost::vecS,
+		/// Selector type to specify the directedness of the graph.
 		boost::bidirectionalS,
+		/// The Vertex properties type.
 		CFGVertexProperties,
+		/// The Edge properties type.
 		CFGEdgeProperties
 		> T_CFG;
 
@@ -130,6 +136,10 @@ public:
 	/// @name Graph construction helpers
 	//@{
 
+	/**
+	 * Traverses the CFG of Function @a f and marks all back edges.
+	 * @param f
+	 */
 	void FixupBackEdges(Function *f);
 
 	void InsertMergeNodes(Function *f);

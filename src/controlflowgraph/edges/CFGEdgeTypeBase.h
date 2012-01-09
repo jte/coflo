@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -21,6 +21,7 @@
 #define	CFGEDGETYPEBASE_H
 
 #include <string>
+#include "coflo_exceptions.hpp"
 
 /**
  * Base class for control flow graph edge types.
@@ -30,8 +31,16 @@ class CFGEdgeTypeBase
 
 public:
 	CFGEdgeTypeBase();
+	/**
+	 *  Copy constructor.
+	 *
+	 *  @param orig Reference to the CFGEdgeTypeBase object to copy.
+	 */
 	CFGEdgeTypeBase(const CFGEdgeTypeBase& orig);
-	/// Destructor made pure virtual to force this to be an abstract base class.
+	/**
+	 *  Destructor.
+	 *  Pure virtual to force this to be an abstract base class.
+	 */
 	virtual ~CFGEdgeTypeBase() = 0;
 	
 	/**
@@ -43,6 +52,9 @@ public:
      */
 	void MarkAsBackEdge(bool is_back_edge) { m_is_back_edge = is_back_edge; };
 	
+	/// @name Informational Predicates
+	//@{
+
 	/**
 	 * Indicates if this is a back edge in the control flow graph, as would be
 	 * caused by a loop.
@@ -51,6 +63,17 @@ public:
      */
 	bool IsBackEdge() const { return m_is_back_edge; };
 	
+	/**
+	 * Indicates whether this is a normal (as opposed to an Exceptional or Impossible) edge.
+	 *
+	 * @return true if this edge is a normal edge.
+	 */
+	bool IsNormal() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+	bool IsExceptional() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+	bool IsImpossible() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+
+	//@}
+
 	/**
 	 * Returns a string suitable for use as an edge label in a Dot graph.
 	 * 

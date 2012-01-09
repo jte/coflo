@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo, ./debug_utils directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -17,7 +17,7 @@
 
 
 noinst_LIBRARIES = libdebugutils.a
-libdebugutils_a_SOURCES = debug_utils.cpp debug_utils.hpp
+libdebugutils_a_SOURCES = debug_utils.cpp debug_utils.hpp coflo_exceptions.hpp
 
 libdebugutils_a_CPPFLAGS = $(AM_CPPFLAGS)
 libdebugutils_a_CFLAGS = $(AM_CFLAGS)

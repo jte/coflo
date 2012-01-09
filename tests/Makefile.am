@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo's ./tests directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -61,6 +61,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 
 # The .at files which make up the test suite.
 TESTSUITE_AT = \
+	connectedness.at \
 	constraints.at \
 	structuring_compound_conditions.at \
 	testsuite.at \
@@ -114,7 +115,8 @@ C_TEST_SOURCE = $(srcdir)/test_source_file_1.c $(srcdir)/test_source_file_2.c $(
 	compound_condition_1.c \
 	compound_condition_2.c \
 	compound_condition_3.c \
-	compound_condition_4.c
+	compound_condition_4.c \
+	infinite_loop_simple.c
 	
 # The built C++ test files.
 CPP_TEST_SOURCE = test_source_file_1.cpp test_source_file_2.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -31,11 +31,13 @@
 class TranslationUnit;
 class FunctionCall;
 class ToolDot;
-typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
+
 /// Map of function call identifiers to FunctionCallUnresolved instances.
 typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP;
 
-
+/**
+ * Class representing a single function in the source.
+ */
 class Function
 {
 public:
@@ -59,7 +61,7 @@ public:
      * @param cfg The ControlFlowGraph to add this function's control-flow graph to.
      * @return true on success, false on failure.
      */
-	bool CreateControlFlowGraph(ControlFlowGraph &cfg);
+	//bool CreateControlFlowGraph(ControlFlowGraph &cfg);
 	
 	bool CreateControlFlowGraph(ControlFlowGraph &cfg, const std::vector< StatementBase* > &statement_list);
 
@@ -151,6 +153,35 @@ public:
 
 private:
 	
+	/**
+	 * Structure for capturing info regarding basic block leaders.
+	 * Used in the creation of a Function's CFG.
+	 */
+	struct BasicBlockLeaderInfo
+	{
+		BasicBlockLeaderInfo(T_CFG_VERTEX_DESC leader, T_CFG_VERTEX_DESC immediate_predecessor)
+		{
+			m_leader = leader;
+			m_immediate_predecessor = immediate_predecessor;
+		};
+
+		/// Vertex descriptor of the basic block leader.
+		T_CFG_VERTEX_DESC m_leader;
+
+		/// The vertex which ended the immediately-preceding basic block.
+		T_CFG_VERTEX_DESC m_immediate_predecessor;
+	};
+
+	/**
+	 * Add any necessary Impossible edges to the CFG.
+	 *
+	 * These can be necessary when the source contains infinite loops or dead code.
+	 *
+	 * @param cfg
+	 * @param leader_info_list
+	 */
+	void AddImpossibleEdges(ControlFlowGraph & cfg, std::vector< BasicBlockLeaderInfo > &leader_info_list);
+
 	bool CheckForNoInEdges(ControlFlowGraph & cfg,
 			std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
 			std::vector< T_CFG_VERTEX_DESC > *output);
