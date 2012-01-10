@@ -15,4 +15,4 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-void UnsafePrint(char *string, int integer);
+void UnsafePrint(const char *string, int integer);
