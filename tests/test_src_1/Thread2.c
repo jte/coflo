@@ -16,7 +16,7 @@
  */
  
 #include <stdio.h>
-#include "ThreadUnsafeFunctions.h"
+#include "Layer1.h"
  
 void* ThreadBody2(void* arg)
 {
@@ -29,7 +29,7 @@ void* ThreadBody2(void* arg)
 		}
 		else
 		{
-			UnsafePrint("Thread 2: ", i);
+			SometimesSafePrint("Thread 2: ", i);
 		}
 	}
 	

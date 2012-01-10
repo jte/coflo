@@ -17,7 +17,7 @@
 
 #include <stdio.h>
  
-void UnsafePrint(char *string, int integer)
+void UnsafePrint(const char *string, int integer)
 {
 COFLO_NOT_THREADSAFE:
 	printf(string);
