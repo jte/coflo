@@ -54,3 +54,13 @@ AT_CHECK([grep -E 'warning.*?constraint violation.*?calculate' stdout],
 
 # End this test group.
 AT_CLEANUP
+
+# Start a test group.
+AT_SETUP([Multithread 1: Function reachable from Thread, several intermediate files])
+
+AT_CHECK([coflo ${abs_top_srcdir}/tests/test_src_1/*.c --constraint="ThreadBody2() -x UnsafePrint()"],
+	0,
+	ignore,
+	ignore)
+
+AT_CLEANUP

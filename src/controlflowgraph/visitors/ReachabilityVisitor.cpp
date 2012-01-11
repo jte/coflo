@@ -38,14 +38,22 @@ ReachabilityVisitor::~ReachabilityVisitor()
 {
 }
 
+edge_return_value_t ReachabilityVisitor::examine_edge(T_CFG_EDGE_DESC u)
+{
+	if(m_cfg.GetEdgeTypePtr(u)->IsImpossible() || m_cfg.GetEdgeTypePtr(u)->IsBackEdge())
+	{
+		// Ignore Impossible edges.
+		return edge_return_value_t::terminate_branch;
+	}
+	else
+	{
+		return edge_return_value_t::ok;
+	}
+}
+
 vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 {
-	/*std::cout << "discover_vertex: " << m_graph[u].m_statement->GetIdentifierCFG()
-					// Print the vertex ID.
-					<< " [" << u << "]" << " <" << m_graph[u].m_statement->GetLocation() << ">" << std::endl;*/
-
 	if(m_inspect_vertex(m_cfg, u) == true)
-	//if(u == m_sink)
 	{
 		// We found the vertex we were looking for, terminate the search.
 		return vertex_return_value_t::terminate_search;
@@ -57,16 +65,17 @@ vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 edge_return_value_t ReachabilityVisitor::tree_edge(T_CFG_EDGE_DESC e)
 {
 	// Add this edge to the predecessor list.
-	//std::cout << "push " << e << std::endl;
 	m_predecessor_list->push_back(e);
+	//std::cout << "PUSH, size=" << m_predecessor_list->size() << std::endl;
 
 	return edge_return_value_t::ok;
 }
 
+
 vertex_return_value_t ReachabilityVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
 {
 	// Remove this vertex from the predecessor stack.
-	//std::cout << "pop" << std::endl;
+	//std::cout << "POP, size=" << m_predecessor_list->size() << std::endl;
 	m_predecessor_list->pop_back();
 
 	return vertex_return_value_t::ok;

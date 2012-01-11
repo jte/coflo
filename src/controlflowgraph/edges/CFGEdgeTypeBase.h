@@ -68,11 +68,21 @@ public:
 	 *
 	 * @return true if this edge is a normal edge.
 	 */
-	bool IsNormal() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
-	bool IsExceptional() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
-	bool IsImpossible() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+	virtual bool IsNormal() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+	virtual bool IsExceptional() const { BOOST_THROW_EXCEPTION(not_implemented()); return false; };
+	virtual bool IsImpossible() const { return false; };
 
 	//@}
+
+	/**
+	 * Returns a string suitable for printing as the edge's label.
+	 * E.g., "true" or "false" for out edges of an if() statement.
+	 *
+	 * Unless overridden in derived classes, returns an empty string.
+	 *
+     * @return A string suitable for printing as the edge's label.
+     */
+	virtual std::string GetLabel() const { return std::string(); };
 
 	/**
 	 * Returns a string suitable for use as an edge label in a Dot graph.

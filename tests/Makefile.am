@@ -21,6 +21,14 @@
 MAX_GCCS_TO_TEST=16
 
 EXTRA_DIST = $(TESTSUITE_AT) $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
+nobase_EXTRA_DIST = test_src_1/main.c \
+	test_src_1/Layer1.c test_src_1/Layer1.h \
+	test_src_1/Thread1.c \
+	test_src_1/Thread1.h \
+	test_src_1/Thread2.c \
+	test_src_1/Thread2.h \
+	test_src_1/RarelySafePrint.c test_src_1/RarelySafePrint.h \
+	test_src_1/ThreadUnsafeFunctions.c test_src_1/ThreadUnsafeFunctions.h
 DISTCLEANFILES = atconfig
 MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 CLEANFILES = $(CPP_TEST_SOURCE)

@@ -26,7 +26,7 @@ libanalysis_a_SOURCES = \
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
 # the ordinary ‘AM_’ form of the flags variable is not automatically included in the compilation
 # (however, the user form of the variable is included)."
-libanalysis_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libanalysis_a_CPPFLAGS = -I $(abs_top_srcdir)/src -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libanalysis_a_CFLAGS = $(AM_CFLAGS)
 libanalysis_a_CXXFLAGS = $(AM_CXXFLAGS)
 

@@ -33,8 +33,6 @@ class Function;
 /**
  * Base class for ControlFlowGraph visitors.
  * ControlFlowGraphVisitorBase adds a call stack usable by derived classes.
- *
- * @todo This should probably be a specialization of ImprovedDFSVisitorBase, not derived from it.
  */
 class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>
 {
@@ -61,6 +59,7 @@ protected:
 	bool IsCallStackEmpty() const;
 	bool AreWeRecursing(Function* function);
 
+	/// Reference to the ControlFlowGraph we're traversing.
 	ControlFlowGraph &m_cfg;
 
 private:

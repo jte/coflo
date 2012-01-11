@@ -44,7 +44,7 @@ coflo_SOURCES = main.cpp \
 	safe_enum.h \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
-coflo_DEPENDENCIES = $(top_builddir)/libtool ../third_party/stamp_boost_src_installed ../third_party/stamp_dparser_installed
+coflo_DEPENDENCIES = $(top_builddir)/libtool $(top_builddir)/third_party/stamp_boost_src_installed $(top_builddir)/third_party/stamp_dparser_installed
 	
 # Path to the make_dparser executable.
 PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
