@@ -20,8 +20,8 @@
 # Test at most the first 16 GCCs that we find installed on the system.
 MAX_GCCS_TO_TEST=16
 
-EXTRA_DIST = $(TESTSUITE_AT) $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE)
-nobase_EXTRA_DIST = test_src_1/main.c \
+EXTRA_DIST = $(TESTSUITE_AT) $(TESTSUITE) $(srcdir)/package.m4 atlocal.in $(C_TEST_SOURCE) \
+	test_src_1/main.c \
 	test_src_1/Layer1.c test_src_1/Layer1.h \
 	test_src_1/Thread1.c \
 	test_src_1/Thread1.h \
