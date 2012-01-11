@@ -58,7 +58,13 @@ AT_CLEANUP
 # Start a test group.
 AT_SETUP([Multithread 1: Function reachable from Thread, several intermediate files])
 
-AT_CHECK([coflo ${abs_top_srcdir}/tests/test_src_1/*.c --constraint="ThreadBody2() -x UnsafePrint()"],
+AT_CHECK([coflo ${abs_top_srcdir}/tests/test_src_1/main.c \
+	${abs_top_srcdir}/tests/test_src_1/Thread1.c \
+	${abs_top_srcdir}/tests/test_src_1/Thread2.c \
+	${abs_top_srcdir}/tests/test_src_1/Layer1.c \
+	${abs_top_srcdir}/tests/test_src_1/RarelySafePrint.c \
+	${abs_top_srcdir}/tests/test_src_1/ThreadUnsafeFunctions.c \
+	--constraint="ThreadBody2() -x UnsafePrint()"],
 	0,
 	ignore,
 	ignore)
