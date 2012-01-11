@@ -139,6 +139,8 @@ public:
 	 */
 	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
 
+	T_CFG_EDGE_DESC GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
+
 	/**
 	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
 	 *

@@ -34,6 +34,10 @@ class ReachabilityVisitor: public ControlFlowGraphVisitorBase
 {
 public:
 
+	/**
+	 * Typedef for the predicate which this class will call on each vertex it visits to check
+	 * for a match.
+	 */
 	typedef std::tr1::function<bool (ControlFlowGraph &, T_CFG_VERTEX_DESC &)> T_VERTEX_VISITOR_PREDICATE;
 
 	ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source,
@@ -41,6 +45,13 @@ public:
 	ReachabilityVisitor(const ReachabilityVisitor& orig);
 	virtual ~ReachabilityVisitor();
 
+	/**
+	 * For reachability traversal, we want to filter out certain edges, in particular Impossible edges.
+	 *
+	 * @param u
+	 * @return
+	 */
+	virtual edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
 	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
 	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC e);
 	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
@@ -49,9 +60,6 @@ private:
 
 	/// The starting vertex.
 	T_CFG_VERTEX_DESC m_source;
-
-	/// The vertex we're trying to find.
-	//T_CFG_VERTEX_DESC m_sink;
 
 	/// The predicate we will use to inspect each vertex of the control flow graph.  When we find the one we're looking
 	/// for, we'll return true.

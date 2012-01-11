@@ -17,13 +17,16 @@
 
 /** @file */
 
+#include "Analyzer.h"
+
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
-#include "Analyzer.h"
-#include "../../Program.h"
 #include "RuleBase.h"
 #include "RuleReachability.h"
+
+#include "Program.h"
+#include "Function.h"
 
 /// Regex for function-calls-function constraint "f1() -x f2()".
 static const boost::regex f_fxf_regex("([[:alpha:]_][[:alnum:]_]+)\\(\\) -x ([[:alpha:]_][[:alnum:]_]+)\\(\\)");
@@ -60,7 +63,9 @@ void Analyzer::AddConstraints(const std::vector< std::string > &vector_of_constr
 			}
 			else
 			{
-				std::cerr << "INFO: Adding constraint: f1() -x f2()." << std::endl;
+				std::cerr << "INFO: Adding constraint: "
+						<< f1->GetIdentifier() << "() -x "
+						<< f2->GetIdentifier() << "()" << std::endl;
 				RuleReachability *rule = new RuleReachability(*m_program->GetControlFlowGraphPtr(), f1, f2);
 				m_constraints.push_back(rule);
 			}
