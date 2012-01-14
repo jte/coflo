@@ -134,7 +134,7 @@ AT_XFAIL_IF([true])
 # Capture the contents of the intermediate files if the test fails.
 AT_CAPTURE_FILE([main.cpp.coflo.gimple])
 
-AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --cfg=main],
+AT_CHECK([coflo -I ${abs_top_builddir}/src -I ${abs_top_srcdir}/src/debug_utils ${abs_top_srcdir}/src/main.cpp --cfg=main],
 	0,
 	ignore,
 	ignore)

@@ -34,7 +34,8 @@ DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
 # from the DParser source tarball.
 noinst_PROGRAMS = make_dparser
 make_dparser_SOURCES =
-make_dparser_DEPENDENCIES = stamp_dparser_installed stamp_boost_src_installed
+make_dparser_CPPFLAGS = -DUSE_FREELISTS -DD_MAJOR_VERSION=$(MAJOR) -DD_MINOR_VERSION=$(MINOR) -DD_BUILD_VERSION=\"$(D_BUILD_VERSION)\" $(AM_CPPFLAGS)
+make_dparser_DEPENDENCIES = stamp_dparser_src_installed stamp_boost_src_installed
 make_dparser_LINK = $(INSTALL_PROGRAM) $(builddir)/d/make_dparser$(EXEEXT) $(builddir)/make_dparser$(EXEEXT)
 
 # These headers are only built in the sense that they get untarred into the ./d directory.
@@ -44,7 +45,7 @@ LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 	$(DPARSER_INCLUDE_DIR)/dparse_tree.h
 
 # Delete all the stamps except for the untarring ones for any clean.
-MOSTLYCLEANFILES = stamp_dparser_built stamp_dparser_installed \
+MOSTLYCLEANFILES = stamp_dparser_src_built stamp_dparser_src_installed \
 	 stamp_boost_src_configured stamp_boost_src_built stamp_boost_src_installed
 	 
 # 
@@ -59,14 +60,14 @@ stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 # Build the untarred DParser, again creating a stamp file indicating that we completed it.
-stamp_dparser_built: stamp_dparser_src_untarred
+stamp_dparser_src_built: stamp_dparser_src_untarred
 	rm -f $@-temp
 	cd d && $(MAKE) $(AM_MAKEFLAGS) D_BUILD_VERSION=exported all
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 	
-stamp_dparser_installed: stamp_dparser_built
+stamp_dparser_src_installed: stamp_dparser_src_built
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) D_BUILD_VERSION=exported PREFIX=$(DPARSER_PREFIX) install
+	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 ###
