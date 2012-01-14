@@ -17,11 +17,22 @@
 
 /** @file */
 
-#include <vector>
-#include <boost/unordered_set.hpp>
 
-#include "debug_utils.hpp"
-#include "BackEdgeFixupVisitor.h"
+#ifndef COFLO_EXCEPTIONS_HPP
+#define COFLO_EXCEPTIONS_HPP
+
+#include <boost/exception/all.hpp>
+#include <boost/throw_exception.hpp>
+
+/**
+ * Exception base class for all exceptions CoFlo itself will throw.
+ */
+struct coflo_exception_base: virtual std::exception, virtual boost::exception { };
+
+/**
+ * Exception to throw when some functionality is not yet implemented.
+ */
+struct not_implemented: virtual coflo_exception_base { };
 
 
-
+#endif /* COFLO_EXCEPTIONS_HPP */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -15,13 +15,27 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+#include <string.h>
+#include <stdio.h>
 
-#include <vector>
-#include <boost/unordered_set.hpp>
+/**
+ * This is the volatile variable which decides whether the function is threadsafe or not.
+ */
+volatile int external_forces;
 
-#include "debug_utils.hpp"
-#include "BackEdgeFixupVisitor.h"
+void SometimesSafePrint(char *string, int integer)
+{
+	if(external_forces)
+	{
+		// We can print safely by copying the params and calling the (assumed threadsafe) printf().
+		char *copy_of_string = strdup(string);
+		int copy_of_int = integer;
 
-
-
+		printf(copy_of_string);
+		printf("%d\n", copy_of_int);		
+	}
+	else
+	{
+		RarelySafePrint(string, integer);
+	}
+}

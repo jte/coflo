@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo, ./controlflowgraph directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -29,7 +29,7 @@ libcontrolflowgraph_a_SOURCES = \
 	topological_visit_kahn.h
 	
 
-libcontrolflowgraph_a_CPPFLAGS = $(AM_CPPFLAGS)
+libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 

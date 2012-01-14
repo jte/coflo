@@ -1,6 +1,6 @@
 # testsuite.at for CoFlo
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -134,13 +134,18 @@ AT_XFAIL_IF([true])
 # Capture the contents of the intermediate files if the test fails.
 AT_CAPTURE_FILE([main.cpp.coflo.gimple])
 
-AT_CHECK([coflo ${abs_top_srcdir}/src/main.cpp --cfg=main],
+AT_CHECK([coflo -I ${abs_top_builddir}/src -I ${abs_top_srcdir}/src/debug_utils ${abs_top_srcdir}/src/main.cpp --cfg=main],
 	0,
 	ignore,
 	ignore)
 
 # End this test group.
 AT_CLEANUP
+
+###
+### Do some checks to make sure CoFlo is generating valid CFGs.
+###
+m4_include([connectedness.at])
 
 ###
 ### Do some checks of the CFG structuring functionality.

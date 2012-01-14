@@ -1,5 +1,5 @@
-# Second-level Makefile.am for CoFlo, ./debug_utils directory.
-#
+#! /bin/sh
+
 # Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-
-noinst_LIBRARIES = libdebugutils.a
-libdebugutils_a_SOURCES = debug_utils.cpp debug_utils.hpp coflo_exceptions.hpp
-
-libdebugutils_a_CPPFLAGS = $(AM_CPPFLAGS)
-libdebugutils_a_CFLAGS = $(AM_CFLAGS)
-libdebugutils_a_CXXFLAGS = $(AM_CXXFLAGS)
+../../build/src/coflo  main.c Thread1.c Thread2.c Layer1.c RarelySafePrint.c ThreadUnsafeFunctions.c \
+	--constraint="ThreadBody1() -x UnsafePrint()" \
+	--constraint="ThreadBody2() -x UnsafePrint()"

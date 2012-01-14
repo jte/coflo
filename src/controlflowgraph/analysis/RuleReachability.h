@@ -41,6 +41,7 @@ public:
 private:
 	
 	void PrintStatement(StatementBase *fc, long indent_level);
+	void PrintStatement(StatementBase *sb, CFGEdgeTypeBase *eb, long indent_level);
 
 	/// Flag which we'll set when we find m_sink to stop the search.
 	bool m_found_sink;

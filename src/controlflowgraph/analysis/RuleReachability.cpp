@@ -17,6 +17,8 @@
 
 /** @file */
 
+#include "RuleReachability.h"
+
 #include <iostream>
 
 #include <boost/graph/depth_first_search.hpp>
@@ -26,8 +28,8 @@
 #include "../ControlFlowGraphTraversalDFS.h"
 #include "../visitors/ReachabilityVisitor.h"
 #include "../statements/Entry.h"
-#include "../../Function.h"
-#include "RuleReachability.h"
+#include "Function.h"
+
 #include "../statements/Entry.h"
 
 RuleReachability::RuleReachability(ControlFlowGraph &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
@@ -46,6 +48,10 @@ RuleReachability::~RuleReachability()
 {
 }
 
+/**
+ * This is the predicate which will be called by the ReachabilityVisitor as it visits each vertex.
+ * It will return true to indicate that the target vertex was discovered.
+ */
 struct ReachabilityPredicateSpecificVertex
 {
 	ReachabilityPredicateSpecificVertex(T_CFG_VERTEX_DESC sink) { m_sink = sink; };
@@ -68,7 +74,11 @@ bool RuleReachability::RunRule()
 {
 	T_CFG_VERTEX_DESC starting_vertex_desc;
 
+	// Get the starting vertex.
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
+
+	// Push a fake edge onto the predecessor stack, since our last vertex will try to pop it.
+	m_predecessors.push_back(m_source->GetEntrySelfEdgeDescriptor());
 
 	// Set up a visitor.
 	ReachabilityPredicateSpecificVertex pred(m_sink->GetEntryVertexDescriptor());
@@ -91,7 +101,11 @@ bool RuleReachability::RunRule()
 	}
 	else
 	{
-		std::cout << "Couldn't find a constraint violation." << std::endl;
+		std::cout << "Couldn't find a violation of constraint: "
+				<< m_source->GetIdentifier()
+				<< "() -x "
+				<< m_sink->GetIdentifier() << "()"
+				<< std::endl;
 	}
 
 	return true;
@@ -105,10 +119,18 @@ void RuleReachability::PrintCallChain()
 
 	std::deque<T_CFG_EDGE_DESC> m_new_predecessors;
 
-	// First strip the call chain of all calls that returned with no matches.
+	// First strip the call chain of all function calls that returned with no matches.
 	BOOST_REVERSE_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
 		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+
+		if (sb->IsType<FunctionCallUnresolved>())
+		{
+			// By definition, unresolved calls will never be in our call stack.
+			continue;
+		}
+
+#if 0
 		if(sb->IsType<Exit>())
 		{
 			// Seeing an exit vertex means we're at a return from a successful call.
@@ -125,25 +147,29 @@ void RuleReachability::PrintCallChain()
 		{
 			ignore_function_call = false;
 		}
-		else if (sb->IsType<FunctionCallUnresolved>())
-		{
-			// By definition, unresolved calls will never be in our call stack.
-			continue;
-		}
 		else if(bypass_call_depth == 0)
 		{
+#endif
 			m_new_predecessors.push_front(pred);
+/**
 		}
+**/
 	}
+
 
 	m_predecessors.swap(m_new_predecessors);
 
 	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
 	{
 		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
-		if(sb->IsType<FunctionCall>() /*|| sb->IsDecisionStatement()*/)
+		if(sb->IsType<FunctionCall>())
 		{
 			PrintStatement(sb, indent_level);
+		}
+		else if(sb->IsDecisionStatement())
+		{
+			// It's a decision statement
+			PrintStatement(sb, m_cfg.GetEdgeTypePtr(pred), indent_level);
 		}
 		else if(sb->IsType<Entry>())
 		{
@@ -162,5 +188,14 @@ void RuleReachability::PrintStatement(StatementBase *fc, long indent_level)
 	indent(indent_level);
 	std::cout << fc->GetIdentifierCFG() << std::endl;
 }
+
+void RuleReachability::PrintStatement(StatementBase *sb, CFGEdgeTypeBase *eb, long  indent_level)
+{
+	std::cout << sb->GetLocation().asGNUCompilerMessageLocation() << ": warning: ";
+	indent(indent_level);
+	std::cout << sb->GetIdentifierCFG() << ", taking out edge \"" << eb->GetLabel() << "\"" << std::endl;
+}
+
+
 
 

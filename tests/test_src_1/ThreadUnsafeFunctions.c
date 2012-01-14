@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -15,34 +15,18 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
-
-#include "CFGEdgeTypeBase.h"
-
-CFGEdgeTypeBase::CFGEdgeTypeBase()
+#include <stdio.h>
+ 
+void UnsafePrint(const char *string, int integer)
 {
-	// We're not a back edge until told otherwise.
-	m_is_back_edge = false;
+COFLO_NOT_THREADSAFE:
+	printf(string);
+	printf("%d\n", integer);
 }
 
-CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig)
+void UnsafePrint2(char *string, int integer)
 {
-	m_is_back_edge = orig.m_is_back_edge;
-}
-
-CFGEdgeTypeBase::~CFGEdgeTypeBase() 
-{
-}
-
-std::string CFGEdgeTypeBase::GetDotStyle() const
-{
-	if(m_is_back_edge)
-	{
-		// This is a back edge, make it a dashed line.
-		return "dashed";
-	}
-	else
-	{
-		return "solid";
-	}
+COFLO_NOT_THREADSAFE:
+	printf(string);
+	printf("%d\n", integer);
 }

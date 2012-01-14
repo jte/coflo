@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -42,7 +42,7 @@ public:
 	 * @param source  The vertex to start the traversal from.
 	 * @param visitor The ControlFlowGraphVisitorBase()-derived visitor which will examine the nodes traversed and stop the traversal.
 	 */
-	virtual void Traverse(typename boost::graph_traits<T_CFG>::vertex_descriptor source,
+	virtual void Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
 			ControlFlowGraphVisitorBase *visitor) = 0;
 
 protected:
