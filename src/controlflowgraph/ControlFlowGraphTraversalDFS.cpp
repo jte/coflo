@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -74,13 +74,13 @@ ControlFlowGraphTraversalDFS::~ControlFlowGraphTraversalDFS()
 
 }
 
-void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>::vertex_descriptor source,
+void ControlFlowGraphTraversalDFS::Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
 		ControlFlowGraphVisitorBase *visitor)
 {
 	// Some convenience typedefs.
 	typedef VertexInfo<T_CFG> T_VERTEX_INFO;
-	typedef typename boost::graph_traits<T_CFG>::vertex_descriptor T_VERTEX_DESC;
-	typedef typename boost::graph_traits<T_CFG>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef boost::graph_traits<T_CFG>::vertex_descriptor T_VERTEX_DESC;
+	typedef boost::graph_traits<T_CFG>::out_edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 
 	// The local variables.
@@ -275,7 +275,7 @@ void ControlFlowGraphTraversalDFS::Traverse(typename boost::graph_traits<T_CFG>:
 	}
 }
 
-bool ControlFlowGraphTraversalDFS::SkipEdge(typename boost::graph_traits<T_CFG>::edge_descriptor e)
+bool ControlFlowGraphTraversalDFS::SkipEdge(boost::graph_traits<T_CFG>::edge_descriptor e)
 {
 	CFGEdgeTypeBase *edge_type;
 	CFGEdgeTypeFunctionCall *fc;

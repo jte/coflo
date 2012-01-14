@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,11 +17,12 @@
 
 /** @file */
 
-#include <vector>
-#include <boost/unordered_set.hpp>
 
-#include "debug_utils.hpp"
-#include "BackEdgeFixupVisitor.h"
+#ifndef RARELYSAFEPRINT_H
+#define RARELYSAFEPRINT_H
 
 
+void RarelySafePrint(const char *string, int integer);
 
+
+#endif /* RARELYSAFEPRINT_H */

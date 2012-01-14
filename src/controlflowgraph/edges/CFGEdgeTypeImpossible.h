@@ -40,6 +40,8 @@ public:
 	
 	virtual std::string GetDotLabel() const { return "Impossible"; };
 	
+	bool IsImpossible() const { return true; };
+
 private:
 
 };

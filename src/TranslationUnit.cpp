@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,11 +17,12 @@
 
 /** @file */
 
+#include "TranslationUnit.h"
+
 #include <iostream>
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>
@@ -34,8 +35,6 @@
 #include <boost/graph/topological_sort.hpp>
 
 #include "debug_utils/debug_utils.hpp"
-
-#include "TranslationUnit.h"
 
 #include "Location.h"
 #include "Function.h"
@@ -179,16 +178,6 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 	}
 }
 
-bool TranslationUnit::CreateControlFlowGraphs(ControlFlowGraph *cfg)
-{
-	BOOST_FOREACH(Function* fp, m_function_defs)
-	{
-		fp->CreateControlFlowGraph(*cfg);
-	}
-	
-	return true;
-}
-
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
@@ -276,6 +265,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		// Add the new Function to the program-wide function map.
 		(*function_map)[*(fi->m_identifier)] = f;
 
+		// Create the control flow graph for this function.
 		f->CreateControlFlowGraph(*(m_parent_program->GetControlFlowGraphPtr()), *(fi->m_statement_list));
 	}
 }

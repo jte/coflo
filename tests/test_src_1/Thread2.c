@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -14,35 +14,24 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/** @file */
-
-#include "CFGEdgeTypeBase.h"
-
-CFGEdgeTypeBase::CFGEdgeTypeBase()
+ 
+#include <stdio.h>
+#include "Layer1.h"
+ 
+void* ThreadBody2(void* arg)
 {
-	// We're not a back edge until told otherwise.
-	m_is_back_edge = false;
-}
-
-CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig)
-{
-	m_is_back_edge = orig.m_is_back_edge;
-}
-
-CFGEdgeTypeBase::~CFGEdgeTypeBase() 
-{
-}
-
-std::string CFGEdgeTypeBase::GetDotStyle() const
-{
-	if(m_is_back_edge)
+	int i;
+	for(i=0; i<100; i++)
 	{
-		// This is a back edge, make it a dashed line.
-		return "dashed";
+		if(arg != NULL)
+		{
+			printf("Thread 2: %d\n", i);
+		}
+		else
+		{
+			SometimesSafePrint("Thread 2: ", i);
+		}
 	}
-	else
-	{
-		return "solid";
-	}
+	
+	return NULL;
 }

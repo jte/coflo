@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,11 +17,18 @@
 
 /** @file */
 
-#include <vector>
-#include <boost/unordered_set.hpp>
 
-#include "debug_utils.hpp"
-#include "BackEdgeFixupVisitor.h"
+#ifndef LAYER1_H
+#define LAYER1_H
+
+/**
+ * This function is threadsafe or not depending on the state of an extern volatile variable,
+ * perhaps something set by an interrupt handler.
+ *
+ * @param string
+ * @param integer
+ */
+void SometimesSafePrint(char *string, int integer);
 
 
-
+#endif /* LAYER1_H */
