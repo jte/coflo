@@ -22,10 +22,10 @@ nobase_dist_html_DATA = index.html img/loop_test_1.png
 # The non-generated documentation.
 EXTRA_DIST=doxygen_filter.sh MainPage.dox index.template.html
 
-BUILT_SOURCE = index.html
+BUILT_SOURCE = $(srcdir)/index.html
 
-$(srcdir)/index.html: index.template.html
-	cat index.template.html | "$(SED)" -r -e 's/@THIS_VERSION@/$(PACKAGE_VERSION)/' > $(srcdir)/index.html
+$(srcdir)/index.html: $(srcdir)/index.template.html
+	cat $(srcdir)/index.template.html | "$(SED)" -r -e 's/[@]THIS_VERSION[@]/$(PACKAGE_VERSION)/g' > $(srcdir)/index.html
 
 MOSTLYCLEAN = index.html
 
