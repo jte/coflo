@@ -39,6 +39,7 @@ public:
 	virtual ~CFGEdgeTypeImpossible();
 	
 	virtual std::string GetDotLabel() const { return "Impossible"; };
+	virtual std::string GetDotSVGColor() const { return "gray"; };
 	
 	bool IsImpossible() const { return true; };
 

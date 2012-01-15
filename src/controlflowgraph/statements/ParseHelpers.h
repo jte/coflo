@@ -105,8 +105,10 @@ class IfUnlinked : public FlowControlUnlinked
 {
 public:
 	IfUnlinked() : FlowControlUnlinked() {};
-	IfUnlinked(const Location &loc, GotoUnlinked *goto_true, GotoUnlinked *goto_false) : FlowControlUnlinked(loc)
+	IfUnlinked(const Location &loc, const std::string &condition,
+			GotoUnlinked *goto_true, GotoUnlinked *goto_false) : FlowControlUnlinked(loc)
 	{
+		m_condition = condition;
 		m_true = goto_true;
 		m_false = goto_false;
 	}
@@ -117,7 +119,7 @@ public:
 	M_DECLARE_FLOW_CONTROL_VIRTUALS(If)
 
 private:
-
+	std::string m_condition;
 	GotoUnlinked *m_true;
 	GotoUnlinked *m_false;
 };
