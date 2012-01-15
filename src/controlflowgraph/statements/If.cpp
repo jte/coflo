@@ -17,8 +17,9 @@
 
 #include "If.h"
 
-If::If(const Location &location) : FlowControlBase(location)
+If::If(const Location &location, const std::string &condition) : FlowControlBase(location)
 {
+	m_condition = condition;
 }
 
 If::If(const If& orig) : FlowControlBase(orig)

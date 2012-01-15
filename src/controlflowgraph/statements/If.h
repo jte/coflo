@@ -22,6 +22,7 @@
 
 #include "FlowControlBase.h"
 
+#include <string>
 
 /**
  * Class representing a 2-option (true/false) decision vertex.
@@ -29,11 +30,11 @@
 class If : public FlowControlBase
 {
 public:
-	If(const Location &location);
+	If(const Location &location, const std::string &condition);
 	If(const If& orig);
 	virtual ~If();
 	
-	virtual std::string GetStatementTextDOT() const { return "if()"; };
+	virtual std::string GetStatementTextDOT() const { return "if(" + m_condition + ")"; };
 	
 	virtual std::string GetIdentifierCFG() const { return "if()"; };
 	
@@ -43,6 +44,7 @@ public:
 
 private:
 
+	std::string m_condition;
 };
 
 #endif	/* IF_H */

@@ -98,7 +98,7 @@ FlowControlBase* IfUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DE
 		cfg.AddEdge(this_vertex, (*it_true).second, new CFGEdgeTypeIfTrue());
 		cfg.AddEdge(this_vertex, (*it_false).second, new CFGEdgeTypeIfFalse());
 
-		return new If(this->GetLocation());
+		return new If(this->GetLocation(), m_condition);
 	}
 }
 
