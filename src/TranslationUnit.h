@@ -20,7 +20,6 @@
 
 #include <string>
 
-#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
 #include "controlflowgraph/ControlFlowGraph.h"
