@@ -41,6 +41,7 @@ coflo_SOURCES = main.cpp \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
+	UEI.cpp UEI.h \
 	safe_enum.h \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h

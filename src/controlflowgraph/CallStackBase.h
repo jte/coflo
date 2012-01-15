@@ -20,7 +20,7 @@
 #ifndef CALLSTACKBASE_H
 #define CALLSTACKBASE_H
 
-class FunctionCallResolved;
+class CallStackFrameBase;
 class Function;
 
 /**
@@ -31,10 +31,25 @@ class CallStackBase
 public:
 	virtual ~CallStackBase() = 0;
 
-	virtual void PushCallStack(FunctionCallResolved* pushing_function_call) = 0;
+	/**
+	 * Push a new stack frame onto the call stack.
+	 * @param cfsb
+	 */
+	virtual void PushCallStack(CallStackFrameBase* cfsb) = 0;
+
+	/**
+	 * Pop the topmost stack frame off the call stack.
+	 */
 	virtual void PopCallStack() = 0;
-	virtual FunctionCallResolved* TopCallStack() = 0;
+
+	/**
+	 * Access the topmost stack frame of the call stack.
+	 * @return
+	 */
+	virtual CallStackFrameBase* TopCallStack() = 0;
+
 	virtual bool IsCallStackEmpty() const = 0;
+
 	virtual bool AreWeRecursing(Function* function) = 0;
 };
 

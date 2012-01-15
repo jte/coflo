@@ -26,8 +26,6 @@
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>
-// Tell <boost/filesystem.hpp> that we want the new interface.
-#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/graph/graph_traits.hpp>

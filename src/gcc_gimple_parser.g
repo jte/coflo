@@ -34,7 +34,8 @@
 
 #include <dparse.h>
 
-// Redefine this with C++ casts.
+// Redefine P_PN with C++ casts to avoid warnings.
+#undef D_PN
 #define D_PN(_x, _o) (reinterpret_cast<D_ParseNode*>(static_cast<char*>(_x) + _o))
 
 extern D_ParserTables parser_tables_gcc_gimple_parser;
