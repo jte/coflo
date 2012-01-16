@@ -36,7 +36,7 @@ public:
 	
 	virtual std::string GetStatementTextDOT() const { return "if(" + m_condition + ")"; };
 	
-	virtual std::string GetIdentifierCFG() const { return "if()"; };
+	virtual std::string GetIdentifierCFG() const { return "if(" + m_condition + ")"; };
 	
 	virtual std::string GetShapeTextDOT() const { return "diamond"; };
 	
