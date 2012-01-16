@@ -2,6 +2,16 @@ CoFlo NEWS
 
 Version 0.0.4 - Gary R. Van Sickle, 2012-??-??
 
+* Major feature enhancements, Major bugfixes:
+- if() statements now display the conditional expression in CFG output.
+- Fixed segfault with constraints when no violations were found.
+- Many misc improvements to reachability analysis and reporting.
+- Added another multi-file constraints test case, this one slightly more real-world.
+- Added connectedness test.
+- Now adding impossible edges to unconnected blocks during CFG creation.
+- Fixed tests/testsuite.at's main.cpp check.
+- Fixed broken dependencies which were resulting in the coflo executable not being rebuilt.
+- Passing Autoconf/Automake-determined CPPFLAGS to DParser build now.
 
 Version 0.0.3 - Gary R. Van Sickle, 2012-01-07
 
