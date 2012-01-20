@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -34,7 +34,8 @@
 
 #include <dparse.h>
 
-// Redefine this with C++ casts.
+// Redefine P_PN with C++ casts to avoid warnings.
+#undef D_PN
 #define D_PN(_x, _o) (reinterpret_cast<D_ParseNode*>(static_cast<char*>(_x) + _o))
 
 extern D_ParserTables parser_tables_gcc_gimple_parser;
@@ -364,10 +365,12 @@ if
 	// The style used in 4.5.3.
 	: location 'if' '(' condition ')' goto_statement ';' 'else' goto_statement ';'
 		{
+			$$.m_str = new M_TO_STR($n3);
 			$$.m_statement = new IfUnlinked(*($0.m_location),
+					*($$.m_str),
 					dynamic_cast<GotoUnlinked*>($5.m_statement),
 					dynamic_cast<GotoUnlinked*>($8.m_statement));
-			/// @todo Get condition in here.
+			delete $$.m_str;
 		}
 	;
 	
@@ -513,6 +516,7 @@ argument_expression_list
 decl_spec
 	: type_qualifier
 	| storage_class_specifier
+	| function_specifier  /* C++ */
 	| 'struct' identifier 
 	| 'short'
 	| 'signed'
@@ -541,6 +545,12 @@ type_qualifier
 storage_class_specifier
 	: 'static'
 	| 'extern'
+	;
+	
+function_specifier
+	: 'inline'
+	| 'virtual'
+	| 'explicit'
 	;
 
 lhs

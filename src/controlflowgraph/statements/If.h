@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -22,6 +22,7 @@
 
 #include "FlowControlBase.h"
 
+#include <string>
 
 /**
  * Class representing a 2-option (true/false) decision vertex.
@@ -29,13 +30,13 @@
 class If : public FlowControlBase
 {
 public:
-	If(const Location &location);
+	If(const Location &location, const std::string &condition);
 	If(const If& orig);
 	virtual ~If();
 	
-	virtual std::string GetStatementTextDOT() const { return "if()"; };
+	virtual std::string GetStatementTextDOT() const { return "if(" + m_condition + ")"; };
 	
-	virtual std::string GetIdentifierCFG() const { return "if()"; };
+	virtual std::string GetIdentifierCFG() const { return "if(" + m_condition + ")"; };
 	
 	virtual std::string GetShapeTextDOT() const { return "diamond"; };
 	
@@ -43,6 +44,7 @@ public:
 
 private:
 
+	std::string m_condition;
 };
 
 #endif	/* IF_H */

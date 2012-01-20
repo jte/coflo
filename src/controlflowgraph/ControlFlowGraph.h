@@ -30,7 +30,7 @@
 class Function;
 
 
-/// \name Control Flow Graph definitions.
+/// @name Control Flow Graph definitions.
 //@{
 	
 /// Vertex properties for the CFG graph.
@@ -55,7 +55,7 @@ struct CFGEdgeProperties
 typedef boost::adjacency_list
 		<
 		/// Selector type to specify the out edge list storage type.
-		boost::vecS,
+		boost::listS,
 		/// Selector type to specify the Vertex list storage type.
 		boost::vecS,
 		/// Selector type to specify the directedness of the graph.

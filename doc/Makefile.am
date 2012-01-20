@@ -1,6 +1,6 @@
 # Second-level Makefile.am for CoFlo, ./doc directory.
 #
-# Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+# Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 #
 # This file is part of CoFlo.
 #
@@ -15,9 +15,17 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# The non-built HTML documentation.
+# The HTML documentation.
 # nobase == Don't strip off the subdirectories from filenames on install. 
 nobase_dist_html_DATA = index.html img/loop_test_1.png
 
 # The non-generated documentation.
-EXTRA_DIST=doxygen_filter.sh MainPage.dox
+EXTRA_DIST=doxygen_filter.sh MainPage.dox index.template.html
+
+BUILT_SOURCE = $(srcdir)/index.html
+
+$(srcdir)/index.html: $(srcdir)/index.template.html
+	cat $(srcdir)/index.template.html | "$(SED)" -r -e 's/[@]THIS_VERSION[@]/$(PACKAGE_VERSION)/g' > $(srcdir)/index.html
+
+MOSTLYCLEAN = index.html
+
