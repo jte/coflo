@@ -1,6 +1,6 @@
 CoFlo NEWS
 
-Version 0.0.4 - Gary R. Van Sickle, 2012-??-??
+Version 0.0.4 - Gary R. Van Sickle, 2012-01-19
 
 * Major feature enhancements, Major bugfixes:
 - if() statements now display the conditional expression in CFG output.

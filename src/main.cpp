@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 			// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y.Z".
 			/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
 			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
-			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
+			std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
 			std::cout << "License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>" << std::endl;
 			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
 			std::cout << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 		{
 			/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
 			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
-			std::cout << "Copyright (C) 2011 Gary R. Van Sickle" << std::endl;
+			std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
 			std::cout << std::endl;
 			std::cout << "Build info:" << std::endl << std::endl;
 			print_build_info();
