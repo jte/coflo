@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -18,31 +18,31 @@
 /** @file */
 
 /*
- * GCC file paths for "gcc -S -fdump-tree-cfg-lineno-blocks <file>.c":
+ * GCC file paths for "gcc -fno-builtin -S -fdump-tree-gimple-lineno <file>.c":
  * - Source path: relative to working directory.
- * - Output <file>.c.013t.cfg:
+ * - Output <file>.c.NNNt.gimple:
  *		- 4.3.4: Always in working directory, ignores -o directory.
  *		- i686-w64-mingw32-gcc (GCC) 4.5.2: In same directory as <file>.s
- * - Output <file>.c.012t.cfg:
+ * - Output <file>.c.NNNt.gimple:
  *		- 4.5.2: In same directory as <file>.s (i.e. follows -o).
  * - Output <file>.s:
  *		- In working directory by default.
  *		- If "-o file.s", then relative to working directory.
  *
- *	The code in GenerateCFG() normalizes this so that the .nnnt.cfg file:
- *	- Always has an extension of ".coflo.cfg".
+ *	The code in GenerateCFG() normalizes this so that the .NNNt.gimple file:
+ *	- Always has an extension of ".coflo.gimple".
  *	- Always is put in the current working directory.
  */
+
+#include "ToolCompiler.h"
 
 #include <cstdio>
 #include <iostream>
 #include <fstream>
 
-// Tell <boost/filesystem.hpp> that we want the new interface.
-#define BOOST_FILESYSTEM_VERSION 3
+// We don't need a "#define BOOST_FILESYSTEM_VERSION 3" here.  configure.ac sets that in AM_CPPFLAGS.
 #include <boost/filesystem.hpp>
 
-#include "ToolCompiler.h"
 
 ToolCompiler::ToolCompiler(const std::string &cmd) 
 {
@@ -51,6 +51,7 @@ ToolCompiler::ToolCompiler(const std::string &cmd)
 
 ToolCompiler::ToolCompiler(const ToolCompiler& orig) : ToolBase(orig)
 {
+	// No members to copy.
 }
 
 ToolCompiler::~ToolCompiler()
@@ -66,6 +67,9 @@ int ToolCompiler::GenerateCFG(const std::string &params, const std::string &sour
 	// Create the compile command.
 	std::string compile_to_cfg_command;
 	
+	// Flags we're sending to GCC:
+	// -fno-builtin = Don't silently use builtins for things like alloca, memcpy, etc.  This would make CoFlo's
+	//                output harder to interpret.
 	compile_to_cfg_command = " -fno-builtin -S -fdump-tree-gimple-lineno";
 	
 	// Call the compiler to generate the CFG file.
@@ -110,10 +114,10 @@ std::pair< std::string, bool > ToolCompiler::CheckIfVersionIsUsable() const
 {
 	std::pair<std::string, bool> retval = std::make_pair(std::string("Ok"), true);
 	
-	// gcc 3.x.x doesn't support the "-fdump-tree-cfg" functionality.
-	if(GetVersion() < VersionNumber("4.0.0"))
+	// gcc versions < 4.5.0 don't support the "-fdump-tree-gimple" functionality.
+	if(GetVersion() < VersionNumber("4.5.0"))
 	{
-		retval = std::make_pair(std::string("CoFlo requires a GCC version greater than 4.0.0"), false);
+		retval = std::make_pair(std::string("CoFlo requires a GCC version greater than 4.5.0"), false);
 	}
 
 	return retval;

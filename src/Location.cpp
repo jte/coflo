@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -15,9 +15,9 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sstream>
-
 #include "Location.h"
+
+#include <sstream>
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>

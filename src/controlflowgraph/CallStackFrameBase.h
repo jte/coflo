@@ -25,8 +25,8 @@
 
 class FunctionCallResolved;
 
-/*
- *
+/**
+ * Base class for CallStackBase stack frames.
  */
 class CallStackFrameBase
 {

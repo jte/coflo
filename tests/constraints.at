@@ -64,9 +64,19 @@ AT_CHECK([coflo ${abs_top_srcdir}/tests/test_src_1/main.c \
 	${abs_top_srcdir}/tests/test_src_1/Layer1.c \
 	${abs_top_srcdir}/tests/test_src_1/RarelySafePrint.c \
 	${abs_top_srcdir}/tests/test_src_1/ThreadUnsafeFunctions.c \
+	--constraint="ThreadBody1() -x UnsafePrint()" \
 	--constraint="ThreadBody2() -x UnsafePrint()"],
+	0,
+	stdout,
+	ignore)
+AT_CHECK(
+	[
+		grep -E 'Couldn.t find a violation of constraint: ThreadBody1\(\) -x UnsafePrint\(\)' stdout;
+		grep -E '.+?Thread2\.c: In function ThreadBody2:' stdout;
+		grep -E '.+?warning: constraint violation: path exists in control flow graph to UnsafePrint\( string, integer \)' stdout;
+	],
 	0,
 	ignore,
 	ignore)
-
+	
 AT_CLEANUP
