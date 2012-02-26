@@ -22,17 +22,19 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/labeled_graph.hpp>
 #include <boost/utility.hpp>
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
+#include "VertexID.h"
 
 class Function;
 
 
 /// @name Control Flow Graph definitions.
 //@{
-	
+
 /// Vertex properties for the CFG graph.
 struct CFGVertexProperties
 {
@@ -42,6 +44,10 @@ struct CFGVertexProperties
 	/// The Function which contains this vertex.
 	Function *m_containing_function;
 };
+/*
+typedef boost::property<boost::vertex_index_t, size_t,
+		boost::property<boost::vertex_bundle_t, CFGVertexProperties> > T_CFG_VERTEX_PROPERTIES;
+*/
 
 /// Edge properties for the CFG graph.
 struct CFGEdgeProperties
@@ -57,14 +63,17 @@ typedef boost::adjacency_list
 		/// Selector type to specify the out edge list storage type.
 		boost::listS,
 		/// Selector type to specify the Vertex list storage type.
+		/// @todo REMOVE: boost::vecS,
 		boost::vecS,
 		/// Selector type to specify the directedness of the graph.
 		boost::bidirectionalS,
 		/// The Vertex properties type.
 		CFGVertexProperties,
+		/*T_CFG_VERTEX_PROPERTIES,*/
 		/// The Edge properties type.
 		CFGEdgeProperties
-		> T_CFG;
+		> T_CFG_BASE;
+typedef boost::labeled_graph<T_CFG_BASE, VertexID> T_CFG;
 
 /// Typedef for the vertex_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
@@ -83,6 +92,15 @@ typedef boost::graph_traits< T_CFG >::in_edge_iterator T_CFG_IN_EDGE_ITERATOR;
 
 /// Typedef for the type used to represent vertex degrees.
 typedef boost::graph_traits< T_CFG >::degree_size_type T_CFG_DEGREE_SIZE_TYPE;
+
+// Typedef for the type used to index the Vertices.
+typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
+
+
+/// Property map typedef for property maps which allow us to get at the function pointer stored at
+/// CFGVertexProperties::m_containing_function in the T_CFG.
+typedef boost::property_map<T_CFG_BASE, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
+
 
 template < typename CFGEdgeType >
 boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
@@ -113,6 +131,7 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
  * The primary control flow graph class.
  * @todo Well, it will be.  At the moment too much functionality is implemented in terms of the Boost Graph Library's
  *       free functions acting on the underlying T_CFG.
+ *
  */
 class ControlFlowGraph : boost::noncopyable
 {
@@ -188,7 +207,7 @@ public:
 
 	//@}
 
-	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
+	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg.graph()[v].m_statement; };
 
 	/**
 	 * Return the in degree of vertex @a v.
@@ -198,8 +217,23 @@ public:
 	 */
 	long InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
 
+	/// @name Property Map Functions
+	//@{
+
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION GetPropMap_ContainingFunction();
+
+	//@}
+
 
 private:
+
+	/// @name Vertex unique ID generator routines.
+	//@{
+
+	void InitVertexIDGenerator();
+	VertexID GetNewVertexID();
+
+	//@}
 
 	/// @name Edge manipulation routines.
 	//@{
@@ -219,6 +253,9 @@ private:
 
 	/// The Boost Graph Library graph we'll use for our underlying graph implementation.
 	T_CFG m_cfg;
+
+	/// The Vertex ID generator state.
+	VertexID m_vertex_id_state;
 };
 
 //@}

@@ -53,10 +53,6 @@
 
 #include "gcc_gimple_parser.h"
 
-/// Property map typedef which allows us to get at the function pointer stored at
-/// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP;
-
 /// Property map typedef which allows us to get at the edge type pointer stored at
 /// CFGEdgeProperties::m_edge_type in the T_CFG.
 typedef boost::property_map<T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::*>::type T_EDGE_TYPE_PROPERTY_MAP;
@@ -69,7 +65,7 @@ struct vertex_filter_predicate
 	vertex_filter_predicate()
 	{
 	};
-	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map,
+	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vertex_prop_map,
 			Function *parent_function) :
 			m_vertex_prop_map(vertex_prop_map),
 			m_parent_function(parent_function)
@@ -88,7 +84,7 @@ struct vertex_filter_predicate
 		}
 	};
 
-	T_VERTEX_PROPERTY_MAP m_vertex_prop_map;
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
 	Function *m_parent_function;
 };
 
@@ -121,8 +117,8 @@ bool Function::IsCalled() const
 void Function::Link(const std::map<std::string, Function*> &function_map,
 		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, *m_cfg);
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
+			&CFGVertexProperties::m_containing_function, m_cfg->graph());
 
 	vertex_filter_predicate the_filter(vpm, this);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -762,8 +758,9 @@ private:
 
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, *m_cfg);
+	/*T_VERTEX_PROPERTY_MAP vpm = boost::get(
+			&CFGVertexProperties::m_containing_function, *m_cfg);*/
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
 	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> graph_of_this_function(
