@@ -17,7 +17,7 @@
 
 /** @file */
 
-/// Always include a .cpp file's header first.  This ensures that the header file is
+/// Always include a .cpp file's own header first.  This ensures that the header file is
 /// idempotent at compile time.  If it isn't, the compile will fail, alerting you to the problem.
 #include "ControlFlowGraph.h"
 
@@ -34,9 +34,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/// Property map typedef which allows us to get at the function pointer stored at
-/// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP;
 
 /**
  * Predicate for filtering the CFG for only the vertices of the given function.
@@ -47,10 +44,9 @@ struct vertex_filter_predicate
 	{
 	}
 	;
-	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map,
+	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vertex_prop_map,
 			Function *parent_function) :
-			m_vertex_prop_map(vertex_prop_map), m_parent_function(
-					parent_function)
+			m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function)
 	{
 	}
 	;
@@ -68,14 +64,14 @@ struct vertex_filter_predicate
 	}
 	;
 
-	T_VERTEX_PROPERTY_MAP m_vertex_prop_map;
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
 	Function *m_parent_function;
 };
 
 
 ControlFlowGraph::ControlFlowGraph()
 {
-
+	InitVertexIDGenerator();
 }
 
 ControlFlowGraph::~ControlFlowGraph()
@@ -108,8 +104,8 @@ void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 void ControlFlowGraph::FixupBackEdges(Function *f)
 {
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, m_cfg);
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
+			&CFGVertexProperties::m_containing_function, m_cfg.graph());
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
 					vertex_filter_predicate> T_FILTERED_GRAPH;
@@ -126,6 +122,7 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
+	//, boost::vertex_index_map(boost::get(&CFGVertexProperties::vertex_index, graph_of_this_function))
 	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
 
 	// Mark the edges we found as back edges.
@@ -164,8 +161,9 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 
 void ControlFlowGraph::InsertMergeNodes(Function *f)
 {
+#if 0
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -248,13 +246,15 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 			RemoveEdge(*eit);
 		}
 	}
+#endif
 }
 
 
 void ControlFlowGraph::SplitCriticalEdges(Function *f)
 {
+#if 0
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -316,6 +316,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 		m_cfg[new_edge_2].m_edge_type = new CFGEdgeTypeFallthrough();
 		boost::remove_edge(e, m_cfg);
 	}
+#endif
 }
 
 void ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
@@ -331,10 +332,13 @@ void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_
 T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function *containing_function)
 {
 	T_CFG_VERTEX_DESC retval;
+	VertexID new_id;
 
-	retval = boost::add_vertex(m_cfg);
-	m_cfg[retval].m_statement = statement;
-	m_cfg[retval].m_containing_function = containing_function;
+	new_id = GetNewVertexID();
+
+	retval = boost::add_vertex(new_id, m_cfg);
+	m_cfg.graph()[retval].m_statement = statement;
+	m_cfg.graph()[retval].m_containing_function = containing_function;
 
 	return retval;
 }
@@ -349,6 +353,26 @@ T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, cons
 	m_cfg[eid].m_edge_type = edge_type;
 
 	return eid;
+}
+
+
+
+void ControlFlowGraph::InitVertexIDGenerator()
+{
+	m_vertex_id_state = 0;
+}
+
+VertexID ControlFlowGraph::GetNewVertexID()
+{
+	VertexID retval = m_vertex_id_state;
+	m_vertex_id_state++;
+
+	return retval;
+}
+
+T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION ControlFlowGraph::GetPropMap_ContainingFunction()
+{
+	return boost::get(&CFGVertexProperties::m_containing_function, m_cfg.graph());
 }
 
 void ControlFlowGraph::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)

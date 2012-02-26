@@ -149,7 +149,7 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 # Check if the C++ compiler supports some flags we'd like to set.
 # Append them to AM_CXXFLAGS if it does. 
 AC_LANG_PUSH([C++])
-AX_APPEND_COMPILE_FLAGS([-fno-pretty-templates],[AM_CXXFLAGS])
+#AX_APPEND_COMPILE_FLAGS([-fno-pretty-templates],[AM_CXXFLAGS])
 AC_LANG_POP([C++])
 
 
