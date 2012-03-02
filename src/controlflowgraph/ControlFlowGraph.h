@@ -22,12 +22,13 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/labeled_graph.hpp>
+//#include <boost/graph/labeled_graph.hpp>
 #include <boost/utility.hpp>
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
 #include "VertexID.h"
+#include "SparsePropertyMap.h"
 
 class Function;
 
@@ -38,16 +39,19 @@ class Function;
 /// Vertex properties for the CFG graph.
 struct CFGVertexProperties
 {
+	/// The index of this vertex.
+	//size_t vertex_index;
+
 	/// The Statement at this vertex of the CFG.
 	StatementBase *m_statement;
 	
 	/// The Function which contains this vertex.
 	Function *m_containing_function;
 };
-/*
+
 typedef boost::property<boost::vertex_index_t, size_t,
 		boost::property<boost::vertex_bundle_t, CFGVertexProperties> > T_CFG_VERTEX_PROPERTIES;
-*/
+
 
 /// Edge properties for the CFG graph.
 struct CFGEdgeProperties
@@ -64,16 +68,16 @@ typedef boost::adjacency_list
 		boost::listS,
 		/// Selector type to specify the Vertex list storage type.
 		/// @todo REMOVE: boost::vecS,
-		boost::vecS,
+		boost::listS,
 		/// Selector type to specify the directedness of the graph.
 		boost::bidirectionalS,
 		/// The Vertex properties type.
-		CFGVertexProperties,
-		/*T_CFG_VERTEX_PROPERTIES,*/
+		/*CFGVertexProperties,*/
+		T_CFG_VERTEX_PROPERTIES,
 		/// The Edge properties type.
 		CFGEdgeProperties
-		> T_CFG_BASE;
-typedef boost::labeled_graph<T_CFG_BASE, VertexID> T_CFG;
+		> T_CFG;
+//typedef boost::labeled_graph<T_CFG_BASE, VertexID> T_CFG;
 
 /// Typedef for the vertex_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
@@ -99,7 +103,9 @@ typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
 
 /// Property map typedef for property maps which allow us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map<T_CFG_BASE, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
+typedef boost::property_map</*T_CFG_BASE*/T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
+
+typedef boost::property_map</*T_CFG_BASE*/T_CFG, size_t CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
 template < typename CFGEdgeType >
@@ -167,6 +173,8 @@ public:
 
 	void StructureCompoundConditionals(Function *f);
 
+	void RemoveRedundantNodes(Function *f);
+
 	//@}
 
 	/// @name Debugging helper functions
@@ -177,6 +185,13 @@ public:
 
 	T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
 	T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEdgeTypeBase *edge_type);
+
+	/// @name Vertex attribute accessors.
+	//@{
+
+	VertexID GetID(T_CFG_VERTEX_DESC vdesc);
+
+	//@}
 
 	/// @name Edge attribute accessors.
 	//@{
@@ -207,7 +222,7 @@ public:
 
 	//@}
 
-	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg.graph()[v].m_statement; };
+	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
 
 	/**
 	 * Return the in degree of vertex @a v.
@@ -222,6 +237,8 @@ public:
 
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION GetPropMap_ContainingFunction();
 
+	//T_VERTEX_PROPERTY_MAP_INDEX GetPropMap_VertexIndex();
+
 	//@}
 
 
@@ -234,6 +251,8 @@ private:
 	VertexID GetNewVertexID();
 
 	//@}
+
+	void RemoveVertex(T_CFG_VERTEX_DESC v);
 
 	/// @name Edge manipulation routines.
 	//@{

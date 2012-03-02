@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -20,7 +20,9 @@
 #ifndef SPARSEPROPERTYMAP_H_
 #define SPARSEPROPERTYMAP_H_
 
+#include <boost/property_map/property_map.hpp>
 #include <boost/tr1/unordered_map.hpp>
+
 
 template < typename Key, typename Value, Value DefaultValue >
 class SparsePropertyMap
@@ -28,6 +30,11 @@ class SparsePropertyMap
 	typedef std::tr1::unordered_map<Key, Value> T_UNDERLYING_MAP;
 
 public:
+    typedef Key key_type;
+    typedef Value value_type;
+    typedef value_type& reference;
+    typedef boost::read_write_property_map_tag category;
+
 	SparsePropertyMap() {};
 	~SparsePropertyMap() {};
 
@@ -71,6 +78,5 @@ private:
 	/// The underlying vertex descriptor to integer map.
 	T_UNDERLYING_MAP m_underlying_map;
 };
-
 
 #endif /* SPARSEPROPERTYMAP_H_ */
