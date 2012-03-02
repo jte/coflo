@@ -117,8 +117,7 @@ bool Function::IsCalled() const
 void Function::Link(const std::map<std::string, Function*> &function_map,
 		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, m_cfg->graph());
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -682,7 +681,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 /// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
 struct graph_property_writer
 {
-	graph_property_writer(Function * function) : m_function(function) {};
+	graph_property_writer(ControlFlowGraph &g, Function * function) : m_g(g), m_function(function) {};
 
 	void operator()(std::ostream& out) const
 	{
@@ -692,10 +691,11 @@ struct graph_property_writer
 		out << "labeljust = \"l\";" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
-		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor() << "; }" << std::endl;
-		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor() << "; }" << std::endl;
+		out << "{ rank = source; " << m_g.GetID(m_function->GetEntryVertexDescriptor()) << "; }" << std::endl;
+		out << "{ rank = sink; " << m_g.GetID(m_function->GetExitVertexDescriptor()) << "; }" << std::endl;
 	}
 
+	ControlFlowGraph &m_g;
 	Function* m_function;
 };
 
@@ -705,14 +705,14 @@ struct graph_property_writer
 class cfg_vertex_property_writer
 {
 public:
-	cfg_vertex_property_writer(T_CFG g) :	m_graph(g)	{ };
+	cfg_vertex_property_writer(ControlFlowGraph &cfg, T_CFG g) : m_g(cfg), m_graph(g)	{ };
 
 	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
 	{
 		if (m_graph[v].m_statement != NULL)
 		{
 			out << "[label=\"";
-			out << v << " " << m_graph[v].m_statement->GetStatementTextDOT();
+			out << m_g.GetID(v) << " " << m_graph[v].m_statement->GetStatementTextDOT();
 			out << "\\n" << m_graph[v].m_statement->GetLocation() << "\"";
 			out << ", color=" << m_graph[v].m_statement->GetDotSVGColor();
 			out << ", shape=" << m_graph[v].m_statement->GetShapeTextDOT();
@@ -724,6 +724,8 @@ public:
 		}
 	}
 private:
+
+	ControlFlowGraph &m_g;
 
 	/// The graph whose vertices we're writing the properties of.
 	T_CFG& m_graph;
@@ -758,8 +760,6 @@ private:
 
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
-	/*T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, *m_cfg);*/
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
@@ -771,9 +771,9 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 	std::ofstream outfile(output_filename.c_str());
 
 	boost::write_graphviz(outfile, graph_of_this_function,
-			cfg_vertex_property_writer(*m_cfg),
+			cfg_vertex_property_writer(*m_the_cfg, *m_cfg),
 			cfg_edge_property_writer(*m_cfg),
-			graph_property_writer(this));
+			graph_property_writer(*m_the_cfg, this));
 
 	// graph_property_writer() added a subgraph, which "uses up" the "}" that write_graphviz streams out.
 	// Terminate the graph appropriately.
@@ -948,6 +948,10 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
 	cfg.FixupBackEdges(this);
 	dlog_cfg << "INFO: Fix up complete." << std::endl;
+
+	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;
+	cfg.RemoveRedundantNodes(this);
+	dlog_cfg << "INFO: Redundant node removal complete." << std::endl;
 
 	return true;
 }
