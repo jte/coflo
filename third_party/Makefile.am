@@ -79,16 +79,20 @@ COFLO_BOOST_THREADING = single
 COFLO_BOOST_BJAM_JOBS = -j$(CPU_COUNT)
 # @todo runtime-link option?  variant=debug|release?
 
+# Split the bunzipping and the untarring into separate rules so we can take better advantage of parallel builds. 
+#$(BOOST_TARBALL_TAR): $(FILE_PATH_BOOST_SOURCE_TARBALL)
+#	bunzip2 --keep --force "$<"
+
 stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 	rm -f $@-temp && echo "`date -u`" > $@-temp
-	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_BOOST_SOURCE_TARBALL)\""
+	@echo "In directory $$(pwd), attempting to untar \"$(BOOST_TARBALL_TAR)\""
 	@: 'Untar the Boost source distro into our build directory.'
-	tar -xaf "$(FILE_PATH_BOOST_SOURCE_TARBALL)"
+	tar -xaf "$<"
 	mv $@-temp $@
 
 stamp_boost_src_configured: stamp_boost_src_untarred
 	rm -f $@-temp
-	cd boost_1_48_0 && ./bootstrap.sh --prefix="$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
+	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
@@ -101,7 +105,7 @@ stamp_boost_src_configured: stamp_boost_src_untarred
 	
 stamp_boost_src_installed: stamp_boost_src_configured
 	rm -f $@-temp
-	cd boost_1_48_0 && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
+	cd $(BOOST_TARBALL_DIRNAME) && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 		link=static threading=$(COFLO_BOOST_THREADING)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
@@ -109,7 +113,7 @@ stamp_boost_src_installed: stamp_boost_src_configured
 # than a copy, and bjam takes way too long to do it.  For now we'll use the headers and libs in situ. 	
 #stamp_boost_src_installed: stamp_boost_src_built
 #	rm -f $@-temp
-#	cd boost_1_48_0 && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
+#	cd $(BOOST_TARBALL_DIRNAME) && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 #		link=static threading=$(COFLO_BOOST_THREADING) install
 #	echo "`date -u`" > $@-temp && mv $@-temp $@
 
@@ -126,7 +130,7 @@ clean-local:
 	@: 'Remove the DParser source tree.'
 	test ! -d "$(builddir)/d" || rm -rf "$(builddir)/d"
 	@: 'Remove the Boost source tree.'
-	test ! -d "$(builddir)/boost_1_48_0" || rm -rf "$(builddir)/boost_1_48_0"
+	test ! -d "$(builddir)/$(BOOST_TARBALL_DIRNAME)" || rm -rf "$(builddir)/$(BOOST_TARBALL_DIRNAME)"
 	@: 'Remove the DParser local install tree.'
 	test ! -d "$(DPARSER_PREFIX)" || rm -rf "$(DPARSER_PREFIX)"
  
