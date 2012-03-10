@@ -53,7 +53,7 @@ DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
 # Collect all the Boost libraries we found into a single variable.
 if BOOST_USE_BUILT_BOOST
-BOOST_LOCAL_LIB = $(abs_top_builddir)/third_party/boost_1_48_0/stage/lib
+BOOST_LOCAL_LIB = $(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)/stage/lib
 ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_program_options.a \
 	$(BOOST_LOCAL_LIB)/libboost_regex.a \
