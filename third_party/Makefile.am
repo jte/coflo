@@ -18,6 +18,9 @@
 # This is a proxy Makefile.am which dispatches the Autotools rules to the real makefiles of
 # the third-party libraries/tools we may need.
 
+# Define some file extensions we know how to handle
+SUFFIXES = .tar.bz2 .tar.gz2 .tar
+
 # Some Boost lib directory variables.
 BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
 BOOST_LOCAL = $(abs_builddir)/boost_local
@@ -85,7 +88,7 @@ COFLO_BOOST_BJAM_JOBS = -j$(CPU_COUNT)
 
 stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 	rm -f $@-temp && echo "`date -u`" > $@-temp
-	@echo "In directory $$(pwd), attempting to untar \"$(BOOST_TARBALL_TAR)\""
+	@echo "In directory $$(pwd), attempting to untar \"$<\""
 	@: 'Untar the Boost source distro into our build directory.'
 	tar -xaf "$<"
 	mv $@-temp $@
