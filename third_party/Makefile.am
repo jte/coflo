@@ -51,7 +51,7 @@ LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 MOSTLYCLEANFILES = stamp_dparser_src_built stamp_dparser_src_installed \
 	 stamp_boost_src_configured stamp_boost_src_built stamp_boost_src_installed
 	 
-# 
+# Additional files to clean during a "make clean".
 CLEANFILES = stamp_dparser_src_untarred stamp_boost_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 
 # Untar the DParser source tarball and create a stamp file indicating that we did it.
