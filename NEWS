@@ -1,5 +1,9 @@
 CoFlo NEWS
 
+Version 0.0.5 - Gary R. Van Sickle, 2012-03-10
+
+- Now builds against both Boost 1.48.0 and 1.49.0.
+
 Version 0.0.4 - Gary R. Van Sickle, 2012-01-19
 
 * Major feature enhancements, Major bugfixes:
