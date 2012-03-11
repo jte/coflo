@@ -51,7 +51,7 @@ LT_PREREQ([2.4])
 # the "AC_SUBST([CONFIG_STATUS_DEPENDENCIES]..." line below, and the top-level Makefile.am for the other components
 # of this mechanism.
 #AC_INIT([CoFlo], , [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
-AC_INIT([CoFlo], [0.0.4], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
+AC_INIT([CoFlo], [0.0.5], [BUG-REPORT-ADDRESS],,[http://coflo.sourceforge.net/])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -211,7 +211,7 @@ AC_MSG_NOTICE([FILE_PATH_DPARSER_SOURCE_TARBALL=$FILE_PATH_DPARSER_SOURCE_TARBAL
 # If the user doesn't already have a suitable Boost installation, we'll do something similar to what we do
 # for DParser, and build it from the source tarball and link to it statically.
 # The reason here though is more complex:
-#   1. Boost (as of 1.48.0) wants to install into the wrong /lib directory on some systems, notably some x86_64 systems.
+#   1. Boost (at least as of 1.48.0) wants to install into the wrong /lib directory on some systems, notably some x86_64 systems.
 #   2. Neither of the Autoconf macro packages for detecting Boost that I've tried works completely correctly when
 #      more than one Boost installation is on a system, e.g. one in /usr/lib and one in /usr/local/lib. E.g., if an
 #      old copy is in /usr/include & /usr/lib and a suitable copy is in /usr/local/include and /usr/local/lib, both
@@ -226,7 +226,12 @@ AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
 # The "boost_1_4x_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
+BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")
+BOOST_TARBALL_TAR=$(basename "${BOOST_TARBALL_TARBZ2}" .bz2)
 AC_SUBST([BOOST_TARBALL_DIRNAME])
+AC_SUBST([BOOST_TARBALL_TARBZ2])
+AC_SUBST([BOOST_TARBALL_TAR])
+
 
 AM_COND_IF([BOOST_USE_BUILT_BOOST],
 [
@@ -238,7 +243,7 @@ AM_COND_IF([BOOST_USE_BUILT_BOOST],
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
 ],
 [
-	AC_MSG_ERROR([Linking with system Boost libraries is currently unsupported.  Please download the Boost 1.48.0 source tarball and reconfigure using --with-boost-tarball.])
+	AC_MSG_ERROR([Linking with system Boost libraries is currently unsupported.  Please download the Boost source tarball, version 1.48.0 or newer, and reconfigure using --with-boost-tarball.])
 	# Try to find a Boost version we can use.
 	# Use the Autoconf Macro Archive macros.
 	# Note that there is a bug in Boost.Filesystem prior to 1.47.0 which causes an exception to be thrown if the
