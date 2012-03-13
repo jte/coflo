@@ -36,6 +36,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+#if 0
 
 /**
  * Predicate for filtering the CFG for only the vertices of the given function.
@@ -69,12 +70,12 @@ struct vertex_filter_predicate
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
 	Function *m_parent_function;
 };
-
+#endif
 
 ControlFlowGraphBase::ControlFlowGraphBase() : m_cfg(*m_cfg_ptr)
 {
 	// Create the new Boost graph.
-	m_cfg_ptr = new T_CFG;
+	m_cfg_ptr = new T::underlying_type_t;
 
 	InitVertexIDGenerator();
 }
@@ -105,6 +106,9 @@ void ControlFlowGraphBase::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 		std::cout << typeid(*(m_cfg[*ei].m_edge_type)).name() << std::endl;
 	}
 }
+
+
+#if 0
 
 void ControlFlowGraphBase::FixupBackEdges(Function *f)
 {
@@ -322,6 +326,8 @@ void ControlFlowGraphBase::SplitCriticalEdges(Function *f)
 #endif
 }
 
+#endif
+
 void ControlFlowGraphBase::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
 {
 	boost::add_edge(source, target, m_cfg);
@@ -447,6 +453,7 @@ void ControlFlowGraphBase::RemoveEdge(const T_CFG_EDGE_DESC & e)
 	boost::remove_edge(e, m_cfg);
 }
 
+#if 0
 void ControlFlowGraphBase::StructureCompoundConditionals(Function *f)
 {
 #if 0
@@ -558,3 +565,6 @@ void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 		RemoveVertex(i);
 	}
 }
+
+#endif
+

@@ -142,7 +142,6 @@ class FilteredGraph;
  *       free functions acting on the underlying T_CFG.
  *
  */
-template <class UnderlyingGraphType = T_CFG>
 class ControlFlowGraphBase : boost::noncopyable
 {
 public:
@@ -413,7 +412,7 @@ void ControlFlowGraphBase::FixupBackEdges(Function *f)
 class ControlFlowGraph : public ControlFlowGraphBase<ControlFlowGraph>
 {
 public:
-	ControlFlowGraph() { m_cfg_ptr = new T_CFG; };
+	ControlFlowGraph() { };
 
 protected:
 	typedef T_CFG underlying_type_t;
