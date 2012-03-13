@@ -19,9 +19,10 @@
 
 /// Always include a .cpp file's own header first.  This ensures that the header file is
 /// idempotent at compile time.  If it isn't, the compile will fail, alerting you to the problem.
-#include "ControlFlowGraph.h"
+//#include "ControlFlowGraph.h"
 
 #include <utility>
+
 #include <boost/foreach.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
@@ -29,6 +30,7 @@
 #include "visitors/MergeNodeInsertionVisitor.h"
 #include "edges/edge_types.h"
 #include "../Function.h"
+#include "FilteredGraph.h"
 
 using std::cout;
 using std::cerr;
@@ -69,17 +71,20 @@ struct vertex_filter_predicate
 };
 
 
-ControlFlowGraph::ControlFlowGraph()
+ControlFlowGraphBase::ControlFlowGraphBase() : m_cfg(*m_cfg_ptr)
 {
+	// Create the new Boost graph.
+	m_cfg_ptr = new T_CFG;
+
 	InitVertexIDGenerator();
 }
 
-ControlFlowGraph::~ControlFlowGraph()
+ControlFlowGraphBase::~ControlFlowGraphBase()
 {
-
+	delete m_cfg_ptr;
 }
 
-void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+void ControlFlowGraphBase::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 {
 	T_CFG_OUT_EDGE_ITERATOR ei, eend;
 	
@@ -90,7 +95,7 @@ void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 	}
 }
 
-void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+void ControlFlowGraphBase::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 {
 	T_CFG_IN_EDGE_ITERATOR ei, eend;
 	
@@ -101,7 +106,7 @@ void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 	}
 }
 
-void ControlFlowGraph::FixupBackEdges(Function *f)
+void ControlFlowGraphBase::FixupBackEdges(Function *f)
 {
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
@@ -157,7 +162,7 @@ void ControlFlowGraph::FixupBackEdges(Function *f)
 }
 
 
-void ControlFlowGraph::InsertMergeNodes(Function *f)
+void ControlFlowGraphBase::InsertMergeNodes(Function *f)
 {
 #if 0
 	// Property map for getting at the edge types in the CFG.
@@ -248,7 +253,7 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 }
 
 
-void ControlFlowGraph::SplitCriticalEdges(Function *f)
+void ControlFlowGraphBase::SplitCriticalEdges(Function *f)
 {
 #if 0
 	// Property map for getting at the edge types in the CFG.
@@ -317,12 +322,12 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 #endif
 }
 
-void ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
+void ControlFlowGraphBase::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
 {
 	boost::add_edge(source, target, m_cfg);
 }
 
-void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & target)
+void ControlFlowGraphBase::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & target)
 {
 	T_CFG_EDGE_DESC new_edge;
 
@@ -333,7 +338,7 @@ void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_
 	boost::remove_edge(e, m_cfg);
 }
 
-T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function *containing_function)
+T_CFG_VERTEX_DESC ControlFlowGraphBase::AddVertex(StatementBase *statement, Function *containing_function)
 {
 	T_CFG_VERTEX_DESC retval;
 	VertexID new_id;
@@ -353,7 +358,7 @@ T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function
 	return retval;
 }
 
-T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEdgeTypeBase *edge_type)
+T_CFG_EDGE_DESC ControlFlowGraphBase::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEdgeTypeBase *edge_type)
 {
 	T_CFG_EDGE_DESC eid;
 	bool ok;
@@ -367,12 +372,12 @@ T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, cons
 
 
 
-void ControlFlowGraph::InitVertexIDGenerator()
+void ControlFlowGraphBase::InitVertexIDGenerator()
 {
 	m_vertex_id_state = 0;
 }
 
-VertexID ControlFlowGraph::GetNewVertexID()
+VertexID ControlFlowGraphBase::GetNewVertexID()
 {
 	VertexID retval = m_vertex_id_state;
 	m_vertex_id_state++;
@@ -380,24 +385,24 @@ VertexID ControlFlowGraph::GetNewVertexID()
 	return retval;
 }
 
-T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION ControlFlowGraph::GetPropMap_ContainingFunction()
+T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION ControlFlowGraphBase::GetPropMap_ContainingFunction()
 {
 	return boost::get(&CFGVertexProperties::m_containing_function, m_cfg);
 }
 
 #if 0
-T_VERTEX_PROPERTY_MAP_INDEX ControlFlowGraph::GetPropMap_VertexIndex()
+T_VERTEX_PROPERTY_MAP_INDEX ControlFlowGraphBase::GetPropMap_VertexIndex()
 {
 	//return boost::get(&CFGVertexProperties::m_vertex_index, m_cfg);
 }
 #endif
 
-VertexID ControlFlowGraph::GetID(T_CFG_VERTEX_DESC vdesc)
+VertexID ControlFlowGraphBase::GetID(T_CFG_VERTEX_DESC vdesc)
 {
 	return static_cast<VertexID>(boost::get(boost::vertex_index_t(), m_cfg, vdesc));
 }
 
-void ControlFlowGraph::RemoveVertex(T_CFG_VERTEX_DESC v)
+void ControlFlowGraphBase::RemoveVertex(T_CFG_VERTEX_DESC v)
 {
 	/// @todo Reclaim the vertex_index?
 
@@ -405,17 +410,44 @@ void ControlFlowGraph::RemoveVertex(T_CFG_VERTEX_DESC v)
 	boost::remove_vertex(v, m_cfg);
 }
 
-void ControlFlowGraph::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)
+std::pair<T_CFG_OUT_EDGE_ITERATOR, T_CFG_OUT_EDGE_ITERATOR> ControlFlowGraphBase::OutEdges(
+		T_CFG_VERTEX_DESC vdesc)
+{
+	return boost::out_edges(vdesc, m_cfg);
+}
+
+void ControlFlowGraphBase::ReplaceStatementPtr(T_CFG_VERTEX_DESC v, StatementBase *new_statement_base)
+{
+	delete m_cfg[v].m_statement;
+	m_cfg[v].m_statement = new_statement_base;
+}
+
+std::pair<T_CFG_VERTEX_ITERATOR, T_CFG_VERTEX_ITERATOR> ControlFlowGraphBase::Vertices()
+{
+	return boost::vertices(m_cfg);
+}
+
+void ControlFlowGraphBase::ReplaceEdgeTypePtr(T_CFG_EDGE_DESC e,
+		CFGEdgeTypeBase* new_edge_type_ptr)
+{
+	// Delete the existing edge type object.
+	delete m_cfg[e].m_edge_type;
+
+	// Replace it with the new one.
+	m_cfg[e].m_edge_type = new_edge_type_ptr;
+}
+
+void ControlFlowGraphBase::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)
 {
 }
 
-void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
+void ControlFlowGraphBase::RemoveEdge(const T_CFG_EDGE_DESC & e)
 {
 	delete m_cfg[e].m_edge_type;
 	boost::remove_edge(e, m_cfg);
 }
 
-void ControlFlowGraph::StructureCompoundConditionals(Function *f)
+void ControlFlowGraphBase::StructureCompoundConditionals(Function *f)
 {
 #if 0
 	// ... postorder traversal...
@@ -456,7 +488,7 @@ void ControlFlowGraph::StructureCompoundConditionals(Function *f)
 }
 
 
-void ControlFlowGraph::RemoveRedundantNodes(Function* f)
+void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 {
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();

@@ -34,6 +34,11 @@ CFGEdgeTypeBase::~CFGEdgeTypeBase()
 {
 }
 
+void CFGEdgeTypeBase::CopyBasePropertiesFrom(const CFGEdgeTypeBase& orig)
+{
+	m_is_back_edge = orig.m_is_back_edge;
+}
+
 std::string CFGEdgeTypeBase::GetDotStyle() const
 {
 	if(m_is_back_edge)

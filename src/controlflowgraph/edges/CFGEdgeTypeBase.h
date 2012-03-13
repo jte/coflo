@@ -31,18 +31,22 @@ class CFGEdgeTypeBase
 
 public:
 	CFGEdgeTypeBase();
+
 	/**
 	 *  Copy constructor.
 	 *
 	 *  @param orig Reference to the CFGEdgeTypeBase object to copy.
 	 */
 	CFGEdgeTypeBase(const CFGEdgeTypeBase& orig);
+
 	/**
 	 *  Destructor.
 	 *  Pure virtual to force this to be an abstract base class.
 	 */
 	virtual ~CFGEdgeTypeBase() = 0;
 	
+	virtual void CopyBasePropertiesFrom(const CFGEdgeTypeBase& orig);
+
 	/**
 	 * Mark the edge as a back edge.  We keep this info around because we need it
 	 * for doing certain operations such as topological sorting, and for efficiency

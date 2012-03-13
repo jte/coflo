@@ -15,14 +15,17 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+/** @file
+ * Header for the ControlFlowGraph class.
+ */
 
 #ifndef CONTROLFLOWGRAPH_H
 #define	CONTROLFLOWGRAPH_H
 
+#include <utility>
+
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-//#include <boost/graph/labeled_graph.hpp>
 #include <boost/utility.hpp>
 
 #include "statements/statements.h"
@@ -72,12 +75,10 @@ typedef boost::adjacency_list
 		/// Selector type to specify the directedness of the graph.
 		boost::bidirectionalS,
 		/// The Vertex properties type.
-		/*CFGVertexProperties,*/
 		T_CFG_VERTEX_PROPERTIES,
 		/// The Edge properties type.
 		CFGEdgeProperties
 		> T_CFG;
-//typedef boost::labeled_graph<T_CFG_BASE, VertexID> T_CFG;
 
 /// Typedef for the vertex_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
@@ -103,9 +104,9 @@ typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
 
 /// Property map typedef for property maps which allow us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map</*T_CFG_BASE*/T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
+typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
 
-typedef boost::property_map</*T_CFG_BASE*/T_CFG, size_t CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
+typedef boost::property_map<T_CFG, size_t CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
 template < typename CFGEdgeType >
@@ -130,7 +131,9 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 	return retval;
 }
 
-
+// Forward declare the FilteredGraph class template.
+template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
+class FilteredGraph;
 
 
 /**
@@ -139,11 +142,22 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
  *       free functions acting on the underlying T_CFG.
  *
  */
-class ControlFlowGraph : boost::noncopyable
+template <class UnderlyingGraphType = T_CFG>
+class ControlFlowGraphBase : boost::noncopyable
 {
 public:
-	ControlFlowGraph();
-	~ControlFlowGraph();
+	ControlFlowGraphBase();
+	virtual ~ControlFlowGraphBase();
+
+	template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
+	FilteredGraph<EdgeFilterPredicate,VertexFilterPredicate>* CreateFilteredGraph(EdgeFilterPredicate edge_filter, VertexFilterPredicate vertex_filter)
+	{
+		FilteredGraph<EdgeFilterPredicate, VertexFilterPredicate> *retval;
+
+		retval = new FilteredGraph<EdgeFilterPredicate, VertexFilterPredicate>(*this, m_cfg, edge_filter, vertex_filter);
+
+		return retval;
+	}
 
 
 	/**
@@ -155,8 +169,6 @@ public:
 	 * @return A reference to the underlying T_CFG (Boost Graph Library adjacency_list) object.
 	 */
 	const T_CFG& GetConstT_CFG() const { return m_cfg; };
-
-	T_CFG& GetT_CFG() { return m_cfg; };
 
 	/// @name Graph construction helpers
 	//@{
@@ -191,6 +203,28 @@ public:
 
 	VertexID GetID(T_CFG_VERTEX_DESC vdesc);
 
+	std::pair< T_CFG_OUT_EDGE_ITERATOR, T_CFG_OUT_EDGE_ITERATOR > OutEdges(T_CFG_VERTEX_DESC vdesc);
+
+	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
+
+	void ReplaceStatementPtr(T_CFG_VERTEX_DESC v, StatementBase *new_statement_base);
+
+	/**
+	 * Return the in degree of vertex @a v.
+	 *
+	 * @param v
+	 * @return The in degree of @v.
+	 */
+	T_CFG_DEGREE_SIZE_TYPE InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
+
+	std::pair< T_CFG_VERTEX_ITERATOR, T_CFG_VERTEX_ITERATOR > Vertices();
+
+	template < typename CFGEdgeType >
+	boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc)
+	{
+		return ::GetFirstOutEdgeOfType<CFGEdgeType>(vdesc, m_cfg);
+	}
+
 	//@}
 
 	/// @name Edge attribute accessors.
@@ -220,17 +254,11 @@ public:
 	 */
 	CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) { return m_cfg[e].m_edge_type; };
 
+	void ReplaceEdgeTypePtr(T_CFG_EDGE_DESC e, CFGEdgeTypeBase *new_edge_type_ptr);
+
 	//@}
 
-	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
 
-	/**
-	 * Return the in degree of vertex @a v.
-	 *
-	 * @param v
-	 * @return The in degree of @v.
-	 */
-	long InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
 
 	/// @name Property Map Functions
 	//@{
@@ -241,6 +269,15 @@ public:
 
 	//@}
 
+
+protected:
+
+	T_CFG& GetT_CFG() { return m_cfg; };
+
+	void ReplaceUnderlyingGraphObjectInstance(T_CFG *new_cfg) { delete m_cfg_ptr; m_cfg_ptr = new_cfg; };
+
+	/// Pointer to the Boost Graph Library graph we'll use for our underlying graph implementation.
+	/*T_CFG*/UnderlyingGraphType *m_cfg_ptr;
 
 private:
 
@@ -270,11 +307,116 @@ private:
 
 	//@}
 
-	/// The Boost Graph Library graph we'll use for our underlying graph implementation.
-	T_CFG m_cfg;
+	/// Reference to the Boost Graph Library graph we'll use for our underlying graph implementation.
+	/// We'll point this at *m_cfg_ptr in the constructor.
+	/// @note We should probably just use the pointer, this is a leftover from the pre-FilteredGraph implementation.
+	/*T_CFG*/ UnderlyingGraphType &m_cfg;
 
 	/// The Vertex ID generator state.
 	VertexID m_vertex_id_state;
+};
+
+//#include "ControlFlowGraph.cpp"
+
+template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
+ControlFlowGraphBase::ControlFlowGraphBase() : m_cfg(*m_cfg_ptr)
+{
+	// Create the new Boost graph.
+	m_cfg_ptr = new T_CFG;
+
+	InitVertexIDGenerator();
+}
+
+ControlFlowGraphBase::~ControlFlowGraphBase()
+{
+	delete m_cfg_ptr;
+}
+
+void ControlFlowGraphBase::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+{
+	T_CFG_OUT_EDGE_ITERATOR ei, eend;
+
+	boost::tie(ei, eend) = boost::out_edges(vdesc, m_cfg);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*(m_cfg[*ei].m_edge_type)).name() << std::endl;
+	}
+}
+
+void ControlFlowGraphBase::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+{
+	T_CFG_IN_EDGE_ITERATOR ei, eend;
+
+	boost::tie(ei, eend) = boost::in_edges(vdesc, m_cfg);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*(m_cfg[*ei].m_edge_type)).name() << std::endl;
+	}
+}
+
+void ControlFlowGraphBase::FixupBackEdges(Function *f)
+{
+	// Property map for getting at the edge types in the CFG.
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
+	vertex_filter_predicate the_vertex_filter(vpm, f);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all,
+					vertex_filter_predicate> T_FILTERED_GRAPH;
+	// Define a filtered view of only this function's CFG.
+	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
+
+	std::vector<BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo> back_edges;
+
+	// Define a visitor which will find all the back edges and send back the info
+	// we need to fix them up.
+	BackEdgeFixupVisitor<T_FILTERED_GRAPH> back_edge_finder(back_edges);
+
+	// Set the back_edge_finder visitor loose on the function's CFG, with its
+	// search strategy being a simple depth-first search.
+	// Locate all the back edges, and send the fix-up info back to the back_edges
+	// std::vector<> above.
+	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
+
+	// Mark the edges we found as back edges.
+	BOOST_FOREACH(BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo fixinfo, back_edges)
+	{
+		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
+
+		// Change this edge type to a back edge.
+		m_cfg[e].m_edge_type->MarkAsBackEdge(true);
+
+		// Skip the rest if this is a self edge.
+		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<T_FILTERED_GRAPH>::null_vertex())
+		{
+			dlog_cfg << "Self edge, no further action: " << e << std::endl;
+			continue;
+		}
+
+		// If the source node of this back edge now has no non-back-edge out-edges,
+		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
+		T_CFG_VERTEX_DESC src;
+		src = boost::source(e, m_cfg);
+		if (boost::out_degree(src, m_cfg) == 1)
+		{
+			T_CFG_EDGE_DESC newedge;
+			boost::tie(newedge, boost::tuples::ignore) =
+					boost::add_edge(src, fixinfo.m_impossible_target_vertex, m_cfg);
+			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;
+
+			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
+		}
+	}
+
+	dlog_cfg << "Back edge fixup complete." << std::endl;
+}
+
+
+class ControlFlowGraph : public ControlFlowGraphBase<ControlFlowGraph>
+{
+public:
+	ControlFlowGraph() { m_cfg_ptr = new T_CFG; };
+
+protected:
+	typedef T_CFG underlying_type_t;
 };
 
 //@}

@@ -22,13 +22,15 @@ libcontrolflowgraph_a_SOURCES = \
 	SparsePropertyMap.h \
 	CallStackBase.cpp CallStackBase.h \
 	CallStackFrameBase.cpp CallStackFrameBase.h \
-	ControlFlowGraph.cpp ControlFlowGraph.h \
+	ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
 	depth_first_traversal.hpp \
+	FilteredGraph.cpp FilteredGraph.h \
 	topological_visit_kahn.h \
 	VertexID.cpp VertexID.h
 	
+### ControlFlowGraph.cpp
 
 libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)

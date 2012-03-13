@@ -202,7 +202,7 @@ private:
 	T_CFG_EDGE_DESC m_exit_vertex_self_edge;
 	
 	ControlFlowGraph *m_the_cfg;
-	T_CFG *m_cfg;
+	//T_CFG *m_cfg;
 
 	/// @name Static properties of this function.
 	/// These are properties of the function determined at analysis-time which are invariant, such as

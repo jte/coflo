@@ -64,7 +64,7 @@ struct VertexInfo
 };
 
 
-ControlFlowGraphTraversalDFS::ControlFlowGraphTraversalDFS(ControlFlowGraph &control_flow_graph) : ControlFlowGraphTraversalBase(control_flow_graph)
+ControlFlowGraphTraversalDFS::ControlFlowGraphTraversalDFS(ControlFlowGraphBase &control_flow_graph) : ControlFlowGraphTraversalBase(control_flow_graph)
 {
 
 }
@@ -110,7 +110,8 @@ void ControlFlowGraphTraversalDFS::Traverse(boost::graph_traits<T_CFG>::vertex_d
 	visitor_vertex_return_value = visitor->discover_vertex(u);
 
 	// Get iterators to the out edges of vertex u.
-	boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
+	//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
+	boost::tie(ei, eend) = m_control_flow_graph.OutEdges(u);
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -226,7 +227,8 @@ void ControlFlowGraphTraversalDFS::Traverse(boost::graph_traits<T_CFG>::vertex_d
 				}
 
 				// Get the out-edges of the target vertex.
-				boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
+				//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
+				boost::tie(ei, eend) = m_control_flow_graph.OutEdges(u);
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{
@@ -282,7 +284,8 @@ bool ControlFlowGraphTraversalDFS::SkipEdge(boost::graph_traits<T_CFG>::edge_des
 	CFGEdgeTypeReturn *ret;
 	CFGEdgeTypeFunctionCallBypass *fcb;
 
-	edge_type = m_control_flow_graph.GetT_CFG()[e].m_edge_type;
+	//edge_type = m_control_flow_graph.GetT_CFG()[e].m_edge_type;
+	edge_type = m_control_flow_graph.GetEdgeTypePtr(e);
 
 	// Attempt dynamic casts to call/return types to see if we need to handle
 	// these specially.

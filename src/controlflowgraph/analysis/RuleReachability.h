@@ -24,7 +24,7 @@
 
 #include "RuleDFSBase.h"
 
-class ControlFlowGraph;
+//class ControlFlowGraph;
 class Function;
 
 class RuleReachability : public RuleDFSBase
