@@ -26,7 +26,7 @@ BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
-# the ordinary ‘AM_’ form of the flags variable is not automatically included in the compilation
+# the ordinary AM_ form of the flags variable is not automatically included in the compilation
 # (however, the user form of the variable is included)."
 libvisitors_a_CPPFLAGS = -I $(abs_top_srcdir)/src/controlflowgraph -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libvisitors_a_CFLAGS = $(AM_CFLAGS)

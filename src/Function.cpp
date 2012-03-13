@@ -47,6 +47,7 @@
 #include "controlflowgraph/statements/ParseHelpers.h"
 #include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
+#include "controlflowgraph/FilteredGraph.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
 
 #include "libexttools/ToolDot.h"
@@ -111,7 +112,7 @@ bool Function::IsCalled() const
 	// Determine if this function is ever called.
 	// If the first statement (the ENTRY block) has any in-edges
 	// other than its self-edge, it's called by something.
-	return boost::in_degree(m_entry_vertex_desc, *m_cfg) > 1;
+	return m_the_cfg->InDegree(m_entry_vertex_desc) > 1;
 }
 
 void Function::Link(const std::map<std::string, Function*> &function_map,
@@ -120,17 +121,22 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
+	/*typedef boost::filtered_graph<T_CFG, boost::keep_all,
 			vertex_filter_predicate> T_FILTERED_CFG;
 	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(),
-			the_filter);
+			the_filter);*/
 
-	boost::graph_traits<T_FILTERED_CFG>::vertex_iterator vit, vend;
-	boost::tie(vit, vend) = boost::vertices(graph_of_this_function);
+	typedef FilteredGraph<boost::keep_all, vertex_filter_predicate> T_FG;
+	FilteredGraph<boost::keep_all, vertex_filter_predicate> *graph_of_this_function
+			= m_the_cfg->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
+
+	boost::graph_traits<T_FG::T_CFG_FILTERED>::vertex_iterator vit, vend;
+	boost::tie(vit, vend) = graph_of_this_function->Vertices();
 	for (; vit != vend; vit++)
 	{
 		FunctionCallUnresolved *fcu =
-				dynamic_cast<FunctionCallUnresolved*>((*m_cfg)[*vit].m_statement);
+				dynamic_cast<FunctionCallUnresolved*>(graph_of_this_function->GetStatementPtr(*vit));
+				//dynamic_cast<FunctionCallUnresolved*>((*m_cfg)[*vit].m_statement);
 		if (fcu != NULL)
 		{
 			std::map<std::string, Function*>::const_iterator it;
@@ -150,9 +156,10 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				FunctionCallResolved *fcr = new FunctionCallResolved(it->second,
 						fcu);
 				// Delete the FunctionCallUnresolved object...
-				delete fcu;
+				//delete fcu;
 				// ...and replace it with the FunctionCallResolved object.
-				(*m_cfg)[*vit].m_statement = fcr;
+				//(*m_cfg)[*vit].m_statement = fcr;
+				m_the_cfg->ReplaceStatementPtr(*vit, fcr);
 
 				// Now add the appropriate CFG edges.
 				// The FunctionCall->Function->entrypoint edge.
@@ -161,6 +168,8 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				T_CFG_EDGE_DESC new_edge_desc;
 				bool ok;
 
+				new_edge_desc = m_the_cfg->AddEdge(*vit, it->second->GetEntryVertexDescriptor(), call_edge_type);
+				/*
 				boost::tie(new_edge_desc, ok) = boost::add_edge(*vit,
 						it->second->GetEntryVertexDescriptor(), *m_cfg);
 				if (ok)
@@ -173,6 +182,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					// We couldn't add the edge.  This should never happen.
 					std::cerr << "ERROR: Can't add call edge." << std::endl;
 				}
+				*/
 
 				// Add the return edge.
 				// The return edge goes from the EXIT of the called function to
@@ -181,7 +191,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				// to the next statement in its containing function.
 				T_CFG_EDGE_DESC function_call_out_edge;
 
-				boost::tie(function_call_out_edge, ok) = GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit, *m_cfg);
+				boost::tie(function_call_out_edge, ok) = m_the_cfg->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit);
 				if (!ok)
 				{
 					// Couldn't find the return.
@@ -192,37 +202,39 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					//PrintOutEdgeTypes(*vit, *m_cfg);
 				}
 
-				boost::tie(new_edge_desc, ok) = boost::add_edge(
+				/*boost::tie(new_edge_desc, ok) = boost::add_edge(
 						it->second->GetExitVertexDescriptor(),
 						boost::target(function_call_out_edge, *m_cfg), *m_cfg);
-				if (ok)
-				{
+						*/
+				//if (ok)
+				//{
 					// Return edge was added OK.  Create and connect the edge's properties.
-					CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(
-							fcr);
-					(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
+					CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
+					//(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
 					// Copy the fallthrough edge's properties to the newly-added return edge.
 					/// @todo Find a cleaner way to do this.
-					return_edge_type->MarkAsBackEdge(
-							(*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
+					//return_edge_type->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
+					return_edge_type->CopyBasePropertiesFrom(*(m_the_cfg->GetEdgeTypePtr(function_call_out_edge)));
 
 					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
 					// For graphing just the function itself, we'll look at these edges and not the
 					// call/return edges.
-					CFGEdgeTypeFunctionCallBypass *fcbp =
-							new CFGEdgeTypeFunctionCallBypass();
+					CFGEdgeTypeFunctionCallBypass *fcbp = new CFGEdgeTypeFunctionCallBypass();
 					// Copy the fallthrough edge's properties to its replacement.
 					/// @todo Find a cleaner way to do this.
-					fcbp->MarkAsBackEdge(
-							(*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
-					delete (*m_cfg)[function_call_out_edge].m_edge_type;
-					(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
-				}
+					//fcbp->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
+					fcbp->CopyBasePropertiesFrom(*(m_the_cfg->GetEdgeTypePtr(function_call_out_edge)));
+					//delete (*m_cfg)[function_call_out_edge].m_edge_type;
+					//(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
+					m_the_cfg->ReplaceEdgeTypePtr(function_call_out_edge, fcbp);
+				/*}
 				else
 				{
 					// We couldn't add the edge.  This should never happen.
 					std::cerr << "ERROR: Can't add return edge." << std::endl;
-				}
+				}*/
+				new_edge_desc = m_the_cfg->AddEdge(it->second->GetExitVertexDescriptor(),
+						m_the_cfg->Target(function_call_out_edge), return_edge_type);
 			}
 		}
 	}
@@ -391,7 +403,7 @@ using std::endl;
 class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 {
 public:
-	function_control_flow_graph_visitor(ControlFlowGraph &g,
+	function_control_flow_graph_visitor(ControlFlowGraphBase &g,
 			T_CFG_VERTEX_DESC last_statement,
 			bool cfg_verbose,
 			bool cfg_vertex_ids) :
@@ -674,14 +686,14 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 #else
 	// Set up the visitor.
 	function_control_flow_graph_visitor cfg_visitor(*m_the_cfg, m_exit_vertex_desc, cfg_verbose, cfg_vertex_ids);
-	topological_visit_kahn(*m_cfg, m_entry_vertex_self_edge, cfg_visitor);
+	topological_visit_kahn(m_the_cfg->GetConstT_CFG(), m_entry_vertex_self_edge, cfg_visitor);
 #endif
 }
 
 /// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
 struct graph_property_writer
 {
-	graph_property_writer(ControlFlowGraph &g, Function * function) : m_g(g), m_function(function) {};
+	graph_property_writer(ControlFlowGraphBase &g, Function * function) : m_g(g), m_function(function) {};
 
 	void operator()(std::ostream& out) const
 	{
@@ -695,7 +707,7 @@ struct graph_property_writer
 		out << "{ rank = sink; " << m_g.GetID(m_function->GetExitVertexDescriptor()) << "; }" << std::endl;
 	}
 
-	ControlFlowGraph &m_g;
+	ControlFlowGraphBase &m_g;
 	Function* m_function;
 };
 
@@ -705,17 +717,18 @@ struct graph_property_writer
 class cfg_vertex_property_writer
 {
 public:
-	cfg_vertex_property_writer(ControlFlowGraph &cfg, T_CFG g) : m_g(cfg), m_graph(g)	{ };
+	cfg_vertex_property_writer(ControlFlowGraphBase &cfg) : m_g(cfg) { };
 
 	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
 	{
-		if (m_graph[v].m_statement != NULL)
+		StatementBase *sbp = m_g.GetStatementPtr(v);
+		if (sbp != NULL)
 		{
 			out << "[label=\"";
-			out << m_g.GetID(v) << " " << m_graph[v].m_statement->GetStatementTextDOT();
-			out << "\\n" << m_graph[v].m_statement->GetLocation() << "\"";
-			out << ", color=" << m_graph[v].m_statement->GetDotSVGColor();
-			out << ", shape=" << m_graph[v].m_statement->GetShapeTextDOT();
+			out << m_g.GetID(v) << " " << sbp->GetStatementTextDOT();
+			out << "\\n" << sbp->GetLocation() << "\"";
+			out << ", color=" << sbp->GetDotSVGColor();
+			out << ", shape=" << sbp->GetShapeTextDOT();
 			out << "]";
 		}
 		else
@@ -725,10 +738,8 @@ public:
 	}
 private:
 
-	ControlFlowGraph &m_g;
-
 	/// The graph whose vertices we're writing the properties of.
-	T_CFG& m_graph;
+	ControlFlowGraphBase &m_g;
 };
 
 /**
@@ -737,24 +748,23 @@ private:
 class cfg_edge_property_writer
 {
 public:
-	cfg_edge_property_writer(T_CFG _g) :
-			m_graph(_g)
+	cfg_edge_property_writer(ControlFlowGraphBase &_g) :	m_graph(_g)
 	{
 	}
 	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
 	{
+		CFGEdgeTypeBase *etb = m_graph.GetEdgeTypePtr(e);
 		// Set the edge attributes.
 		out << "[";
-		out << "label=\"" << m_graph[e].m_edge_type->GetDotLabel() << "\"";
-		out << ", color=" << m_graph[e].m_edge_type->GetDotSVGColor();
-		out << ", style=" << m_graph[e].m_edge_type->GetDotStyle();
+		out << "label=\"" << etb->GetDotLabel() << "\"";
+		out << ", color=" << etb->GetDotSVGColor();
+		out << ", style=" << etb->GetDotStyle();
 		out << "]";
-	}
-	;
+	};
 private:
 
 	/// The graph whose edges we're writing the properties of.
-	T_CFG& m_graph;
+	ControlFlowGraphBase &m_graph;
 };
 
 
@@ -763,16 +773,19 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
-	boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> graph_of_this_function(
-			*m_cfg, boost::keep_all(), the_filter);
+	/*boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> graph_of_this_function(
+			*m_cfg, boost::keep_all(), the_filter);*/
+
+	FilteredGraph<boost::keep_all, vertex_filter_predicate> *graph_of_this_function
+		= m_the_cfg->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
 
 	std::clog << "Creating " << output_filename << std::endl;
 
 	std::ofstream outfile(output_filename.c_str());
 
-	boost::write_graphviz(outfile, graph_of_this_function,
-			cfg_vertex_property_writer(*m_the_cfg, *m_cfg),
-			cfg_edge_property_writer(*m_cfg),
+	boost::write_graphviz(outfile, graph_of_this_function->GetConstT_CFG(),
+			cfg_vertex_property_writer(*m_the_cfg),
+			cfg_edge_property_writer(*m_the_cfg),
 			graph_property_writer(*m_the_cfg, this));
 
 	// graph_property_writer() added a subgraph, which "uses up" the "}" that write_graphviz streams out.
@@ -801,7 +814,7 @@ class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
 
 };
 
-bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector< StatementBase* > &statement_list)
+bool Function::CreateControlFlowGraph(ControlFlowGraphBase & cfg, const std::vector< StatementBase* > &statement_list)
 {
 	LabelMap label_map;
 	T_CFG_VERTEX_DESC prev_vertex;
@@ -815,7 +828,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
 
 	m_the_cfg = &cfg;
-	m_cfg = &cfg.GetT_CFG();
+	//m_cfg = &cfg.GetT_CFG();
 
 	// Create ENTRY and EXIT vertices.
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
@@ -915,8 +928,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		{
 			// The ResolveLinks call succeeded.  Replace the *Unlinked() class instance with a suitable linked instance.
 			dlog_cfg << "INFO: Linked " << typeid(*fcl).name() << std::endl;
-			cfg.GetT_CFG()[vd].m_statement = replacement_statement;
-			delete fcl;
+			//cfg.GetT_CFG()[vd].m_statement = replacement_statement;
+			//delete fcl;
+			cfg.ReplaceStatementPtr(vd, replacement_statement);
 		}
 		else
 		{
@@ -950,13 +964,13 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Fix up complete." << std::endl;
 
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;
-	cfg.RemoveRedundantNodes(this);
+	//cfg.RemoveRedundantNodes(this);
 	dlog_cfg << "INFO: Redundant node removal complete." << std::endl;
 
 	return true;
 }
 
-void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlockLeaderInfo> & leader_info_list)
+void Function::AddImpossibleEdges(ControlFlowGraphBase & cfg, std::vector<BasicBlockLeaderInfo> & leader_info_list)
 {
 	BOOST_FOREACH(BasicBlockLeaderInfo p, leader_info_list)
 	{
@@ -976,7 +990,7 @@ void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlock
 	}
 }
 
-bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
+bool Function::CheckForNoInEdges(ControlFlowGraphBase & cfg,
 		std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
 		std::vector< T_CFG_VERTEX_DESC > *output)
 {
