@@ -27,8 +27,11 @@ libcontrolflowgraph_a_SOURCES = \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
 	depth_first_traversal.hpp \
+	Edge.cpp Edge.h \
 	FilteredGraph.cpp FilteredGraph.h \
+	Graph.cpp Graph.h \
 	topological_visit_kahn.h \
+	Vertex.cpp Vertex.h \
 	VertexID.cpp VertexID.h
 
 libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
