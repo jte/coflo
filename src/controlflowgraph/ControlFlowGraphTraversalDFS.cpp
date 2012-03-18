@@ -64,7 +64,7 @@ struct VertexInfo
 };
 
 
-ControlFlowGraphTraversalDFS::ControlFlowGraphTraversalDFS(ControlFlowGraphBase &control_flow_graph) : ControlFlowGraphTraversalBase(control_flow_graph)
+ControlFlowGraphTraversalDFS::ControlFlowGraphTraversalDFS(ControlFlowGraph &control_flow_graph) : ControlFlowGraphTraversalBase(control_flow_graph)
 {
 
 }

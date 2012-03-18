@@ -32,4 +32,5 @@ public:
 	virtual ~VertexID();
 };
 #endif
+
 #endif /* VERTEXID_H_ */

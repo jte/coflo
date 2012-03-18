@@ -301,6 +301,7 @@ AC_CONFIG_FILES([Makefile
 	doc/Makefile
 	src/Makefile
 	src/controlflowgraph/Makefile
+	src/controlflowgraph/algorithms/Makefile
 	src/controlflowgraph/analysis/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile

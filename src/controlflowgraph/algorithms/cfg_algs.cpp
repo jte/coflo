@@ -20,7 +20,7 @@
 
 #include "../../Function.h"
 
-
+#if 0
 void FixupBackEdges(Function *f)
 {
 	// Property map for getting at the edge types in the CFG.
@@ -77,7 +77,7 @@ void FixupBackEdges(Function *f)
 }
 
 
-void ControlFlowGraphBase::InsertMergeNodes(Function *f)
+void ControlFlowGraph::InsertMergeNodes(Function *f)
 {
 #if 0
 	// Property map for getting at the edge types in the CFG.
@@ -168,7 +168,7 @@ void ControlFlowGraphBase::InsertMergeNodes(Function *f)
 }
 
 
-void ControlFlowGraphBase::SplitCriticalEdges(Function *f)
+void ControlFlowGraph::SplitCriticalEdges(Function *f)
 {
 #if 0
 	// Property map for getting at the edge types in the CFG.
@@ -349,3 +349,6 @@ void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 		RemoveVertex(i);
 	}
 }
+
+#endif
+
