@@ -22,11 +22,12 @@
 
 #include <string>
 #include "coflo_exceptions.hpp"
+#include "../Edge.h"
 
 /**
  * Base class for control flow graph edge types.
  */
-class CFGEdgeTypeBase
+class CFGEdgeTypeBase : public Edge
 {
 
 public:

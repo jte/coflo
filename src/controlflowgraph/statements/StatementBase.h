@@ -24,11 +24,12 @@
 
 #include "../../debug_utils/debug_utils.hpp"
 #include "../../Location.h"
+#include "../Vertex.h"
 
 /**
  * Abstract base class for all statements and expressions in the control flow graph.
  */
-class StatementBase
+class StatementBase : public Vertex
 {
 public:
 	StatementBase() {};

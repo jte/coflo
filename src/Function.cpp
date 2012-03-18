@@ -127,10 +127,10 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 			the_filter);*/
 
 	typedef FilteredGraph<boost::keep_all, vertex_filter_predicate> T_FG;
-	FilteredGraph<boost::keep_all, vertex_filter_predicate> *graph_of_this_function
-			= m_the_cfg->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
+	T_FG *graph_of_this_function
+			= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
 
-	boost::graph_traits<T_FG::T_CFG_FILTERED>::vertex_iterator vit, vend;
+	boost::graph_traits<T_FG::underlying_graph_type_t>::vertex_iterator vit, vend;
 	boost::tie(vit, vend) = graph_of_this_function->Vertices();
 	for (; vit != vend; vit++)
 	{
@@ -403,7 +403,7 @@ using std::endl;
 class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 {
 public:
-	function_control_flow_graph_visitor(ControlFlowGraphBase &g,
+	function_control_flow_graph_visitor(ControlFlowGraph &g,
 			T_CFG_VERTEX_DESC last_statement,
 			bool cfg_verbose,
 			bool cfg_vertex_ids) :
@@ -693,7 +693,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 /// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
 struct graph_property_writer
 {
-	graph_property_writer(ControlFlowGraphBase &g, Function * function) : m_g(g), m_function(function) {};
+	graph_property_writer(ControlFlowGraph &g, Function * function) : m_g(g), m_function(function) {};
 
 	void operator()(std::ostream& out) const
 	{
@@ -707,7 +707,7 @@ struct graph_property_writer
 		out << "{ rank = sink; " << m_g.GetID(m_function->GetExitVertexDescriptor()) << "; }" << std::endl;
 	}
 
-	ControlFlowGraphBase &m_g;
+	ControlFlowGraph &m_g;
 	Function* m_function;
 };
 
@@ -717,7 +717,7 @@ struct graph_property_writer
 class cfg_vertex_property_writer
 {
 public:
-	cfg_vertex_property_writer(ControlFlowGraphBase &cfg) : m_g(cfg) { };
+	cfg_vertex_property_writer(ControlFlowGraph &cfg) : m_g(cfg) { };
 
 	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
 	{
@@ -739,7 +739,7 @@ public:
 private:
 
 	/// The graph whose vertices we're writing the properties of.
-	ControlFlowGraphBase &m_g;
+	ControlFlowGraph &m_g;
 };
 
 /**
@@ -748,7 +748,7 @@ private:
 class cfg_edge_property_writer
 {
 public:
-	cfg_edge_property_writer(ControlFlowGraphBase &_g) :	m_graph(_g)
+	cfg_edge_property_writer(ControlFlowGraph &_g) :	m_graph(_g)
 	{
 	}
 	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
@@ -764,7 +764,7 @@ public:
 private:
 
 	/// The graph whose edges we're writing the properties of.
-	ControlFlowGraphBase &m_graph;
+	ControlFlowGraph &m_graph;
 };
 
 
@@ -777,7 +777,7 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 			*m_cfg, boost::keep_all(), the_filter);*/
 
 	FilteredGraph<boost::keep_all, vertex_filter_predicate> *graph_of_this_function
-		= m_the_cfg->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
+		= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
 
 	std::clog << "Creating " << output_filename << std::endl;
 
@@ -814,7 +814,7 @@ class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
 
 };
 
-bool Function::CreateControlFlowGraph(ControlFlowGraphBase & cfg, const std::vector< StatementBase* > &statement_list)
+bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector< StatementBase* > &statement_list)
 {
 	LabelMap label_map;
 	T_CFG_VERTEX_DESC prev_vertex;
@@ -970,7 +970,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraphBase & cfg, const std::vec
 	return true;
 }
 
-void Function::AddImpossibleEdges(ControlFlowGraphBase & cfg, std::vector<BasicBlockLeaderInfo> & leader_info_list)
+void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlockLeaderInfo> & leader_info_list)
 {
 	BOOST_FOREACH(BasicBlockLeaderInfo p, leader_info_list)
 	{
@@ -990,7 +990,7 @@ void Function::AddImpossibleEdges(ControlFlowGraphBase & cfg, std::vector<BasicB
 	}
 }
 
-bool Function::CheckForNoInEdges(ControlFlowGraphBase & cfg,
+bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 		std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
 		std::vector< T_CFG_VERTEX_DESC > *output)
 {

@@ -18,7 +18,7 @@
 #include "ControlFlowGraphTraversalBase.h"
 #include "CallStackFrameBase.h"
 
-ControlFlowGraphTraversalBase::ControlFlowGraphTraversalBase(ControlFlowGraphBase &control_flow_graph) : m_control_flow_graph(control_flow_graph)
+ControlFlowGraphTraversalBase::ControlFlowGraphTraversalBase(ControlFlowGraph &control_flow_graph) : m_control_flow_graph(control_flow_graph)
 {
 
 }
