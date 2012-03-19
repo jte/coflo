@@ -35,7 +35,7 @@ class LabelMap;
 	virtual std::string GetIdentifierCFG() const { return #name "_UNLINKED"; };
 
 #define M_DECLARE_FLOW_CONTROL_VIRTUALS(name) \
-		virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map);
+		virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map);
 
 class FlowControlUnlinked : public FlowControlBase
 {
@@ -52,7 +52,7 @@ public:
 	 * @return Pointer to a FlowControlBase-derived object which the caller is to use to replace this object with in the
 	 * 		vertex's CFGVertexProperties.  NULL if all links could not be resolved.
 	 */
-	virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map) = 0;
+	virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map) = 0;
 
 };
 

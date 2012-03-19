@@ -30,3 +30,19 @@ Vertex::~Vertex()
 	// TODO Auto-generated destructor stub
 }
 
+void Vertex::AddInEdge(Edge* e)
+{
+	m_in_edges.insert(e);
+}
+
+void Vertex::AddOutEdge(Edge* e)
+{
+	m_out_edges.insert(e);
+}
+
+std::pair<Vertex::Out_Edge_iterator, Vertex::Out_Edge_iterator> Vertex::OutEdges()
+{
+	return std::pair<Out_Edge_iterator, Out_Edge_iterator>(m_out_edges.begin(), m_out_edges.end());
+}
+
+

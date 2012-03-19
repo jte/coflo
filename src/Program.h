@@ -25,7 +25,7 @@
 #include <map>
 
 #include "controlflowgraph/ControlFlowGraph.h"
-#include "controlflowgraph/ControlFlowGraphTemplateHelper.h"
+//#include "controlflowgraph/ControlFlowGraphTemplateHelper.h"
 
 class TranslationUnit;
 class Function;
@@ -115,7 +115,7 @@ private:
 	ToolDot *m_the_dot;
 	
 	/// The Control Flow Graph for the Program.
-	OverallControlFlowGraph m_cfg;
+	ControlFlowGraph m_cfg;
 	
 	/// The identifier string to Function* map.
 	T_ID_TO_FUNCTION_PTR_MAP m_function_map;

@@ -42,7 +42,7 @@ public:
 	 * @param source  The vertex to start the traversal from.
 	 * @param visitor The ControlFlowGraphVisitorBase()-derived visitor which will examine the nodes traversed and stop the traversal.
 	 */
-	virtual void Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
+	virtual void Traverse(StatementBase* source,
 			ControlFlowGraphVisitorBase *visitor) = 0;
 
 protected:

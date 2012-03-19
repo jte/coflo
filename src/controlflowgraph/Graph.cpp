@@ -19,6 +19,9 @@
 
 #include "Graph.h"
 
+#include "Vertex.h"
+#include "Edge.h"
+
 Graph::Graph()
 {
 	// TODO Auto-generated constructor stub
@@ -29,4 +32,30 @@ Graph::~Graph()
 {
 	// TODO Auto-generated destructor stub
 }
+
+void Graph::AddVertex(Vertex* v)
+{
+	m_vertices.insert(v);
+}
+
+void Graph::RemoveVertex(Vertex* v)
+{
+	m_vertices.erase(v);
+}
+
+void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)
+{
+	source->AddOutEdge(e);
+	target->AddInEdge(e);
+}
+
+void Graph::RemoveEdge(Edge* e)
+{
+}
+
+std::pair<Graph::Vertex_iterator, Graph::Vertex_iterator> Graph::Vertices()
+{
+	return std::pair< Vertex_iterator, Vertex_iterator >(m_vertices.begin(), m_vertices.end());
+}
+
 

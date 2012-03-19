@@ -136,9 +136,14 @@ public:
 	 *
 	 * @return T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function
 	 */
-	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
+	StatementBase* GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
 
-	T_CFG_EDGE_DESC GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
+	/**
+	 * Get the ENTRY vertex's self-edge.
+	 *
+	 * @return
+	 */
+	CFGEdgeTypeBase* GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
 
 	/**
 	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
@@ -194,8 +199,10 @@ private:
 	std::string m_function_id;
 
 	/// The first statement in the body of this function.
-	T_CFG_VERTEX_DESC m_entry_vertex_desc;
-	T_CFG_EDGE_DESC m_entry_vertex_self_edge;
+	///T_CFG_VERTEX_DESC m_entry_vertex_desc;
+	///T_CFG_EDGE_DESC m_entry_vertex_self_edge;
+	StatementBase* m_entry_vertex_desc;
+	CFGEdgeTypeBase* m_entry_vertex_self_edge;
 	
 	/// The last statement in the body of this function.
 	T_CFG_VERTEX_DESC m_exit_vertex_desc;

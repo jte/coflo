@@ -23,6 +23,7 @@
 #include <string>
 #include "coflo_exceptions.hpp"
 #include "../Edge.h"
+#include "../statements/StatementBase.h"
 
 /**
  * Base class for control flow graph edge types.
@@ -114,6 +115,13 @@ public:
      * @return 
      */
 	std::string GetDotStyle() const;
+
+	/**
+	 * @note This overload works because the return type is covariant with a Vertex*.
+	 * @return
+	 */
+	virtual StatementBase* Source();
+	virtual StatementBase* Target();
 
 private:
 	

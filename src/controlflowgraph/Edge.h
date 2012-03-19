@@ -20,6 +20,8 @@
 #ifndef EDGE_H_
 #define EDGE_H_
 
+class Vertex;
+
 /*
  *
  */
@@ -28,6 +30,15 @@ class Edge
 public:
 	Edge();
 	virtual ~Edge();
+
+	Vertex* Source() { return m_source; };
+	Vertex* Target() { return m_target; };
+
+
+
+private:
+	Vertex *m_source;
+	Vertex *m_target;
 };
 
 #endif /* EDGE_H_ */

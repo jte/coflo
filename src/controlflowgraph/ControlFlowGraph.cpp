@@ -30,7 +30,7 @@
 #include "visitors/MergeNodeInsertionVisitor.h"
 #include "edges/edge_types.h"
 #include "../Function.h"
-#include "FilteredGraph.h"
+//#include "FilteredGraph.h"
 
 using std::cout;
 using std::cerr;
