@@ -33,6 +33,8 @@
 #include "VertexID.h"
 #include "SparsePropertyMap.h"
 
+#include "Graph.h"
+
 class Function;
 
 
@@ -79,7 +81,7 @@ typedef boost::adjacency_list
 		/// The Edge properties type.
 		CFGEdgeProperties
 		> T_CFG;
-
+#if 0
 /// Typedef for the vertex_descriptors in the control flow graph.
 typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
 
@@ -100,7 +102,10 @@ typedef boost::graph_traits< T_CFG >::degree_size_type T_CFG_DEGREE_SIZE_TYPE;
 
 // Typedef for the type used to index the Vertices.
 typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
+#endif
 
+typedef StatementBase* T_CFG_VERTEX_DESC;
+typedef CFGEdgeTypeBase* T_CFG_EDGE_DESC;
 
 /// Property map typedef for property maps which allow us to get at the function pointer stored at
 /// CFGVertexProperties::m_containing_function in the T_CFG.
@@ -143,7 +148,7 @@ class FilteredGraph;
  *       free functions acting on the underlying T_CFG.
  *
  */
-class ControlFlowGraph : boost::noncopyable
+class ControlFlowGraph : public Graph //: boost::noncopyable
 {
 public:
 	ControlFlowGraph();
@@ -184,19 +189,19 @@ public:
 	virtual void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
 	//@}
 
-	virtual T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
-	virtual T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEdgeTypeBase *edge_type);
+	//virtual T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
+	//virtual T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEdgeTypeBase *edge_type);
 
 	/// @name Vertex attribute accessors.
 	//@{
 
-	virtual VertexID GetID(T_CFG_VERTEX_DESC vdesc) = 0;
+	//virtual VertexID GetID(T_CFG_VERTEX_DESC vdesc) = 0;
 
-	virtual std::pair< T_CFG_OUT_EDGE_ITERATOR, T_CFG_OUT_EDGE_ITERATOR > OutEdges(T_CFG_VERTEX_DESC vdesc) = 0;
+	//virtual std::pair< T_CFG_OUT_EDGE_ITERATOR, T_CFG_OUT_EDGE_ITERATOR > OutEdges(T_CFG_VERTEX_DESC vdesc) = 0;
 
-	virtual StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) = 0;
+	//virtual StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) = 0;
 
-	virtual void ReplaceStatementPtr(T_CFG_VERTEX_DESC v, StatementBase *new_statement_base) = 0;
+	//virtual void ReplaceStatementPtr(T_CFG_VERTEX_DESC v, StatementBase *new_statement_base) = 0;
 
 	/**
 	 * Return the in degree of vertex @a v.
@@ -204,9 +209,7 @@ public:
 	 * @param v
 	 * @return The in degree of @v.
 	 */
-	virtual T_CFG_DEGREE_SIZE_TYPE InDegree(T_CFG_VERTEX_DESC v) = 0;
-
-	virtual std::pair< T_CFG_VERTEX_ITERATOR, T_CFG_VERTEX_ITERATOR > Vertices() = 0;
+	//virtual T_CFG_DEGREE_SIZE_TYPE InDegree(T_CFG_VERTEX_DESC v) = 0;
 
 	//@}
 
@@ -219,7 +222,7 @@ public:
 	 * @param e The graph edge to examine.
 	 * @return The source vertex of @a e.
 	 */
-	virtual T_CFG_VERTEX_DESC Source(T_CFG_EDGE_DESC e) = 0;
+	//virtual T_CFG_VERTEX_DESC Source(T_CFG_EDGE_DESC e) = 0;
 
 	/**
 	 * Return the target vertex of edge @a e.
@@ -227,7 +230,7 @@ public:
 	 * @param e The graph edge to examine.
 	 * @return The target vertex of @a e.
 	 */
-	virtual T_CFG_VERTEX_DESC Target(T_CFG_EDGE_DESC e) = 0;
+	//virtual T_CFG_VERTEX_DESC Target(T_CFG_EDGE_DESC e) = 0;
 
 	/**
 	 * Returns a pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
@@ -235,7 +238,7 @@ public:
 	 * @param e The graph edge to examine.
 	 * @return Pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
 	 */
-	virtual CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) = 0;
+	//virtual CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) = 0;
 
 	virtual void ReplaceEdgeTypePtr(T_CFG_EDGE_DESC e, CFGEdgeTypeBase *new_edge_type_ptr);
 
@@ -273,7 +276,7 @@ private:
 	 * @param source Source vertex descriptor.
 	 * @param target Target vertex descriptor.
 	 */
-	virtual void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
+	//virtual void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
 	virtual void RemoveEdge(const T_CFG_EDGE_DESC &e);
 	virtual void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
 	virtual void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);

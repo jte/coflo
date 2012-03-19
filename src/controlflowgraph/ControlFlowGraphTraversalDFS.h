@@ -22,8 +22,6 @@
 
 #include "ControlFlowGraphTraversalBase.h"
 
-class ControlFlowGraphVisitorBase;
-
 /**
  * Depth-first search traversal of the CFG.
  */
@@ -39,7 +37,7 @@ public:
 	 * @param source  The vertex to start the traversal from.
 	 * @param visitor The visitor which will visit the vertices in depth-first order during the search.
 	 */
-	virtual void Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
+	virtual void Traverse(StatementBase* source,
 			ControlFlowGraphVisitorBase *visitor);
 
 protected:
@@ -50,7 +48,7 @@ protected:
 	 * @param e
 	 * @return true if the edge should be ignored as if it wasn't in the graph.
 	 */
-	virtual bool SkipEdge(boost::graph_traits<T_CFG>::edge_descriptor e);
+	virtual bool SkipEdge(CFGEdgeTypeBase* e);
 };
 
 #endif /* CONTROLFLOWGRAPHTRAVERSALDFS_H_ */

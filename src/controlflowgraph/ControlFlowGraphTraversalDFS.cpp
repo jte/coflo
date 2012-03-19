@@ -74,13 +74,13 @@ ControlFlowGraphTraversalDFS::~ControlFlowGraphTraversalDFS()
 
 }
 
-void ControlFlowGraphTraversalDFS::Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
+void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 		ControlFlowGraphVisitorBase *visitor)
 {
 	// Some convenience typedefs.
 	typedef VertexInfo<T_CFG> T_VERTEX_INFO;
-	typedef boost::graph_traits<T_CFG>::vertex_descriptor T_VERTEX_DESC;
-	typedef boost::graph_traits<T_CFG>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef StatementBase* T_VERTEX_DESC;
+	typedef Vertex::Out_Edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 
 	// The local variables.
@@ -277,7 +277,7 @@ void ControlFlowGraphTraversalDFS::Traverse(boost::graph_traits<T_CFG>::vertex_d
 	}
 }
 
-bool ControlFlowGraphTraversalDFS::SkipEdge(boost::graph_traits<T_CFG>::edge_descriptor e)
+bool ControlFlowGraphTraversalDFS::SkipEdge(CFGEdgeTypeBase* e)
 {
 	CFGEdgeTypeBase *edge_type;
 	CFGEdgeTypeFunctionCall *fc;

@@ -25,12 +25,12 @@
 #include "statements.h"
 #include "../edges/edge_types.h"
 
-class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
+class LabelMap : public std::map< std::string, StatementBase*>
 {
 
 };
 
-FlowControlBase* GotoUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map)
+FlowControlBase* GotoUnlinked::ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map)
 {
 	// Look up our target.
 	LabelMap::iterator it;
@@ -51,7 +51,7 @@ FlowControlBase* GotoUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_
 	}
 }
 
-FlowControlBase* ReturnUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map)
+FlowControlBase* ReturnUnlinked::ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map)
 {
 	// Look up our target, which is always "EXIT" for a return statement.
 	LabelMap::iterator it;
@@ -73,7 +73,7 @@ FlowControlBase* ReturnUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTE
 	}
 }
 
-FlowControlBase* IfUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map)
+FlowControlBase* IfUnlinked::ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map)
 {
 	// Look up our targets.
 	LabelMap::iterator it_true, it_false;
@@ -102,14 +102,14 @@ FlowControlBase* IfUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DE
 	}
 }
 
-FlowControlBase* CaseUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map)
+FlowControlBase* CaseUnlinked::ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map)
 {
 	/// @todo We should eliminate this class, since it never appears on its own.
 	std::cerr << "ERROR: CaseUnlinked::ResolveLinks called, should never happen." << std::endl;
 	return NULL;
 }
 
-FlowControlBase* SwitchUnlinked::ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map)
+FlowControlBase* SwitchUnlinked::ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map)
 {
 	bool resolved_any_links = false;
 

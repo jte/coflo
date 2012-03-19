@@ -21,8 +21,8 @@
 #include "ReachabilityVisitor.h"
 
 
-ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, T_CFG_VERTEX_DESC source,
-		T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<T_CFG_EDGE_DESC> *predecessor_list)
+ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, StatementBase* source,
+		T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<CFGEdgeTypeBase*> *predecessor_list)
 	: ControlFlowGraphVisitorBase(g), m_source(source), m_inspect_vertex(inspect_vertex)
 {
 	m_predecessor_list = predecessor_list;
@@ -38,9 +38,9 @@ ReachabilityVisitor::~ReachabilityVisitor()
 {
 }
 
-edge_return_value_t ReachabilityVisitor::examine_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ReachabilityVisitor::examine_edge(CFGEdgeTypeBase* u)
 {
-	if(m_cfg.GetEdgeTypePtr(u)->IsImpossible() || m_cfg.GetEdgeTypePtr(u)->IsBackEdge())
+	if(u->IsImpossible() || u->IsBackEdge())
 	{
 		// Ignore Impossible edges.
 		return edge_return_value_t::terminate_branch;
@@ -51,7 +51,7 @@ edge_return_value_t ReachabilityVisitor::examine_edge(T_CFG_EDGE_DESC u)
 	}
 }
 
-vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ReachabilityVisitor::discover_vertex(StatementBase* u)
 {
 	if(m_inspect_vertex(m_cfg, u) == true)
 	{
@@ -62,7 +62,7 @@ vertex_return_value_t ReachabilityVisitor::discover_vertex(T_CFG_VERTEX_DESC u)
 	return vertex_return_value_t::ok;
 }
 
-edge_return_value_t ReachabilityVisitor::tree_edge(T_CFG_EDGE_DESC e)
+edge_return_value_t ReachabilityVisitor::tree_edge(CFGEdgeTypeBase* e)
 {
 	// Add this edge to the predecessor list.
 	m_predecessor_list->push_back(e);
@@ -72,7 +72,7 @@ edge_return_value_t ReachabilityVisitor::tree_edge(T_CFG_EDGE_DESC e)
 }
 
 
-vertex_return_value_t ReachabilityVisitor::finish_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ReachabilityVisitor::finish_vertex(StatementBase* u)
 {
 	// Remove this vertex from the predecessor stack.
 	//std::cout << "POP, size=" << m_predecessor_list->size() << std::endl;

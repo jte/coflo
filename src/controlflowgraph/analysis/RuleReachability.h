@@ -24,6 +24,7 @@
 
 #include "RuleDFSBase.h"
 
+class CFGEdgeTypeBase;
 //class ControlFlowGraph;
 class Function;
 
@@ -53,7 +54,7 @@ private:
 	const Function *m_sink;
 	
 	/// Array to store predecessor of each visited vertex.
-	std::deque<T_CFG_EDGE_DESC> m_predecessors;
+	std::deque<CFGEdgeTypeBase*> m_predecessors;
 };
 
 #endif	/* RULEREACHABILITY_H */

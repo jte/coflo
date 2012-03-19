@@ -20,14 +20,38 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
+#include <boost/unordered_set.hpp>
+#include <utility>
+
+class Vertex;
+class Edge;
+
 /*
  *
  */
 class Graph
 {
 public:
+	/// @name Public member types.
+	//@{
+	typedef boost::unordered_set< Vertex* >::const_iterator Vertex_iterator;
+
+public:
 	Graph();
 	virtual ~Graph();
+
+	virtual void AddVertex(Vertex *v);
+	virtual void RemoveVertex(Vertex *v);
+
+	virtual void AddEdge(Vertex *source, Vertex *target, Edge *e);
+	virtual void RemoveEdge(Edge *e);
+
+	virtual std::pair<Vertex_iterator, Vertex_iterator> Vertices();
+
+private:
+
+	/// Collection of all vertices in the Graph.
+	boost::unordered_set< Vertex* > m_vertices;
 };
 
 #endif /* GRAPH_H_ */

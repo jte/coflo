@@ -51,3 +51,15 @@ std::string CFGEdgeTypeBase::GetDotStyle() const
 		return "solid";
 	}
 }
+
+StatementBase* CFGEdgeTypeBase::Source()
+{
+	return dynamic_cast<StatementBase*>(Edge::Source());
+}
+
+
+StatementBase* CFGEdgeTypeBase::Target()
+{
+	return dynamic_cast<StatementBase*>(Edge::Target());
+}
+

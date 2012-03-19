@@ -28,9 +28,9 @@
 #include "../ControlFlowGraphTraversalDFS.h"
 #include "../visitors/ReachabilityVisitor.h"
 #include "../statements/Entry.h"
+#include "../edges/CFGEdgeTypeBase.h"
 #include "Function.h"
 
-#include "../statements/Entry.h"
 
 RuleReachability::RuleReachability(ControlFlowGraph &cfg, const Function *source, const Function *sink) : RuleDFSBase(cfg)
 {
@@ -54,9 +54,9 @@ RuleReachability::~RuleReachability()
  */
 struct ReachabilityPredicateSpecificVertex
 {
-	ReachabilityPredicateSpecificVertex(T_CFG_VERTEX_DESC sink) { m_sink = sink; };
+	ReachabilityPredicateSpecificVertex(StatementBase* sink) { m_sink = sink; };
 
-	bool operator()(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC &v)
+	bool operator()(ControlFlowGraph &cfg, StatementBase* &v)
 	{
 		if(v == m_sink)
 		{
@@ -67,12 +67,12 @@ struct ReachabilityPredicateSpecificVertex
 	}
 
 	/// The vertex we're trying to find.
-	T_CFG_VERTEX_DESC m_sink;
+	StatementBase* m_sink;
 };
 
 bool RuleReachability::RunRule()
 {
-	T_CFG_VERTEX_DESC starting_vertex_desc;
+	StatementBase* starting_vertex_desc;
 
 	// Get the starting vertex.
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
@@ -92,7 +92,8 @@ bool RuleReachability::RunRule()
 
 	if(!m_predecessors.empty())
 	{
-		StatementBase *violating_statement = m_cfg.GetStatementPtr(m_predecessors.rbegin()->m_source);
+		//StatementBase *violating_statement = m_cfg.GetStatementPtr(m_predecessors.rbegin()->m_source);
+		StatementBase *violating_statement = (*(m_predecessors.rbegin()))->Source();
 		std::cout << m_source->GetDefinitionFilePath() << ": In function " << m_source->GetIdentifier() << ":" << std::endl;
 		std::cout << violating_statement->GetLocation().asGNUCompilerMessageLocation()
 				<< ": warning: constraint violation: path exists in control flow graph to " << violating_statement->GetIdentifierCFG() << std::endl;
@@ -117,12 +118,13 @@ void RuleReachability::PrintCallChain()
 	long bypass_call_depth = 0;
 	bool ignore_function_call = false;
 
-	std::deque<T_CFG_EDGE_DESC> m_new_predecessors;
+	std::deque<CFGEdgeTypeBase*> m_new_predecessors;
 
 	// First strip the call chain of all function calls that returned with no matches.
-	BOOST_REVERSE_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
+	BOOST_REVERSE_FOREACH(CFGEdgeTypeBase *pred, m_predecessors)
 	{
-		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		//StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		StatementBase *sb = pred->Source();
 
 		if (sb->IsType<FunctionCallUnresolved>())
 		{
@@ -159,9 +161,9 @@ void RuleReachability::PrintCallChain()
 
 	m_predecessors.swap(m_new_predecessors);
 
-	BOOST_FOREACH(T_CFG_EDGE_DESC pred, m_predecessors)
+	BOOST_FOREACH(CFGEdgeTypeBase *pred, m_predecessors)
 	{
-		StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
+		StatementBase *sb = pred->Source();
 		if(sb->IsType<FunctionCall>())
 		{
 			PrintStatement(sb, indent_level);
@@ -169,7 +171,8 @@ void RuleReachability::PrintCallChain()
 		else if(sb->IsDecisionStatement())
 		{
 			// It's a decision statement
-			PrintStatement(sb, m_cfg.GetEdgeTypePtr(pred), indent_level);
+			//PrintStatement(sb, m_cfg.GetEdgeTypePtr(pred), indent_level);
+			PrintStatement(sb, pred, indent_level);
 		}
 		else if(sb->IsType<Entry>())
 		{

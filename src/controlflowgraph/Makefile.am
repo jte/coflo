@@ -23,16 +23,17 @@ libcontrolflowgraph_a_SOURCES = \
 	CallStackBase.cpp CallStackBase.h \
 	CallStackFrameBase.cpp CallStackFrameBase.h \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
-	ControlFlowGraphTemplateHelper.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
 	depth_first_traversal.hpp \
 	Edge.cpp Edge.h \
-	FilteredGraph.cpp FilteredGraph.h \
 	Graph.cpp Graph.h \
 	topological_visit_kahn.h \
 	Vertex.cpp Vertex.h \
 	VertexID.cpp VertexID.h
+
+#	ControlFlowGraphTemplateHelper.h \#
+#	FilteredGraph.cpp FilteredGraph.h \#
 
 libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
