@@ -35,6 +35,9 @@ public:
 	/// @name Public member types.
 	//@{
 	typedef boost::unordered_set< Vertex* >::const_iterator Vertex_iterator;
+	typedef Vertex* vertex_descriptor;
+	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
+	//@}
 
 public:
 	Graph();

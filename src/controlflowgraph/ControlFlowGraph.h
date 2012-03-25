@@ -151,6 +151,14 @@ class FilteredGraph;
 class ControlFlowGraph : public Graph //: boost::noncopyable
 {
 public:
+	/// @name Public member types.
+	//@{
+	typedef StatementBase* vertex_descriptor;
+	typedef boost::unordered_set< StatementBase* >::const_iterator vertex_iterator;
+	typedef boost::unordered_set< CFGEdgeTypeBase* >::const_iterator out_edge_iterator;
+	//@}
+
+public:
 	ControlFlowGraph();
 	virtual ~ControlFlowGraph();
 

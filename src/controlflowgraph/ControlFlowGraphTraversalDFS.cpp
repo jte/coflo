@@ -42,8 +42,8 @@
 template <typename IncidenceGraph>
 struct VertexInfo
 {
-	typedef typename boost::graph_traits<IncidenceGraph>::vertex_descriptor T_VERTEX_DESC;
-	typedef typename boost::graph_traits<IncidenceGraph>::out_edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef typename IncidenceGraph::vertex_descriptor T_VERTEX_DESC;
+	typedef typename IncidenceGraph::out_edge_iterator T_OUT_EDGE_ITERATOR;
 
 	/**
 	 * Set the VertexInfo's members to the given values.
@@ -78,9 +78,9 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 		ControlFlowGraphVisitorBase *visitor)
 {
 	// Some convenience typedefs.
-	typedef VertexInfo<T_CFG> T_VERTEX_INFO;
+	typedef VertexInfo<ControlFlowGraph> T_VERTEX_INFO;
 	typedef StatementBase* T_VERTEX_DESC;
-	typedef Vertex::Out_Edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef StatementBase::Out_Edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 
 	// The local variables.
@@ -111,7 +111,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 	// Get iterators to the out edges of vertex u.
 	//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-	boost::tie(ei, eend) = m_control_flow_graph.OutEdges(u);
+	boost::tie(ei, eend) = u->OutEdges();
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -177,7 +177,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			}
 
 			// Get the target vertex of the current edge.
-			v = m_control_flow_graph.Target(*ei);
+			v = (*ei)->Target();
 
 			// Get the target vertex's color.
 			v_color = TopCallStack()->GetColorMap()->get(v);
@@ -218,7 +218,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				visitor_vertex_return_value = visitor->discover_vertex(u);
 
 
-				StatementBase* sbp = m_control_flow_graph.GetStatementPtr(u);
+				StatementBase* sbp = u;
 				//// If this is a FunctionCallResolved node, push a new stack frame.
 				if(sbp->IsType<FunctionCallResolved>())
 				{
@@ -228,7 +228,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 				// Get the out-edges of the target vertex.
 				//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-				boost::tie(ei, eend) = m_control_flow_graph.OutEdges(u);
+				boost::tie(ei, eend) = u->OutEdges();
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{
@@ -285,7 +285,7 @@ bool ControlFlowGraphTraversalDFS::SkipEdge(CFGEdgeTypeBase* e)
 	CFGEdgeTypeFunctionCallBypass *fcb;
 
 	//edge_type = m_control_flow_graph.GetT_CFG()[e].m_edge_type;
-	edge_type = m_control_flow_graph.GetEdgeTypePtr(e);
+	edge_type = e;
 
 	// Attempt dynamic casts to call/return types to see if we need to handle
 	// these specially.

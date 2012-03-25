@@ -26,11 +26,19 @@
 #include "../../Location.h"
 #include "../Vertex.h"
 
+class CFGEdgeTypeBase;
+
 /**
  * Abstract base class for all statements and expressions in the control flow graph.
  */
 class StatementBase : public Vertex
 {
+public:
+	typedef boost::unordered_set< CFGEdgeTypeBase* >::const_iterator Edge_iterator;
+	typedef Edge_iterator Out_Edge_iterator;
+	typedef Edge_iterator In_Edge_iterator;
+	typedef boost::unordered_set< CFGEdgeTypeBase* >::size_type degree_size_t;
+
 public:
 	StatementBase() {};
 	StatementBase(const Location &location);
