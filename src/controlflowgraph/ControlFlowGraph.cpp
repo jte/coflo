@@ -302,6 +302,25 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 #endif
 
 
+void ControlFlowGraph::Vertices(std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator>* iterator_pair)
+{
+/*
+	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> it_pair;
+
+	it_pair = GetVertexIteratorPair<ControlFlowGraph::vertex_iterator>();
+
+	iterator_pair->first = it_pair.first; //m_vertices.begin();
+	iterator_pair->second = it_pair.second; //m_vertices.end();
+*/
+
+	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> base_iterator_pair;
+	Graph::Vertices(&base_iterator_pair);
+
+	iterator_pair->first = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.first); //base_iterator_pair.first;
+	iterator_pair->second = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.second);
+
+}
+
 void ControlFlowGraph::InitVertexIDGenerator()
 {
 	m_vertex_id_state = 0;
@@ -438,4 +457,3 @@ void ControlFlowGraph::RemoveRedundantNodes(Function* f)
 }
 
 #endif
-

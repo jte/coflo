@@ -18,6 +18,7 @@
 /** @file */
 
 #include "CFGEdgeTypeBase.h"
+#include "../statements/StatementBase.h"
 
 CFGEdgeTypeBase::CFGEdgeTypeBase()
 {
@@ -60,6 +61,12 @@ StatementBase* CFGEdgeTypeBase::Source()
 
 StatementBase* CFGEdgeTypeBase::Target()
 {
-	return dynamic_cast<StatementBase*>(Edge::Target());
+	return dynamic_cast<StatementBase*>(GetBasePtr()->Target());
 }
+
+CFGEdgeTypeBase::base_class_t* CFGEdgeTypeBase::GetBasePtr()
+{
+	return static_cast<base_class_t*>(this);
+}
+
 

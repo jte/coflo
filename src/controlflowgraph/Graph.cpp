@@ -21,6 +21,7 @@
 
 #include "Vertex.h"
 #include "Edge.h"
+#include <coflo_exceptions.hpp>
 
 Graph::Graph()
 {
@@ -51,11 +52,17 @@ void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)
 
 void Graph::RemoveEdge(Edge* e)
 {
+	BOOST_THROW_EXCEPTION( not_implemented() );
 }
 
-std::pair<Graph::Vertex_iterator, Graph::Vertex_iterator> Graph::Vertices()
+void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair)
 {
-	return std::pair< Vertex_iterator, Vertex_iterator >(m_vertices.begin(), m_vertices.end());
+	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> it_pair;
+
+	it_pair = GetVertexIteratorPair<Graph::vertex_iterator>();
+
+	iterator_pair->first = it_pair.first; //m_vertices.begin();
+	iterator_pair->second = it_pair.second; //m_vertices.end();
 }
 
 

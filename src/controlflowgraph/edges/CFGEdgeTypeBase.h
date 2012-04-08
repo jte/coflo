@@ -23,7 +23,8 @@
 #include <string>
 #include "coflo_exceptions.hpp"
 #include "../Edge.h"
-#include "../statements/StatementBase.h"
+//#include "../statements/StatementBase.h"
+class StatementBase;
 
 /**
  * Base class for control flow graph edge types.
@@ -125,6 +126,10 @@ public:
 
 private:
 	
+	typedef Edge base_class_t;
+
+	base_class_t* GetBasePtr();
+
 	/// Flag indicating whether this edge has been determined to be a back edge or not.
 	bool m_is_back_edge;
 
