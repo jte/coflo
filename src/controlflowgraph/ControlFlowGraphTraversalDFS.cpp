@@ -146,7 +146,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			boost::default_color_type v_color;
 
 			// Check if we want to filter out this edge.
-			if(SkipEdge(*ei))
+			if(SkipEdge(dynamic_cast<CFGEdgeTypeBase*>(*ei)))
 			{
 				// Skip this edge.
 				++ei;
@@ -154,7 +154,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			}
 
 			// Let the visitor examine the edge *ei.
-			visitor_edge_return_value = visitor->examine_edge(*ei);
+			visitor_edge_return_value = visitor->examine_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
 			switch(visitor_edge_return_value.as_enum())
 			{
 				case edge_return_value_t::terminate_branch:
@@ -177,7 +177,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			}
 
 			// Get the target vertex of the current edge.
-			v = (*ei)->Target();
+			v = dynamic_cast<StatementBase*>((*ei)->Target());
 
 			// Get the target vertex's color.
 			v_color = TopCallStack()->GetColorMap()->get(v);
@@ -193,7 +193,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				// that is a member of the search tree.
 
 				// Visit the edge.
-				visitor_edge_return_value = visitor->tree_edge(*ei);
+				visitor_edge_return_value = visitor->tree_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
 				switch(visitor_edge_return_value.as_enum())
 				{
 					/// @todo Handle other cases.
@@ -252,7 +252,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 				// This is a back edge, i.e. an edge to a vertex that we've
 				// already visited.  Visit it, but don't follow it.
-				visitor_edge_return_value = visitor->back_edge(*ei);
+				visitor_edge_return_value = visitor->back_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
 				//std::cout << "BACKEDGE" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;
@@ -262,7 +262,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				// This vertex has been visited and so have all vertices reachable from it.
 
 				// A forward or cross edge.  Visit it, but don't follow it.
-				visitor_edge_return_value = visitor->forward_or_cross_edge(*ei);
+				visitor_edge_return_value = visitor->forward_or_cross_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
 				//std::cout << "FWDCROSS" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;

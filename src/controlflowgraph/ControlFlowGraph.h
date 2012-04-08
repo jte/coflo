@@ -27,6 +27,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/utility.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
@@ -141,6 +142,16 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
 class FilteredGraph;
 
+struct CastToStatementBaseReference
+{
+	StatementBase*& operator()(Vertex*& v)
+	{
+		return (StatementBase*&)v;
+	};
+
+	/// This is for boost::result_of().
+	typedef StatementBase*& result_type;
+};
 
 /**
  * The primary control flow graph class.
@@ -154,8 +165,9 @@ public:
 	/// @name Public member types.
 	//@{
 	typedef StatementBase* vertex_descriptor;
-	typedef boost::unordered_set< StatementBase* >::const_iterator vertex_iterator;
-	typedef boost::unordered_set< CFGEdgeTypeBase* >::const_iterator out_edge_iterator;
+	//typedef boost::unordered_set< StatementBase* >::const_iterator vertex_iterator;
+	typedef boost::transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator, StatementBase*&, StatementBase* > vertex_iterator;
+	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
 	//@}
 
 public:
@@ -262,6 +274,8 @@ public:
 	//T_VERTEX_PROPERTY_MAP_INDEX GetPropMap_VertexIndex();
 
 	//@}
+
+	virtual void Vertices(std::pair<vertex_iterator, vertex_iterator> *iterator_pair);
 
 private:
 

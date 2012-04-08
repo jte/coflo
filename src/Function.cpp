@@ -47,7 +47,7 @@
 #include "controlflowgraph/statements/ParseHelpers.h"
 #include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
-#include "controlflowgraph/FilteredGraph.h"
+//#include "controlflowgraph/FilteredGraph.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
 
 #include "libexttools/ToolDot.h"
@@ -112,7 +112,7 @@ bool Function::IsCalled() const
 	// Determine if this function is ever called.
 	// If the first statement (the ENTRY block) has any in-edges
 	// other than its self-edge, it's called by something.
-	return m_the_cfg->InDegree(m_entry_vertex_desc) > 1;
+	return m_entry_vertex_desc->InDegree() > 1;
 }
 
 void Function::Link(const std::map<std::string, Function*> &function_map,
@@ -214,7 +214,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					// Copy the fallthrough edge's properties to the newly-added return edge.
 					/// @todo Find a cleaner way to do this.
 					//return_edge_type->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
-					return_edge_type->CopyBasePropertiesFrom(*(m_the_cfg->GetEdgeTypePtr(function_call_out_edge)));
+					return_edge_type->CopyBasePropertiesFrom(*function_call_out_edge);
 
 					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
 					// For graphing just the function itself, we'll look at these edges and not the
@@ -223,7 +223,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					// Copy the fallthrough edge's properties to its replacement.
 					/// @todo Find a cleaner way to do this.
 					//fcbp->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
-					fcbp->CopyBasePropertiesFrom(*(m_the_cfg->GetEdgeTypePtr(function_call_out_edge)));
+					fcbp->CopyBasePropertiesFrom(*function_call_out_edge);
 					//delete (*m_cfg)[function_call_out_edge].m_edge_type;
 					//(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
 					m_the_cfg->ReplaceEdgeTypePtr(function_call_out_edge, fcbp);
@@ -234,7 +234,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					std::cerr << "ERROR: Can't add return edge." << std::endl;
 				}*/
 				new_edge_desc = m_the_cfg->AddEdge(it->second->GetExitVertexDescriptor(),
-						m_the_cfg->Target(function_call_out_edge), return_edge_type);
+						function_call_out_edge->Target(), return_edge_type);
 			}
 		}
 	}
@@ -339,7 +339,7 @@ T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
 	boost::graph_traits<T_CFG>::in_edge_iterator ieit, ieend;
 
-	boost::tie(ieit, ieend) = boost::in_edges(v, cfg);
+	boost::tie(ieit, ieend) = v->InEdges();
 
 	bool saw_function_call_already = false;
 	for (; ieit != ieend; ++ieit)
@@ -378,7 +378,7 @@ static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
 	boost::graph_traits<T_CFG>::out_edge_iterator eit, eend;
 
-	boost::tie(eit, eend) = boost::out_edges(v, cfg);
+	boost::tie(eit, eend) = v->OutEdges();
 
 	long i = 0;
 	for (; eit != eend; ++eit)
@@ -438,7 +438,7 @@ public:
 	{
 		// We found a new vertex.
 
-		StatementBase *p = m_graph[u].m_statement;
+		StatementBase *p = u;
 
 		if(p->IsType<Entry>())
 		{
@@ -456,8 +456,8 @@ public:
 		if(fid==1)
 		{
 			T_CFG_VERTEX_DESC predecessor;
-			predecessor = boost::source(e, m_graph);
-			if(m_graph[predecessor].m_statement->IsDecisionStatement())
+			predecessor = e->Source();
+			if(predecessor->IsDecisionStatement())
 			{
 				// Predecessor was a decision statement, so this vertex starts a new branch.
 				// Print a block start marker at the current indent level minus one.
@@ -920,7 +920,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Linking FlowControlUnlinked-derived statements." << std::endl;
 	BOOST_FOREACH(T_CFG_VERTEX_DESC vd, list_of_unlinked_flow_control_statements)
 	{
-		FlowControlUnlinked *fcl = dynamic_cast<FlowControlUnlinked*>(cfg.GetStatementPtr(vd));
+		FlowControlUnlinked *fcl = dynamic_cast<FlowControlUnlinked*>(vd);
 		dlog_cfg << "INFO: Linking " << typeid(*fcl).name() << std::endl;
 		StatementBase* replacement_statement = fcl->ResolveLinks(cfg, vd, label_map);
 
@@ -977,7 +977,7 @@ void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlock
 		// Check if the leader has been linked.
 		long in_degree;
 
-		in_degree = cfg.InDegree(p.m_leader);
+		in_degree = p.m_leader->InDegree();
 
 		if(in_degree != 0)
 		{
@@ -1000,7 +1000,7 @@ bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
 	{
 		long in_degree;
 
-		in_degree = cfg.InDegree(vd);
+		in_degree = vd->InDegree();
 
 		if(in_degree == 0)
 		{

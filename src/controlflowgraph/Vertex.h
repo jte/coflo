@@ -21,9 +21,11 @@
 #define VERTEX_H_
 
 #include <boost/unordered_set.hpp>
+#include <boost/any.hpp>
 #include <utility>
 
-class Edge;
+//class Edge;
+#include "Edge.h"
 
 /*
  *
@@ -35,6 +37,8 @@ public:
 	typedef Edge_iterator Out_Edge_iterator;
 	typedef Edge_iterator In_Edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
+	struct out_edge_iterator_pair_t { Out_Edge_iterator first; Out_Edge_iterator second; };
+
 
 public:
 	Vertex();
@@ -43,7 +47,8 @@ public:
 	void AddInEdge(Edge *e);
 	void AddOutEdge(Edge *e);
 
-	std::pair<Out_Edge_iterator, Out_Edge_iterator> OutEdges();
+	std::pair<Vertex::In_Edge_iterator, Vertex::In_Edge_iterator> InEdges();
+	std::pair<Vertex::Out_Edge_iterator, Vertex::Out_Edge_iterator> OutEdges();
 
 	degree_size_t InDegree() { return m_in_edges.size(); };
 	degree_size_t OutDegree() { return m_out_edges.size(); };

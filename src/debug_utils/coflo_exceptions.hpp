@@ -15,7 +15,13 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+/** @file
+ *
+ * Header containing the exception hierarchy for CoFlo.
+ *
+ * Note that per the Boost docs, an exception hierarchy should use virtual inheritance to avoid ambiguity problems
+ * at the catch sites.
+ */
 
 
 #ifndef COFLO_EXCEPTIONS_HPP
