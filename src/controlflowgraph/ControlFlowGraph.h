@@ -115,27 +115,6 @@ typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VER
 typedef boost::property_map<T_CFG, size_t CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
-template < typename CFGEdgeType >
-boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
-{
-	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
-	boost::tuple<T_CFG_EDGE_DESC, bool> retval;
-	
-	boost::tie(eit, eend) = boost::out_edges(vdesc, cfg);
-	for(; eit != eend; eit++)
-	{
-		if(NULL != dynamic_cast<CFGEdgeType*>(cfg[*eit].m_edge_type))
-		{
-			// Found it.
-			retval = boost::make_tuple(*eit, true);
-			return retval;
-		}
-	}
-
-	// Couldn't find one.
-	retval = boost::make_tuple(*eit, false);
-	return retval;
-}
 
 
 // Forward declare the FilteredGraph class template.
@@ -144,7 +123,7 @@ class FilteredGraph;
 
 struct CastToStatementBaseReference
 {
-	StatementBase*& operator()(Vertex*& v)
+	StatementBase*& operator()(Vertex* const &v) const
 	{
 		return (StatementBase*&)v;
 	};
@@ -165,9 +144,8 @@ public:
 	/// @name Public member types.
 	//@{
 	typedef StatementBase* vertex_descriptor;
-	//typedef boost::unordered_set< StatementBase* >::const_iterator vertex_iterator;
 	typedef boost::transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator, StatementBase*&, StatementBase* > vertex_iterator;
-	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
+	typedef StatementBase::out_edge_iterator out_edge_iterator;
 	//@}
 
 public:
@@ -275,7 +253,7 @@ public:
 
 	//@}
 
-	virtual void Vertices(std::pair<vertex_iterator, vertex_iterator> *iterator_pair);
+	virtual void Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend);
 
 private:
 

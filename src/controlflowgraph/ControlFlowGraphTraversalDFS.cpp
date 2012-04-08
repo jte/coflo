@@ -80,7 +80,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 	// Some convenience typedefs.
 	typedef VertexInfo<ControlFlowGraph> T_VERTEX_INFO;
 	typedef StatementBase* T_VERTEX_DESC;
-	typedef StatementBase::Out_Edge_iterator T_OUT_EDGE_ITERATOR;
+	typedef StatementBase::out_edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 
 	// The local variables.
@@ -111,7 +111,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 	// Get iterators to the out edges of vertex u.
 	//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-	boost::tie(ei, eend) = u->OutEdges();
+	u->OutEdges(&ei, &eend);
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -228,7 +228,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 				// Get the out-edges of the target vertex.
 				//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-				boost::tie(ei, eend) = u->OutEdges();
+				u->OutEdges(&ei, &eend);
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{

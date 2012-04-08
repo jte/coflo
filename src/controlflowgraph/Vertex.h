@@ -24,31 +24,40 @@
 #include <boost/any.hpp>
 #include <utility>
 
+#include "VertexID.h"
+
 //class Edge;
 #include "Edge.h"
 
-/*
+/**
  *
  */
 class Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* >::const_iterator Edge_iterator;
-	typedef Edge_iterator Out_Edge_iterator;
-	typedef Edge_iterator In_Edge_iterator;
+	typedef Edge_iterator out_edge_iterator;
+	typedef Edge_iterator in_edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
-	struct out_edge_iterator_pair_t { Out_Edge_iterator first; Out_Edge_iterator second; };
+	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
 
 
 public:
 	Vertex();
 	virtual ~Vertex();
 
+	/**
+	 * Return this Vetex's ID.  The ID is guaranteed to be unique to the containing Graph.
+	 *
+	 * @return
+	 */
+	VertexID GetID() const;
+
 	void AddInEdge(Edge *e);
 	void AddOutEdge(Edge *e);
 
-	std::pair<Vertex::In_Edge_iterator, Vertex::In_Edge_iterator> InEdges();
-	std::pair<Vertex::Out_Edge_iterator, Vertex::Out_Edge_iterator> OutEdges();
+	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> InEdges();
+	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> OutEdges();
 
 	degree_size_t InDegree() { return m_in_edges.size(); };
 	degree_size_t OutDegree() { return m_out_edges.size(); };

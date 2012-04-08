@@ -126,16 +126,17 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(),
 			the_filter);*/
 
-	typedef FilteredGraph<boost::keep_all, vertex_filter_predicate> T_FG;
-	T_FG *graph_of_this_function
-			= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
+	//typedef FilteredGraph<boost::keep_all, vertex_filter_predicate> T_FG;
+	//T_FG *graph_of_this_function
+	//		= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
 
-	boost::graph_traits<T_FG::underlying_graph_type_t>::vertex_iterator vit, vend;
-	boost::tie(vit, vend) = graph_of_this_function->Vertices();
+	//boost::graph_traits<T_FG::underlying_graph_type_t>::vertex_iterator vit, vend;
+	ControlFlowGraph::vertex_iterator vit, vend;
+	//boost::tie(vit, vend) = graph_of_this_function->Vertices();
+	m_the_cfg->Vertices(&vit, &vend);
 	for (; vit != vend; vit++)
 	{
-		FunctionCallUnresolved *fcu =
-				dynamic_cast<FunctionCallUnresolved*>(graph_of_this_function->GetStatementPtr(*vit));
+		FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*vit);
 				//dynamic_cast<FunctionCallUnresolved*>((*m_cfg)[*vit].m_statement);
 		if (fcu != NULL)
 		{
@@ -168,7 +169,8 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				T_CFG_EDGE_DESC new_edge_desc;
 				bool ok;
 
-				new_edge_desc = m_the_cfg->AddEdge(*vit, it->second->GetEntryVertexDescriptor(), call_edge_type);
+				/*new_edge_desc =*/ m_the_cfg->AddEdge(*vit, it->second->GetEntryVertexDescriptor(), call_edge_type);
+				new_edge_desc = call_edge_type;
 				/*
 				boost::tie(new_edge_desc, ok) = boost::add_edge(*vit,
 						it->second->GetEntryVertexDescriptor(), *m_cfg);
@@ -191,7 +193,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				// to the next statement in its containing function.
 				T_CFG_EDGE_DESC function_call_out_edge;
 
-				boost::tie(function_call_out_edge, ok) = m_the_cfg->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>(*vit);
+				boost::tie(function_call_out_edge, ok) = (*vit)->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>();
 				if (!ok)
 				{
 					// Couldn't find the return.
@@ -233,8 +235,8 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					// We couldn't add the edge.  This should never happen.
 					std::cerr << "ERROR: Can't add return edge." << std::endl;
 				}*/
-				new_edge_desc = m_the_cfg->AddEdge(it->second->GetExitVertexDescriptor(),
-						function_call_out_edge->Target(), return_edge_type);
+				m_the_cfg->AddEdge(it->second->GetExitVertexDescriptor(), function_call_out_edge->Target(), return_edge_type);
+				new_edge_desc = return_edge_type;
 			}
 		}
 	}
@@ -249,10 +251,6 @@ struct back_edge_filter_predicate
 	back_edge_filter_predicate()
 	{
 	};
-	back_edge_filter_predicate(T_EDGE_TYPE_PROPERTY_MAP &edge_type_property_map) :
-			m_edge_type_property_map(edge_type_property_map)
-	{
-	};
 
 	/**
 	 * Returns false if @a eid is a back edge.
@@ -262,7 +260,7 @@ struct back_edge_filter_predicate
 	 */
 	bool operator()(const T_CFG_EDGE_DESC& eid) const
 	{
-		if (get(m_edge_type_property_map, eid)->IsBackEdge())
+		if (eid->IsBackEdge())
 		{
 			// This is a back edge, filter it out.
 			return false;
@@ -273,8 +271,6 @@ struct back_edge_filter_predicate
 			return true;
 		}
 	};
-
-	T_EDGE_TYPE_PROPERTY_MAP m_edge_type_property_map;
 };
 
 static void indent(long i)
@@ -286,17 +282,17 @@ static void indent(long i)
 	};
 }
 
-static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_decision_predecessors = false)
+static long filtered_in_degree(T_CFG_VERTEX_DESC v, bool only_decision_predecessors = false)
 {
-	boost::graph_traits<T_CFG>::in_edge_iterator ieit, ieend;
+	StatementBase::in_edge_iterator ieit, ieend;
 
-	boost::tie(ieit, ieend) = boost::in_edges(v, cfg);
+	v->InEdges(&ieit, &ieend);
 
 	long i = 0;
 	bool saw_function_call_already = false;
 	for (; ieit != ieend; ++ieit)
 	{
-		if (cfg[*ieit].m_edge_type->IsBackEdge())
+		if ((*ieit)->IsBackEdge())
 		{
 			// Always skip anything marked as a back edge.
 			continue;
@@ -305,7 +301,7 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_
 		if(only_decision_predecessors)
 		{
 			// Is the predecessor a decision statement?
-			if(!cfg[boost::source(*ieit,cfg)].m_statement->IsDecisionStatement())
+			if(!(*ieit)->Source()->IsDecisionStatement())
 			{
 				continue;
 			}
@@ -318,13 +314,13 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_
 		//   looking at a vertex v that's an ENTRY statement, with a predecessor of type FunctionCallResolved.
 		//   Any particular instance of an ENTRY has at most only one valid FunctionCall edge.
 		//   For our current purposes, we only care about this one.
-		if ((dynamic_cast<CFGEdgeTypeReturn*>(cfg[*ieit].m_edge_type) == NULL)
+		if ((dynamic_cast<CFGEdgeTypeReturn*>(*ieit) == NULL)
 				&& (saw_function_call_already == false))
 		{
 			i++;
 		}
 
-		if (dynamic_cast<CFGEdgeTypeFunctionCall*>(cfg[*ieit].m_edge_type)
+		if (dynamic_cast<CFGEdgeTypeFunctionCall*>(*ieit)
 				!= NULL)
 		{
 			// Multiple incoming function calls only count as one for convergence purposes.
@@ -337,14 +333,14 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg, bool only_
 
 T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
-	boost::graph_traits<T_CFG>::in_edge_iterator ieit, ieend;
+	StatementBase::out_edge_iterator ieit, ieend;
 
-	boost::tie(ieit, ieend) = v->InEdges();
+	v->OutEdges(&ieit, &ieend);
 
 	bool saw_function_call_already = false;
 	for (; ieit != ieend; ++ieit)
 	{
-		if (cfg[*ieit].m_edge_type->IsBackEdge())
+		if ((*ieit)->IsBackEdge())
 		{
 			// Always skip anything marked as a back edge.
 			continue;
@@ -357,13 +353,13 @@ T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 		//   looking at a vertex v that's an ENTRY statement, with a predecessor of type FunctionCallResolved.
 		//   Any particular instance of an ENTRY has at most only one valid FunctionCall edge.
 		//   For our current purposes, we only care about this one.
-		if ((dynamic_cast<CFGEdgeTypeReturn*>(cfg[*ieit].m_edge_type) == NULL)
+		if ((dynamic_cast<CFGEdgeTypeReturn*>(*ieit) == NULL)
 				&& (saw_function_call_already == false))
 		{
 			return *ieit;
 		}
 
-		if (dynamic_cast<CFGEdgeTypeFunctionCall*>(cfg[*ieit].m_edge_type)
+		if (dynamic_cast<CFGEdgeTypeFunctionCall*>(*ieit)
 				!= NULL)
 		{
 			// Multiple incoming function calls only count as one for convergence purposes.
@@ -376,14 +372,14 @@ T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 
 static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 {
-	boost::graph_traits<T_CFG>::out_edge_iterator eit, eend;
+	StatementBase::out_edge_iterator eit, eend;
 
-	boost::tie(eit, eend) = v->OutEdges();
+	v->OutEdges(&eit, &eend);
 
 	long i = 0;
 	for (; eit != eend; ++eit)
 	{
-		if (cfg[*eit].m_edge_type->IsBackEdge())
+		if ((*eit)->IsBackEdge())
 		{
 			// Skip anything marked as a back edge.
 			continue;
@@ -452,7 +448,7 @@ public:
 		}
 
 		// Check if this vertex is the first vertex of a new branch of the control flow graph.
-		long fid = filtered_in_degree(u, m_graph);
+		long fid = filtered_in_degree(u);
 		if(fid==1)
 		{
 			T_CFG_VERTEX_DESC predecessor;
@@ -537,7 +533,7 @@ public:
 		CFGEdgeTypeReturn *ret;
 		CFGEdgeTypeFunctionCallBypass *fcb;
 
-		edge_type = m_graph[ed].m_edge_type;
+		edge_type = ed;
 
 		// Attempt dynamic casts to call/return types to see if we need to handle
 		// these specially.
@@ -545,7 +541,7 @@ public:
 		ret = dynamic_cast<CFGEdgeTypeReturn*>(edge_type);
 		fcb = dynamic_cast<CFGEdgeTypeFunctionCallBypass*>(edge_type);
 
-		if(ed.m_source == ed.m_target)
+		if(ed->Source() == ed->Target())
 		{
 			// Skip all edges which have the same source and target.  That means they're ENTRY or EXIT pseudostatements.
 			return edge_return_value_t::terminate_branch;
@@ -609,7 +605,7 @@ public:
 	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed, T_CFG_EDGE_DESC e)
 	{
 		// Check if we're leaving an Exit vertex.
-		StatementBase *p = m_graph[u].m_statement;
+		StatementBase *p = u;
 		if(p->IsType<Exit>())
 		{
 			// We're leaving the function we were in, pop the call stack entry it pushed.
@@ -640,7 +636,7 @@ public:
 			std::cout << "}" << std::endl;
 		}
 
-		if	((num_vertices_pushed == 1) && (filtered_in_degree(boost::target(e, m_graph), m_graph) > 1))
+		if	((num_vertices_pushed == 1) && (filtered_in_degree(e->Target()) > 1))
 		{
 			// The edge will end on a merge vertex.  Outdent.
 			m_indent_level--;
@@ -703,8 +699,8 @@ struct graph_property_writer
 		out << "labeljust = \"l\";" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
-		out << "{ rank = source; " << m_g.GetID(m_function->GetEntryVertexDescriptor()) << "; }" << std::endl;
-		out << "{ rank = sink; " << m_g.GetID(m_function->GetExitVertexDescriptor()) << "; }" << std::endl;
+		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetID() << "; }" << std::endl;
+		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetID() << "; }" << std::endl;
 	}
 
 	ControlFlowGraph &m_g;
@@ -721,11 +717,11 @@ public:
 
 	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
 	{
-		StatementBase *sbp = m_g.GetStatementPtr(v);
+		StatementBase *sbp = v;
 		if (sbp != NULL)
 		{
 			out << "[label=\"";
-			out << m_g.GetID(v) << " " << sbp->GetStatementTextDOT();
+			out << v->GetID() << " " << sbp->GetStatementTextDOT();
 			out << "\\n" << sbp->GetLocation() << "\"";
 			out << ", color=" << sbp->GetDotSVGColor();
 			out << ", shape=" << sbp->GetShapeTextDOT();
@@ -753,7 +749,7 @@ public:
 	}
 	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
 	{
-		CFGEdgeTypeBase *etb = m_graph.GetEdgeTypePtr(e);
+		CFGEdgeTypeBase *etb = e;
 		// Set the edge attributes.
 		out << "[";
 		out << "label=\"" << etb->GetDotLabel() << "\"";
@@ -770,6 +766,7 @@ private:
 
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
+#if 0 /// @todo FIXME
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
 	vertex_filter_predicate the_filter(vpm, this);
@@ -793,6 +790,7 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 	outfile << "\n}" << std::endl;
 
 	outfile.close();
+#endif
 }
 
 
@@ -834,8 +832,13 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
 	Exit *exit_ptr = new Exit(Location("[" + GetDefinitionFilePath() + " : 0]"));
 
-	m_entry_vertex_desc = cfg.AddVertex(entry_ptr, this);
-	m_exit_vertex_desc = cfg.AddVertex(exit_ptr, this);
+	entry_ptr->SetOwningFunction(this);
+	exit_ptr->SetOwningFunction(this);
+
+	cfg.AddVertex(entry_ptr);
+	m_entry_vertex_desc = entry_ptr;
+	cfg.AddVertex(exit_ptr);
+	m_exit_vertex_desc = exit_ptr;
 
 	// Add EXIT to the label map, so that ReturnUnlinked instances can find it.
 	label_map["EXIT"] = m_exit_vertex_desc;
@@ -847,7 +850,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	{
 		// Add this Statement to the Control Flow Graph.
 		T_CFG_VERTEX_DESC vid;
-		vid = cfg.AddVertex(sbp, this);
+		sbp->SetOwningFunction(this);
+		cfg.AddVertex(sbp);
+		vid = sbp;
 
 		// Find all the label definitions in the function.
 		if(sbp->IsType<Label>())
@@ -956,8 +961,10 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Check complete." << std::endl;
 
 	// Add self edges to the ENTRY and EXIT vertices.
-	m_entry_vertex_self_edge = cfg.AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, new CFGEdgeTypeImpossible);
-	m_exit_vertex_self_edge = cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, new CFGEdgeTypeImpossible);
+	m_entry_vertex_self_edge = new CFGEdgeTypeImpossible;
+	cfg.AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, m_entry_vertex_self_edge);
+	m_exit_vertex_self_edge = new CFGEdgeTypeImpossible;
+	cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, m_exit_vertex_self_edge);
 
 	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
 	cfg.FixupBackEdges(this);

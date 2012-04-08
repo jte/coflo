@@ -23,12 +23,52 @@
 #include <string>
 #include <utility>
 
+#include <boost/iterator/transform_iterator.hpp>
+
 #include "../../debug_utils/debug_utils.hpp"
 #include "../../Location.h"
 #include "../Vertex.h"
+//#include "../Edge.h"
 
+class Function;
 //class CFGEdgeTypeBase;
 #include "../edges/CFGEdgeTypeBase.h"
+
+#if 0 // @todo NEEDTHIS
+template < typename CFGEdgeType >
+boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
+{
+	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
+	boost::tuple<T_CFG_EDGE_DESC, bool> retval;
+
+	boost::tie(eit, eend) = boost::out_edges(vdesc, cfg);
+	for(; eit != eend; eit++)
+	{
+		if(NULL != dynamic_cast<CFGEdgeType*>(cfg[*eit].m_edge_type))
+		{
+			// Found it.
+			retval = boost::make_tuple(*eit, true);
+			return retval;
+		}
+	}
+
+	// Couldn't find one.
+	retval = boost::make_tuple(*eit, false);
+	return retval;
+}
+#endif
+
+struct CastToCFGEdgeTypeBasePtrReference
+{
+	/// This is for boost::result_of().
+	typedef CFGEdgeTypeBase*& result_type;
+
+	result_type operator()(Edge* const &v) const
+	{
+		return (result_type)v;
+	};
+};
+
 
 /**
  * Abstract base class for all statements and expressions in the control flow graph.
@@ -37,8 +77,8 @@ class StatementBase : public Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* >::const_iterator Edge_iterator;
-	typedef Edge_iterator Out_Edge_iterator;
-	typedef Edge_iterator In_Edge_iterator;
+	typedef boost::transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator > out_edge_iterator;
+	typedef boost::transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::in_edge_iterator > in_edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
 
 public:
@@ -47,6 +87,34 @@ public:
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
 	
+	virtual void InEdges(StatementBase::in_edge_iterator* ibegin, StatementBase::in_edge_iterator* iend);
+	virtual void OutEdges(StatementBase::out_edge_iterator* ibegin, StatementBase::out_edge_iterator* iend);
+
+	template < typename EdgeType >
+	boost::tuple< CFGEdgeTypeBase*, bool > GetFirstOutEdgeOfType()
+	{
+		out_edge_iterator eit, eend;
+		boost::tuple<CFGEdgeTypeBase*, bool> retval;
+
+		OutEdges(&eit, &eend);
+		for(; eit != eend; eit++)
+		{
+			if(NULL != dynamic_cast<EdgeType*>(*eit))
+			{
+				// Found it.
+				retval = boost::make_tuple(*eit, true);
+				return retval;
+			}
+		}
+
+		// Couldn't find one.
+		retval = boost::make_tuple(*eit, false);
+		return retval;
+	};
+
+	void SetOwningFunction(Function *owning_function);
+	Function* GetOwningFunction() const;
+
 	void SetLocation(const Location &new_location) { m_location = new_location; };
 
 	/**
@@ -129,6 +197,9 @@ private:
 
 	/// The Location of this statement.
 	Location m_location;
+
+	/// The Function this statement belongs to.
+	Function *m_owning_function;
 };
 
 #endif	/* STATEMENTBASE_H */
