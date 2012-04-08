@@ -16,6 +16,7 @@
  */
 
 #include <string>
+#include <utility>
 #include <boost/regex.hpp>
 
 #include "StatementBase.h"
@@ -35,6 +36,36 @@ StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_loc
 
 StatementBase::~StatementBase()
 {
+}
+
+void StatementBase::SetOwningFunction(Function *owning_function)
+{
+	m_owning_function = owning_function;
+}
+
+Function* StatementBase::GetOwningFunction() const
+{
+	return m_owning_function;
+}
+
+void StatementBase::OutEdges(StatementBase::out_edge_iterator* ibegin,
+		StatementBase::out_edge_iterator* iend)
+{
+	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> base_iterator_pair;
+	base_iterator_pair = Vertex::OutEdges();
+
+	*ibegin = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator >(base_iterator_pair.first);
+	*iend = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator >(base_iterator_pair.second);
+}
+
+void StatementBase::InEdges(StatementBase::in_edge_iterator* ibegin,
+		StatementBase::in_edge_iterator* iend)
+{
+	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> base_iterator_pair;
+	base_iterator_pair = Vertex::InEdges();
+
+	*ibegin = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::in_edge_iterator >(base_iterator_pair.first);
+	*iend = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::in_edge_iterator >(base_iterator_pair.second);
 }
 
 std::string StatementBase::EscapeifyForUseInDotLabel(const std::string & str)

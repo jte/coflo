@@ -40,14 +40,14 @@ void Vertex::AddOutEdge(Edge* e)
 	m_out_edges.insert(e);
 }
 
-std::pair<Vertex::In_Edge_iterator, Vertex::In_Edge_iterator> Vertex::InEdges()
+std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> Vertex::InEdges()
 {
-	return std::pair<In_Edge_iterator, In_Edge_iterator>(m_in_edges.begin(), m_in_edges.end());
+	return std::pair<in_edge_iterator, in_edge_iterator>(m_in_edges.begin(), m_in_edges.end());
 }
 
-std::pair<Vertex::Out_Edge_iterator, Vertex::Out_Edge_iterator> Vertex::OutEdges()
+std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> Vertex::OutEdges()
 {
-	return std::pair<Out_Edge_iterator, Out_Edge_iterator>(m_out_edges.begin(), m_out_edges.end());
+	return std::pair<out_edge_iterator, out_edge_iterator>(m_out_edges.begin(), m_out_edges.end());
 }
 
 

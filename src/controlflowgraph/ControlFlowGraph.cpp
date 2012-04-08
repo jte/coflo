@@ -302,7 +302,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 #endif
 
 
-void ControlFlowGraph::Vertices(std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator>* iterator_pair)
+void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend)
 {
 /*
 	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> it_pair;
@@ -316,8 +316,8 @@ void ControlFlowGraph::Vertices(std::pair<ControlFlowGraph::vertex_iterator, Con
 	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> base_iterator_pair;
 	Graph::Vertices(&base_iterator_pair);
 
-	iterator_pair->first = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.first); //base_iterator_pair.first;
-	iterator_pair->second = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.second);
+	*ibegin = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.first);
+	*iend = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.second);
 
 }
 
