@@ -29,12 +29,18 @@ class Edge
 {
 public:
 	Edge();
+	Edge(Vertex *source, Vertex *target);
 	virtual ~Edge();
 
 	Vertex* Source() { return m_source; };
 	Vertex* Target() { return m_target; };
 
+	void ChangeSource(Vertex *source);
+	void ChangeTarget(Vertex *target);
 
+	void SetSourceAndTarget(Vertex *source, Vertex *target);
+	void SetSource(Vertex *source);
+	void SetTarget(Vertex *target);
 
 private:
 	Vertex *m_source;

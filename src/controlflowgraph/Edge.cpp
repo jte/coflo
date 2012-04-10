@@ -19,14 +19,68 @@
 
 #include "Edge.h"
 
+#include "Vertex.h"
+
 Edge::Edge()
 {
-	// TODO Auto-generated constructor stub
+	m_source = NULL;
+	m_target = NULL;
+}
 
+Edge::Edge(Vertex* source, Vertex* target)
+{
+	SetSourceAndTarget(source, target);
 }
 
 Edge::~Edge()
 {
 	// TODO Auto-generated destructor stub
 }
+
+
+void Edge::ChangeSource(Vertex* source)
+{
+	if(m_source != NULL)
+	{
+		// This Edge is already has a source Vertex.  Remove it from that Vertex's out edge list.
+		m_source->RemoveOutEdge(this);
+	}
+
+	// Add this edge to the new source Vertex.
+	source->AddOutEdge(this);
+	m_source = source;
+}
+
+void Edge::ChangeTarget(Vertex* target)
+{
+	if(m_target != NULL)
+	{
+		// This Edge is already has a source Vertex.  Remove it from that Vertex's out edge list.
+		m_target->RemoveInEdge(this);
+	}
+
+	// Add this edge to the new source Vertex.
+	target->AddInEdge(this);
+	m_target = target;
+}
+
+void Edge::SetSourceAndTarget(Vertex* source, Vertex* target)
+{
+	/// @todo Handle the case where the edge is already pointed at a source and target.
+
+	m_source = source;
+	m_target = target;
+}
+
+void Edge::SetSource(Vertex* source)
+{
+	m_source = source;
+}
+
+void Edge::SetTarget(Vertex* target)
+{
+	m_target = target;
+}
+
+
 

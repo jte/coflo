@@ -19,6 +19,10 @@
 
 #include "Vertex.h"
 
+#include "coflo_exceptions.hpp"
+
+#include <boost/foreach.hpp>
+
 Vertex::Vertex()
 {
 	// TODO Auto-generated constructor stub
@@ -30,6 +34,26 @@ Vertex::~Vertex()
 	// TODO Auto-generated destructor stub
 }
 
+void Vertex::CopyFrom(Vertex* other)
+{
+	BOOST_THROW_EXCEPTION( not_implemented() );
+}
+
+void Vertex::TransferOwnedResourcesTo(Vertex* other)
+{
+	BOOST_FOREACH(Edge* i, m_in_edges)
+	{
+		i->SetTarget(other);
+	}
+	BOOST_FOREACH(Edge* i, m_out_edges)
+	{
+		i->SetSource(other);
+	}
+
+	m_in_edges.swap(other->m_in_edges);
+	m_out_edges.swap(other->m_out_edges);
+}
+
 void Vertex::AddInEdge(Edge* e)
 {
 	m_in_edges.insert(e);
@@ -38,6 +62,16 @@ void Vertex::AddInEdge(Edge* e)
 void Vertex::AddOutEdge(Edge* e)
 {
 	m_out_edges.insert(e);
+}
+
+void Vertex::RemoveInEdge(Edge* e)
+{
+	m_in_edges.erase(e);
+}
+
+void Vertex::RemoveOutEdge(Edge* e)
+{
+	m_out_edges.erase(e);
 }
 
 std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> Vertex::InEdges()

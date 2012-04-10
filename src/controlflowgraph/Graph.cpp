@@ -44,6 +44,14 @@ void Graph::RemoveVertex(Vertex* v)
 	m_vertices.erase(v);
 }
 
+void Graph::ReplaceVertex(Vertex* old_vertex, Vertex* new_vertex)
+{
+	AddVertex(new_vertex);
+	old_vertex->TransferOwnedResourcesTo(new_vertex);
+	RemoveVertex(old_vertex);
+	delete old_vertex;
+}
+
 void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)
 {
 	source->AddOutEdge(e);
