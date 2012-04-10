@@ -160,7 +160,8 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				//delete fcu;
 				// ...and replace it with the FunctionCallResolved object.
 				//(*m_cfg)[*vit].m_statement = fcr;
-				m_the_cfg->ReplaceStatementPtr(*vit, fcr);
+				//m_the_cfg->ReplaceStatementPtr(*vit, fcr);
+				m_the_cfg->ReplaceVertex(*vit, fcr);
 
 				// Now add the appropriate CFG edges.
 				// The FunctionCall->Function->entrypoint edge.
@@ -935,7 +936,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 			dlog_cfg << "INFO: Linked " << typeid(*fcl).name() << std::endl;
 			//cfg.GetT_CFG()[vd].m_statement = replacement_statement;
 			//delete fcl;
-			cfg.ReplaceStatementPtr(vd, replacement_statement);
+			//cfg.ReplaceStatementPtr(vd, replacement_statement);
+			/// @todo This is probably wrong, it probably invalidates the iterator.
+			cfg.ReplaceVertex(vd, replacement_statement);
 		}
 		else
 		{

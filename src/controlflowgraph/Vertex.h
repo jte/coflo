@@ -46,6 +46,10 @@ public:
 	Vertex();
 	virtual ~Vertex();
 
+	void CopyFrom(Vertex *other);
+
+	void TransferOwnedResourcesTo(Vertex *other);
+
 	/**
 	 * Return this Vetex's ID.  The ID is guaranteed to be unique to the containing Graph.
 	 *
@@ -54,7 +58,9 @@ public:
 	VertexID GetID() const;
 
 	void AddInEdge(Edge *e);
+	void RemoveInEdge(Edge *e);
 	void AddOutEdge(Edge *e);
+	void RemoveOutEdge(Edge *e);
 
 	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> InEdges();
 	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> OutEdges();
@@ -63,9 +69,9 @@ public:
 	degree_size_t OutDegree() { return m_out_edges.size(); };
 
 private:
-
-	boost::unordered_set< Edge* > m_out_edges;
-	boost::unordered_set< Edge* > m_in_edges;
+	typedef boost::unordered_set< Edge* > T_EDGE_PTR_CONTAINER;
+	T_EDGE_PTR_CONTAINER m_out_edges;
+	T_EDGE_PTR_CONTAINER m_in_edges;
 
 };
 

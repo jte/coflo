@@ -45,6 +45,7 @@ public:
 
 	virtual void AddVertex(Vertex *v);
 	virtual void RemoveVertex(Vertex *v);
+	virtual void ReplaceVertex(Vertex *old_vertex, Vertex *new_vertex);
 
 	virtual void AddEdge(Vertex *source, Vertex *target, Edge *e);
 	virtual void RemoveEdge(Edge *e);
