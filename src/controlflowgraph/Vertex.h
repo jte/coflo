@@ -35,10 +35,11 @@
 class Vertex
 {
 public:
-	typedef boost::unordered_set< Edge* >::const_iterator Edge_iterator;
-	typedef Edge_iterator out_edge_iterator;
-	typedef Edge_iterator in_edge_iterator;
-	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
+	typedef boost::unordered_set< Edge* > edge_list_type;
+	typedef boost::unordered_set< Edge* >::const_iterator edge_iterator;
+	typedef edge_iterator out_edge_iterator;
+	typedef edge_iterator in_edge_iterator;
+	typedef boost::unordered_set< Edge* >::size_type degree_size_type;
 	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
 
 
@@ -65,11 +66,11 @@ public:
 	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> InEdges();
 	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> OutEdges();
 
-	degree_size_t InDegree() { return m_in_edges.size(); };
-	degree_size_t OutDegree() { return m_out_edges.size(); };
+	degree_size_type InDegree() { return m_in_edges.size(); };
+	degree_size_type OutDegree() { return m_out_edges.size(); };
 
 private:
-	typedef boost::unordered_set< Edge* > T_EDGE_PTR_CONTAINER;
+	typedef edge_list_type T_EDGE_PTR_CONTAINER;
 	T_EDGE_PTR_CONTAINER m_out_edges;
 	T_EDGE_PTR_CONTAINER m_in_edges;
 

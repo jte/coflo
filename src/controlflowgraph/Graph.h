@@ -21,10 +21,15 @@
 #define GRAPH_H_
 
 #include <boost/unordered_set.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/graph_archetypes.hpp>
 #include <utility>
 
-class Vertex;
-class Edge;
+//class Vertex;
+// Including header to get access to member typedefs.
+#include "Vertex.h"
+#include "Edge.h"
+//class Edge;
 
 /**
  * Graph base class.
@@ -34,9 +39,34 @@ class Graph
 public:
 	/// @name Public member types.
 	//@{
+
+	/// The type for the collection of all vertices in the graph.
+	typedef boost::unordered_set< Vertex* > vertex_list_type;
+	typedef Vertex::edge_list_type edge_list_type;
+
 	typedef boost::unordered_set< Vertex* >::const_iterator vertex_iterator;
 	typedef Vertex* vertex_descriptor;
 	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
+
+	/// @name These are specifically for interoperability with the Boost graph library.
+	//@{
+	typedef Edge* edge_descriptor;
+	typedef Vertex::edge_iterator edge_iterator;
+	typedef Vertex::in_edge_iterator in_edge_iterator;
+	typedef Vertex::degree_size_type degree_size_type;
+	typedef boost::directed_tag directed_category;
+	typedef boost::allow_parallel_edge_tag edge_parallel_category;
+	typedef boost::bidirectional_graph_tag traversal_category;
+	/// (@todo AFAICT, the BidirectionalGraph concept doesn't need the below three, but a concept check of that chokes if they're not
+	/// in here.  boost::graph_traits<> appears to always need them.)
+	// AdjacencyGraph
+	typedef vertex_iterator adjacency_iterator;
+	// VertexListGraph (efficient traversal of all vertices in graph)
+	typedef vertex_list_type::size_type vertices_size_type;
+	// EdgeListGraph (efficient traversal of all edges in graph)
+	typedef edge_list_type edges_size_type;
+	//@}
+
 	//@}
 
 public:
@@ -69,5 +99,20 @@ private:
 	/// Collection of all vertices in the Graph.
 	boost::unordered_set< Vertex* > m_vertices;
 };
+
+/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+//@{
+namespace boost
+{
+	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Target(); };
+	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Source(); };
+
+	Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->OutDegree(); };
+	Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->InDegree(); };
+
+	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->OutEdges(); };
+	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->InEdges(); };
+}
+//@}
 
 #endif /* GRAPH_H_ */
