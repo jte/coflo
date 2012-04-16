@@ -72,7 +72,7 @@ public:
 			// Pretend it was in the map and add it with its original in-degree.
 			T_DEGREE_SIZE_TYPE indegree;
 			/// @todo We should find a better way to get this "filtered" in degree value.
-			indegree = filtered_in_degree(vdesc, m_graph);
+			indegree = filtered_in_degree(vdesc);
 			m_remaining_in_degree_map[vdesc] = indegree;
 
 			return indegree;

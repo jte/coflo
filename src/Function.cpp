@@ -683,7 +683,7 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 #else
 	// Set up the visitor.
 	function_control_flow_graph_visitor cfg_visitor(*m_the_cfg, m_exit_vertex_desc, cfg_verbose, cfg_vertex_ids);
-	topological_visit_kahn(m_the_cfg->GetConstT_CFG(), m_entry_vertex_self_edge, cfg_visitor);
+	topological_visit_kahn(*m_the_cfg, m_entry_vertex_self_edge, cfg_visitor);
 #endif
 }
 

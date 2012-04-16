@@ -146,6 +146,26 @@ public:
 	typedef StatementBase* vertex_descriptor;
 	typedef boost::transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator, StatementBase*&, StatementBase* > vertex_iterator;
 	typedef StatementBase::out_edge_iterator out_edge_iterator;
+
+	/// @name These are specifically for interoperability with the Boost graph library.
+	//@{
+	typedef CFGEdgeTypeBase* edge_descriptor;
+	typedef StatementBase::edge_iterator edge_iterator;
+	typedef StatementBase::in_edge_iterator in_edge_iterator;
+	typedef StatementBase::degree_size_type degree_size_type;
+	typedef boost::directed_tag directed_category;
+	typedef boost::allow_parallel_edge_tag edge_parallel_category;
+	typedef boost::bidirectional_graph_tag traversal_category;
+	/// (@todo AFAICT, the BidirectionalGraph concept doesn't need the below three, but a concept check of that chokes if they're not
+	/// in here.  boost::graph_traits<> appears to always need them.)
+	// AdjacencyGraph
+	typedef vertex_iterator adjacency_iterator;
+	// VertexListGraph (efficient traversal of all vertices in graph)
+	typedef vertex_list_type::size_type vertices_size_type;
+	// EdgeListGraph (efficient traversal of all edges in graph)
+	typedef edge_list_type edges_size_type;
+	//@}
+
 	//@}
 
 public:
@@ -295,6 +315,14 @@ private:
 
 //@}
 
+/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+//@{
+namespace boost
+{
+	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Target(); };
+	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+}
+//@}
 
 /// @name Other headers in this library.
 //@{
