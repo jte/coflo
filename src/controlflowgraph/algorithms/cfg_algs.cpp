@@ -17,11 +17,15 @@
 
 /** @file */
 
+#include "cfg_algs.h"
 
+#include <boost/foreach.hpp>
+
+#include "../ControlFlowGraph.h"
 #include "../../Function.h"
+#include "../visitors/BackEdgeFixupVisitor.h"
 
-#if 0
-void FixupBackEdges(Function *f)
+void FixupBackEdges(ControlFlowGraph &g, Function *f)
 {
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
@@ -76,7 +80,7 @@ void FixupBackEdges(Function *f)
 	dlog_cfg << "Back edge fixup complete." << std::endl;
 }
 
-
+#if 0
 void ControlFlowGraph::InsertMergeNodes(Function *f)
 {
 #if 0

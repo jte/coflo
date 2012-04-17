@@ -17,11 +17,14 @@
 
 /** @file */
 
+class ControlFlowGraph;
+class Function;
+
 /**
  * Traverses the CFG of Function @a f and marks all back edges.
  * @param f
  */
-void FixupBackEdges(Function *f);
+void FixupBackEdges(ControlFlowGraph &g, Function *f);
 
 void InsertMergeNodes(Function *f);
 

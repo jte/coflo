@@ -180,7 +180,7 @@ public:
 	 *
 	 * @return A reference to the underlying T_CFG (Boost Graph Library adjacency_list) object.
 	 */
-	const T_CFG& GetConstT_CFG() const;
+	//const T_CFG& GetConstT_CFG() const;
 
 	/// @name Graph construction helpers
 	//@{
@@ -189,15 +189,15 @@ public:
 	 * Traverses the CFG of Function @a f and marks all back edges.
 	 * @param f
 	 */
-	virtual void FixupBackEdges(Function *f);
+	//virtual void FixupBackEdges(Function *f);
 
-	virtual void InsertMergeNodes(Function *f);
+	//virtual void InsertMergeNodes(Function *f);
 
-	virtual void SplitCriticalEdges(Function *f);
+	//virtual void SplitCriticalEdges(Function *f);
 
-	virtual void StructureCompoundConditionals(Function *f);
+	//virtual void StructureCompoundConditionals(Function *f);
 
-	virtual void RemoveRedundantNodes(Function *f);
+	//virtual void RemoveRedundantNodes(Function *f);
 
 	//@}
 
@@ -315,19 +315,24 @@ private:
 
 //@}
 
-/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+/// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
 namespace boost
 {
-	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Target(); };
-	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/);
+	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/);
+
+	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
+	out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
+	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
+	in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
 }
 //@}
 
 /// @name Other headers in this library.
 //@{
 #include "visitors/ControlFlowGraphVisitorBase.h"
-#include "topological_visit_kahn.h"
+#include "algorithms/topological_visit_kahn.h"
 //@}
 
 #endif	/* CONTROLFLOWGRAPH_H */

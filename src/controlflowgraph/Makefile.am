@@ -25,10 +25,8 @@ libcontrolflowgraph_a_SOURCES = \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
-	depth_first_traversal.hpp \
 	Edge.cpp Edge.h \
 	Graph.cpp Graph.h \
-	topological_visit_kahn.h \
 	Vertex.cpp Vertex.h \
 	VertexID.cpp VertexID.h
 
