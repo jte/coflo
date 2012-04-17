@@ -17,7 +17,10 @@
 
 noinst_LIBRARIES = libalgorithms.a
 libalgorithms_a_SOURCES = \
-	cfg_algs.cpp cfg_algs.h
+	cfg_algs.cpp cfg_algs.h \
+	depth_first_traversal.hpp \
+	topological_visit_kahn.h
+	
 	
 libalgorithms_a_CPPFLAGS = -I $(abs_top_srcdir)/src/controlflowgraph -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libalgorithms_a_CFLAGS = $(AM_CFLAGS)
