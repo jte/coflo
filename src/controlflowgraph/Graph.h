@@ -100,18 +100,18 @@ private:
 	boost::unordered_set< Vertex* > m_vertices;
 };
 
-/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+/// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
 namespace boost
 {
-	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Target(); };
-	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Source(); };
+	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/);
+	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/);
 
-	Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->OutDegree(); };
-	Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->InDegree(); };
+	Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/);
+	Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/);
 
-	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->OutEdges(); };
-	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->InEdges(); };
+	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
+	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
 }
 //@}
 

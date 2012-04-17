@@ -457,3 +457,28 @@ void ControlFlowGraph::RemoveRedundantNodes(Function* f)
 }
 
 #endif
+
+/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+//@{
+namespace boost
+{
+	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Target(); };
+	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+
+	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
+	out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/)
+	{
+		ControlFlowGraph::out_edge_iterator r1, r2;
+		u->OutEdges(&r1, &r2);
+		return std::make_pair(r1, r2);
+	};
+	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
+	in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/)
+	{
+		ControlFlowGraph::out_edge_iterator r1, r2;
+		u->InEdges(&r1, &r2);
+		return std::make_pair(r1, r2);
+	};
+}
+//@}
+

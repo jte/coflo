@@ -36,7 +36,7 @@ class Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* > edge_list_type;
-	typedef boost::unordered_set< Edge* >::const_iterator edge_iterator;
+	typedef edge_list_type::const_iterator edge_iterator;
 	typedef edge_iterator out_edge_iterator;
 	typedef edge_iterator in_edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_type;
