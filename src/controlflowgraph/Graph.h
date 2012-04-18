@@ -48,6 +48,8 @@ public:
 	typedef Vertex* vertex_descriptor;
 	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
 
+	static inline vertex_descriptor null_vertex() { return NULL; };
+
 	/// @name These are specifically for interoperability with the Boost graph library.
 	//@{
 	typedef Edge* edge_descriptor;
@@ -83,6 +85,9 @@ public:
 	//std::pair<vertex_iterator, vertex_iterator> Vertices();
 	virtual void Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair);
 
+	Vertex* operator[](Graph::vertex_descriptor vd) { return vd; };
+	Edge* operator[](Graph::edge_descriptor ed) { return ed; };
+
 protected:
 
 	template < typename IteratorType >
@@ -112,6 +117,8 @@ namespace boost
 
 	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
 	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
+
+	std::pair<Graph::vertex_descriptor, Graph::vertex_descriptor> vertices(const Graph& g);
 }
 //@}
 

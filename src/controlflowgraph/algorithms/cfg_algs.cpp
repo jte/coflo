@@ -24,39 +24,50 @@
 #include "../ControlFlowGraph.h"
 #include "../../Function.h"
 #include "../visitors/BackEdgeFixupVisitor.h"
+#include "../edges/CFGEdgeTypeImpossible.h"
+
+
+/// Property map typedef for property maps which allow us to get at the function pointer stored at
+/// CFGVertexProperties::m_containing_function in the T_CFG.
+//typedef boost::property_map<ControlFlowGraph, Function* StatementBase::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
+
+//typedef boost::property_map<ControlFlowGraph, size_t StatementBase::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
+
 
 void FixupBackEdges(ControlFlowGraph &g, Function *f)
 {
+#if 0
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = g.GetPropMap_ContainingFunction();
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
 					vertex_filter_predicate> T_FILTERED_GRAPH;
 	// Define a filtered view of only this function's CFG.
 	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
+#endif
 
-	std::vector<BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo> back_edges;
+	std::vector<BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo> back_edges;
 
 	// Define a visitor which will find all the back edges and send back the info
 	// we need to fix them up.
-	BackEdgeFixupVisitor<T_FILTERED_GRAPH> back_edge_finder(back_edges);
+	BackEdgeFixupVisitor<ControlFlowGraph> back_edge_finder(back_edges);
 
 	// Set the back_edge_finder visitor loose on the function's CFG, with its
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
-	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
+	boost::depth_first_search(g, boost::visitor(back_edge_finder));
 
 	// Mark the edges we found as back edges.
-	BOOST_FOREACH(BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo fixinfo, back_edges)
+	BOOST_FOREACH(BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo fixinfo, back_edges)
 	{
 		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
 
 		// Change this edge type to a back edge.
-		m_cfg[e].m_edge_type->MarkAsBackEdge(true);
+		g[e]->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
-		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<T_FILTERED_GRAPH>::null_vertex())
+		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<ControlFlowGraph>::null_vertex())
 		{
 			dlog_cfg << "Self edge, no further action: " << e << std::endl;
 			continue;
@@ -65,13 +76,14 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 		// If the source node of this back edge now has no non-back-edge out-edges,
 		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
 		T_CFG_VERTEX_DESC src;
-		src = boost::source(e, m_cfg);
-		if (boost::out_degree(src, m_cfg) == 1)
+		src = boost::source(e, g);
+		if (boost::out_degree(src, g) == 1)
 		{
-			T_CFG_EDGE_DESC newedge;
+			/*T_CFG_EDGE_DESC newedge;
 			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, fixinfo.m_impossible_target_vertex, m_cfg);
-			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;
+					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
+			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
+			g.AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
 			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
 		}

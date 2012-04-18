@@ -479,6 +479,15 @@ namespace boost
 		u->InEdges(&r1, &r2);
 		return std::make_pair(r1, r2);
 	};
+
+	std::pair<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::vertex_descriptor> vertices(const ControlFlowGraph& g)
+	{
+		std::pair<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::vertex_descriptor> retval;
+
+		g.Vertices(&retval);
+
+		return retval;
+	}
 }
 //@}
 

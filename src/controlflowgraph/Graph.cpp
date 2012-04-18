@@ -85,6 +85,15 @@ namespace boost
 
 	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->OutEdges(); };
 	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->InEdges(); };
+
+	std::pair<Graph::vertex_descriptor, Graph::vertex_descriptor> vertices(const Graph& g)
+	{
+		std::pair<Graph::vertex_descriptor, Graph::vertex_descriptor> retval;
+
+		g.Vertices(&retval);
+
+		return retval;
+	}
 }
 //@}
 
