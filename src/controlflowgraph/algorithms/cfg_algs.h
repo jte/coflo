@@ -17,6 +17,9 @@
 
 /** @file */
 
+#ifndef CFG_ALGS_H
+#define CFH_ALGS_H
+
 class ControlFlowGraph;
 class Function;
 
@@ -34,3 +37,4 @@ void StructureCompoundConditionals(Function *f);
 
 void RemoveRedundantNodes(Function *f);
 
+#endif

@@ -108,14 +108,6 @@ typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
 typedef StatementBase* T_CFG_VERTEX_DESC;
 typedef CFGEdgeTypeBase* T_CFG_EDGE_DESC;
 
-/// Property map typedef for property maps which allow us to get at the function pointer stored at
-/// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
-
-typedef boost::property_map<T_CFG, size_t CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
-
-
-
 
 // Forward declare the FilteredGraph class template.
 template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
@@ -146,6 +138,9 @@ public:
 	typedef StatementBase* vertex_descriptor;
 	typedef boost::transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator, StatementBase*&, StatementBase* > vertex_iterator;
 	typedef StatementBase::out_edge_iterator out_edge_iterator;
+
+	static inline vertex_descriptor null_vertex() { return NULL; };
+
 
 	/// @name These are specifically for interoperability with the Boost graph library.
 	//@{
@@ -267,11 +262,14 @@ public:
 	/// @name Property Map Functions
 	//@{
 
-	virtual T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION GetPropMap_ContainingFunction();
+	//virtual T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION GetPropMap_ContainingFunction();
 
 	//T_VERTEX_PROPERTY_MAP_INDEX GetPropMap_VertexIndex();
 
 	//@}
+
+	StatementBase* operator[](ControlFlowGraph::vertex_descriptor vd) { return vd; };
+	CFGEdgeTypeBase* operator[](ControlFlowGraph::edge_descriptor ed) { return ed; };
 
 	virtual void Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend);
 
@@ -326,6 +324,8 @@ namespace boost
 	out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
 	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
 	in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
+
+	std::pair<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::vertex_descriptor> vertices(const ControlFlowGraph& g);
 }
 //@}
 
