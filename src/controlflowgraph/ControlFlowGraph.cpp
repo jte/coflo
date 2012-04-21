@@ -336,7 +336,6 @@ VertexID ControlFlowGraph::GetNewVertexID()
 	return retval;
 }
 
-
 #if 0
 T_VERTEX_PROPERTY_MAP_INDEX ControlFlowGraph::GetPropMap_VertexIndex()
 {
@@ -459,6 +458,28 @@ void ControlFlowGraph::RemoveRedundantNodes(Function* f)
 }
 
 #endif
+
+void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+{
+	out_edge_iterator ei, eend;
+
+	boost::tie(ei, eend) = boost::out_edges(vdesc, *this);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
+	}
+}
+
+void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+{
+	in_edge_iterator ei, eend;
+
+	boost::tie(ei, eend) = boost::in_edges(vdesc, *this);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
+	}
+}
 
 /// @name Free-function definitions for adapting this graph class to the Boost graph library.
 //@{

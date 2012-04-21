@@ -247,7 +247,7 @@ public:
 	 */
 	//virtual CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) = 0;
 
-	virtual void ReplaceEdgeTypePtr(T_CFG_EDGE_DESC e, CFGEdgeTypeBase *new_edge_type_ptr);
+	//virtual void ReplaceEdgeTypePtr(T_CFG_EDGE_DESC e, CFGEdgeTypeBase *new_edge_type_ptr);
 
 	//@}
 
@@ -255,11 +255,6 @@ public:
 
 	/// @name Property Map Functions
 	//@{
-
-	//virtual T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION GetPropMap_ContainingFunction();
-
-	//T_VERTEX_PROPERTY_MAP_INDEX GetPropMap_VertexIndex();
-
 	//@}
 
 	StatementBase* operator[](ControlFlowGraph::vertex_descriptor vd) { return vd; };
@@ -280,8 +275,6 @@ private:
 
 	//@}
 
-	virtual void RemoveVertex(T_CFG_VERTEX_DESC v);
-
 	/// @name Edge manipulation routines.
 	//@{
 
@@ -292,9 +285,9 @@ private:
 	 * @param target Target vertex descriptor.
 	 */
 	//virtual void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
-	virtual void RemoveEdge(const T_CFG_EDGE_DESC &e);
+	/*virtual void RemoveEdge(const T_CFG_EDGE_DESC &e);
 	virtual void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
-	virtual void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);
+	virtual void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);*/
 
 	//@}
 
