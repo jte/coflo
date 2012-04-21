@@ -18,7 +18,7 @@
 /** @file */
 
 #ifndef CFG_ALGS_H
-#define CFH_ALGS_H
+#define CFG_ALGS_H
 
 class ControlFlowGraph;
 class Function;

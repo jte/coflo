@@ -57,6 +57,7 @@ public:
 	 * @return
 	 */
 	VertexID GetID() const;
+	long GetVertexIndex() const { return 0; /** @todo FIXME */};
 
 	void AddInEdge(Edge *e);
 	void RemoveInEdge(Edge *e);

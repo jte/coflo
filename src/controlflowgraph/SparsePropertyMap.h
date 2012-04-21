@@ -79,4 +79,9 @@ private:
 	T_UNDERLYING_MAP m_underlying_map;
 };
 
+/// Make sure we're correctly modeling the property map concept.
+//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<const boost::Graph_vertex_id_map, const Graph::vertex_descriptor> ));
+
+
+
 #endif /* SPARSEPROPERTYMAP_H_ */

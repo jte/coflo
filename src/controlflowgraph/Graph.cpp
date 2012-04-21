@@ -63,7 +63,7 @@ void Graph::RemoveEdge(Edge* e)
 	BOOST_THROW_EXCEPTION( not_implemented() );
 }
 
-void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair)
+void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const
 {
 	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> it_pair;
 
@@ -86,13 +86,18 @@ namespace boost
 	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->OutEdges(); };
 	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->InEdges(); };
 
-	std::pair<Graph::vertex_descriptor, Graph::vertex_descriptor> vertices(const Graph& g)
+	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertices(const Graph& g)
 	{
-		std::pair<Graph::vertex_descriptor, Graph::vertex_descriptor> retval;
+		std::pair<Graph::vertex_iterator, Graph::vertex_iterator> retval;
 
 		g.Vertices(&retval);
 
 		return retval;
+	}
+
+	Graph::vertices_size_type num_vertices(const Graph& g)
+	{
+		return g.NumVertices();
 	}
 }
 //@}

@@ -25,6 +25,8 @@
 
 #include <boost/foreach.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/graph_concepts.hpp>
+
 
 #include "visitors/BackEdgeFixupVisitor.h"
 #include "visitors/MergeNodeInsertionVisitor.h"
@@ -302,7 +304,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 #endif
 
 
-void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend)
+void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend) const
 {
 /*
 	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> it_pair;
@@ -480,13 +482,13 @@ namespace boost
 		return std::make_pair(r1, r2);
 	};
 
-	std::pair<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::vertex_descriptor> vertices(const ControlFlowGraph& g)
+	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g)
 	{
-		std::pair<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::vertex_descriptor> retval;
+		ControlFlowGraph::vertex_iterator ibegin, iend;
 
-		g.Vertices(&retval);
+		g.Vertices(&ibegin, &iend);
 
-		return retval;
+		return std::make_pair(ibegin, iend);
 	}
 }
 //@}
