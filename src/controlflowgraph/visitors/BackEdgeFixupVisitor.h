@@ -162,7 +162,7 @@ private:
 
 			dlog_cfg << "WALKING PREDECESSOR TREE: VERTEX " << w << std::endl;
 
-			if(cfg[w].m_statement->IsDecisionStatement())
+			if(cfg[w]->IsDecisionStatement())
 			{
 				// It's a decision statement, this might be the way out.
 				dlog_cfg << "FOUND DECISION PREDECESSOR VERTEX: " << w << std::endl;

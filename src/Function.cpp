@@ -47,7 +47,7 @@
 #include "controlflowgraph/statements/ParseHelpers.h"
 #include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
-//#include "controlflowgraph/FilteredGraph.h"
+#include "controlflowgraph/algorithms/cfg_algs.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
 
 #include "libexttools/ToolDot.h"
@@ -58,6 +58,7 @@
 /// CFGEdgeProperties::m_edge_type in the T_CFG.
 typedef boost::property_map<T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::*>::type T_EDGE_TYPE_PROPERTY_MAP;
 
+#if 0
 /**
  * Predicate for filtering the CFG for only the vertices of the given function.
  */
@@ -88,6 +89,7 @@ struct vertex_filter_predicate
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
 	Function *m_parent_function;
 };
+#endif
 
 Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 {
@@ -118,10 +120,10 @@ bool Function::IsCalled() const
 void Function::Link(const std::map<std::string, Function*> &function_map,
 		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
+	//T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
 
-	vertex_filter_predicate the_filter(vpm, this);
-	/*typedef boost::filtered_graph<T_CFG, boost::keep_all,
+	/*vertex_filter_predicate the_filter(vpm, this);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all,
 			vertex_filter_predicate> T_FILTERED_CFG;
 	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(),
 			the_filter);*/
@@ -970,7 +972,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, m_exit_vertex_self_edge);
 
 	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
-	cfg.FixupBackEdges(this);
+	FixupBackEdges(cfg, this);
 	dlog_cfg << "INFO: Fix up complete." << std::endl;
 
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;

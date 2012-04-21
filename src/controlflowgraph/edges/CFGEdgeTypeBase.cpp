@@ -26,7 +26,7 @@ CFGEdgeTypeBase::CFGEdgeTypeBase()
 	m_is_back_edge = false;
 }
 
-CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig)
+CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig) : Edge(orig)
 {
 	m_is_back_edge = orig.m_is_back_edge;
 }

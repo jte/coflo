@@ -34,7 +34,7 @@
 //typedef boost::property_map<ControlFlowGraph, size_t StatementBase::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
-void FixupBackEdges(ControlFlowGraph &g, Function *f)
+void FixupBackEdges(ControlFlowGraph &g, Function */*f*/)
 {
 #if 0
 	// Property map for getting at the edge types in the CFG.
