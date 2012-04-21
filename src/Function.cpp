@@ -231,7 +231,8 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 					fcbp->CopyBasePropertiesFrom(*function_call_out_edge);
 					//delete (*m_cfg)[function_call_out_edge].m_edge_type;
 					//(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
-					m_the_cfg->ReplaceEdgeTypePtr(function_call_out_edge, fcbp);
+					BOOST_THROW_EXCEPTION( not_implemented() );
+					/// @todo FIXME m_the_cfg->ReplaceEdgeTypePtr(function_call_out_edge, fcbp);
 				/*}
 				else
 				{

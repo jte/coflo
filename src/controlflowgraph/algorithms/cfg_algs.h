@@ -37,4 +37,4 @@ void StructureCompoundConditionals(Function *f);
 
 void RemoveRedundantNodes(Function *f);
 
-#endif
+#endif // CFG_ALGS_H

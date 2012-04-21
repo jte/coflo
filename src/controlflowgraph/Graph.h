@@ -125,14 +125,6 @@ extern long dummy_val;
 //@{
 namespace boost
 {
-
-	/// graph_traits<> specialization for the Graph class.
-	/*template<>
-	struct graph_traits<Graph>
-	{
-		typedef Graph::vertex_descriptor vertex_descriptor;
-	};*/
-
 	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/);
 	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/);
 

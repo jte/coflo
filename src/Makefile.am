@@ -75,7 +75,8 @@ coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflo_LDADD = ./controlflowgraph/analysis/libanalysis.a \
+coflo_LDADD = ./controlflowgraph/algorithms/libalgorithms.a \
+	./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
 	./controlflowgraph/edges/libedges.a \
