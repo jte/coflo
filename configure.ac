@@ -297,10 +297,6 @@ AC_CONFIG_FILES([tests/Makefile tests/atlocal])
 # Autotest needs autom4te, or 'missing's stub for it. 
 AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
-# Create CppUnit Makefiles if we have it.
-AC_CONFIG_FILES([cppunit_tests/Makefile
-	cppunit_tests/controlflowgraph/Makefile])
-
 ###
 ### Create the Makefiles for the program.
 ###

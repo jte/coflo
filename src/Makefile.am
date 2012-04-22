@@ -46,6 +46,8 @@ coflo_SOURCES = main.cpp \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
 	
+
+	
 # Path to the make_dparser executable.
 PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
 # Flags for make_dparser.
@@ -66,6 +68,16 @@ ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LI
 #ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
 endif
 
+NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
+	./controlflowgraph/analysis/libanalysis.a \
+	./controlflowgraph/libcontrolflowgraph.a \
+	./controlflowgraph/statements/libstatements.a \
+	./controlflowgraph/edges/libedges.a \
+	./controlflowgraph/visitors/libvisitors.a \
+	./debug_utils/libdebugutils.a \
+	./libexttools/libexttools.a \
+	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
+
 coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
@@ -75,16 +87,24 @@ coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflo_LDADD = ./controlflowgraph/algorithms/libalgorithms.a \
-	./controlflowgraph/analysis/libanalysis.a \
-	./controlflowgraph/libcontrolflowgraph.a \
-	./controlflowgraph/statements/libstatements.a \
-	./controlflowgraph/edges/libedges.a \
-	./controlflowgraph/visitors/libvisitors.a \
-	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a \
-	$(top_builddir)/third_party/dparser/local/lib/libdparse.a \
-	$(ALLBOOSTLIBS)
+coflo_LDADD = $(NORMALLIBS) $(ALLBOOSTLIBS)
+
+
+# Automake rules for the coflotest unit test executable.
+
+TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
+
+check_PROGRAMS = coflotest
+coflotest_SOURCES = coflotest.cpp
+coflotest_CPPFLAGS = -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
+	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
+coflotest_CXXFLAGS = $(AM_CXXFLAGS)
+coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
+	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
+	$(AM_LDFLAGS)
+coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(CPPUNIT_LIBS) $(ALLBOOSTLIBS)
+
 
 # Suffix for DParser grammars.
 SUFFIX = .g
