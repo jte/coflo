@@ -21,48 +21,129 @@
 
 #include "Graph.h"
 
+
 int PullInMyLibrary() { return 0; }
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( GraphTest );
 
-void
-GraphTest::setUp()
+TEST_F(GraphTest, GraphNewDelete)
 {
+	Graph *g;
+
+	g = new Graph();
+	delete g;
 }
 
-
-void
-GraphTest::tearDown()
+TEST_F(GraphTest, AddVertsAndEdge)
 {
+	Graph *g;
+	Vertex *v1, *v2;
+	Edge *e1;
+
+	// Create a new Graph.
+	g = new Graph();
+	ASSERT_TRUE( g != NULL );
+
+	// Create two Vertexes.
+	v1 = new Vertex();
+	ASSERT_TRUE( v1 != NULL);
+	v2 = new Vertex();
+	ASSERT_TRUE( v2 != NULL);
+
+	// Add the vertices to the graph.
+	g->AddVertex(v1);
+	g->AddVertex(v2);
+
+	// Check to be sure the vertices have different vertex indices.
+	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+
+	EXPECT_EQ(g->NumVertices(), 2);
+
+	e1 = new Edge();
+	ASSERT_TRUE(e1 != NULL);
+
+	// Add the edge between the vertices.
+	ASSERT_NO_THROW( g->AddEdge(v1, v2, e1) );
+
+	// check if the edge is connected correctly.
+	ASSERT_EQ(e1->Source(), v1);
+	ASSERT_EQ(e1->Target(), v2);
+	ASSERT_EQ(v1->InDegree(), 0);
+	ASSERT_EQ(v1->OutDegree(), 1);
+	ASSERT_EQ(v2->InDegree(), 1);
+	ASSERT_EQ(v2->OutDegree(), 0);
+
+	// Remove the edge from the graph.
+	ASSERT_NO_THROW( g->RemoveEdge(e1) );
+
+	// Delete the edge.
+	delete e1;
+
+	// Remove the vertices from the graph.
+	g->RemoveVertex(v2);
+	g->RemoveVertex(v1);
+
+	// Delete the vertices.
+	delete v2;
+	delete v1;
+
+	// Delete the graph.
+	delete g;
 }
 
-
-void
-GraphTest::testConstructor()
+TEST_F(GraphTest, AddVertsAndEdgeBoost)
 {
-	CPPUNIT_ASSERT_NO_THROW( m_test_graph = new Graph() );
-	CPPUNIT_ASSERT( m_test_graph != NULL );
-}
+	Graph *g;
+	Vertex *v1, *v2;
+	Edge *e1;
 
-void GraphTest::testCreateVertex()
-{
-	CPPUNIT_ASSERT_NO_THROW( m_test_vert1 = new Vertex() );
-	CPPUNIT_ASSERT( m_test_vert1 != NULL );
-	CPPUNIT_ASSERT_NO_THROW( m_test_vert2 = new Vertex() );
-}
+	// Create a new Graph.
+	g = new Graph();
+	ASSERT_TRUE( g != NULL );
 
-void GraphTest::testAddVertex()
-{
-	CPPUNIT_ASSERT_NO_THROW( m_test_graph = new Graph() );
-	CPPUNIT_ASSERT( m_test_graph != NULL );
-	CPPUNIT_ASSERT_NO_THROW( m_test_vert1 = new Vertex() );
-	CPPUNIT_ASSERT( m_test_vert1 != NULL );
-	CPPUNIT_ASSERT_NO_THROW( m_test_vert2 = new Vertex() );
-	CPPUNIT_ASSERT_NO_THROW( m_test_graph->AddVertex(m_test_vert1) );
-	CPPUNIT_ASSERT( m_test_graph->NumVertices() == 1 );
-	CPPUNIT_ASSERT_NO_THROW( m_test_graph->AddVertex(m_test_vert2) );
-	CPPUNIT_ASSERT( m_test_graph->NumVertices() == 2 );
-}
+	// Create two Vertexes.
+	v1 = new Vertex();
+	ASSERT_TRUE( v1 != NULL);
+	v2 = new Vertex();
+	ASSERT_TRUE( v2 != NULL);
 
+	// Add the vertices to the graph.
+	g->AddVertex(v1);
+	g->AddVertex(v2);
+
+	// Check to be sure the vertices have different vertex indices.
+	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+
+	EXPECT_EQ(g->NumVertices(), 2);
+
+	e1 = new Edge();
+	ASSERT_TRUE(e1 != NULL);
+
+	// Add the edge between the vertices.
+	ASSERT_NO_THROW( g->AddEdge(v1, v2, e1) );
+
+	// check if the edge is connected correctly.
+	ASSERT_EQ(boost::source(e1, *g), v1);
+	ASSERT_EQ(boost::target(e1, *g), v2);
+	ASSERT_EQ(boost::in_degree(v1, *g), 0);
+	ASSERT_EQ(boost::out_degree(v1, *g), 1);
+	ASSERT_EQ(boost::in_degree(v2, *g), 1);
+	ASSERT_EQ(boost::out_degree(v2, *g), 0);
+
+	// Remove the edge from the graph.
+	ASSERT_NO_THROW( g->RemoveEdge(e1) );
+
+	// Delete the edge.
+	delete e1;
+
+	// Remove the vertices from the graph.
+	g->RemoveVertex(v2);
+	g->RemoveVertex(v1);
+
+	// Delete the vertices.
+	delete v2;
+	delete v1;
+
+	// Delete the graph.
+	delete g;
+}
 

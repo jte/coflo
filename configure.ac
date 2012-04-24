@@ -281,8 +281,13 @@ AC_CHECK_FUNC(glob)
 ### Checks for optional libraries.
 ###
 
-# CppUnit
-AM_PATH_CPPUNIT(1.12.1)
+# Google Test library.
+# Defines HAVE_GTEST="yes" or "no".
+# Vars if found are:
+# GTEST_CONFIG = full path to gtest-config.
+# GTEST_CPPFLAGS, GTEST_CXXFLAGS, GTEST_LDFLAGS, GTEST_LIBS = Vars to add to the compile/link lines.
+# GTEST_VERSION = The version found (e.g. "1.5.0").
+#GTEST_LIB_CHECK([1.5.0])
 
 # Allow the user to build with dmalloc.
 AX_WITH_DMALLOC

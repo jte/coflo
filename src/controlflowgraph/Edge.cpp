@@ -23,8 +23,7 @@
 
 Edge::Edge()
 {
-	m_source = NULL;
-	m_target = NULL;
+	ClearSourceAndTarget();
 }
 
 Edge::Edge(Vertex* source, Vertex* target)
@@ -70,6 +69,12 @@ void Edge::SetSourceAndTarget(Vertex* source, Vertex* target)
 
 	m_source = source;
 	m_target = target;
+}
+
+void Edge::ClearSourceAndTarget()
+{
+	m_source = NULL;
+	m_target = NULL;
 }
 
 void Edge::SetSource(Vertex* source)

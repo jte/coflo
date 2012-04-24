@@ -39,6 +39,7 @@ public:
 	void ChangeTarget(Vertex *target);
 
 	void SetSourceAndTarget(Vertex *source, Vertex *target);
+	void ClearSourceAndTarget();
 	void SetSource(Vertex *source);
 	void SetTarget(Vertex *target);
 

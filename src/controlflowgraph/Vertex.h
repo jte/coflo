@@ -26,6 +26,7 @@
 
 #include "VertexID.h"
 
+class Graph;
 //class Edge;
 #include "Edge.h"
 
@@ -42,7 +43,6 @@ public:
 	typedef boost::unordered_set< Edge* >::size_type degree_size_type;
 	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
 
-
 public:
 	Vertex();
 	virtual ~Vertex();
@@ -57,7 +57,10 @@ public:
 	 * @return
 	 */
 	VertexID GetID() const;
-	long GetVertexIndex() const { return 0; /** @todo FIXME */};
+	/**
+	 * Note that Vertex's don't have indexes until they're added to a Graph.
+	 */
+	std::size_t GetVertexIndex() const { return m_vertex_index; };
 
 	void AddInEdge(Edge *e);
 	void RemoveInEdge(Edge *e);
@@ -70,10 +73,19 @@ public:
 	degree_size_type InDegree() { return m_in_edges.size(); };
 	degree_size_type OutDegree() { return m_out_edges.size(); };
 
+	/// Allow the Graph class access to m_vertex_index.
+	friend class Graph;
+
+private:
+	void SetVertexIndex(VertexID vertex_index);
+
 private:
 	typedef edge_list_type T_EDGE_PTR_CONTAINER;
 	T_EDGE_PTR_CONTAINER m_out_edges;
 	T_EDGE_PTR_CONTAINER m_in_edges;
+
+	// This Vertex's index.
+	std::size_t m_vertex_index;
 
 };
 

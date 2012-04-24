@@ -31,10 +31,7 @@ EXTRA_DIST = Doxyfile
 #MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
 MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug
 
-# The Automake rules for the CoFlo executable.
-bin_PROGRAMS = coflo
-coflo_SOURCES = main.cpp \
-	Function.cpp Function.h \
+COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
@@ -45,7 +42,10 @@ coflo_SOURCES = main.cpp \
 	safe_enum.h \
 	\
 	gcc_gimple_parser.g gcc_gimple_parser.h
-	
+
+# The Automake rules for the CoFlo executable.
+bin_PROGRAMS = coflo
+coflo_SOURCES = main.cpp $(COMMONSOURCES)
 
 	
 # Path to the make_dparser executable.
@@ -93,10 +93,17 @@ coflo_LDADD = $(NORMALLIBS) $(ALLBOOSTLIBS)
 # Automake rules for the coflotest unit test executable.
 
 TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
+GTESTDIR = /home/Gary/src/gtest-1.6.0
 
+gtest-all.cc: $(GTESTDIR)/src/gtest-all.cc
+	cp $< $@
+
+BUILT_SOURCES = gtest-all.cc
+MOSTLYCLEANFILES += gtest-all.cc
 check_PROGRAMS = coflotest
-coflotest_SOURCES = coflotest.cpp
-coflotest_CPPFLAGS = -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
+coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
+nodist_coflotest_SOURCES = gtest-all.cc
+coflotest_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)

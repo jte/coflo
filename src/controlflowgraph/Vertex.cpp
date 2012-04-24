@@ -84,4 +84,10 @@ std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> Vertex::OutEdges
 	return std::pair<out_edge_iterator, out_edge_iterator>(m_out_edges.begin(), m_out_edges.end());
 }
 
+void Vertex::SetVertexIndex(VertexID vertex_index)
+{
+	m_vertex_index = vertex_index;
+}
+
+
 

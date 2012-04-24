@@ -25,8 +25,8 @@
 
 Graph::Graph()
 {
-	// TODO Auto-generated constructor stub
-
+	// Initialize the vertex_index generator.
+	InitVertexIDGenerator();
 }
 
 Graph::~Graph()
@@ -36,6 +36,7 @@ Graph::~Graph()
 
 void Graph::AddVertex(Vertex* v)
 {
+	AssignAVertexIndexToVertex(v);
 	m_vertices.insert(v);
 }
 
@@ -56,11 +57,14 @@ void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)
 {
 	source->AddOutEdge(e);
 	target->AddInEdge(e);
+	e->SetSourceAndTarget(source, target);
 }
 
 void Graph::RemoveEdge(Edge* e)
 {
-	BOOST_THROW_EXCEPTION( not_implemented() );
+	e->Source()->RemoveOutEdge(e);
+	e->Target()->RemoveInEdge(e);
+	e->ClearSourceAndTarget();
 }
 
 void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const
@@ -71,6 +75,28 @@ void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *
 
 	iterator_pair->first = it_pair.first; //m_vertices.begin();
 	iterator_pair->second = it_pair.second; //m_vertices.end();
+}
+
+void Graph::InitVertexIDGenerator()
+{
+	m_vertex_id_state = 0;
+}
+
+VertexID Graph::GetNewVertexID()
+{
+	VertexID retval = m_vertex_id_state;
+	m_vertex_id_state++;
+
+	return retval;
+}
+
+void Graph::AssignAVertexIndexToVertex(Vertex* v)
+{
+	VertexID vertex_index;
+
+	vertex_index = GetNewVertexID();
+
+	v->SetVertexIndex(vertex_index);
 }
 
 /// @name Free-function definitions for adapting this graph class to the Boost graph library.

@@ -45,9 +45,6 @@ class Function;
 /// Vertex properties for the CFG graph.
 struct CFGVertexProperties
 {
-	/// The index of this vertex.
-	//size_t vertex_index;
-
 	/// The Statement at this vertex of the CFG.
 	StatementBase *m_statement;
 	
@@ -82,28 +79,7 @@ typedef boost::adjacency_list
 		/// The Edge properties type.
 		CFGEdgeProperties
 		> T_CFG;
-#if 0
-/// Typedef for the vertex_descriptors in the control flow graph.
-typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
 
-/// Typedef for the edge_descriptors in the control flow graph.
-typedef boost::graph_traits<T_CFG>::edge_descriptor T_CFG_EDGE_DESC;
-
-/// Typedef for vertex iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::vertex_iterator T_CFG_VERTEX_ITERATOR;
-
-/// Typedef for out-edge iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::out_edge_iterator T_CFG_OUT_EDGE_ITERATOR;
-
-/// Typedef for in-edge iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::in_edge_iterator T_CFG_IN_EDGE_ITERATOR;
-
-/// Typedef for the type used to represent vertex degrees.
-typedef boost::graph_traits< T_CFG >::degree_size_type T_CFG_DEGREE_SIZE_TYPE;
-
-// Typedef for the type used to index the Vertices.
-typedef boost::graph_traits<T_CFG>::vertices_size_type T_CFG_VERTICES_SIZE_TYPE;
-#endif
 
 typedef StatementBase* T_CFG_VERTEX_DESC;
 typedef CFGEdgeTypeBase* T_CFG_EDGE_DESC;
@@ -161,8 +137,8 @@ public:
 	typedef edge_list_type edges_size_type;
 
 	/// For vertex_index_t.
-	typedef boost::property<boost::vertex_index_t, long> VertexProperty;
-	typedef VertexProperty vertex_property_type;
+	//typedef boost::property<boost::vertex_index_t, long> VertexProperty;
+	//typedef VertexProperty vertex_property_type;
 	//@}
 
 	//@}
@@ -267,14 +243,6 @@ public:
 
 private:
 
-	/// @name Vertex unique ID generator routines.
-	//@{
-
-	virtual void InitVertexIDGenerator();
-	virtual VertexID GetNewVertexID();
-
-	//@}
-
 	/// @name Edge manipulation routines.
 	//@{
 
@@ -295,9 +263,6 @@ private:
 	/// We'll point this at *m_cfg_ptr in the constructor.
 	/// @note We should probably just use the pointer, this is a leftover from the pre-FilteredGraph implementation.
 	///*T_CFG*/ UnderlyingGraphType &m_cfg;
-
-	/// The Vertex ID generator state.
-	VertexID m_vertex_id_state;
 };
 
 
