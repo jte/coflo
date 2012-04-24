@@ -20,7 +20,7 @@
 #ifndef GRAPHTEST_H_
 #define GRAPHTEST_H_
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "gtest/gtest.h"
 
 class Graph;
 class Vertex;
@@ -28,24 +28,26 @@ class Vertex;
 /**
  * CppUnit test fixture for the Graph class.
  */
-class GraphTest : public CppUnit::TestFixture
+class GraphTest : public ::testing::Test
 {
-	CPPUNIT_TEST_SUITE( GraphTest );
-	CPPUNIT_TEST( testConstructor );
-	CPPUNIT_TEST( testCreateVertex );
-	CPPUNIT_TEST( testAddVertex );
-	CPPUNIT_TEST_SUITE_END();
+protected:
+	GraphTest() {};
+	virtual ~GraphTest() {};
 
-public:
-	void setUp();
-	void tearDown();
-
-	void testConstructor();
-	void testCreateVertex();
-	void testAddVertex();
+	virtual void SetUp() {};
+	virtual void TearDown() {};
 
 	Graph *m_test_graph;
 	Vertex *m_test_vert1, *m_test_vert2;
+	enum UnitTestLevel
+	{
+		GraphNewDelete,
+		VertexNewDelete,
+		VertexAddRemove,
+		EdgeNewDelete,
+		EdgeAddRemove,
+	};
 };
+
 
 #endif /* GRAPHTEST_H_ */

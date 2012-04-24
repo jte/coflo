@@ -20,10 +20,12 @@
 #ifndef VERTEXID_H_
 #define VERTEXID_H_
 
+#include <cstddef>
+
 /**
  * This is the type we'll use to label the vertices in the boost::labeled_graph.
  */
-typedef unsigned long VertexID;
+typedef std::size_t VertexID;
 #if 0
 class VertexID
 {

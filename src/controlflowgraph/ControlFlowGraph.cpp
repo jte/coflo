@@ -76,7 +76,6 @@ struct vertex_filter_predicate
 
 ControlFlowGraph::ControlFlowGraph()
 {
-	InitVertexIDGenerator();
 }
 
 ControlFlowGraph::~ControlFlowGraph()
@@ -323,18 +322,6 @@ void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, Contr
 
 }
 
-void ControlFlowGraph::InitVertexIDGenerator()
-{
-	m_vertex_id_state = 0;
-}
-
-VertexID ControlFlowGraph::GetNewVertexID()
-{
-	VertexID retval = m_vertex_id_state;
-	m_vertex_id_state++;
-
-	return retval;
-}
 
 #if 0
 T_VERTEX_PROPERTY_MAP_INDEX ControlFlowGraph::GetPropMap_VertexIndex()

@@ -71,7 +71,9 @@ public:
 	typedef edge_list_type edges_size_type;
 
 	/// For vertex_index_t.
-	typedef boost::property<boost::vertex_index_t, long> VertexProperty;
+	typedef std::size_t vertex_index_type;
+    typedef std::size_t edge_index_type;
+	typedef boost::property<boost::vertex_index_t, vertex_index_type> VertexProperty;
 	typedef VertexProperty vertex_property_type;
 	//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
 	//@}
@@ -89,7 +91,7 @@ public:
 	virtual void AddEdge(Vertex *source, Vertex *target, Edge *e);
 	virtual void RemoveEdge(Edge *e);
 
-	long GetVertexIndex(Vertex *v) const { return v->GetVertexIndex(); };
+	Graph::vertex_index_type GetVertexIndex(Vertex *v) const { return v->GetVertexIndex(); };
 
 	//std::pair<vertex_iterator, vertex_iterator> Vertices();
 	virtual void Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const;
@@ -111,12 +113,23 @@ protected:
 
 private:
 
+	/// @name Vertex unique ID generator routines.
+	//@{
+
+	void InitVertexIDGenerator();
+	VertexID GetNewVertexID();
+	void AssignAVertexIndexToVertex(Vertex *v);
+
+	//@}
+
+
+private:
+
 	/// Collection of all vertices in the Graph.
 	boost::unordered_set< Vertex* > m_vertices;
 
-private:
-	/// Concept checking function.
-	inline void concept_checker();
+	/// The Vertex ID generator state.
+	VertexID m_vertex_id_state;
 };
 
 extern long dummy_val;
@@ -197,8 +210,9 @@ namespace boost
 
 }
 //@}
-/*
-inline void Graph::concept_checker()
+
+template <typename Dummy>
+void Graph_concept_checker()
 {
 	// Is our vertex index map a ReadablePropertyMap?
 	BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<const boost::Graph_vertex_index_map, const Graph::vertex_descriptor> ));
@@ -208,9 +222,10 @@ inline void Graph::concept_checker()
 	//BOOST_CONCEPT_ASSERT(( boost::ReadWritePropertyMapConcept<boost::Graph_vertex_id_map, Graph::vertex_descriptor> ));
 
 	// Is our Graph class a ReadablePropertyGraph for vertex_index_t?
-	BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_index_t> ));
+	//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_index_t> ));
 	// Is our Graph class a PropertyGraph for vertex_color_t?
 	//BOOST_CONCEPT_ASSERT(( boost::PropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_color_t> ));
+	//BOOST_CONCEPT_ASSERT(( boost::VertexIndexGraphConcept<Graph> ))
 }
-*/
+
 #endif /* GRAPH_H_ */

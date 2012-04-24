@@ -17,7 +17,7 @@
 
 SUBDIRS = algorithms analysis edges statements visitors
 
-noinst_LIBRARIES = libcontrolflowgraph.a libcontrolflowgraphtest.a
+noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
 	SparsePropertyMap.h \
 	CallStackBase.cpp CallStackBase.h \
@@ -30,10 +30,6 @@ libcontrolflowgraph_a_SOURCES = \
 	Vertex.cpp Vertex.h \
 	VertexID.cpp VertexID.h
 
-# CppUnit tests.
-libcontrolflowgraphtest_a_SOURCES = \
-	GraphTest.cpp GraphTest.h
-
 #	ControlFlowGraphTemplateHelper.h \#
 #	FilteredGraph.cpp FilteredGraph.h \#
 
@@ -41,6 +37,12 @@ libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFL
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 
-libcontrolflowgraphtest_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+# Unit tests.
+GTESTDIR = /home/Gary/src/gtest-1.6.0
+check_LIBRARIES =  libcontrolflowgraphtest.a
+libcontrolflowgraphtest_a_SOURCES = \
+	GraphTest.cpp GraphTest.h \
+	ControlFlowGraph_test.cpp
+libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraphtest_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraphtest_a_CXXFLAGS = $(AM_CXXFLAGS)
