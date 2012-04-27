@@ -23,7 +23,7 @@ SUFFIXES = .tar.bz2 .tar.gz2 .tar
 
 # Some Boost lib directory variables.
 BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
-BOOST_LOCAL = $(abs_builddir)/boost_local
+BOOST_LOCAL = ./boost_local
 BOOST_STAGE_DIR = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage
 BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
 BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
@@ -96,7 +96,7 @@ stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 
 stamp_boost_src_configured: stamp_boost_src_untarred
 	rm -f $@-temp
-	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
+	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="../$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
