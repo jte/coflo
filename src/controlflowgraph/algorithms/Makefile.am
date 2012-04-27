@@ -22,7 +22,7 @@ libalgorithms_a_SOURCES = \
 	topological_visit_kahn.h
 	
 	
-libalgorithms_a_CPPFLAGS = -I $(abs_top_srcdir)/src/controlflowgraph -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libalgorithms_a_CPPFLAGS = -I $(top_srcdir)/src/controlflowgraph -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libalgorithms_a_CFLAGS = $(AM_CFLAGS)
 libalgorithms_a_CXXFLAGS = $(AM_CXXFLAGS)
 

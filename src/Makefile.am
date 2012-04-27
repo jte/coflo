@@ -49,13 +49,13 @@ coflo_SOURCES = main.cpp $(COMMONSOURCES)
 
 	
 # Path to the make_dparser executable.
-PROG_ABSPATH_MAKE_DPARSER = $(abs_top_builddir)/third_party/make_dparser
+PROG_ABSPATH_MAKE_DPARSER = $(top_builddir)/third_party/make_dparser
 # Flags for make_dparser.
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
 # Collect all the Boost libraries we found into a single variable.
 if BOOST_USE_BUILT_BOOST
-BOOST_LOCAL_LIB = $(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)/stage/lib
+BOOST_LOCAL_LIB = $(top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)/stage/lib
 ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_program_options.a \
 	$(BOOST_LOCAL_LIB)/libboost_regex.a \
@@ -78,7 +78,7 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./libexttools/libexttools.a \
 	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
 
-coflo_CPPFLAGS = -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
+coflo_CPPFLAGS = -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
@@ -103,7 +103,7 @@ MOSTLYCLEANFILES += gtest-all.cc
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
-coflotest_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(abs_top_builddir)/third_party/dparser/local/include -I $(abs_top_srcdir)/src/debug_utils \
+coflotest_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
