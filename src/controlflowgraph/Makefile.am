@@ -33,7 +33,7 @@ libcontrolflowgraph_a_SOURCES = \
 #	ControlFlowGraphTemplateHelper.h \#
 #	FilteredGraph.cpp FilteredGraph.h \#
 
-libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libcontrolflowgraph_a_CPPFLAGS = -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 
@@ -43,6 +43,6 @@ check_LIBRARIES =  libcontrolflowgraphtest.a
 libcontrolflowgraphtest_a_SOURCES = \
 	GraphTest.cpp GraphTest.h \
 	ControlFlowGraph_test.cpp
-libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraphtest_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraphtest_a_CXXFLAGS = $(AM_CXXFLAGS)
