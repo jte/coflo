@@ -237,7 +237,7 @@ AM_COND_IF([BOOST_USE_BUILT_BOOST],
 [
 	# A path to a boost source tarball was specified.
 	# Populate the necessary variables.
-	AC_SUBST([BOOST_CPPFLAGS],['-I $(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)'])
+	AC_SUBST([BOOST_CPPFLAGS],['-I "$(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)"'])
 	AM_CPPFLAGS="$AM_CPPFLAGS $BOOST_CPPFLAGS"
 	AC_SUBST([BOOST_LDFLAGS],[""])
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])

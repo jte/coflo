@@ -29,7 +29,8 @@ BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
 BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
 
 # DParser directory vars.
-DPARSER_PREFIX = $(abs_builddir)/dparser/local
+#$(abs_builddir)
+DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
@@ -70,7 +71,7 @@ stamp_dparser_src_built: stamp_dparser_src_untarred
 	
 stamp_dparser_src_installed: stamp_dparser_src_built
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=$(DPARSER_PREFIX) install
+	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 ###
