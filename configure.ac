@@ -224,7 +224,7 @@ AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
-# The "boost_1_4x_x" part of the filename.
+# Extract the "boost_1_4x_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
 BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")
 BOOST_TARBALL_TAR=$(basename "${BOOST_TARBALL_TARBZ2}" .bz2)

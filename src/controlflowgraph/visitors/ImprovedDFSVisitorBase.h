@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -64,7 +64,7 @@ DECLARE_ENUM_CLASS(edge_return_value_t, ok, terminate_branch, terminate_search,
  * - The event handlers return values allowing them to tell the traversal algorithm whether
  *   to continue, stop exploring the current branch, or stop the traversal entirely.
  */
-template <typename Vertex, typename Edge, typename Graph>
+template <typename VertexDescriptor, typename EdgeDescriptor, typename Graph>
 class ImprovedDFSVisitorBase
 {
 public:
@@ -78,10 +78,10 @@ public:
 	};
 	~ImprovedDFSVisitorBase() {};
 	
-	vertex_return_value_t initialize_vertex(Vertex u) { return vertex_return_value_t::ok; };
-	vertex_return_value_t start_vertex(Vertex u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t initialize_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t start_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
 	
-	vertex_return_value_t start_subgraph_vertex(Vertex u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t start_subgraph_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
 	
 	/**
 	 * Called when Vertex u is seen for the first time.  Vertex u will have already been
@@ -90,7 +90,7 @@ public:
      * @param u
      * @return 
      */
-	vertex_return_value_t discover_vertex(Vertex u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t discover_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
 	
 	/**
 	 * Invoked on every out-edge of each vertex after that vertex has been discovered.
@@ -102,7 +102,7 @@ public:
      * @param u The edge to examine.
      * @return 
      */
-	edge_return_value_t examine_edge(Edge u) { return edge_return_value_t::ok; };
+	edge_return_value_t examine_edge(EdgeDescriptor u) { return edge_return_value_t::ok; };
 	
 	/**
 	 * The Edge u has been determined to be part of the DFS tree.  This means that
@@ -112,23 +112,23 @@ public:
      * @param u
      * @return 
      */
-	edge_return_value_t tree_edge(Edge u) { return edge_return_value_t::ok; };
+	edge_return_value_t tree_edge(EdgeDescriptor u) { return edge_return_value_t::ok; };
 	
 	/**
 	 * The Edge u has been determined to be part of the DFS tree, and has also been determined
 	 * to be a back edge.
 	 */
-	edge_return_value_t back_edge(Edge u) { return edge_return_value_t::ok; };
-	edge_return_value_t forward_or_cross_edge(Edge u) { return edge_return_value_t::ok; };
+	edge_return_value_t back_edge(EdgeDescriptor u) { return edge_return_value_t::ok; };
+	edge_return_value_t forward_or_cross_edge(EdgeDescriptor u) { return edge_return_value_t::ok; };
 	
 	/**
-	 * Called on each Vertex u only after it has been called on all child vertices
+	 * Called on each VertexDescriptor u only after it has been called on all child vertices
 	 * of u in its DFS tree.
 	 * 
      * @param u
      * @return 
      */
-	vertex_return_value_t finish_vertex(Vertex u) { return vertex_return_value_t::ok; };
+	vertex_return_value_t finish_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
 	
 	
 protected:

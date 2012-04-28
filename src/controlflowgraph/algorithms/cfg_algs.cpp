@@ -19,7 +19,10 @@
 
 #include "cfg_algs.h"
 
+#include <boost/concept_check.hpp>
 #include <boost/foreach.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/graph_concepts.hpp>
 
 #include "../ControlFlowGraph.h"
 #include "../../Function.h"
@@ -46,6 +49,11 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
 #endif
 
+	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
+	/// @todo This is probably not the best place for this check.
+	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph>));
+	BOOST_CONCEPT_ASSERT((boost::DFSVisitorConcept< BackEdgeFixupVisitor<ControlFlowGraph>, ControlFlowGraph >));
+
 	std::vector<BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo> back_edges;
 
 	// Define a visitor which will find all the back edges and send back the info
@@ -61,7 +69,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 	// Mark the edges we found as back edges.
 	BOOST_FOREACH(BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo fixinfo, back_edges)
 	{
-		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
+		ControlFlowGraph::edge_descriptor e = fixinfo.m_back_edge;
 
 		// Change this edge type to a back edge.
 		g[e]->MarkAsBackEdge(true);
@@ -75,11 +83,11 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 
 		// If the source node of this back edge now has no non-back-edge out-edges,
 		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
-		T_CFG_VERTEX_DESC src;
+		ControlFlowGraph::vertex_descriptor src;
 		src = boost::source(e, g);
 		if (boost::out_degree(src, g) == 1)
 		{
-			/*T_CFG_EDGE_DESC newedge;
+			/*ControlFlowGraph::edge_descriptor newedge;
 			boost::tie(newedge, boost::tuples::ignore) =
 					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
@@ -115,18 +123,18 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mi, returned_merge_info)
 	{
 		cout << "MI:" << endl;
-		BOOST_FOREACH(T_CFG_EDGE_DESC e, mi.m_terminal_edges)
+		BOOST_FOREACH(ControlFlowGraph::edge_descriptor e, mi.m_terminal_edges)
 		{
 				cout << e << endl;
 		}
 	}
 
 	// Now modify the tree.
-	T_CFG_EDGE_DESC last_merge_vertex_out_edge;
+	ControlFlowGraph::edge_descriptor last_merge_vertex_out_edge;
 	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mii, returned_merge_info)
 	{
 		T_CFG_VERTEX_DESC merge_vertex, last_merge_vertex;
-		T_CFG_EDGE_DESC new_edge, last_merge_edge;
+		ControlFlowGraph::edge_descriptor new_edge, last_merge_edge;
 		CFGEdgeTypeBase *new_edge_type;
 
 		if(mii.m_terminal_edges.size() < 3)
@@ -135,7 +143,7 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 			std::cerr << "ERROR: Less than 3 vertices in InsertMergeNodes()." << std::endl;
 		}
 
-		std::vector<T_CFG_EDGE_DESC>::iterator eit, eend;
+		std::vector<ControlFlowGraph::edge_descriptor>::iterator eit, eend;
 		eit = mii.m_terminal_edges.begin();
 		eend = mii.m_terminal_edges.end();
 		last_merge_edge = *eit;
@@ -172,7 +180,7 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 	// Now remove all the old edges which are now invalid.
 	BOOST_FOREACH(MergeNodeInsertionVisitor<T_FILTERED_GRAPH>::MergeInsertionInfo mii, returned_merge_info)
 	{
-		std::vector<T_CFG_EDGE_DESC>::iterator eit, eend;
+		std::vector<ControlFlowGraph::edge_descriptor>::iterator eit, eend;
 		eit = mii.m_terminal_edges.begin();
 		eend = mii.m_terminal_edges.end();
 		for(; eit+1 != eend; ++eit)
@@ -196,7 +204,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 	// Define a filtered view of only this function's CFG.
 	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
 
-	std::vector<T_CFG_EDGE_DESC> edges_to_remove;
+	std::vector<ControlFlowGraph::edge_descriptor> edges_to_remove;
 
 	// Find any critical edges and split them by inserting NOOPs.
 	boost::graph_traits<T_FILTERED_GRAPH>::edge_iterator eit, eend;
@@ -227,7 +235,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 	}
 
 	// Remove the critical edges we found.
-	BOOST_FOREACH(T_CFG_EDGE_DESC e, edges_to_remove)
+	BOOST_FOREACH(ControlFlowGraph::edge_descriptor e, edges_to_remove)
 	{
 		T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc, splitting_vertex;
 
@@ -242,7 +250,7 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 
 		// Split the edge by pointing the old edge at the new vertex, and a new fallthrough
 		// edge from the new vertex to the old target.
-		T_CFG_EDGE_DESC new_edge_1, new_edge_2;
+		ControlFlowGraph::edge_descriptor new_edge_1, new_edge_2;
 		boost::tie(new_edge_1, boost::tuples::ignore) = boost::add_edge(source_vertex_desc, splitting_vertex, m_cfg);
 		boost::tie(new_edge_2, boost::tuples::ignore) = boost::add_edge(splitting_vertex, target_vertex_desc, m_cfg);
 		m_cfg[new_edge_1].m_edge_type = m_cfg[e].m_edge_type;
@@ -324,7 +332,7 @@ void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 
 				T_FILTERED_GRAPH::in_edge_iterator in_eit;
 				T_FILTERED_GRAPH::out_edge_iterator out_eit;
-				T_CFG_EDGE_DESC in_edge, out_edge;
+				ControlFlowGraph::edge_descriptor in_edge, out_edge;
 
 				boost::tie(in_eit, boost::tuples::ignore) = boost::in_edges(*it, graph_of_this_function);
 				boost::tie(out_eit, boost::tuples::ignore) = boost::out_edges(*it, graph_of_this_function);

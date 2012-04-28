@@ -21,6 +21,9 @@
 #define BACKEDGEFIXUPVISITOR_H
 
 #include <vector>
+
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/graph_concepts.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
@@ -34,6 +37,12 @@
 template <typename GraphType>
 class BackEdgeFixupVisitor : public boost::default_dfs_visitor
 {
+	/// @name Concept checks.
+	//@{
+	/// Make sure GraphType models the Boost GraphConcept, which is the minimum necessary for use by the DFSVisitorConcept.
+	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<GraphType> ));
+	//@}
+
 public:
 
 	typedef typename boost::graph_traits<GraphType>::vertex_descriptor T_VERTEX_DESC;
@@ -53,6 +62,10 @@ public:
 		boost::default_dfs_visitor(), m_back_edges(back_edges), m_predecessor_map()
 	{
 	};
+	// Copy constructor so we model the CopyConstructibleConcept, which DFSVisitorConcept must model.
+	BackEdgeFixupVisitor(const BackEdgeFixupVisitor& other) :
+		boost::default_dfs_visitor(other), m_back_edges(other.m_back_edges), m_predecessor_map(other.m_predecessor_map)
+	{};
 	~BackEdgeFixupVisitor() {};
 
 	/**
@@ -96,14 +109,6 @@ public:
 	}
 
 private:
-
-	/// Reference to an external vector where we'll store the edges we'll mark later.
-	std::vector<BackEdgeFixupInfo> &m_back_edges;
-
-	/// Map where we'll store the predecessors we find during the depth-first-search.
-	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
-	/// to deal with back edges caused by loops.
-	boost::unordered_map<T_VERTEX_DESC, T_EDGE_DESC> m_predecessor_map;
 
 	T_EDGE_DESC FindDifferentOutEdge(T_EDGE_DESC e, const GraphType &cfg)
 	{
@@ -169,7 +174,7 @@ private:
 
 				// Find an edge that's not this one out of the decision vertex.
 				/// @todo Make this more robust.  As far as I know, this isn't guaranteed to be the right way out, or even *a* way out.
-				T_CFG_EDGE_DESC other_edge;
+				T_EDGE_DESC other_edge;
 				other_edge = FindDifferentOutEdge(e, cfg);
 
 				retval = boost::target(other_edge, cfg);
@@ -185,6 +190,19 @@ private:
 		return retval;
 	};
 
+private:
+	/// @name State
+	//@{
+
+	/// Reference to an external vector where we'll store the edges we'll mark later.
+	std::vector<BackEdgeFixupInfo> &m_back_edges;
+
+	/// Map where we'll store the predecessors we find during the depth-first-search.
+	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
+	/// to deal with back edges caused by loops.
+	boost::unordered_map<T_VERTEX_DESC, T_EDGE_DESC> m_predecessor_map;
+
+	//@}
 };
 
 #endif /* BACKEDGEFIXUPVISITOR_H */

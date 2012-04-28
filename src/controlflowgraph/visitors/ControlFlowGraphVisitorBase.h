@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -34,7 +34,7 @@ class Function;
  * Base class for ControlFlowGraph visitors.
  * ControlFlowGraphVisitorBase adds a call stack usable by derived classes.
  */
-class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, ControlFlowGraph>
+class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>
 {
 public:
 
@@ -42,14 +42,14 @@ public:
 	ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig);
 	virtual ~ControlFlowGraphVisitorBase();
 	
-	virtual vertex_return_value_t initialize_vertex(T_CFG_VERTEX_DESC u);
-	virtual vertex_return_value_t start_vertex(T_CFG_VERTEX_DESC u);
-	virtual vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u);
-	virtual edge_return_value_t examine_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t tree_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t back_edge(T_CFG_EDGE_DESC u);
-	virtual edge_return_value_t forward_or_cross_edge(T_CFG_EDGE_DESC u);
-	virtual vertex_return_value_t finish_vertex(T_CFG_VERTEX_DESC u);
+	virtual vertex_return_value_t initialize_vertex(ControlFlowGraph::vertex_descriptor u);
+	virtual vertex_return_value_t start_vertex(ControlFlowGraph::vertex_descriptor u);
+	virtual vertex_return_value_t discover_vertex(ControlFlowGraph::vertex_descriptor u);
+	virtual edge_return_value_t examine_edge(ControlFlowGraph::edge_descriptor u);
+	virtual edge_return_value_t tree_edge(ControlFlowGraph::edge_descriptor u);
+	virtual edge_return_value_t back_edge(ControlFlowGraph::edge_descriptor u);
+	virtual edge_return_value_t forward_or_cross_edge(ControlFlowGraph::edge_descriptor u);
+	virtual vertex_return_value_t finish_vertex(ControlFlowGraph::vertex_descriptor u);
 
 protected:
 

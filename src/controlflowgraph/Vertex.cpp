@@ -29,6 +29,11 @@ Vertex::Vertex()
 
 }
 
+Vertex::Vertex(const Vertex& other)
+{
+	BOOST_THROW_EXCEPTION( not_implemented() );
+}
+
 Vertex::~Vertex()
 {
 	// TODO Auto-generated destructor stub
