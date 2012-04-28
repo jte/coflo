@@ -169,7 +169,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				// The FunctionCall->Function->entrypoint edge.
 				CFGEdgeTypeFunctionCall *call_edge_type =
 						new CFGEdgeTypeFunctionCall(fcr);
-				T_CFG_EDGE_DESC new_edge_desc;
+				ControlFlowGraph::edge_descriptor new_edge_desc;
 				bool ok;
 
 				/*new_edge_desc =*/ m_the_cfg->AddEdge(*vit, it->second->GetEntryVertexDescriptor(), call_edge_type);
@@ -194,7 +194,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 				// the node in the CFG which is after the FunctionCall.  There is
 				// only ever one normal (i.e. fallthrough) edge from the FunctionCall
 				// to the next statement in its containing function.
-				T_CFG_EDGE_DESC function_call_out_edge;
+				ControlFlowGraph::edge_descriptor function_call_out_edge;
 
 				boost::tie(function_call_out_edge, ok) = (*vit)->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>();
 				if (!ok)
@@ -262,7 +262,7 @@ struct back_edge_filter_predicate
 	 * @param eid Reference to an edge descriptor.
 	 * @return
 	 */
-	bool operator()(const T_CFG_EDGE_DESC& eid) const
+	bool operator()(const ControlFlowGraph::edge_descriptor& eid) const
 	{
 		if (eid->IsBackEdge())
 		{
@@ -286,7 +286,7 @@ static void indent(long i)
 	};
 }
 
-static long filtered_in_degree(T_CFG_VERTEX_DESC v, bool only_decision_predecessors = false)
+static long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decision_predecessors = false)
 {
 	StatementBase::in_edge_iterator ieit, ieend;
 
@@ -335,7 +335,7 @@ static long filtered_in_degree(T_CFG_VERTEX_DESC v, bool only_decision_predecess
 	return i;
 }
 
-T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+ControlFlowGraph::edge_descriptor first_filtered_out_edge(ControlFlowGraph::vertex_descriptor v, const T_CFG &cfg)
 {
 	StatementBase::out_edge_iterator ieit, ieend;
 
@@ -374,7 +374,7 @@ T_CFG_EDGE_DESC first_filtered_out_edge(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
 	return *ieend;
 }
 
-static long filtered_out_degree(T_CFG_VERTEX_DESC v, const T_CFG &cfg)
+static long filtered_out_degree(ControlFlowGraph::vertex_descriptor v)
 {
 	StatementBase::out_edge_iterator eit, eend;
 
@@ -404,7 +404,7 @@ class function_control_flow_graph_visitor: public ControlFlowGraphVisitorBase
 {
 public:
 	function_control_flow_graph_visitor(ControlFlowGraph &g,
-			T_CFG_VERTEX_DESC last_statement,
+			ControlFlowGraph::vertex_descriptor last_statement,
 			bool cfg_verbose,
 			bool cfg_vertex_ids) :
 			ControlFlowGraphVisitorBase(g)
@@ -423,7 +423,7 @@ public:
 	{
 	};
 
-	vertex_return_value_t start_vertex(T_CFG_EDGE_DESC u)
+	vertex_return_value_t start_vertex(ControlFlowGraph::edge_descriptor u)
 	{
 		// The very first vertex has been popped.
 
@@ -434,7 +434,7 @@ public:
 		return vertex_return_value_t::ok;
 	};
 
-	vertex_return_value_t discover_vertex(T_CFG_VERTEX_DESC u, T_CFG_EDGE_DESC e)
+	vertex_return_value_t discover_vertex(ControlFlowGraph::vertex_descriptor u, ControlFlowGraph::edge_descriptor e)
 	{
 		// We found a new vertex.
 
@@ -455,7 +455,7 @@ public:
 		long fid = filtered_in_degree(u);
 		if(fid==1)
 		{
-			T_CFG_VERTEX_DESC predecessor;
+			ControlFlowGraph::vertex_descriptor predecessor;
 			predecessor = e->Source();
 			if(predecessor->IsDecisionStatement())
 			{
@@ -528,7 +528,7 @@ public:
 		return vertex_return_value_t::ok;
 	}
 
-	edge_return_value_t examine_edge(T_CFG_EDGE_DESC ed)
+	edge_return_value_t examine_edge(ControlFlowGraph::edge_descriptor ed)
 	{
 		// Filter out any edges that we want to pretend aren't even part of the
 		// graph we're looking at.
@@ -606,7 +606,7 @@ public:
 		return edge_return_value_t::ok;
 	}
 
-	void vertex_visit_complete(T_CFG_VERTEX_DESC u, long num_vertices_pushed, T_CFG_EDGE_DESC e)
+	void vertex_visit_complete(ControlFlowGraph::vertex_descriptor u, long num_vertices_pushed, ControlFlowGraph::edge_descriptor e)
 	{
 		// Check if we're leaving an Exit vertex.
 		StatementBase *p = u;
@@ -653,7 +653,7 @@ private:
 
 	/// Vertex corresponding to the last statement of the function.
 	/// We'll terminate the search when we find this.
-	T_CFG_VERTEX_DESC m_last_statement;
+	ControlFlowGraph::vertex_descriptor m_last_statement;
 
 	/// Flag indicating if we should only print function calls and flow control constructs.
 	bool m_cfg_verbose;
@@ -719,7 +719,7 @@ class cfg_vertex_property_writer
 public:
 	cfg_vertex_property_writer(ControlFlowGraph &cfg) : m_g(cfg) { };
 
-	void operator()(std::ostream& out, const T_CFG_VERTEX_DESC& v)
+	void operator()(std::ostream& out, const ControlFlowGraph::vertex_descriptor& v)
 	{
 		StatementBase *sbp = v;
 		if (sbp != NULL)
@@ -748,10 +748,10 @@ private:
 class cfg_edge_property_writer
 {
 public:
-	cfg_edge_property_writer(ControlFlowGraph &_g) :	m_graph(_g)
+	cfg_edge_property_writer(ControlFlowGraph &_g) : m_graph(_g)
 	{
 	}
-	void operator()(std::ostream& out, const T_CFG_EDGE_DESC& e)
+	void operator()(std::ostream& out, const ControlFlowGraph::edge_descriptor& e)
 	{
 		CFGEdgeTypeBase *etb = e;
 		// Set the edge attributes.
@@ -811,7 +811,7 @@ void Function::PrintControlFlowGraphBitmap(ToolDot *the_dot, const boost::filesy
 	the_dot->CompileDotToPNG(dot_filename.generic_string(), output_filename.generic_string());
 }
 
-class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
+class LabelMap : public std::map< std::string, ControlFlowGraph::vertex_descriptor>
 {
 
 };
@@ -819,13 +819,13 @@ class LabelMap : public std::map< std::string, T_CFG_VERTEX_DESC>
 bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector< StatementBase* > &statement_list)
 {
 	LabelMap label_map;
-	T_CFG_VERTEX_DESC prev_vertex;
+	ControlFlowGraph::vertex_descriptor prev_vertex;
 	bool prev_vertex_ended_basic_block = false;
 
 	// A list of basic block leader info.
 	std::vector< BasicBlockLeaderInfo > list_of_leader_info;
-	std::vector< T_CFG_VERTEX_DESC > list_of_statements_with_no_in_edge_yet;
-	std::vector< T_CFG_VERTEX_DESC > list_of_unlinked_flow_control_statements;
+	std::vector< ControlFlowGraph::vertex_descriptor > list_of_statements_with_no_in_edge_yet;
+	std::vector< ControlFlowGraph::vertex_descriptor > list_of_unlinked_flow_control_statements;
 
 	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
 
@@ -853,7 +853,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	BOOST_FOREACH(StatementBase *sbp, statement_list)
 	{
 		// Add this Statement to the Control Flow Graph.
-		T_CFG_VERTEX_DESC vid;
+		ControlFlowGraph::vertex_descriptor vid;
 		sbp->SetOwningFunction(this);
 		cfg.AddVertex(sbp);
 		vid = sbp;
@@ -927,7 +927,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 
 	// Link the FlowControlUnlinked-derived statements (i.e. link jumps to their targets).
 	dlog_cfg << "INFO: Linking FlowControlUnlinked-derived statements." << std::endl;
-	BOOST_FOREACH(T_CFG_VERTEX_DESC vd, list_of_unlinked_flow_control_statements)
+	BOOST_FOREACH(ControlFlowGraph::vertex_descriptor vd, list_of_unlinked_flow_control_statements)
 	{
 		FlowControlUnlinked *fcl = dynamic_cast<FlowControlUnlinked*>(vd);
 		dlog_cfg << "INFO: Linking " << typeid(*fcl).name() << std::endl;
@@ -962,7 +962,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 
 
 	dlog_cfg << "INFO: Checking for unreachable code." << std::endl;
-	std::vector< T_CFG_VERTEX_DESC > statements_with_no_in_edge;
+	std::vector< ControlFlowGraph::vertex_descriptor > statements_with_no_in_edge;
 	CheckForNoInEdges(cfg, list_of_statements_with_no_in_edge_yet, &statements_with_no_in_edge);
 	dlog_cfg << "INFO: Check complete." << std::endl;
 
@@ -1004,12 +1004,12 @@ void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlock
 }
 
 bool Function::CheckForNoInEdges(ControlFlowGraph & cfg,
-		std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
-		std::vector< T_CFG_VERTEX_DESC > *output)
+		std::vector< ControlFlowGraph::vertex_descriptor > &list_of_statements_with_no_in_edge_yet,
+		std::vector< ControlFlowGraph::vertex_descriptor > *output)
 {
 	bool retval = false;
 
-	BOOST_FOREACH(T_CFG_VERTEX_DESC vd, list_of_statements_with_no_in_edge_yet)
+	BOOST_FOREACH(ControlFlowGraph::vertex_descriptor vd, list_of_statements_with_no_in_edge_yet)
 	{
 		long in_degree;
 

@@ -446,7 +446,7 @@ void ControlFlowGraph::RemoveRedundantNodes(Function* f)
 
 #endif
 
-void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+void ControlFlowGraph::PrintOutEdgeTypes(ControlFlowGraph::vertex_descriptor vdesc)
 {
 	out_edge_iterator ei, eend;
 
@@ -457,7 +457,7 @@ void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
 	}
 }
 
-void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
+void ControlFlowGraph::PrintInEdgeTypes(ControlFlowGraph::vertex_descriptor vdesc)
 {
 	in_edge_iterator ei, eend;
 

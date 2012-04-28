@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -31,7 +31,7 @@ class FunctionCallResolved;
 class CallStackFrameBase
 {
 public:
-	typedef SparsePropertyMap< T_CFG_VERTEX_DESC, boost::default_color_type, boost::white_color > T_COLOR_MAP;
+	typedef SparsePropertyMap< ControlFlowGraph::vertex_descriptor, boost::default_color_type, boost::white_color > T_COLOR_MAP;
 
 	explicit CallStackFrameBase(FunctionCallResolved *function_call_which_pushed_this_frame);
 	virtual ~CallStackFrameBase();

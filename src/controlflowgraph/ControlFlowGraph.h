@@ -81,8 +81,8 @@ typedef boost::adjacency_list
 		> T_CFG;
 
 
-typedef StatementBase* T_CFG_VERTEX_DESC;
-typedef CFGEdgeTypeBase* T_CFG_EDGE_DESC;
+//typedef StatementBase* T_CFG_VERTEX_DESC;
+//typedef CFGEdgeTypeBase* T_CFG_EDGE_DESC;
 
 
 // Forward declare the FilteredGraph class template.
@@ -102,9 +102,6 @@ struct CastToStatementBaseReference
 
 /**
  * The primary control flow graph class.
- * @todo Well, it will be.  At the moment too much functionality is implemented in terms of the Boost Graph Library's
- *       free functions acting on the underlying T_CFG.
- *
  */
 class ControlFlowGraph : public Graph //: boost::noncopyable
 {
@@ -168,8 +165,8 @@ public:
 
 	/// @name Debugging helper functions
 	//@{
-	virtual void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc);
-	virtual void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
+	virtual void PrintOutEdgeTypes(vertex_descriptor vdesc);
+	virtual void PrintInEdgeTypes(vertex_descriptor vdesc);
 	//@}
 
 	//virtual T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);

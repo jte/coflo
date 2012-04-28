@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -24,6 +24,10 @@
 
 class RuleDFSBase : public RuleBase
 {
+public:
+	typedef ControlFlowGraph::vertex_descriptor T_CFG_VERTEX_DESC;
+	typedef ControlFlowGraph::edge_descriptor T_CFG_EDGE_DESC;
+
 public:
 	RuleDFSBase(ControlFlowGraph &cfg);
 	RuleDFSBase(const RuleDFSBase& orig);

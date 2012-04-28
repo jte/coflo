@@ -132,11 +132,11 @@ public:
 	
 	
 	/**
-	 * Get the T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function.
+	 * Get the ControlFlowGraph::vertex_descriptor corresponding to the Entry vertex of this Function.
 	 *
-	 * @return T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function
+	 * @return ControlFlowGraph::vertex_descriptor corresponding to the Entry vertex of this Function
 	 */
-	StatementBase* GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
+	ControlFlowGraph::vertex_descriptor GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
 
 	/**
 	 * Get the ENTRY vertex's self-edge.
@@ -146,11 +146,11 @@ public:
 	CFGEdgeTypeBase* GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
 
 	/**
-	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 * Get the ControlFlowGraph::vertex_descriptor corresponding to the Exit vertex of this Function.
 	 *
-	 * @return T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 * @return ControlFlowGraph::vertex_descriptor corresponding to the Exit vertex of this Function.
 	 */
-	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
+	ControlFlowGraph::vertex_descriptor GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
 	
 	/// @name Debugging helpers
 	//@{
@@ -165,17 +165,17 @@ private:
 	 */
 	struct BasicBlockLeaderInfo
 	{
-		BasicBlockLeaderInfo(T_CFG_VERTEX_DESC leader, T_CFG_VERTEX_DESC immediate_predecessor)
+		BasicBlockLeaderInfo(ControlFlowGraph::vertex_descriptor leader, ControlFlowGraph::vertex_descriptor immediate_predecessor)
 		{
 			m_leader = leader;
 			m_immediate_predecessor = immediate_predecessor;
 		};
 
 		/// Vertex descriptor of the basic block leader.
-		T_CFG_VERTEX_DESC m_leader;
+		ControlFlowGraph::vertex_descriptor m_leader;
 
 		/// The vertex which ended the immediately-preceding basic block.
-		T_CFG_VERTEX_DESC m_immediate_predecessor;
+		ControlFlowGraph::vertex_descriptor m_immediate_predecessor;
 	};
 
 	/**
@@ -189,9 +189,10 @@ private:
 	void AddImpossibleEdges(ControlFlowGraph & cfg, std::vector< BasicBlockLeaderInfo > &leader_info_list);
 
 	bool CheckForNoInEdges(ControlFlowGraph & cfg,
-			std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
-			std::vector< T_CFG_VERTEX_DESC > *output);
+			std::vector< ControlFlowGraph::vertex_descriptor > &list_of_statements_with_no_in_edge_yet,
+			std::vector< ControlFlowGraph::vertex_descriptor > *output);
 
+private:
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 
@@ -199,14 +200,12 @@ private:
 	std::string m_function_id;
 
 	/// The first statement in the body of this function.
-	///T_CFG_VERTEX_DESC m_entry_vertex_desc;
-	///T_CFG_EDGE_DESC m_entry_vertex_self_edge;
-	StatementBase* m_entry_vertex_desc;
-	CFGEdgeTypeBase* m_entry_vertex_self_edge;
+	ControlFlowGraph::vertex_descriptor m_entry_vertex_desc;
+	ControlFlowGraph::edge_descriptor m_entry_vertex_self_edge;
 	
 	/// The last statement in the body of this function.
-	T_CFG_VERTEX_DESC m_exit_vertex_desc;
-	T_CFG_EDGE_DESC m_exit_vertex_self_edge;
+	ControlFlowGraph::vertex_descriptor m_exit_vertex_desc;
+	ControlFlowGraph::edge_descriptor m_exit_vertex_self_edge;
 	
 	ControlFlowGraph *m_the_cfg;
 	//T_CFG *m_cfg;

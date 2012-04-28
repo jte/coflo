@@ -44,7 +44,18 @@ public:
 	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
 
 public:
+	/**
+	 * Default vertex constructor.
+	 */
 	Vertex();
+	/**
+	 * Copy constructor.
+	 * @param other
+	 */
+	Vertex(const Vertex& other);
+	/**
+	 * Destructor.
+	 */
 	virtual ~Vertex();
 
 	void CopyFrom(Vertex *other);
@@ -52,12 +63,14 @@ public:
 	void TransferOwnedResourcesTo(Vertex *other);
 
 	/**
-	 * Return this Vetex's ID.  The ID is guaranteed to be unique to the containing Graph.
+	 * Return this Vetex's ID.
 	 *
 	 * @return
 	 */
 	VertexID GetID() const;
+
 	/**
+	 * Get the vertex's index.  The index is guaranteed to be unique to the containing Graph.
 	 * Note that Vertex's don't have indexes until they're added to a Graph.
 	 */
 	std::size_t GetVertexIndex() const { return m_vertex_index; };
@@ -80,9 +93,9 @@ private:
 	void SetVertexIndex(VertexID vertex_index);
 
 private:
-	typedef edge_list_type T_EDGE_PTR_CONTAINER;
-	T_EDGE_PTR_CONTAINER m_out_edges;
-	T_EDGE_PTR_CONTAINER m_in_edges;
+
+	Vertex::edge_list_type m_out_edges;
+	Vertex::edge_list_type m_in_edges;
 
 	// This Vertex's index.
 	std::size_t m_vertex_index;
