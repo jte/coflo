@@ -125,6 +125,60 @@ namespace boost
 	{
 		return g.NumVertices();
 	}
+
+	/// @name Free function definitions for implementing the MutableGraph concept.
+	//@{
+
+	boost::graph_traits<Graph>::vertex_descriptor add_vertex(Graph& g)
+	{
+		/// @todo We probably need to use the "virtual constructor" pattern here.
+		Vertex *v = new Vertex();
+
+		g.AddVertex(v);
+
+		return v;
+	}
+
+	std::pair<Graph::edge_descriptor, bool> add_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, Graph &g)
+	{
+		Edge *e = new Edge();
+
+		g.AddEdge(u, v, e);
+
+		/// @todo From the BGL docs: "If the graph disallows parallel edges, and the edge (u,v) is already in the graph,
+		/// then the bool flag returned is false and the returned edge descriptor points to the already existing edge.".
+
+		return std::make_pair(e, true);
+	}
+
+	void remove_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, Graph &g)
+	{
+
+	}
+
+	void remove_edge(Graph::edge_descriptor e, Graph &g)
+	{
+
+	}
+
+	void clear_vertex(Graph::vertex_descriptor u, Graph &g)
+	{
+
+	}
+
+	void remove_vertex(Graph::vertex_descriptor u, Graph &g)
+	{
+
+	}
+
+	//@}
 }
 //@}
+
+std::ostream& operator<<(std::ostream& os, const VertexDescriptor& vd)
+{
+	// Stream out the pointer.
+    os << vd.m_v;
+    return os;
+}
 

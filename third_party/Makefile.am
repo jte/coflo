@@ -96,6 +96,7 @@ stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 
 stamp_boost_src_configured: stamp_boost_src_untarred
 	rm -f $@-temp
+	@echo "Building b2 and configuring Boost..."; 
 	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="../$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
@@ -109,7 +110,8 @@ stamp_boost_src_configured: stamp_boost_src_untarred
 	
 stamp_boost_src_installed: stamp_boost_src_configured
 	rm -f $@-temp
-	cd $(BOOST_TARBALL_DIRNAME) && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
+	@echo "Building Boost with b2...";
+	cd $(BOOST_TARBALL_DIRNAME) && ./b2 -d 1 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 		link=static threading=$(COFLO_BOOST_THREADING)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
@@ -122,7 +124,7 @@ stamp_boost_src_installed: stamp_boost_src_configured
 #	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
-# Hook "mostlyclean" to avoid rm'ing the boost tarball when we don't have to.
+# Hook "mostlyclean" to avoid rm'ing the untarred boost tarball when we don't have to.
 mostlyclean-local:
 	@: 'Remove the Boost local installation tree.'
 	test ! -d "$(BOOST_LOCAL)" || rm -rf "$(BOOST_LOCAL)"

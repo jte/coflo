@@ -29,6 +29,41 @@
 class Graph;
 //class Edge;
 #include "Edge.h"
+#include "DescriptorBaseClass.h"
+
+
+class EdgeDescriptor : public DescriptorBaseClass
+{
+public:
+	static EdgeDescriptor GetNullDescriptor() { return EdgeDescriptor(); };
+
+	EdgeDescriptor() { m_e = NULL; };
+	explicit EdgeDescriptor(Edge* e) { m_e = e; };
+	EdgeDescriptor(const EdgeDescriptor& other) { m_e = other.m_e; };
+	virtual ~EdgeDescriptor() {};
+
+	EdgeDescriptor& operator=(const EdgeDescriptor& other) { m_e = other.m_e; return *this; };
+
+	operator Edge*() const { return m_e; };
+	bool operator==(const EdgeDescriptor& other) const { return m_e == other.m_e; };
+	bool operator!=(const EdgeDescriptor& other) const { return m_e != other.m_e; };
+
+protected:
+
+	virtual Edge* GetPointerToEdge() const { return m_e; };
+
+	Edge *m_e;
+};
+
+
+struct EdgeDescriptorConv
+{
+	EdgeDescriptor operator()(Edge* e) const { return EdgeDescriptor(e); };
+
+	/// This is for boost::result_of().
+	typedef EdgeDescriptor result_type;
+};
+
 
 /**
  *
@@ -37,9 +72,9 @@ class Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* > edge_list_type;
-	typedef edge_list_type::const_iterator edge_iterator;
-	typedef edge_iterator out_edge_iterator;
-	typedef edge_iterator in_edge_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> edge_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> out_edge_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> in_edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_type;
 	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
 
