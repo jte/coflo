@@ -20,34 +20,5 @@
 #ifndef GRAPHTEST_H_
 #define GRAPHTEST_H_
 
-#include "gtest/gtest.h"
-
-class Graph;
-class Vertex;
-
-/**
- * CppUnit test fixture for the Graph class.
- */
-class GraphTest : public ::testing::Test
-{
-protected:
-	GraphTest() {};
-	virtual ~GraphTest() {};
-
-	virtual void SetUp() {};
-	virtual void TearDown() {};
-
-	Graph *m_test_graph;
-	Vertex *m_test_vert1, *m_test_vert2;
-	enum UnitTestLevel
-	{
-		GraphNewDelete,
-		VertexNewDelete,
-		VertexAddRemove,
-		EdgeNewDelete,
-		EdgeAddRemove,
-	};
-};
-
 
 #endif /* GRAPHTEST_H_ */
