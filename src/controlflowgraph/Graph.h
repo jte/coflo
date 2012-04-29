@@ -20,7 +20,7 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
-#include <boost/unordered_set.hpp>
+#include <boost/tr1/unordered_set.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graph_archetypes.hpp>
 #include <utility>
@@ -30,6 +30,51 @@
 #include "Vertex.h"
 #include "Edge.h"
 //class Edge;
+#include "DescriptorBaseClass.h"
+
+
+class VertexDescriptor : public DescriptorBaseClass
+{
+public:
+	static VertexDescriptor GetNullDescriptor() { return VertexDescriptor(); };
+
+	VertexDescriptor() { m_v = NULL; };
+	explicit VertexDescriptor(Vertex* v) { m_v = v; };
+	VertexDescriptor(const VertexDescriptor& other) { m_v = other.m_v; };
+	virtual ~VertexDescriptor() {};
+
+	VertexDescriptor& operator=(const VertexDescriptor& other) { m_v = other.m_v; return *this; };
+
+	operator Vertex*() const { return GetPointerToVertex(); };
+	bool operator==(const VertexDescriptor& other) const { return m_v == other.m_v; };
+	bool operator!=(const VertexDescriptor& other) const { return m_v != other.m_v; };
+
+	/**
+	 * Stream insertion operator.  Inserts @a loc into stream @a os in the following format:
+	 * "filepath : line_no(:column_no)?"
+	 *
+	 * @param os
+	 * @param loc
+	 * @return Reference to @a os.
+	 */
+	friend std::ostream& operator<<(std::ostream& os, const VertexDescriptor& vd);
+
+protected:
+
+	virtual Vertex* GetPointerToVertex() const { return m_v; };
+
+	Vertex *m_v;
+};
+
+
+struct VertexDescriptorConv
+{
+	VertexDescriptor operator()(Vertex* v) const { return VertexDescriptor(v); };
+
+	/// This is for boost::result_of().
+	typedef VertexDescriptor result_type;
+};
+
 
 /**
  * Graph base class.
@@ -41,21 +86,24 @@ public:
 	//@{
 
 	/// The type for the collection of all vertices in the graph.
-	typedef boost::unordered_set< Vertex* > vertex_list_type;
+	typedef std::tr1::unordered_set< Vertex* > vertex_list_type;
 	/// The type for the collection of all edges in the graph
 	/// @todo FIXME: this isn't actually correct, it's just for the edges of a particular vertex.
 	typedef Vertex::edge_list_type edge_list_type;
 
-	typedef vertex_list_type::const_iterator vertex_iterator;
-	typedef Vertex* vertex_descriptor;
-	typedef boost::unordered_set< Edge* >::const_iterator out_edge_iterator;
+	//typedef vertex_list_type::const_iterator vertex_iterator;
+	typedef boost::transform_iterator<VertexDescriptorConv, vertex_list_type::iterator> vertex_iterator;
+	//typedef Vertex* vertex_descriptor;
+	typedef VertexDescriptor vertex_descriptor;
 
-	static inline vertex_descriptor null_vertex() { return NULL; };
+	static inline vertex_descriptor null_vertex() { return VertexDescriptor::GetNullDescriptor(); };
 
 	/// @name These are specifically for interoperability with the Boost graph library.
 	//@{
-	typedef Edge* edge_descriptor;
+	//typedef Edge* edge_descriptor;
+	typedef EdgeDescriptor edge_descriptor;
 	typedef Vertex::edge_iterator edge_iterator;
+	typedef Vertex::out_edge_iterator out_edge_iterator;
 	typedef Vertex::in_edge_iterator in_edge_iterator;
 	typedef Vertex::degree_size_type degree_size_type;
 	typedef boost::directed_tag directed_category;
@@ -68,13 +116,15 @@ public:
 	// VertexListGraph (efficient traversal of all vertices in graph)
 	typedef vertex_list_type::size_type vertices_size_type;
 	// EdgeListGraph (efficient traversal of all edges in graph)
-	typedef edge_list_type edges_size_type;
+	typedef edge_list_type::size_type edges_size_type;
 
 	/// For vertex_index_t.
 	typedef std::size_t vertex_index_type;
     typedef std::size_t edge_index_type;
 	typedef boost::property<boost::vertex_index_t, vertex_index_type> VertexProperty;
 	typedef VertexProperty vertex_property_type;
+	typedef boost::no_property edge_property_type;
+	typedef boost::no_property graph_property_type;
 	//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
 	//@}
 
@@ -99,6 +149,8 @@ public:
 
 	Vertex* operator[](const Graph::vertex_descriptor vd) { return vd; };
 	Edge* operator[](const Graph::edge_descriptor ed) { return ed; };
+	const Vertex* operator[](const Graph::vertex_descriptor vd) const { return vd; };
+	const Edge* operator[](const Graph::edge_descriptor ed) const { return ed; };
 
 protected:
 
@@ -147,6 +199,7 @@ namespace boost
 	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
 	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/);
 
+	//std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertices(Graph& g) { return vertices(g); };
 	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertices(const Graph& g);
 	Graph::vertices_size_type num_vertices(const Graph & g);
 
@@ -162,7 +215,7 @@ namespace boost
 		Graph_vertex_index_map() /*: m_g(0)*/ { };
 		Graph_vertex_index_map(const Graph& /*g*/) /*: m_g(&g)*/ { }
 		Graph_vertex_index_map(const Graph_vertex_index_map& /*other*/) {};
-		reference operator[](const key_type v) const { return v->GetVertexIndex(); };
+		reference operator[](const key_type v) const { return static_cast<Vertex*>(v)->GetVertexIndex(); };
 	protected:
 		//const Graph* m_g;
 	};
@@ -176,7 +229,7 @@ namespace boost
 	}
 	inline long get(vertex_index_t, const Graph& /*g*/, Graph::vertex_descriptor v)
 	{
-		return v->GetVertexIndex();
+		return static_cast<Vertex*>(v)->GetVertexIndex();
 	}
 
 	/// Property map traits specializations.
@@ -191,26 +244,37 @@ namespace boost
 	{
 		typedef const Graph_vertex_index_map const_type;
 	};
-	/*
-	template <>
-	struct property_map<Graph, vertex_color_t>
-	{
-		/// The default color map to use for the Graph class.
-		typedef SparsePropertyMap< Graph::vertex_descriptor, boost::default_color_type, boost::white_color > type;
-		typedef SparsePropertyMap< Graph::vertex_descriptor, boost::default_color_type, boost::white_color > const_type;
-	};
 
-	///  the
-	inline property_map<Graph, vertex_color_t>::type get(vertex_color_t, Graph& g)
-	{
-		property_map<Graph, vertex_color_t>::type retval;
 
-		return retval;
-	}*/
+	/// @name Free functions for implementing the MutableGraph concept.
+	//@{
+
+	/**
+	 * Create a new Vertex and add it to Graph @a g.
+	 *
+	 * @param g The instance of Graph to add the new Vertex to.
+	 * @return Descriptor of the new vertex.
+	 */
+	boost::graph_traits<Graph>::vertex_descriptor add_vertex(Graph& g);
+	std::pair<Graph::edge_descriptor, bool> add_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, Graph &g);
+	void remove_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, Graph &g);
+	void remove_edge(Graph::edge_descriptor e, Graph &g);
+	void clear_vertex(Graph::vertex_descriptor u, Graph &g);
+	void remove_vertex(Graph::vertex_descriptor u, Graph &g);
+
+	//@}
+
 
 }
 //@}
 
+/**
+ * Concept checker function for the Graph class.
+ * This is templatized so that it never actually gets instantiated, hence wasting space in the resulting binary.
+ *
+ * @note Don't try to instantiate or use this function.  It's solely here to check concepts associated with Graph,
+ * which are done at compile time.
+ */
 template <typename Dummy>
 void Graph_concept_checker()
 {
@@ -221,11 +285,22 @@ void Graph_concept_checker()
 	// Is our vertex index map a ReadWritePropertyMap?
 	//BOOST_CONCEPT_ASSERT(( boost::ReadWritePropertyMapConcept<boost::Graph_vertex_id_map, Graph::vertex_descriptor> ));
 
+	// Check iterators.
+	BOOST_CONCEPT_ASSERT(( boost::DefaultConstructibleConcept< Graph::vertex_descriptor > ));
+    BOOST_CONCEPT_ASSERT(( boost::EqualityComparableConcept< Graph::vertex_descriptor> ));
+	BOOST_CONCEPT_ASSERT(( boost::AssignableConcept<Graph::vertex_descriptor> ));
+	BOOST_CONCEPT_ASSERT(( boost::DefaultConstructibleConcept<Graph::edge_descriptor> ));
+	BOOST_CONCEPT_ASSERT(( boost::EqualityComparableConcept<Graph::edge_descriptor> ));
+	BOOST_CONCEPT_ASSERT(( boost::AssignableConcept<Graph::edge_descriptor> ));
+
+	// Is our Graph class a Boost Graph?
+	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<Graph> ));
 	// Is our Graph class a ReadablePropertyGraph for vertex_index_t?
-	//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_index_t> ));
+	BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_index_t> ));
 	// Is our Graph class a PropertyGraph for vertex_color_t?
 	//BOOST_CONCEPT_ASSERT(( boost::PropertyGraphConcept<Graph, Graph::vertex_descriptor, boost::vertex_color_t> ));
 	//BOOST_CONCEPT_ASSERT(( boost::VertexIndexGraphConcept<Graph> ))
+	BOOST_CONCEPT_ASSERT(( boost::MutableGraphConcept<Graph> ));
 }
 
 #endif /* GRAPH_H_ */

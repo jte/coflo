@@ -140,8 +140,9 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
 # specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
-# Otherwise, Autoconf assumes the builder wants to compile everything "-g -O2" by default, which overrides
+# Otherwise, Autoconf's AC_PROG_CXX et al macros assume the builder wants to compile everything "-g -O2" by default, which overrides
 # any AM_C*FLAGS.
+# This otherwise-frowned-upon touching of these user variables is sanctioned by the Autoconf manual for this purpose.
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
@@ -223,7 +224,7 @@ COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost so
 AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
-AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
+AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,random,regex])
 # Extract the "boost_1_4x_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
 BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")

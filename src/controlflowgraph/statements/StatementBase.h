@@ -29,6 +29,7 @@
 #include "../../Location.h"
 #include "../Vertex.h"
 //#include "../Edge.h"
+#include "DescriptorBaseClass.h"
 
 class Function;
 //class CFGEdgeTypeBase;
@@ -69,6 +70,31 @@ struct CastToCFGEdgeTypeBasePtrReference
 	};
 };
 
+class CFGEdgeDescriptor : public EdgeDescriptor
+{
+public:
+	static CFGEdgeDescriptor GetNullDescriptor() { return CFGEdgeDescriptor(); };
+
+	CFGEdgeDescriptor() { };
+	explicit CFGEdgeDescriptor(CFGEdgeTypeBase* e) { m_e = e; };
+	CFGEdgeDescriptor(const CFGEdgeDescriptor& other) : EdgeDescriptor(other) {};
+	virtual ~CFGEdgeDescriptor() {};
+
+	CFGEdgeDescriptor& operator=(const CFGEdgeDescriptor& other) { m_e = other.m_e; return *this; };
+
+	operator CFGEdgeTypeBase*() const { return GetPointerToEdge(); };
+
+protected:
+	virtual CFGEdgeTypeBase* GetPointerToEdge() const { return dynamic_cast<CFGEdgeTypeBase*>(m_e); };
+};
+
+struct CFGEdgeDescriptorConv
+{
+	CFGEdgeDescriptor operator()(EdgeDescriptor& e) const { return CFGEdgeDescriptor(dynamic_cast<CFGEdgeDescriptor&>(e)); };
+
+	/// This is for boost::result_of().
+	typedef CFGEdgeDescriptor result_type;
+};
 
 /**
  * Abstract base class for all statements and expressions in the control flow graph.
@@ -77,8 +103,8 @@ class StatementBase : public Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* >::const_iterator Edge_iterator;
-	typedef boost::transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator > out_edge_iterator;
-	typedef boost::transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::in_edge_iterator > in_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::out_edge_iterator > out_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::in_edge_iterator > in_edge_iterator;
 	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
 
 public:

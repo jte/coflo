@@ -46,11 +46,11 @@ void Vertex::CopyFrom(Vertex* other)
 
 void Vertex::TransferOwnedResourcesTo(Vertex* other)
 {
-	BOOST_FOREACH(Edge* i, m_in_edges)
+	BOOST_FOREACH(Edge *i, m_in_edges)
 	{
 		i->SetTarget(other);
 	}
-	BOOST_FOREACH(Edge* i, m_out_edges)
+	BOOST_FOREACH(Edge *i, m_out_edges)
 	{
 		i->SetSource(other);
 	}

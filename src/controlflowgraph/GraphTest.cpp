@@ -17,13 +17,31 @@
 
 /** @file */
 
-#include "GraphTest.h"
+#include "gtest/gtest.h"
+
+#include <boost/tr1/random.hpp>
+#include <boost/graph/random.hpp>
+#include <boost/graph/graph_concepts.hpp>
 
 #include "Graph.h"
 
-
 int PullInMyLibrary() { return 0; }
 
+/**
+ * CppUnit test fixture for the Graph class.
+ */
+class GraphTest : public ::testing::Test
+{
+protected:
+	GraphTest() {};
+	virtual ~GraphTest() {};
+
+	virtual void SetUp() {};
+	virtual void TearDown() {};
+
+	Graph *m_test_graph;
+	Vertex *m_test_vert1, *m_test_vert2;
+};
 
 TEST_F(GraphTest, GraphNewDelete)
 {
@@ -147,3 +165,20 @@ TEST_F(GraphTest, AddVertsAndEdgeBoost)
 	delete g;
 }
 
+TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
+{
+	Graph *g;
+
+	// Create a new Graph.
+	ASSERT_NO_THROW( g = new Graph() );
+	ASSERT_TRUE( g != NULL );
+
+	boost::add_vertex(*g);
+
+	// Generate a random graph with no parallel edges and no self edges.
+	std::tr1::mt19937 rng;
+	ASSERT_NO_THROW( boost::generate_random_graph(*g, 10, 20, rng, false, false) );
+
+	delete g;
+
+}
