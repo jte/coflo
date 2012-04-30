@@ -22,6 +22,7 @@
 
 #include <boost/unordered_set.hpp>
 #include <boost/any.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 #include <utility>
 
 #include "VertexID.h"
@@ -31,29 +32,7 @@ class Graph;
 #include "Edge.h"
 #include "DescriptorBaseClass.h"
 
-
-class EdgeDescriptor : public DescriptorBaseClass
-{
-public:
-	static EdgeDescriptor GetNullDescriptor() { return EdgeDescriptor(); };
-
-	EdgeDescriptor() { m_e = NULL; };
-	explicit EdgeDescriptor(Edge* e) { m_e = e; };
-	EdgeDescriptor(const EdgeDescriptor& other) { m_e = other.m_e; };
-	virtual ~EdgeDescriptor() {};
-
-	EdgeDescriptor& operator=(const EdgeDescriptor& other) { m_e = other.m_e; return *this; };
-
-	operator Edge*() const { return m_e; };
-	bool operator==(const EdgeDescriptor& other) const { return m_e == other.m_e; };
-	bool operator!=(const EdgeDescriptor& other) const { return m_e != other.m_e; };
-
-protected:
-
-	virtual Edge* GetPointerToEdge() const { return m_e; };
-
-	Edge *m_e;
-};
+typedef DescriptorBaseClass<Edge> EdgeDescriptor;
 
 
 struct EdgeDescriptorConv
@@ -72,11 +51,11 @@ class Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* > edge_list_type;
-	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> edge_iterator;
-	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> out_edge_iterator;
-	typedef boost::transform_iterator<EdgeDescriptorConv, boost::unordered_set< Edge* >::iterator> in_edge_iterator;
-	typedef boost::unordered_set< Edge* >::size_type degree_size_type;
-	struct out_edge_iterator_pair_t { out_edge_iterator first; out_edge_iterator second; };
+	typedef edge_list_type::const_iterator base_edge_list_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> edge_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> out_edge_iterator;
+	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> in_edge_iterator;
+	typedef edge_list_type::size_type degree_size_type;
 
 public:
 	/**
@@ -124,10 +103,16 @@ public:
 	/// Allow the Graph class access to m_vertex_index.
 	friend class Graph;
 
+	/// @todo Friend this only to DescriptorBaseClass.
+	/// This is for the use of the DescriptorBaseClass.
+	std::size_t GetDescriptorIndex() const { return m_vertex_index; };
+
 private:
 	void SetVertexIndex(VertexID vertex_index);
 
-private:
+	edge_iterator MakeIterator(base_edge_list_iterator i);
+
+protected:
 
 	Vertex::edge_list_type m_out_edges;
 	Vertex::edge_list_type m_in_edges;

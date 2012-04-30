@@ -54,7 +54,7 @@ private:
 	const Function *m_sink;
 	
 	/// Array to store predecessor of each visited vertex.
-	std::deque<CFGEdgeTypeBase*> m_predecessors;
+	std::deque<ControlFlowGraph::edge_descriptor> m_predecessors;
 };
 
 #endif	/* RULEREACHABILITY_H */

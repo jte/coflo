@@ -37,7 +37,7 @@ public:
 	 * @param source  The vertex to start the traversal from.
 	 * @param visitor The visitor which will visit the vertices in depth-first order during the search.
 	 */
-	virtual void Traverse(StatementBase* source,
+	virtual void Traverse(ControlFlowGraph::vertex_descriptor source,
 			ControlFlowGraphVisitorBase *visitor);
 
 protected:
@@ -48,7 +48,7 @@ protected:
 	 * @param e
 	 * @return true if the edge should be ignored as if it wasn't in the graph.
 	 */
-	virtual bool SkipEdge(CFGEdgeTypeBase* e);
+	virtual bool SkipEdge(ControlFlowGraph::edge_descriptor e);
 };
 
 #endif /* CONTROLFLOWGRAPHTRAVERSALDFS_H_ */

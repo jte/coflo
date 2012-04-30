@@ -38,10 +38,10 @@ public:
 	 * Typedef for the predicate which this class will call on each vertex it visits to check
 	 * for a match.
 	 */
-	typedef std::tr1::function<bool (ControlFlowGraph &, StatementBase* &)> T_VERTEX_VISITOR_PREDICATE;
+	typedef std::tr1::function<bool (ControlFlowGraph &, ControlFlowGraph::vertex_descriptor)> T_VERTEX_VISITOR_PREDICATE;
 
-	ReachabilityVisitor(ControlFlowGraph &g, StatementBase* source,
-			T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<CFGEdgeTypeBase*> *predecessor_list);
+	ReachabilityVisitor(ControlFlowGraph &g, ControlFlowGraph::vertex_descriptor source,
+			T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<ControlFlowGraph::edge_descriptor> *predecessor_list);
 	ReachabilityVisitor(const ReachabilityVisitor& orig);
 	virtual ~ReachabilityVisitor();
 
@@ -59,14 +59,14 @@ public:
 private:
 
 	/// The starting vertex.
-	StatementBase* m_source;
+	ControlFlowGraph::vertex_descriptor m_source;
 
 	/// The predicate we will use to inspect each vertex of the control flow graph.  When we find the one we're looking
 	/// for, we'll return true.
 	T_VERTEX_VISITOR_PREDICATE m_inspect_vertex;
 
 	/// Pointer to the list of predecessor edges.
-	std::deque<CFGEdgeTypeBase*> *m_predecessor_list;
+	std::deque<ControlFlowGraph::edge_descriptor> *m_predecessor_list;
 };
 
 #endif /* REACHABILITYVISITOR_H */

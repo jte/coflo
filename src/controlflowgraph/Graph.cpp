@@ -19,6 +19,8 @@
 
 #include "Graph.h"
 
+#include <boost/iterator/transform_iterator.hpp>
+
 #include "Vertex.h"
 #include "Edge.h"
 #include <coflo_exceptions.hpp>
@@ -69,12 +71,8 @@ void Graph::RemoveEdge(Edge* e)
 
 void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const
 {
-	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> it_pair;
-
-	it_pair = GetVertexIteratorPair<Graph::vertex_iterator>();
-
-	iterator_pair->first = it_pair.first; //m_vertices.begin();
-	iterator_pair->second = it_pair.second; //m_vertices.end();
+	iterator_pair->first = boost::make_transform_iterator< VertexDescriptorConv, vertex_list_type::iterator>(m_vertices.begin());
+	iterator_pair->second = boost::make_transform_iterator< VertexDescriptorConv, vertex_list_type::iterator>(m_vertices.end());
 }
 
 void Graph::InitVertexIDGenerator()
@@ -103,14 +101,14 @@ void Graph::AssignAVertexIndexToVertex(Vertex* v)
 //@{
 namespace boost
 {
-	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Target(); };
-	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/) { return e->Source(); };
+	Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/) { return (*e)->Target(); };
+	Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/) { return (*e)->Source(); };
 
-	Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->OutDegree(); };
-	Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return u->InDegree(); };
+	Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return (*u)->OutDegree(); };
+	Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/) { return (*u)->InDegree(); };
 
-	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->OutEdges(); };
-	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return u->InEdges(); };
+	std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return (*u)->OutEdges(); };
+	std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/) { return (*u)->InEdges(); };
 
 	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertices(const Graph& g)
 	{
@@ -129,7 +127,7 @@ namespace boost
 	/// @name Free function definitions for implementing the MutableGraph concept.
 	//@{
 
-	boost::graph_traits<Graph>::vertex_descriptor add_vertex(Graph& g)
+	Graph::vertex_descriptor add_vertex(Graph& g)
 	{
 		/// @todo We probably need to use the "virtual constructor" pattern here.
 		Vertex *v = new Vertex();
@@ -143,7 +141,7 @@ namespace boost
 	{
 		Edge *e = new Edge();
 
-		g.AddEdge(u, v, e);
+		g.AddEdge(*u, *v, e);
 
 		/// @todo From the BGL docs: "If the graph disallows parallel edges, and the edge (u,v) is already in the graph,
 		/// then the bool flag returned is false and the returned edge descriptor points to the already existing edge.".
@@ -175,10 +173,4 @@ namespace boost
 }
 //@}
 
-std::ostream& operator<<(std::ostream& os, const VertexDescriptor& vd)
-{
-	// Stream out the pointer.
-    os << vd.m_v;
-    return os;
-}
 

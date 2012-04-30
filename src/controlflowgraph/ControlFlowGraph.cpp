@@ -313,12 +313,15 @@ void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, Contr
 	iterator_pair->first = it_pair.first; //m_vertices.begin();
 	iterator_pair->second = it_pair.second; //m_vertices.end();
 */
-
+/*
 	std::pair<Graph::vertex_iterator, Graph::vertex_iterator> base_iterator_pair;
 	Graph::Vertices(&base_iterator_pair);
 
 	*ibegin = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.first);
 	*iend = boost::make_transform_iterator< CastToStatementBaseReference, Graph::vertex_iterator >(base_iterator_pair.second);
+*/
+	*ibegin = boost::make_transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator>(m_vertices.begin());
+	*iend = boost::make_transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator>(m_vertices.end());
 
 }
 
@@ -472,6 +475,7 @@ void ControlFlowGraph::PrintInEdgeTypes(ControlFlowGraph::vertex_descriptor vdes
 //@{
 namespace boost
 {
+#if 0
 	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Target(); };
 	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Source(); };
 
@@ -498,6 +502,7 @@ namespace boost
 
 		return std::make_pair(ibegin, iend);
 	}
+#endif
 }
 //@}
 

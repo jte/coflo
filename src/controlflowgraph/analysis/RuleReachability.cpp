@@ -54,9 +54,9 @@ RuleReachability::~RuleReachability()
  */
 struct ReachabilityPredicateSpecificVertex
 {
-	ReachabilityPredicateSpecificVertex(StatementBase* sink) { m_sink = sink; };
+	ReachabilityPredicateSpecificVertex(ControlFlowGraph::vertex_descriptor sink) { m_sink = sink; };
 
-	bool operator()(ControlFlowGraph &cfg, StatementBase* &v)
+	bool operator()(ControlFlowGraph &cfg, ControlFlowGraph::vertex_descriptor v)
 	{
 		if(v == m_sink)
 		{
@@ -67,12 +67,12 @@ struct ReachabilityPredicateSpecificVertex
 	}
 
 	/// The vertex we're trying to find.
-	StatementBase* m_sink;
+	ControlFlowGraph::vertex_descriptor m_sink;
 };
 
 bool RuleReachability::RunRule()
 {
-	StatementBase* starting_vertex_desc;
+	ControlFlowGraph::vertex_descriptor starting_vertex_desc;
 
 	// Get the starting vertex.
 	starting_vertex_desc = m_source->GetEntryVertexDescriptor();
@@ -93,7 +93,7 @@ bool RuleReachability::RunRule()
 	if(!m_predecessors.empty())
 	{
 		//StatementBase *violating_statement = m_cfg.GetStatementPtr(m_predecessors.rbegin()->m_source);
-		StatementBase *violating_statement = (*(m_predecessors.rbegin()))->Source();
+		StatementBase *violating_statement = (*(*(m_predecessors.rbegin())))->Source();
 		std::cout << m_source->GetDefinitionFilePath() << ": In function " << m_source->GetIdentifier() << ":" << std::endl;
 		std::cout << violating_statement->GetLocation().asGNUCompilerMessageLocation()
 				<< ": warning: constraint violation: path exists in control flow graph to " << violating_statement->GetIdentifierCFG() << std::endl;
@@ -118,11 +118,13 @@ void RuleReachability::PrintCallChain()
 	long bypass_call_depth = 0;
 	bool ignore_function_call = false;
 
-	std::deque<CFGEdgeTypeBase*> m_new_predecessors;
+	std::deque<ControlFlowGraph::edge_descriptor> m_new_predecessors;
 
 	// First strip the call chain of all function calls that returned with no matches.
-	BOOST_REVERSE_FOREACH(CFGEdgeTypeBase *pred, m_predecessors)
+	BOOST_REVERSE_FOREACH(CFGEdgeDescriptor i, m_predecessors)
 	{
+		CFGEdgeTypeBase *pred = *i;
+
 		//StatementBase *sb = m_cfg.GetStatementPtr(pred.m_source);
 		StatementBase *sb = pred->Source();
 
@@ -161,8 +163,10 @@ void RuleReachability::PrintCallChain()
 
 	m_predecessors.swap(m_new_predecessors);
 
-	BOOST_FOREACH(CFGEdgeTypeBase *pred, m_predecessors)
+	BOOST_FOREACH(ControlFlowGraph::edge_descriptor i, m_predecessors)
 	{
+		CFGEdgeTypeBase *pred = *i;
+
 		StatementBase *sb = pred->Source();
 		if(sb->IsType<FunctionCall>())
 		{
