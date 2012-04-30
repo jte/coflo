@@ -51,7 +51,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 
 	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
 	/// @todo This is probably not the best place for this check.
-	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph>));
+	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph> ));
 	BOOST_CONCEPT_ASSERT((boost::DFSVisitorConcept< BackEdgeFixupVisitor<ControlFlowGraph>, ControlFlowGraph >));
 
 	std::vector<BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo> back_edges;
@@ -60,11 +60,21 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 	// we need to fix them up.
 	BackEdgeFixupVisitor<ControlFlowGraph> back_edge_finder(back_edges);
 
+	//typedef boost::color_traits<boost::default_color_type> T_COLOR;
+	typedef boost::default_color_type T_COLOR;
+	typedef std::map<ControlFlowGraph::vertex_descriptor, T_COLOR> T_COLORMAP;
+	T_COLORMAP color_map;
+	typedef boost::associative_property_map<T_COLORMAP> T_COLOR_PROPERTY_MAP;
+	T_COLOR_PROPERTY_MAP color_property_map(color_map);
+
+	// Check if the color_property_map fulfills the concept.
+	BOOST_CONCEPT_ASSERT((boost::ReadWritePropertyMapConcept< T_COLOR_PROPERTY_MAP, ControlFlowGraph::vertex_descriptor >));
+
 	// Set the back_edge_finder visitor loose on the function's CFG, with its
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
-	boost::depth_first_search(g, boost::visitor(back_edge_finder));
+	boost::depth_first_search(g, /*boost::visitor(*/back_edge_finder/*)*/, color_property_map);
 
 	// Mark the edges we found as back edges.
 	BOOST_FOREACH(BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo fixinfo, back_edges)
@@ -72,6 +82,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 		ControlFlowGraph::edge_descriptor e = fixinfo.m_back_edge;
 
 		// Change this edge type to a back edge.
+		(*e)->MarkAsBackEdge(true);
 		g[e]->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
@@ -91,7 +102,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 			boost::tie(newedge, boost::tuples::ignore) =
 					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
-			g.AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
+			g.AddEdge(*src, *(fixinfo.m_impossible_target_vertex), new CFGEdgeTypeImpossible);
 
 			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
 		}

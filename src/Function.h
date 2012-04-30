@@ -143,7 +143,7 @@ public:
 	 *
 	 * @return
 	 */
-	CFGEdgeTypeBase* GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
+	ControlFlowGraph::edge_descriptor GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
 
 	/**
 	 * Get the ControlFlowGraph::vertex_descriptor corresponding to the Exit vertex of this Function.

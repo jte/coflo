@@ -81,18 +81,24 @@ void Vertex::RemoveOutEdge(Edge* e)
 
 std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> Vertex::InEdges()
 {
-	return std::pair<in_edge_iterator, in_edge_iterator>(m_in_edges.begin(), m_in_edges.end());
+	return std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator>(MakeIterator(m_in_edges.begin()), MakeIterator(m_in_edges.end()));
 }
 
 std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> Vertex::OutEdges()
 {
-	return std::pair<out_edge_iterator, out_edge_iterator>(m_out_edges.begin(), m_out_edges.end());
+	return std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator>(MakeIterator(m_out_edges.begin()), MakeIterator(m_out_edges.end()));
 }
 
 void Vertex::SetVertexIndex(VertexID vertex_index)
 {
 	m_vertex_index = vertex_index;
 }
+
+Vertex::edge_iterator Vertex::MakeIterator(Vertex::base_edge_list_iterator i)
+{
+	return boost::make_transform_iterator< EdgeDescriptorConv, base_edge_list_iterator>(i);
+}
+
 
 
 

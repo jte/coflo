@@ -29,7 +29,7 @@
 #include "../../Location.h"
 #include "../Vertex.h"
 //#include "../Edge.h"
-#include "DescriptorBaseClass.h"
+#include "../DescriptorBaseClass.h"
 
 class Function;
 //class CFGEdgeTypeBase;
@@ -57,40 +57,24 @@ boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdes
 	retval = boost::make_tuple(*eit, false);
 	return retval;
 }
-#endif
 
 struct CastToCFGEdgeTypeBasePtrReference
 {
 	/// This is for boost::result_of().
-	typedef CFGEdgeTypeBase*& result_type;
+	typedef const CFGEdgeTypeBase*& result_type;
 
 	result_type operator()(Edge* const &v) const
 	{
 		return (result_type)v;
 	};
 };
+#endif
 
-class CFGEdgeDescriptor : public EdgeDescriptor
-{
-public:
-	static CFGEdgeDescriptor GetNullDescriptor() { return CFGEdgeDescriptor(); };
-
-	CFGEdgeDescriptor() { };
-	explicit CFGEdgeDescriptor(CFGEdgeTypeBase* e) { m_e = e; };
-	CFGEdgeDescriptor(const CFGEdgeDescriptor& other) : EdgeDescriptor(other) {};
-	virtual ~CFGEdgeDescriptor() {};
-
-	CFGEdgeDescriptor& operator=(const CFGEdgeDescriptor& other) { m_e = other.m_e; return *this; };
-
-	operator CFGEdgeTypeBase*() const { return GetPointerToEdge(); };
-
-protected:
-	virtual CFGEdgeTypeBase* GetPointerToEdge() const { return dynamic_cast<CFGEdgeTypeBase*>(m_e); };
-};
+typedef DescriptorBaseClass<CFGEdgeTypeBase> CFGEdgeDescriptor;
 
 struct CFGEdgeDescriptorConv
 {
-	CFGEdgeDescriptor operator()(EdgeDescriptor& e) const { return CFGEdgeDescriptor(dynamic_cast<CFGEdgeDescriptor&>(e)); };
+	CFGEdgeDescriptor operator()(Edge* e) const { return CFGEdgeDescriptor(dynamic_cast<CFGEdgeTypeBase*>(e)); };
 
 	/// This is for boost::result_of().
 	typedef CFGEdgeDescriptor result_type;
@@ -102,10 +86,10 @@ struct CFGEdgeDescriptorConv
 class StatementBase : public Vertex
 {
 public:
-	typedef boost::unordered_set< Edge* >::const_iterator Edge_iterator;
-	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::out_edge_iterator > out_edge_iterator;
-	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::in_edge_iterator > in_edge_iterator;
-	typedef boost::unordered_set< Edge* >::size_type degree_size_t;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor> edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > out_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
+	//typedef boost::unordered_set< Edge* >::size_type degree_size_t;
 
 public:
 	StatementBase() {};
@@ -227,6 +211,7 @@ private:
 	/// The Function this statement belongs to.
 	Function *m_owning_function;
 };
+
 
 #endif	/* STATEMENTBASE_H */
 

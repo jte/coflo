@@ -74,12 +74,12 @@ ControlFlowGraphTraversalDFS::~ControlFlowGraphTraversalDFS()
 
 }
 
-void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
+void ControlFlowGraphTraversalDFS::Traverse(ControlFlowGraph::vertex_descriptor source,
 		ControlFlowGraphVisitorBase *visitor)
 {
 	// Some convenience typedefs.
 	typedef VertexInfo<ControlFlowGraph> T_VERTEX_INFO;
-	typedef StatementBase* T_VERTEX_DESC;
+	typedef ControlFlowGraph::vertex_descriptor T_VERTEX_DESC;
 	typedef StatementBase::out_edge_iterator T_OUT_EDGE_ITERATOR;
 	typedef boost::color_traits<boost::default_color_type> T_COLOR;
 
@@ -111,7 +111,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 	// Get iterators to the out edges of vertex u.
 	//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-	u->OutEdges(&ei, &eend);
+	(*u)->OutEdges(&ei, &eend);
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -146,7 +146,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			boost::default_color_type v_color;
 
 			// Check if we want to filter out this edge.
-			if(SkipEdge(dynamic_cast<CFGEdgeTypeBase*>(*ei)))
+			if(SkipEdge(*ei))
 			{
 				// Skip this edge.
 				++ei;
@@ -154,7 +154,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			}
 
 			// Let the visitor examine the edge *ei.
-			visitor_edge_return_value = visitor->examine_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
+			visitor_edge_return_value = visitor->examine_edge(*ei);
 			switch(visitor_edge_return_value.as_enum())
 			{
 				case edge_return_value_t::terminate_branch:
@@ -177,7 +177,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 			}
 
 			// Get the target vertex of the current edge.
-			v = dynamic_cast<StatementBase*>((*ei)->Target());
+			v = (*(*ei))->Target();
 
 			// Get the target vertex's color.
 			v_color = TopCallStack()->GetColorMap()->get(v);
@@ -193,7 +193,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				// that is a member of the search tree.
 
 				// Visit the edge.
-				visitor_edge_return_value = visitor->tree_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
+				visitor_edge_return_value = visitor->tree_edge(*ei);
 				switch(visitor_edge_return_value.as_enum())
 				{
 					/// @todo Handle other cases.
@@ -218,7 +218,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				visitor_vertex_return_value = visitor->discover_vertex(u);
 
 
-				StatementBase* sbp = u;
+				StatementBase* sbp = *u;
 				//// If this is a FunctionCallResolved node, push a new stack frame.
 				if(sbp->IsType<FunctionCallResolved>())
 				{
@@ -228,7 +228,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 				// Get the out-edges of the target vertex.
 				//boost::tie(ei, eend) = boost::out_edges(u, m_control_flow_graph.GetT_CFG());
-				u->OutEdges(&ei, &eend);
+				(*u)->OutEdges(&ei, &eend);
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{
@@ -252,7 +252,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 
 				// This is a back edge, i.e. an edge to a vertex that we've
 				// already visited.  Visit it, but don't follow it.
-				visitor_edge_return_value = visitor->back_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
+				visitor_edge_return_value = visitor->back_edge(*ei);
 				//std::cout << "BACKEDGE" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;
@@ -262,7 +262,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 				// This vertex has been visited and so have all vertices reachable from it.
 
 				// A forward or cross edge.  Visit it, but don't follow it.
-				visitor_edge_return_value = visitor->forward_or_cross_edge(dynamic_cast<CFGEdgeTypeBase*>(*ei));
+				visitor_edge_return_value = visitor->forward_or_cross_edge(*ei);
 				//std::cout << "FWDCROSS" << std::endl;
 				/// @todo Interpret and handle return value.
 				++ei;
@@ -277,7 +277,7 @@ void ControlFlowGraphTraversalDFS::Traverse(StatementBase* source,
 	}
 }
 
-bool ControlFlowGraphTraversalDFS::SkipEdge(CFGEdgeTypeBase* e)
+bool ControlFlowGraphTraversalDFS::SkipEdge(ControlFlowGraph::edge_descriptor e)
 {
 	CFGEdgeTypeBase *edge_type;
 	CFGEdgeTypeFunctionCall *fc;
@@ -285,7 +285,7 @@ bool ControlFlowGraphTraversalDFS::SkipEdge(CFGEdgeTypeBase* e)
 	CFGEdgeTypeFunctionCallBypass *fcb;
 
 	//edge_type = m_control_flow_graph.GetT_CFG()[e].m_edge_type;
-	edge_type = e;
+	edge_type = (*e);
 
 	// Attempt dynamic casts to call/return types to see if we need to handle
 	// these specially.

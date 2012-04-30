@@ -21,8 +21,8 @@
 #include "ReachabilityVisitor.h"
 
 
-ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, StatementBase* source,
-		T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<CFGEdgeTypeBase*> *predecessor_list)
+ReachabilityVisitor::ReachabilityVisitor(ControlFlowGraph &g, ControlFlowGraph::vertex_descriptor source,
+		T_VERTEX_VISITOR_PREDICATE inspect_vertex, std::deque<ControlFlowGraph::edge_descriptor> *predecessor_list)
 	: ControlFlowGraphVisitorBase(g), m_source(source), m_inspect_vertex(inspect_vertex)
 {
 	m_predecessor_list = predecessor_list;

@@ -20,6 +20,8 @@
 #ifndef EDGE_H_
 #define EDGE_H_
 
+#include <cstddef>
+
 class Vertex;
 
 /*
@@ -42,6 +44,11 @@ public:
 	void ClearSourceAndTarget();
 	void SetSource(Vertex *source);
 	void SetTarget(Vertex *target);
+
+	/// @todo Friend this only to DescriptorBaseClass.
+	/// @bug Make this return a real index.
+	/// This is for the use of the DescriptorBaseClass.
+	std::size_t GetDescriptorIndex() const { return 0; };
 
 private:
 	Vertex *m_source;
