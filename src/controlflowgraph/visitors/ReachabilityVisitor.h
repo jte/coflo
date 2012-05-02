@@ -51,10 +51,10 @@ public:
 	 * @param u
 	 * @return
 	 */
-	virtual edge_return_value_t examine_edge(CFGEdgeTypeBase* u);
-	virtual vertex_return_value_t discover_vertex(StatementBase* u);
-	virtual edge_return_value_t tree_edge(CFGEdgeTypeBase* e);
-	virtual vertex_return_value_t finish_vertex(StatementBase* u);
+	virtual edge_return_value_t examine_edge(ControlFlowGraph::edge_descriptor u);
+	virtual vertex_return_value_t discover_vertex(ControlFlowGraph::vertex_descriptor u);
+	virtual edge_return_value_t tree_edge(ControlFlowGraph::edge_descriptor e);
+	virtual vertex_return_value_t finish_vertex(ControlFlowGraph::vertex_descriptor u);
 
 private:
 

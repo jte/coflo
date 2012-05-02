@@ -140,12 +140,12 @@ TEST_F(ControlFlowGraphTest, AddVertsAndEdgeBoost)
 	ASSERT_NO_THROW( g->AddEdge(v1, v2, e1) );
 
 	// check if the edge is connected correctly.
-	ASSERT_EQ(boost::source(e1, *g), v1);
-	ASSERT_EQ(boost::target(e1, *g), v2);
-	ASSERT_EQ(boost::in_degree(v1, *g), 0);
-	ASSERT_EQ(boost::out_degree(v1, *g), 1);
-	ASSERT_EQ(boost::in_degree(v2, *g), 1);
-	ASSERT_EQ(boost::out_degree(v2, *g), 0);
+	ASSERT_EQ(source(e1, *g), v1);
+	ASSERT_EQ(target(e1, *g), v2);
+	ASSERT_EQ(in_degree(v1, *g), 0);
+	ASSERT_EQ(out_degree(v1, *g), 1);
+	ASSERT_EQ(in_degree(v2, *g), 1);
+	ASSERT_EQ(out_degree(v2, *g), 0);
 
 	// Remove the edge from the graph.
 	ASSERT_NO_THROW( g->RemoveEdge(e1) );

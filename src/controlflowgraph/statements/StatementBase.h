@@ -70,11 +70,12 @@ struct CastToCFGEdgeTypeBasePtrReference
 };
 #endif
 
-typedef DescriptorBaseClass<CFGEdgeTypeBase> CFGEdgeDescriptor;
+//typedef DescriptorBaseClass<CFGEdgeTypeBase> CFGEdgeDescriptor;
+typedef CFGEdgeTypeBase* CFGEdgeDescriptor;
 
 struct CFGEdgeDescriptorConv
 {
-	CFGEdgeDescriptor operator()(Edge* e) const { return CFGEdgeDescriptor(dynamic_cast<CFGEdgeTypeBase*>(e)); };
+	CFGEdgeDescriptor operator()(Edge* e) const { return CFGEdgeDescriptor(e); };
 
 	/// This is for boost::result_of().
 	typedef CFGEdgeDescriptor result_type;
@@ -86,9 +87,9 @@ struct CFGEdgeDescriptorConv
 class StatementBase : public Vertex
 {
 public:
-	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor> edge_iterator;
-	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > out_edge_iterator;
-	typedef boost::transform_iterator< CFGEdgeDescriptorConv, base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor> edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > out_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
 	//typedef boost::unordered_set< Edge* >::size_type degree_size_t;
 
 public:

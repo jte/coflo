@@ -74,7 +74,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
-	boost::depth_first_search(g, /*boost::visitor(*/back_edge_finder/*)*/, color_property_map);
+	boost::depth_first_search(g, /*boost::visitor(back_edge_finder)*/back_edge_finder, color_property_map);
 
 	// Mark the edges we found as back edges.
 	BOOST_FOREACH(BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo fixinfo, back_edges)
@@ -82,7 +82,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 		ControlFlowGraph::edge_descriptor e = fixinfo.m_back_edge;
 
 		// Change this edge type to a back edge.
-		(*e)->MarkAsBackEdge(true);
+		e->MarkAsBackEdge(true);
 		g[e]->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
@@ -95,14 +95,14 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 		// If the source node of this back edge now has no non-back-edge out-edges,
 		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
 		ControlFlowGraph::vertex_descriptor src;
-		src = boost::source(e, g);
-		if (boost::out_degree(src, g) == 1)
+		src = /*boost::*/source(e, g);
+		if (/*boost::*/out_degree(src, g) == 1)
 		{
 			/*ControlFlowGraph::edge_descriptor newedge;
 			boost::tie(newedge, boost::tuples::ignore) =
 					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
-			g.AddEdge(*src, *(fixinfo.m_impossible_target_vertex), new CFGEdgeTypeImpossible);
+			g.AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
 			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
 		}
@@ -114,7 +114,7 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 #if 0
 void ControlFlowGraph::InsertMergeNodes(Function *f)
 {
-#if 0
+
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
@@ -199,13 +199,14 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 			RemoveEdge(*eit);
 		}
 	}
-#endif
+
 }
+#endif
 
-
+#if 0
 void ControlFlowGraph::SplitCriticalEdges(Function *f)
 {
-#if 0
+
 	// Property map for getting at the edge types in the CFG.
 	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
@@ -269,13 +270,13 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 		m_cfg[new_edge_2].m_edge_type = new CFGEdgeTypeFallthrough();
 		boost::remove_edge(e, m_cfg);
 	}
-#endif
+
 }
-
-
+#endif
+#if 0
 void ControlFlowGraphBase::StructureCompoundConditionals(Function *f)
 {
-#if 0
+
 	// ... postorder traversal...
 	T_CFG_VERTEX_DESC v;
 	T_FILTERED_GRAPH fg;
@@ -310,10 +311,10 @@ void ControlFlowGraphBase::StructureCompoundConditionals(Function *f)
 			}
 		}
 	}
-#endif
+
 }
-
-
+#endif
+#if 0
 void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 {
 	// Property map for getting at the edge types in the CFG.
@@ -384,6 +385,5 @@ void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 		RemoveVertex(i);
 	}
 }
-
 #endif
 

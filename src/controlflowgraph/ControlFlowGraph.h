@@ -64,6 +64,7 @@ struct CFGEdgeProperties
 	CFGEdgeTypeBase *m_edge_type;
 };
 
+/*
 /// Typedef for the CFG graph.
 typedef boost::adjacency_list
 		<
@@ -79,7 +80,7 @@ typedef boost::adjacency_list
 		/// The Edge properties type.
 		CFGEdgeProperties
 		> T_CFG;
-
+*/
 
 // Forward declare the FilteredGraph class template.
 template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
@@ -99,11 +100,14 @@ struct CastToStatementBaseReference
 */
 
 /// The vertex descriptor type for ControlFlowGraphs.
-typedef DescriptorBaseClass<StatementBase> CFGVertexDescriptor;
+//typedef DescriptorBaseClass<StatementBase> CFGVertexDescriptor;
+typedef StatementBase* CFGVertexDescriptor;
+
 
 struct CFGVertexDescriptorConv
 {
-	CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return CFGVertexDescriptor(v); };
+	//CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return CFGVertexDescriptor(v); };
+	CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return dynamic_cast<CFGVertexDescriptor>(v); };
 
 	/// This is for boost::result_of().
 	typedef CFGVertexDescriptor result_type;
@@ -124,7 +128,7 @@ public:
 	//typedef Graph::vertex_iterator vertex_iterator;
 	typedef StatementBase::out_edge_iterator out_edge_iterator;
 
-	static inline vertex_descriptor null_vertex() { return CFGVertexDescriptor::GetNullDescriptor(); };
+	static inline vertex_descriptor null_vertex() { return NULL; /*CFGVertexDescriptor::GetNullDescriptor();*/ };
 
 
 	/// @name These are specifically for interoperability with the Boost graph library.
@@ -186,10 +190,10 @@ public:
 	//@}
 
 
-	StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) { return *vd; };
-	CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) { return *ed; };
-	const StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) const { return *vd; };
-	const CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) const { return *ed; };
+	StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) { return vd; };
+	CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) { return ed; };
+	const StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) const { return vd; };
+	const CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) const { return ed; };
 
 	virtual void Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend) const;
 
@@ -202,11 +206,12 @@ private:
 
 /// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
-namespace boost
-{
 
-	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/);
-	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/);
+
+	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/);
+	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/);
+	inline ControlFlowGraph::degree_size_type out_degree(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph& /*g*/) { return u->OutDegree(); };
+	inline ControlFlowGraph::degree_size_type in_degree(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph& /*g*/) { return u->InDegree(); };
 
 	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
 		out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
@@ -216,6 +221,8 @@ namespace boost
 	//std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(ControlFlowGraph& g) { return vertices(g); };
 	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g);
 #if 0
+namespace boost
+{
 	/// Property map traits specializations.
 	template <>
 	struct property_map<ControlFlowGraph, vertex_index_t>
@@ -228,6 +235,7 @@ namespace boost
 	{
 		typedef const Graph_vertex_index_map const_type;
 	};
+}
 #endif
 
 #if 0
@@ -277,7 +285,7 @@ namespace boost
 		//BOOST_CONCEPT_ASSERT(( boost::MutablePropertyGraph<ControlFlowGraph> ));
 		//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<ControlFlowGraph, ControlFlowGraph::vertex_descriptor, boost::vertex_index_t> ));
 	}
-}
+
 
 //@}
 
