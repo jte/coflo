@@ -149,7 +149,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		e = no_remaining_in_edges_set.top();
 		no_remaining_in_edges_set.pop();
 
-		u = boost::target(e, graph);
+		u = /*boost::*/target(e, graph);
 
 		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
 		visitor_vertex_return_value = visitor.discover_vertex(u, e);
@@ -164,7 +164,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		//
 
 		// Get iterators to the out edges of vertex u.
-		boost::tie(ei, eend) = boost::out_edges(u, graph);
+		boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 		T_EDGE_DESC first_edge_pushed;
 
 		while (ei != eend)
@@ -192,7 +192,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 			}
 
 			// Get the target vertex of this edge.
-			v = boost::target(*ei, graph);
+			v = /*boost::*/target(*ei, graph);
 
 			// Look up the current in-degree of the target vertex of *ei in the
 			// in-degree map.

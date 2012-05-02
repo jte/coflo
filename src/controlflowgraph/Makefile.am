@@ -28,6 +28,7 @@ libcontrolflowgraph_a_SOURCES = \
 	DescriptorBaseClass.cpp DescriptorBaseClass.h \
 	Edge.cpp Edge.h \
 	Graph.cpp Graph.h \
+	GraphAdapter.h \
 	Vertex.cpp Vertex.h \
 	VertexDescriptor.cpp VertexDescriptor.h \
 	VertexID.cpp VertexID.h

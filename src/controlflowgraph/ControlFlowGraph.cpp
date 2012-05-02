@@ -21,6 +21,8 @@
 /// idempotent at compile time.  If it isn't, the compile will fail, alerting you to the problem.
 #include "ControlFlowGraph.h"
 
+#include "GraphAdapter.h"
+
 #include <utility>
 
 #include <boost/foreach.hpp>
@@ -453,7 +455,7 @@ void ControlFlowGraph::PrintOutEdgeTypes(ControlFlowGraph::vertex_descriptor vde
 {
 	out_edge_iterator ei, eend;
 
-	boost::tie(ei, eend) = boost::out_edges(vdesc, *this);
+	boost::tie(ei, eend) = out_edges(vdesc, *this);
 	for(;ei!=eend; ++ei)
 	{
 		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
@@ -464,7 +466,7 @@ void ControlFlowGraph::PrintInEdgeTypes(ControlFlowGraph::vertex_descriptor vdes
 {
 	in_edge_iterator ei, eend;
 
-	boost::tie(ei, eend) = boost::in_edges(vdesc, *this);
+	boost::tie(ei, eend) = in_edges(vdesc, *this);
 	for(;ei!=eend; ++ei)
 	{
 		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
@@ -473,11 +475,9 @@ void ControlFlowGraph::PrintInEdgeTypes(ControlFlowGraph::vertex_descriptor vdes
 
 /// @name Free-function definitions for adapting this graph class to the Boost graph library.
 //@{
-namespace boost
-{
-#if 0
-	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Target(); };
-	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor &e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/) { return e->Target(); };
+ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+
 
 	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
 	out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/)
@@ -502,7 +502,6 @@ namespace boost
 
 		return std::make_pair(ibegin, iend);
 	}
-#endif
-}
+
 //@}
 

@@ -24,6 +24,7 @@
 #include <boost/graph/graph_concepts.hpp>
 
 #include "Graph.h"
+#include "GraphAdapter.h"
 
 int PullInMyLibrary() { return 0; }
 
@@ -140,12 +141,12 @@ TEST_F(GraphTest, AddVertsAndEdgeBoost)
 	ASSERT_NO_THROW( g->AddEdge(v1, v2, e1) );
 
 	// check if the edge is connected correctly.
-	ASSERT_EQ(boost::source(e1, *g), v1);
-	ASSERT_EQ(boost::target(e1, *g), v2);
-	ASSERT_EQ(boost::in_degree(v1, *g), 0);
-	ASSERT_EQ(boost::out_degree(v1, *g), 1);
-	ASSERT_EQ(boost::in_degree(v2, *g), 1);
-	ASSERT_EQ(boost::out_degree(v2, *g), 0);
+	ASSERT_EQ(source(e1, *g), v1);
+	ASSERT_EQ(target(e1, *g), v2);
+	ASSERT_EQ(in_degree(v1, *g), 0);
+	ASSERT_EQ(out_degree(v1, *g), 1);
+	ASSERT_EQ(in_degree(v2, *g), 1);
+	ASSERT_EQ(out_degree(v2, *g), 0);
 
 	// Remove the edge from the graph.
 	ASSERT_NO_THROW( g->RemoveEdge(e1) );
@@ -173,11 +174,15 @@ TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
 	ASSERT_NO_THROW( g = new Graph() );
 	ASSERT_TRUE( g != NULL );
 
-	boost::add_vertex(*g);
+	add_vertex(*g);
 
 	// Generate a random graph with no parallel edges and no self edges.
 	std::tr1::mt19937 rng;
 	ASSERT_NO_THROW( boost::generate_random_graph(*g, 10, 20, rng, false, false) );
+
+	// For some reason, generate_random_graph adds one more vertex than you ask it to.
+	ASSERT_EQ(num_vertices(*g), 11);
+	//ASSERT_EQ();
 
 	delete g;
 

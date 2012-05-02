@@ -56,7 +56,7 @@
 
 /// Property map typedef which allows us to get at the edge type pointer stored at
 /// CFGEdgeProperties::m_edge_type in the T_CFG.
-typedef boost::property_map<T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::*>::type T_EDGE_TYPE_PROPERTY_MAP;
+//typedef boost::property_map<T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::*>::type T_EDGE_TYPE_PROPERTY_MAP;
 
 #if 0
 /**
@@ -335,7 +335,7 @@ static long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_
 	return i;
 }
 
-ControlFlowGraph::edge_descriptor first_filtered_out_edge(ControlFlowGraph::vertex_descriptor v, const T_CFG &cfg)
+ControlFlowGraph::edge_descriptor first_filtered_out_edge(ControlFlowGraph::vertex_descriptor v)
 {
 	StatementBase::out_edge_iterator ieit, ieend;
 

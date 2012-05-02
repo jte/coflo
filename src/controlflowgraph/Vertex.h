@@ -32,7 +32,8 @@ class Graph;
 #include "Edge.h"
 #include "DescriptorBaseClass.h"
 
-typedef DescriptorBaseClass<Edge> EdgeDescriptor;
+//typedef DescriptorBaseClass<Edge> EdgeDescriptor;
+typedef Edge* EdgeDescriptor;
 
 
 struct EdgeDescriptorConv
@@ -51,7 +52,7 @@ class Vertex
 {
 public:
 	typedef boost::unordered_set< Edge* > edge_list_type;
-	typedef edge_list_type::const_iterator base_edge_list_iterator;
+	typedef edge_list_type::iterator base_edge_list_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> edge_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> out_edge_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> in_edge_iterator;
