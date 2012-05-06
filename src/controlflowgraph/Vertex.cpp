@@ -19,9 +19,12 @@
 
 #include "Vertex.h"
 
+#include <algorithm>
+#include <functional>
+#include <boost/foreach.hpp>
+
 #include "coflo_exceptions.hpp"
 
-#include <boost/foreach.hpp>
 
 Vertex::Vertex()
 {
@@ -98,6 +101,31 @@ Vertex::edge_iterator Vertex::MakeIterator(Vertex::base_edge_list_iterator i)
 {
 	return boost::make_transform_iterator< EdgeDescriptorConv, base_edge_list_iterator>(i);
 }
+
+struct EdgePointsTo : public std::unary_function<const Edge*,bool>
+{
+	EdgePointsTo(const Vertex* other) { m_other = other; };
+
+	bool operator()(const Edge* e) { return e->Target() == m_other; };
+
+	const Vertex *m_other;
+};
+
+Edge* Vertex::FindOutEdgePointingToVertex(const Vertex* target)
+{
+	edge_list_type::iterator the_edge;
+
+	the_edge = std::find_if(m_out_edges.begin(), m_out_edges.end(), EdgePointsTo(target));
+
+	if(the_edge == m_out_edges.end())
+	{
+		// Couldn't find it.
+		return NULL;
+	}
+
+	return *the_edge;
+}
+
 
 
 

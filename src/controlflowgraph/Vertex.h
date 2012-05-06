@@ -101,6 +101,9 @@ public:
 	degree_size_type InDegree() { return m_in_edges.size(); };
 	degree_size_type OutDegree() { return m_out_edges.size(); };
 
+
+	Edge* FindOutEdgePointingToVertex(const Vertex *target);
+
 	/// Allow the Graph class access to m_vertex_index.
 	friend class Graph;
 

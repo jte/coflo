@@ -19,10 +19,15 @@
 
 #include "gtest/gtest.h"
 
+#include <boost/graph/graphviz.hpp>
+
+#include "GraphAdapter.h"
 #include "ControlFlowGraph.h"
 #include "statements/Goto.h"
 #include "statements/Label.h"
 #include "edges/CFGEdgeTypeGoto.h"
+#include "edges/CFGEdgeTypeFallthrough.h"
+
 
 int GetMeToo() {return 5; };
 
@@ -38,7 +43,9 @@ protected:
 	virtual void SetUp() {};
 	virtual void TearDown() {};
 
-	ControlFlowGraphTest *m_test_graph;
+	ControlFlowGraph* CreateSimplestCFG();
+
+	ControlFlowGraph *m_test_graph;
 	StatementBase *m_test_vert1, *m_test_vert2;
 };
 
@@ -162,5 +169,58 @@ TEST_F(ControlFlowGraphTest, AddVertsAndEdgeBoost)
 	delete v1;
 
 	// Delete the graph.
+	delete g;
+}
+
+ControlFlowGraph* ControlFlowGraphTest::CreateSimplestCFG()
+{
+	// Create the simplest possible CFG.
+
+	ControlFlowGraph *g;
+	Entry* entry;
+	NoOp* s1;
+	Exit* exit_vertex;
+
+	g = new ControlFlowGraph;
+	entry = new Entry(Location());
+	s1 = new NoOp(Location());
+	exit_vertex = new Exit(Location());
+
+	// Add vertices.
+	g->AddVertex(entry);
+	g->AddVertex(s1);
+	g->AddVertex(exit_vertex);
+
+	CFGEdgeTypeFallthrough *e1 = new CFGEdgeTypeFallthrough;
+	CFGEdgeTypeFallthrough *e2 = new CFGEdgeTypeFallthrough;
+
+	// Add edges.
+	g->AddEdge(entry, s1, e1);
+	g->AddEdge(s1, exit_vertex, e2);
+
+	return g;
+}
+
+TEST_F(ControlFlowGraphTest, SimpleCFG_NewAndDelete)
+{
+	SCOPED_TRACE("");
+
+	ControlFlowGraph *g;
+
+	ASSERT_NO_FATAL_FAILURE(g = CreateSimplestCFG());
+
+	delete g;
+}
+
+TEST_F(ControlFlowGraphTest, SimpleCFG_graphviz_out)
+{
+	SCOPED_TRACE("");
+
+	ControlFlowGraph *g;
+
+	ASSERT_NO_FATAL_FAILURE(g = CreateSimplestCFG());
+
+	ASSERT_NO_THROW( boost::write_graphviz(std::cout, *((Graph*)g)) );
+
 	delete g;
 }
