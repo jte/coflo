@@ -29,7 +29,7 @@
 #include "../../Location.h"
 #include "../Vertex.h"
 //#include "../Edge.h"
-#include "../DescriptorBaseClass.h"
+//#include "../DescriptorBaseClass.h"
 
 class Function;
 //class CFGEdgeTypeBase;

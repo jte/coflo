@@ -45,10 +45,12 @@ struct VertexDescriptorConv
 };
 
 struct Graph_traversal_tag :
-    public virtual boost::vertex_list_graph_tag,
     public virtual boost::incidence_graph_tag,
-    public virtual boost::adjacency_graph_tag,
-    public virtual boost::bidirectional_graph_tag { };
+    public virtual boost::bidirectional_graph_tag,
+    public virtual boost::vertex_list_graph_tag,
+    public virtual boost::edge_list_graph_tag
+    //public virtual boost::adjacency_graph_tag
+    { };
 
 /**
  * Graph base class.
@@ -59,57 +61,123 @@ public:
 	/// @name Public member types.
 	//@{
 
-	/// The type for the collection of all vertices in the graph.
-	typedef std::tr1::unordered_set< Vertex* > vertex_list_type;
-	/// The type for the collection of all edges in the graph
-	/// @todo FIXME: this isn't actually correct, it's just for the edges of a particular vertex.
-	typedef Vertex::edge_list_type edge_list_type;
+		/// The type for the collection of all vertices in the graph.
+		typedef std::tr1::unordered_set< Vertex* > vertex_list_type;
+		/// The type for the collection of all edges in the graph.
+		/// @note The Vertex class has its own methods of managing edges incident on the vertex which are not necessarily
+		/// the same as those of the Graph class.  In particular, edge_iterators are not interchangeable with in_edge_iterators
+		/// or out_edge_iterators.
+		typedef std::tr1::unordered_set< Edge* > edge_list_type;
 
-	//typedef Vertex* vertex_descriptor;
-	typedef VertexDescriptor vertex_descriptor;
+		/// @name Member types for the Graph concept.
+		/// @note Contrary to Boost 1.49 documentation, what is listed here are the complete requirements for GraphConcept.
+		/// E.g., no null_vertex(), no edge_descriptor.
+		//@{
+			typedef VertexDescriptor vertex_descriptor;
+			/// Our "directionality" will be bidirectional.
+			/// @note directed_category must be convertible to either directed_tag or undirected_tag.  bidirectional_tag inherits from
+			/// directed_category.
+			typedef boost::bidirectional_tag directed_category;
+			/// Allow parallel edges.
+			typedef boost::allow_parallel_edge_tag edge_parallel_category;
+			typedef Graph_traversal_tag traversal_category;
+		//@}
 
-	//typedef vertex_list_type::const_iterator vertex_iterator;
-	typedef boost::transform_iterator<VertexDescriptorConv,
-			vertex_list_type::iterator,
-			VertexDescriptor,
-			VertexDescriptor> vertex_iterator;
+		/// @name Member types for the IncidenceGraph concept.
+		/// BidirectionalGraphConcept inherits from this concept.
+		//@{
+			typedef EdgeDescriptor edge_descriptor;
+			typedef Vertex::out_edge_iterator out_edge_iterator;
+			typedef Vertex::degree_size_type degree_size_type;
+			/**
+			 *  Operations:
+			 * - out_edges(u, g)
+			 * - out_degree(u, g)
+			 * - source(e, g)
+			 * - target(e, g)
+			 */
+		//@}
+
+		/// @name Member types for the BidirectionalGraph concept.
+		//@{
+			typedef Vertex::in_edge_iterator in_edge_iterator;
+			/**
+			 * Operations:
+			 * - in_edges()
+			 * - in_degree()
+			 */
+		//@}
+
+		/// @name Member types for the VertexListGraph concept, which inherits from GraphConcept.
+		//@{
+			typedef boost::transform_iterator<VertexDescriptorConv,
+				vertex_list_type::iterator,
+				VertexDescriptor,
+				VertexDescriptor> vertex_iterator;
+			typedef vertex_list_type::size_type vertices_size_type;
+			/**
+			 * Operations:
+			 * - vertices()
+			 * - num_vertices();
+			 */
+		//@}
+
+		/// @name Member types for the AdjacencyGraph concept, which inherits from GraphConcept.
+		//@{
+			/// @note boost::graph_traits<> appears to always need this definition, even if you don't model it.
+			typedef void adjacency_iterator;
+			/**
+			 * Operations:
+			 * - adjacent_vertices()
+			 */
+		//@}
+
+		/// @name Member types for the EdgeListGraph concept (efficient traversal of all edges in graph),
+		/// which inherits from GraphConcept.
+		//@{
+			// BidirectionalGraphConcept already has this typedef covered.
+			//typedef EdgeDescriptor edge_descriptor;
+			typedef edge_list_type::const_iterator edge_iterator;
+			typedef edge_list_type::size_type edges_size_type;
+			/**
+			 * Operations:
+			 * - edges()
+			 * - source()
+			 * - target()
+			 */
+		//@}
+
+		/// @name Member types for the VertexAndEdgeListGraph concept.
+		/// Inherits from both VertexListGraph and EdgeListGraph.
+		//@{
+			/// No new members.
+		//@}
 
 
-	static vertex_descriptor null_vertex() { return NULL;/*VertexDescriptor::GetNullDescriptor();*/ };
+		/// Currently no concept checks for this?  It is in graph_traits<> though.
+		static vertex_descriptor null_vertex() { return NULL; };
 
-	/// @name These are specifically for interoperability with the Boost graph library.
-	//@{
-	typedef EdgeDescriptor edge_descriptor;
-	typedef Vertex::edge_iterator edge_iterator;
-	typedef Vertex::out_edge_iterator out_edge_iterator;
-	typedef Vertex::in_edge_iterator in_edge_iterator;
-	typedef Vertex::degree_size_type degree_size_type;
+		/**
+		 * Return a null edge descriptor.
+		 * @note Not something used by Boost Graph Library.
+		 * @return
+		 */
+		static edge_descriptor null_edge() { return NULL; };
 
-	typedef boost::directed_tag directed_category;
-	typedef boost::allow_parallel_edge_tag edge_parallel_category;
-	typedef Graph_traversal_tag traversal_category;
-	/// (@todo AFAICT, the BidirectionalGraph concept doesn't need the below three, but a concept check of that chokes if they're not
-	/// in here.  boost::graph_traits<> appears to always need them.)
-	// AdjacencyGraph
-	typedef vertex_iterator adjacency_iterator;
-	// VertexListGraph (efficient traversal of all vertices in graph)
-	typedef vertex_list_type::size_type vertices_size_type;
-	// EdgeListGraph (efficient traversal of all edges in graph)
-	typedef edge_list_type::size_type edges_size_type;
 
-	/// For vertex_index_t.
-	typedef std::size_t vertex_index_type;
-    typedef std::size_t edge_index_type;
-	typedef boost::property<boost::vertex_index_t, vertex_index_type> VertexProperty;
-	typedef VertexProperty vertex_property_type;
-	typedef typename boost::graph_detail::edge_prop<boost::no_property>::property edge_property_type;
-	typedef typename boost::graph_detail::graph_prop<boost::no_property>::property graph_property_type;
-	//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
-	//@}
+		/// @name For vertex_index_t.
+		//@{
+			typedef std::size_t vertex_index_type;
+			typedef std::size_t edge_index_type;
+			typedef boost::property<boost::vertex_index_t, vertex_index_type> VertexProperty;
+			typedef VertexProperty vertex_property_type;
+			typedef typename boost::graph_detail::edge_prop<boost::no_property>::property edge_property_type;
+			typedef typename boost::graph_detail::graph_prop<boost::no_property>::property graph_property_type;
+		//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
+		//@}
 
-	/// Mutability
-	typedef boost::mutable_property_graph_tag mutability_category;
-
+		/// Mutability
+		typedef boost::mutable_property_graph_tag mutability_category;
 	//@}
 
 public:
@@ -129,10 +197,21 @@ public:
 	virtual void Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const;
 	vertices_size_type NumVertices() const { return m_vertices.size(); };
 
+	Graph::edges_size_type NumEdges() const { return m_edges.size(); };
+	Graph::edge_iterator EdgeListBegin() const;
+	Graph::edge_iterator EdgeListEnd() const;
+
 	Vertex* operator[](const Graph::vertex_descriptor vd) { return vd; };
 	Edge* operator[](const Graph::edge_descriptor ed) { return ed; };
 	const Vertex* operator[](const Graph::vertex_descriptor vd) const { return vd; };
 	const Edge* operator[](const Graph::edge_descriptor ed) const { return ed; };
+
+	/// @name Find functions.
+	//@{
+
+	Graph::edge_descriptor FindEdge(const Graph::vertex_descriptor source, const Graph::vertex_descriptor target);
+
+	//@}
 
 private:
 
@@ -150,6 +229,9 @@ protected:
 
 	/// Collection of all vertices in the Graph.
 	vertex_list_type m_vertices;
+
+	/// Collection of all Edges in the Graph.
+	edge_list_type m_edges;
 
 	/// The Vertex ID generator state.
 	VertexID m_vertex_id_state;

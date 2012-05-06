@@ -40,9 +40,21 @@ protected:
 	virtual void SetUp() {};
 	virtual void TearDown() {};
 
+	/**
+	 * Checks that Graph @a g is consistent.
+	 *
+	 * @param g
+	 */
+	void CheckGraphForConsistency(Graph *g);
+
 	Graph *m_test_graph;
 	Vertex *m_test_vert1, *m_test_vert2;
 };
+
+void GraphTest::CheckGraphForConsistency(Graph *g)
+{
+
+}
 
 TEST_F(GraphTest, GraphNewDelete)
 {
@@ -174,16 +186,55 @@ TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
 	ASSERT_NO_THROW( g = new Graph() );
 	ASSERT_TRUE( g != NULL );
 
-	add_vertex(*g);
-
 	// Generate a random graph with no parallel edges and no self edges.
 	std::tr1::mt19937 rng;
 	ASSERT_NO_THROW( boost::generate_random_graph(*g, 10, 20, rng, false, false) );
 
-	// For some reason, generate_random_graph adds one more vertex than you ask it to.
-	ASSERT_EQ(num_vertices(*g), 11);
-	//ASSERT_EQ();
+	// Make sure we have the number of vertices and edges we asked for.
+	ASSERT_EQ(num_vertices(*g), 10);
+	ASSERT_EQ(num_edges(*g), 20);
+
+	// Try to serialize the vertices of the graph "by hand".
+	Graph::vertex_iterator i, j;
+	boost::tie(i,j) = vertices(*g);
+	std::cout << "Vertex Index, In Degree, Out Degree" << std::endl;
+	for(; i != j; ++i)
+	{
+		std::cout << "Vertex Index: " << (*i)->GetVertexIndex() << std::endl;
+		std::cout << "In Degree:    " << in_degree(*i, *g) << std::endl;
+		std::cout << "Out Degree:   " << out_degree(*i, *g) << std::endl;
+		std::cout << "  Source vertices:";
+		if(out_degree(*i, *g) > 0)
+		{
+			Graph::in_edge_iterator ei, eend;
+			boost::tie(ei, eend) = in_edges(*i, *g);
+			for(; ei != eend; ei++)
+			{
+				std::cout << " " << source(*ei, *g)->GetVertexIndex();
+			}
+		}
+		else
+		{
+			std::cout << "none.";
+		}
+		std::cout << std::endl;
+		std::cout << "  Target vertices:";
+		if(out_degree(*i, *g) > 0)
+		{
+			Graph::out_edge_iterator ei, eend;
+			boost::tie(ei, eend) = out_edges(*i, *g);
+			for(; ei != eend; ei++)
+			{
+				std::cout << " "  << target(*ei, *g)->GetVertexIndex();
+			}
+		}
+		else
+		{
+			std::cout << "none.";
+		}
+		std::cout << std::endl;
+		std::cout << std::endl;
+	}
 
 	delete g;
-
 }

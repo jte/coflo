@@ -60,6 +60,7 @@ void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)
 	source->AddOutEdge(e);
 	target->AddInEdge(e);
 	e->SetSourceAndTarget(source, target);
+	m_edges.insert(e);
 }
 
 void Graph::RemoveEdge(Edge* e)
@@ -67,6 +68,7 @@ void Graph::RemoveEdge(Edge* e)
 	e->Source()->RemoveOutEdge(e);
 	e->Target()->RemoveInEdge(e);
 	e->ClearSourceAndTarget();
+	m_edges.erase(e);
 }
 
 void Graph::Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const
@@ -88,6 +90,16 @@ VertexID Graph::GetNewVertexID()
 	return retval;
 }
 
+Graph::edge_iterator Graph::EdgeListBegin() const
+{
+	return m_edges.begin();
+}
+
+Graph::edge_iterator Graph::EdgeListEnd() const
+{
+	return m_edges.end();
+}
+
 void Graph::AssignAVertexIndexToVertex(Vertex* v)
 {
 	VertexID vertex_index;
@@ -96,3 +108,14 @@ void Graph::AssignAVertexIndexToVertex(Vertex* v)
 
 	v->SetVertexIndex(vertex_index);
 }
+
+Graph::edge_descriptor Graph::FindEdge(const Graph::vertex_descriptor source, const Graph::vertex_descriptor target)
+{
+	Graph::edge_descriptor e;
+
+	e = source->FindOutEdgePointingToVertex(target);
+
+	/// @todo Check for NULL, return a "null_edge()" instead.
+	return e;
+}
+
