@@ -82,7 +82,7 @@ public:
 	 *
 	 * @return
 	 */
-	VertexID GetID() const;
+	//VertexID GetID() const;
 
 	/**
 	 * Get the vertex's index.  The index is guaranteed to be unique to the containing Graph.

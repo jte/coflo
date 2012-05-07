@@ -184,7 +184,18 @@ public:
 	Graph();
 	virtual ~Graph();
 
+	/**
+	 * Adds the Vertex pointed to by @a v to the Graph.  Graph does not own @a v.
+	 *
+	 * @param v Pointer to the vertex to add.
+	 */
 	virtual void AddVertex(Vertex *v);
+
+	/**
+	 * Removes the Vertex pointed to by @a v from this Graph.
+	 *
+	 * @param v Pointer to the vertex to remove from the graph.
+	 */
 	virtual void RemoveVertex(Vertex *v);
 	virtual void ReplaceVertex(Vertex *old_vertex, Vertex *new_vertex);
 

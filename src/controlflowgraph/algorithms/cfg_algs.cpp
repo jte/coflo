@@ -39,16 +39,6 @@
 
 void FixupBackEdges(ControlFlowGraph &g, Function *f)
 {
-#if 0
-	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = g.GetPropMap_ContainingFunction();
-	vertex_filter_predicate the_vertex_filter(vpm, f);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
-					vertex_filter_predicate> T_FILTERED_GRAPH;
-	// Define a filtered view of only this function's CFG.
-	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
-#endif
-
 	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
 	/// @todo This is probably not the best place for this check.
 	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph> ));

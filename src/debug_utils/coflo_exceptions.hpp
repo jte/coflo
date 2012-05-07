@@ -40,5 +40,6 @@ struct coflo_exception_base: virtual std::exception, virtual boost::exception { 
  */
 struct not_implemented: virtual coflo_exception_base { };
 
+struct duplicate_add: virtual coflo_exception_base {};
 
 #endif /* COFLO_EXCEPTIONS_HPP */

@@ -35,6 +35,7 @@
 #include "SparsePropertyMap.h"
 
 #include "Graph.h"
+#include "GraphAdapter.h"
 
 class Function;
 
