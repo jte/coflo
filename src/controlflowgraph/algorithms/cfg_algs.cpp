@@ -25,6 +25,7 @@
 #include <boost/graph/graph_concepts.hpp>
 
 #include "../ControlFlowGraph.h"
+#include "../GraphAdapter.h"
 #include "../../Function.h"
 #include "../visitors/BackEdgeFixupVisitor.h"
 #include "../edges/CFGEdgeTypeImpossible.h"
@@ -37,13 +38,12 @@
 //typedef boost::property_map<ControlFlowGraph, size_t StatementBase::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
-void FixupBackEdges(ControlFlowGraph &g, Function *f)
+void FixupBackEdges(ControlFlowGraph &g)
 {
 	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
-	/// @todo This is probably not the best place for this check.
-	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph> ));
 	BOOST_CONCEPT_ASSERT((boost::DFSVisitorConcept< BackEdgeFixupVisitor<ControlFlowGraph>, ControlFlowGraph >));
 
+	// The vector we'll use to collect up all the info we need to fix up the graph's back edges.
 	std::vector<BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo> back_edges;
 
 	// Define a visitor which will find all the back edges and send back the info
@@ -64,7 +64,11 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
-	boost::depth_first_search(g, /*boost::visitor(back_edge_finder)*/back_edge_finder, color_property_map);
+	boost::depth_first_search(g, back_edge_finder, color_property_map);
+	//boost::depth_first_search(g, boost::visitor(back_edge_finder));
+
+
+	dlog_cfg << "Number of back edges found: " << back_edges.size() << std::endl;
 
 	// Mark the edges we found as back edges.
 	BOOST_FOREACH(BackEdgeFixupVisitor<ControlFlowGraph>::BackEdgeFixupInfo fixinfo, back_edges)
@@ -94,7 +98,9 @@ void FixupBackEdges(ControlFlowGraph &g, Function *f)
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
 			g.AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
-			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
+			dlog_cfg << "Retargetting back edge " << e->GetDescriptorIndex()
+					<< " to "
+					<< fixinfo.m_impossible_target_vertex->GetDescriptorIndex() << std::endl;
 		}
 	}
 
@@ -304,64 +310,56 @@ void ControlFlowGraphBase::StructureCompoundConditionals(Function *f)
 
 }
 #endif
-#if 0
-void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
+
+void RemoveRedundantNodes(ControlFlowGraph *g)
 {
-	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
-	vertex_filter_predicate the_vertex_filter(vpm, f);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
-					vertex_filter_predicate> T_FILTERED_GRAPH;
-	// Define a filtered view of only this function's CFG.
-	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
+	// We'll collect up the vertices to be removed in this vector.
+	std::vector<typename boost::graph_traits<ControlFlowGraph>::vertex_descriptor> vertices_to_remove;
 
-	std::vector<T_CFG_VERTEX_DESC> vertices_to_remove;
+	typename boost::graph_traits<ControlFlowGraph>::vertex_iterator it, it2;
 
-	T_FILTERED_GRAPH::vertex_iterator it, it2;
-
-	boost::tie(it, it2) = boost::vertices(graph_of_this_function);
+	boost::tie(it, it2) = vertices(*g);
 
 	// Iterate over all vertices.
 	for(;it != it2; ++it)
 	{
-		StatementBase *sbp = GetStatementPtr(*it);
+		StatementBase *sbp = *it;
 		if(sbp->IsType<Goto>())
 		{
 			// This is a Goto.  Check if it's redundant.
-			if(boost::in_degree(*it, graph_of_this_function)==1 && boost::out_degree(*it, graph_of_this_function)==1)
+			if(/*boost::*/in_degree(*it, *g)==1 && /*boost::*/out_degree(*it, *g)==1)
 			{
 				// It's redundant.
 
-				T_FILTERED_GRAPH::in_edge_iterator in_eit;
-				T_FILTERED_GRAPH::out_edge_iterator out_eit;
+				ControlFlowGraph::in_edge_iterator in_eit;
+				ControlFlowGraph::out_edge_iterator out_eit;
 				ControlFlowGraph::edge_descriptor in_edge, out_edge;
 
-				boost::tie(in_eit, boost::tuples::ignore) = boost::in_edges(*it, graph_of_this_function);
-				boost::tie(out_eit, boost::tuples::ignore) = boost::out_edges(*it, graph_of_this_function);
+				boost::tie(in_eit, boost::tuples::ignore) = /*boost::*/in_edges(*it, *g);
+				boost::tie(out_eit, boost::tuples::ignore) = /*boost::*/out_edges(*it, *g);
 				in_edge = *in_eit;
 				out_edge = *out_eit;
 
-				T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc;
-				long target_id, source_od;
+				ControlFlowGraph::vertex_descriptor source_vertex_desc, target_vertex_desc;
 
 				// Get the vertex descriptors.
-				source_vertex_desc = boost::source(in_edge, graph_of_this_function);
-				target_vertex_desc = boost::target(out_edge, graph_of_this_function);
+				source_vertex_desc = /*boost::*/source(in_edge, *g);
+				target_vertex_desc = /*boost::*/target(out_edge, *g);
 
 				// Point the incoming edge to the target of our outgoing edge, bypassing us.
-				ChangeEdgeTarget(in_edge, target_vertex_desc);
+				in_edge->ChangeTarget(target_vertex_desc);
 
 				// Remove our outgoing edge.
-				RemoveEdge(out_edge);
+				g->RemoveEdge(out_edge);
 
 				// We should now have no edges.
-				if(boost::degree(*it, m_cfg) != 0)
+				if(/*boost::*/in_degree(*it, *g) != 0 || out_degree(*it, *g))
 				{
 					std::cerr << "STILL HAS EDGES" << std::endl;
 				}
 				else
 				{
-					// Delete this vertex.
+					// Schedule this vertex to be deleted.
 					vertices_to_remove.push_back(*it);
 				}
 			}
@@ -370,10 +368,11 @@ void ControlFlowGraphBase::RemoveRedundantNodes(Function* f)
 	}
 
 	// Remove all the vertices we found.
-	BOOST_FOREACH(T_CFG_VERTEX_DESC i, vertices_to_remove)
+	BOOST_FOREACH(ControlFlowGraph::vertex_descriptor i, vertices_to_remove)
 	{
-		RemoveVertex(i);
+		g->RemoveVertex(i);
+		delete i;
 	}
 }
-#endif
+
 

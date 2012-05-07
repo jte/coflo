@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -51,13 +51,6 @@ Function* StatementBase::GetOwningFunction() const
 void StatementBase::OutEdges(StatementBase::out_edge_iterator* ibegin,
 		StatementBase::out_edge_iterator* iend)
 {
-	/*
-	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> base_iterator_pair;
-	base_iterator_pair = Vertex::OutEdges();
-
-	*ibegin = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator >(base_iterator_pair.first);
-	*iend = boost::make_transform_iterator< CastToCFGEdgeTypeBasePtrReference, Vertex::out_edge_iterator >(base_iterator_pair.second);
-	*/
 	*ibegin = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_out_edges.begin());
 	*iend = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_out_edges.end());
 }
@@ -65,17 +58,8 @@ void StatementBase::OutEdges(StatementBase::out_edge_iterator* ibegin,
 void StatementBase::InEdges(StatementBase::in_edge_iterator* ibegin,
 		StatementBase::in_edge_iterator* iend)
 {
-	/*
-	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> base_iterator_pair;
-	base_iterator_pair = Vertex::InEdges();
-	*/
-
 	*ibegin = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_in_edges.begin());
 	*iend = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_in_edges.end());
-	/*
-	*ibegin = base_iterator_pair.first;
-	*iend = base_iterator_pair.second;
-	*/
 }
 
 std::string StatementBase::EscapeifyForUseInDotLabel(const std::string & str)

@@ -24,10 +24,12 @@ class ControlFlowGraph;
 class Function;
 
 /**
- * Traverses the CFG of Function @a f and marks all back edges.
+ * Traverses the CFG of Function @a f and marks all back edges as such.
+ *
+ * @param g Reference to the ControlFlowGraph to process.
  * @param f
  */
-void FixupBackEdges(ControlFlowGraph &g, Function *f);
+void FixupBackEdges(ControlFlowGraph &g);
 
 void InsertMergeNodes(Function *f);
 
@@ -35,6 +37,6 @@ void SplitCriticalEdges(Function *f);
 
 void StructureCompoundConditionals(Function *f);
 
-void RemoveRedundantNodes(Function *f);
+void RemoveRedundantNodes(ControlFlowGraph *g);
 
 #endif // CFG_ALGS_H

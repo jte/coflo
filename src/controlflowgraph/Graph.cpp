@@ -128,7 +128,13 @@ Graph::edge_descriptor Graph::FindEdge(const Graph::vertex_descriptor source, co
 
 	e = source->FindOutEdgePointingToVertex(target);
 
-	/// @todo Check for NULL, return a "null_edge()" instead.
-	return e;
+	if(e == NULL)
+	{
+		return null_edge();
+	}
+	else
+	{
+		return e;
+	}
 }
 
