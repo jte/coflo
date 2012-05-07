@@ -98,10 +98,15 @@ Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 
 	// Save our identifier.
 	m_function_id = function_id;
+
+	// Create a new ControlFlowGraph for this function.
+	m_the_cfg = new ControlFlowGraph;
 }
 
 Function::~Function()
 {
+	// Delete the ControlFlowGraph we created in the constructor.
+	delete m_the_cfg;
 }
 
 std::string Function::GetDefinitionFilePath() const
@@ -805,7 +810,7 @@ class LabelMap : public std::map< std::string, ControlFlowGraph::vertex_descript
 
 };
 
-bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector< StatementBase* > &statement_list)
+bool Function::CreateControlFlowGraph(const std::vector< StatementBase* > &statement_list)
 {
 	LabelMap label_map;
 	ControlFlowGraph::vertex_descriptor prev_vertex;
@@ -818,8 +823,6 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 
 	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
 
-	m_the_cfg = &cfg;
-
 	// Create ENTRY and EXIT vertices.
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
 	Exit *exit_ptr = new Exit(Location("[" + GetDefinitionFilePath() + " : 0]"));
@@ -827,9 +830,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	entry_ptr->SetOwningFunction(this);
 	exit_ptr->SetOwningFunction(this);
 
-	cfg.AddVertex(entry_ptr);
+	m_the_cfg->AddVertex(entry_ptr);
 	m_entry_vertex_desc = entry_ptr;
-	cfg.AddVertex(exit_ptr);
+	m_the_cfg->AddVertex(exit_ptr);
 	m_exit_vertex_desc = exit_ptr;
 
 	// Add EXIT to the label map, so that ReturnUnlinked instances can find it.
@@ -843,7 +846,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		// Add this Statement to the Control Flow Graph.
 		ControlFlowGraph::vertex_descriptor vid;
 		sbp->SetOwningFunction(this);
-		cfg.AddVertex(sbp);
+		m_the_cfg->AddVertex(sbp);
 		vid = sbp;
 
 		// Find all the label definitions in the function.
@@ -866,7 +869,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		{
 			// The previous vertex didn't end its basic block.  Therefore, all we have to do is add a simple
 			// fallthrough link to the this vertex.
-			cfg.AddEdge(prev_vertex, vid, new CFGEdgeTypeFallthrough());
+			m_the_cfg->AddEdge(prev_vertex, vid, new CFGEdgeTypeFallthrough());
 		}
 		else
 		{
@@ -905,13 +908,13 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	{
 		// It wasn't, which means it falls through to the EXIT vertex.
 		// Add an edge to the EXIT vertex.
-		cfg.AddEdge(prev_vertex, m_exit_vertex_desc, new CFGEdgeTypeFallthrough());
+		m_the_cfg->AddEdge(prev_vertex, m_exit_vertex_desc, new CFGEdgeTypeFallthrough());
 	}
 
 	std::ofstream debug_file("temp_dotfile.txt");
 
 	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
+	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
 
 	//
 	// At this point, we've created the basic blocks and at the same time added all the fallthrough edges.
@@ -924,7 +927,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	{
 		FlowControlUnlinked *fcl = dynamic_cast<FlowControlUnlinked*>(vd);
 		dlog_cfg << "INFO: Linking " << typeid(*fcl).name() << std::endl;
-		StatementBase* replacement_statement = fcl->ResolveLinks(cfg, vd, label_map);
+		StatementBase* replacement_statement = fcl->ResolveLinks(*m_the_cfg, vd, label_map);
 
 		if(replacement_statement != NULL)
 		{
@@ -934,7 +937,7 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 			//delete fcl;
 			//cfg.ReplaceStatementPtr(vd, replacement_statement);
 			/// @todo This is probably wrong, it probably invalidates the iterator.
-			cfg.ReplaceVertex(vd, replacement_statement);
+			m_the_cfg->ReplaceVertex(vd, replacement_statement);
 		}
 		else
 		{
@@ -946,38 +949,38 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Linking complete." << std::endl;
 
 	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
+	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
 
 	// Now we have to add Impossible in edges for any leader vertices which we haven't already linked above.
 	// This happens in the following cases:
 	//  - Infinite loops
 	//  - Dead code that's been "unlinked" by gcc before we get a chance to look at it.
 	dlog_cfg << "INFO: Adding impossible edges." << std::endl;
-	AddImpossibleEdges(cfg, list_of_leader_info);
+	AddImpossibleEdges(*m_the_cfg, list_of_leader_info);
 	dlog_cfg << "INFO: Impossible edge addition complete." << std::endl;
 
 
 	dlog_cfg << "INFO: Checking for unreachable code." << std::endl;
 	std::vector< ControlFlowGraph::vertex_descriptor > statements_with_no_in_edge;
-	CheckForNoInEdges(cfg, list_of_statements_with_no_in_edge_yet, &statements_with_no_in_edge);
+	CheckForNoInEdges(*m_the_cfg, list_of_statements_with_no_in_edge_yet, &statements_with_no_in_edge);
 	dlog_cfg << "INFO: Check complete." << std::endl;
 
 	// Add self edges to the ENTRY and EXIT vertices.
 	m_entry_vertex_self_edge = new CFGEdgeTypeImpossible;
-	cfg.AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, m_entry_vertex_self_edge);
+	m_the_cfg->AddEdge(m_entry_vertex_desc, m_entry_vertex_desc, m_entry_vertex_self_edge);
 	m_exit_vertex_self_edge = new CFGEdgeTypeImpossible;
-	cfg.AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, m_exit_vertex_self_edge);
+	m_the_cfg->AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, m_exit_vertex_self_edge);
 
 	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
-	FixupBackEdges(cfg, this);
+	FixupBackEdges(*m_the_cfg);
 	dlog_cfg << "INFO: Fix up complete." << std::endl;
 
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;
-	//cfg.RemoveRedundantNodes(this);
+	RemoveRedundantNodes(m_the_cfg);
 	dlog_cfg << "INFO: Redundant node removal complete." << std::endl;
 
 	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
+	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
 
 	return true;
 }
@@ -998,7 +1001,7 @@ void Function::AddImpossibleEdges(ControlFlowGraph & cfg, std::vector<BasicBlock
 		}
 
 		// Link it to its immediate predecessor with an Impossible edge.
-		cfg.AddEdge(p.m_immediate_predecessor, p.m_leader, new CFGEdgeTypeImpossible);
+		m_the_cfg->AddEdge(p.m_immediate_predecessor, p.m_leader, new CFGEdgeTypeImpossible);
 	}
 }
 

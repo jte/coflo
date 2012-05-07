@@ -173,7 +173,7 @@ public:
 			typedef VertexProperty vertex_property_type;
 			typedef typename boost::graph_detail::edge_prop<boost::no_property>::property edge_property_type;
 			typedef typename boost::graph_detail::graph_prop<boost::no_property>::property graph_property_type;
-		//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
+			//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
 		//@}
 
 		/// Mutability

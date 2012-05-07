@@ -37,7 +37,7 @@ typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CA
 /**
  * Class representing a single function in the source.
  */
-class Function
+class Function : boost::noncopyable
 {
 public:
 	Function(TranslationUnit *parent_tu, const std::string &m_function_id);
@@ -55,14 +55,12 @@ public:
 			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 	
 	/**
-	 * Add the control flow graph of this Function to \a cfg.
+	 * Add the statements passed in @a statement_list to the control flow graph of this Function.
 	 * 
-     * @param cfg The ControlFlowGraph to add this function's control-flow graph to.
+     * @param statement_list The list of statements to turn into a control flow graph.
      * @return true on success, false on failure.
      */
-	//bool CreateControlFlowGraph(ControlFlowGraph &cfg);
-	
-	bool CreateControlFlowGraph(ControlFlowGraph &cfg, const std::vector< StatementBase* > &statement_list);
+	bool CreateControlFlowGraph(const std::vector< StatementBase* > &statement_list);
 
 	/**
 	 * Return this Function's identifier.
@@ -208,7 +206,6 @@ private:
 	ControlFlowGraph::edge_descriptor m_exit_vertex_self_edge;
 	
 	ControlFlowGraph *m_the_cfg;
-	//T_CFG *m_cfg;
 
 	/// @name Static properties of this function.
 	/// These are properties of the function determined at analysis-time which are invariant, such as

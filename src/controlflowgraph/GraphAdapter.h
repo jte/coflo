@@ -98,9 +98,10 @@ namespace boost {
 		return u->InEdges();
 	};
 
-	inline std::pair<Graph::vertex_iterator, Graph::vertex_iterator> vertices(const Graph& g)
+	template <typename GraphType>
+	inline std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> vertices(const GraphType& g)
 	{
-		std::pair<Graph::vertex_iterator, Graph::vertex_iterator> retval;
+		std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> retval;
 
 		g.Vertices(&retval);
 
@@ -221,9 +222,8 @@ namespace boost
 
 	/// @name Free functions for implementing the EdgeListGraph concept.
 	//@{
-	std::pair<Graph::edge_iterator, Graph::edge_iterator> edges(const Graph& g);
-	Graph::edges_size_type num_edges(const Graph& g);
-
+		std::pair<Graph::edge_iterator, Graph::edge_iterator> edges(const Graph& g);
+		Graph::edges_size_type num_edges(const Graph& g);
 	//@}
 
 
