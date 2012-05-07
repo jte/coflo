@@ -68,6 +68,7 @@ AT_TESTED([coflo coflotest])
 ###
 AT_BANNER([CoFlo unit tests (coflotest)])
 AT_SETUP([Basic tests])
+AT_KEYWORDS([xUnit])
 AT_CHECK([coflotest],
 	0,
 	ignore,

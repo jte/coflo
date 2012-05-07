@@ -29,7 +29,6 @@
 #include "../../Location.h"
 #include "../Vertex.h"
 //#include "../Edge.h"
-//#include "../DescriptorBaseClass.h"
 
 class Function;
 //class CFGEdgeTypeBase;
@@ -70,9 +69,12 @@ struct CastToCFGEdgeTypeBasePtrReference
 };
 #endif
 
-//typedef DescriptorBaseClass<CFGEdgeTypeBase> CFGEdgeDescriptor;
 typedef CFGEdgeTypeBase* CFGEdgeDescriptor;
 
+/**
+ * Functor for use by the various edge iterators of StatementBase to convert iterators which dereference to
+ * EdgeDescriptors into iterators which dereference to CFGEdgeDescriptors.
+ */
 struct CFGEdgeDescriptorConv
 {
 	CFGEdgeDescriptor operator()(Edge* e) const { return CFGEdgeDescriptor(e); };

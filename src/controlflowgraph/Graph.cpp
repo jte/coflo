@@ -20,6 +20,7 @@
 #include "Graph.h"
 
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "Vertex.h"
 #include "Edge.h"
@@ -39,7 +40,15 @@ Graph::~Graph()
 void Graph::AddVertex(Vertex* v)
 {
 	AssignAVertexIndexToVertex(v);
-	m_vertices.insert(v);
+	bool inserted;
+	boost::tie(boost::tuples::ignore, inserted) = m_vertices.insert(v);
+	if(inserted != true)
+	{
+		// The vertex was not successfully inserted.  This means that either it is now not in the Graph,
+		// or that it was already in the Graph and the caller attempted to add it again.
+		// Either way, we'll throw an exception.
+		BOOST_THROW_EXCEPTION( duplicate_add() );
+	}
 }
 
 void Graph::RemoveVertex(Vertex* v)
@@ -49,10 +58,14 @@ void Graph::RemoveVertex(Vertex* v)
 
 void Graph::ReplaceVertex(Vertex* old_vertex, Vertex* new_vertex)
 {
+	// Add the new vertex to the graph.
 	AddVertex(new_vertex);
+
+	// Move the edges from the old vertex to the new one.
 	old_vertex->TransferOwnedResourcesTo(new_vertex);
+
+	// Remove the old vertex from the graph.
 	RemoveVertex(old_vertex);
-	delete old_vertex;
 }
 
 void Graph::AddEdge(Vertex *source, Vertex *target, Edge* e)

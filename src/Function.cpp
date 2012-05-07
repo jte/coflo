@@ -703,8 +703,8 @@ struct graph_property_writer
 		out << "labeljust = \"l\";" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
-		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetID() << "; }" << std::endl;
-		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetID() << "; }" << std::endl;
+		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetVertexIndex() << "; }" << std::endl;
+		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetVertexIndex() << "; }" << std::endl;
 	}
 
 	ControlFlowGraph &m_g;
@@ -717,15 +717,15 @@ struct graph_property_writer
 class cfg_vertex_property_writer
 {
 public:
-	cfg_vertex_property_writer(ControlFlowGraph &cfg) : m_g(cfg) { };
+	cfg_vertex_property_writer(Graph &cfg) : m_g(cfg) { };
 
-	void operator()(std::ostream& out, const ControlFlowGraph::vertex_descriptor& v)
+	void operator()(std::ostream& out, const Graph::vertex_descriptor& v)
 	{
-		StatementBase *sbp = v;
+		StatementBase *sbp = dynamic_cast<StatementBase*>(v);
 		if (sbp != NULL)
 		{
 			out << "[label=\"";
-			out << v->GetID() << " " << sbp->GetStatementTextDOT();
+			out << v->GetVertexIndex() << " " << sbp->GetStatementTextDOT();
 			out << "\\n" << sbp->GetLocation() << "\"";
 			out << ", color=" << sbp->GetDotSVGColor();
 			out << ", shape=" << sbp->GetShapeTextDOT();
@@ -739,7 +739,7 @@ public:
 private:
 
 	/// The graph whose vertices we're writing the properties of.
-	ControlFlowGraph &m_g;
+	Graph &m_g;
 };
 
 /**
@@ -751,9 +751,9 @@ public:
 	cfg_edge_property_writer(ControlFlowGraph &_g) : m_graph(_g)
 	{
 	}
-	void operator()(std::ostream& out, const ControlFlowGraph::edge_descriptor& e)
+	void operator()(std::ostream& out, const Graph::edge_descriptor& e)
 	{
-		CFGEdgeTypeBase *etb = e;
+		CFGEdgeTypeBase *etb = dynamic_cast<CFGEdgeTypeBase*>(e);
 		// Set the edge attributes.
 		out << "[";
 		out << "label=\"" << etb->GetDotLabel() << "\"";
@@ -770,21 +770,11 @@ private:
 
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
-#if 0 /// @todo FIXME
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
-
-	vertex_filter_predicate the_filter(vpm, this);
-	/*boost::filtered_graph<T_CFG, boost::keep_all, vertex_filter_predicate> graph_of_this_function(
-			*m_cfg, boost::keep_all(), the_filter);*/
-
-	FilteredGraph<boost::keep_all, vertex_filter_predicate> *graph_of_this_function
-		= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
-
 	std::clog << "Creating " << output_filename << std::endl;
 
 	std::ofstream outfile(output_filename.c_str());
 
-	boost::write_graphviz(outfile, graph_of_this_function->GetConstT_CFG(),
+	boost::write_graphviz(outfile, static_cast<const Graph&>(*m_the_cfg),
 			cfg_vertex_property_writer(*m_the_cfg),
 			cfg_edge_property_writer(*m_the_cfg),
 			graph_property_writer(*m_the_cfg, this));
@@ -794,7 +784,6 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 	outfile << "\n}" << std::endl;
 
 	outfile.close();
-#endif
 }
 
 
@@ -830,7 +819,6 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "Creating CFG for Function \"" << m_function_id << "\"" << std::endl;
 
 	m_the_cfg = &cfg;
-	//m_cfg = &cfg.GetT_CFG();
 
 	// Create ENTRY and EXIT vertices.
 	Entry *entry_ptr = new Entry(Location("[" + GetDefinitionFilePath() + " : 0]"));
@@ -920,6 +908,11 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 		cfg.AddEdge(prev_vertex, m_exit_vertex_desc, new CFGEdgeTypeFallthrough());
 	}
 
+	std::ofstream debug_file("temp_dotfile.txt");
+
+	/// @todo DELETEME
+	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
+
 	//
 	// At this point, we've created the basic blocks and at the same time added all the fallthrough edges.
 	// Now we must link the basic blocks together.
@@ -952,6 +945,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	}
 	dlog_cfg << "INFO: Linking complete." << std::endl;
 
+	/// @todo DELETEME
+	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
+
 	// Now we have to add Impossible in edges for any leader vertices which we haven't already linked above.
 	// This happens in the following cases:
 	//  - Infinite loops
@@ -979,6 +975,9 @@ bool Function::CreateControlFlowGraph(ControlFlowGraph & cfg, const std::vector<
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;
 	//cfg.RemoveRedundantNodes(this);
 	dlog_cfg << "INFO: Redundant node removal complete." << std::endl;
+
+	/// @todo DELETEME
+	boost::write_graphviz(debug_file, static_cast<Graph&>(cfg));
 
 	return true;
 }
