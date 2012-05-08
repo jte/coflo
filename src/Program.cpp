@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -87,10 +87,14 @@ bool Program::Parse(const std::vector< std::string > &defines,
 	// Link the function calls.
 	std::cout << "Linking function calls..." << std::endl;
 
+	/// @todo BYPASSING
+	dlog_cfg << "BYPASSING" << std::endl;
+	/*
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
 		tu->Link(m_function_map, unresolved_function_calls);
 	}
+	*/
 
 	// Parsing was successful.
 	return true;

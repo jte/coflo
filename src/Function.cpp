@@ -972,7 +972,7 @@ bool Function::CreateControlFlowGraph(const std::vector< StatementBase* > &state
 	m_the_cfg->AddEdge(m_exit_vertex_desc, m_exit_vertex_desc, m_exit_vertex_self_edge);
 
 	dlog_cfg << "INFO: Fixing up back edges." << std::endl;
-	FixupBackEdges(*m_the_cfg);
+	FixupBackEdges(m_the_cfg, m_entry_vertex_desc);
 	dlog_cfg << "INFO: Fix up complete." << std::endl;
 
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;

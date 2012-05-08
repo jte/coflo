@@ -20,7 +20,8 @@
 #ifndef CFG_ALGS_H
 #define CFG_ALGS_H
 
-class ControlFlowGraph;
+#include "../ControlFlowGraph.h"
+
 class Function;
 
 /**
@@ -29,7 +30,7 @@ class Function;
  * @param g Reference to the ControlFlowGraph to process.
  * @param f
  */
-void FixupBackEdges(ControlFlowGraph &g);
+void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor entry);
 
 void InsertMergeNodes(Function *f);
 

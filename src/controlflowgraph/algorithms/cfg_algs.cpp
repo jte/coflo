@@ -38,7 +38,7 @@
 //typedef boost::property_map<ControlFlowGraph, size_t StatementBase::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
 
 
-void FixupBackEdges(ControlFlowGraph &g)
+void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor entry)
 {
 	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
 	BOOST_CONCEPT_ASSERT((boost::DFSVisitorConcept< BackEdgeFixupVisitor<ControlFlowGraph>, ControlFlowGraph >));
@@ -64,7 +64,7 @@ void FixupBackEdges(ControlFlowGraph &g)
 	// search strategy being a simple depth-first search.
 	// Locate all the back edges, and send the fix-up info back to the back_edges
 	// std::vector<> above.
-	boost::depth_first_search(g, back_edge_finder, color_property_map);
+	boost::depth_first_search(*g, back_edge_finder, color_property_map, entry);
 	//boost::depth_first_search(g, boost::visitor(back_edge_finder));
 
 
@@ -77,7 +77,7 @@ void FixupBackEdges(ControlFlowGraph &g)
 
 		// Change this edge type to a back edge.
 		e->MarkAsBackEdge(true);
-		g[e]->MarkAsBackEdge(true);
+		(*g)[e]->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
 		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<ControlFlowGraph>::null_vertex())
@@ -89,14 +89,14 @@ void FixupBackEdges(ControlFlowGraph &g)
 		// If the source node of this back edge now has no non-back-edge out-edges,
 		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
 		ControlFlowGraph::vertex_descriptor src;
-		src = /*boost::*/source(e, g);
-		if (/*boost::*/out_degree(src, g) == 1)
+		src = /*boost::*/source(e, *g);
+		if (/*boost::*/out_degree(src, *g) == 1)
 		{
 			/*ControlFlowGraph::edge_descriptor newedge;
 			boost::tie(newedge, boost::tuples::ignore) =
 					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
 			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
-			g.AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
+			g->AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
 			dlog_cfg << "Retargetting back edge " << e->GetDescriptorIndex()
 					<< " to "
@@ -373,6 +373,8 @@ void RemoveRedundantNodes(ControlFlowGraph *g)
 		g->RemoveVertex(i);
 		delete i;
 	}
+
+	dlog_cfg << "INFO: Redundant vertices removed: " << vertices_to_remove.size() << std::endl;
 }
 
 
