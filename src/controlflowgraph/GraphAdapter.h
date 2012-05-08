@@ -68,32 +68,40 @@ namespace boost {
 //@{
 //namespace boost
 //{
-	inline Graph::vertex_descriptor target(const Graph::edge_descriptor &e, const Graph &/*g*/)
+	template <typename GraphType>
+	inline typename boost::graph_traits<GraphType>::vertex_descriptor target(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
 	{
-		return VertexDescriptor(e->Target());
+		return typename GraphType::vertex_descriptor(e->Target());
 	};
 
-	inline Graph::vertex_descriptor source(const Graph::edge_descriptor &e, const Graph &/*g*/)
+	template <typename GraphType>
+	inline typename boost::graph_traits<GraphType>::vertex_descriptor source(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
 	{
-		return VertexDescriptor(e->Source());
+		return typename GraphType::vertex_descriptor(e->Source());
 	};
 
-	inline Graph::degree_size_type out_degree(Graph::vertex_descriptor u, const Graph& /*g*/)
+	template <typename GraphType>
+	inline typename GraphType::degree_size_type out_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
 	{
 		return u->OutDegree();
 	};
 
-	inline Graph::degree_size_type in_degree(Graph::vertex_descriptor u, const Graph& /*g*/)
+	template <typename GraphType>
+	inline typename GraphType::degree_size_type in_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
 	{
 		return u->InDegree();
 	};
 
-	inline std::pair<Graph::out_edge_iterator, Graph::out_edge_iterator> out_edges(Graph::vertex_descriptor u, const Graph &/*g*/)
+	template <typename GraphType>
+	inline std::pair<typename GraphType::out_edge_iterator, typename GraphType::out_edge_iterator>
+	out_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 	{
 		return u->OutEdges();
 	};
 
-	inline std::pair<Graph::in_edge_iterator, Graph::in_edge_iterator> in_edges(Graph::vertex_descriptor u, const Graph &/*g*/)
+	template <typename GraphType>
+	inline std::pair<typename GraphType::in_edge_iterator, typename GraphType::in_edge_iterator>
+	in_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 	{
 		return u->InEdges();
 	};
@@ -114,7 +122,7 @@ namespace boost {
 	};
 
 	// VertexIndexGraphConcept requires this.
-	inline void renumber_vertex_indices(Graph &g) {};
+	inline void renumber_vertex_indices(Graph &/*g*/) {};
 
 	/// Vertex index (vertex_index_t) property map.
 	class Graph_vertex_index_map
@@ -201,21 +209,25 @@ namespace boost
 
 	inline void remove_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, Graph &g)
 	{
+		u=u; v=v; g=g;
 		BOOST_THROW_EXCEPTION( not_implemented() );
 	};
 
 	inline void remove_edge(Graph::edge_descriptor e, Graph &g)
 	{
+		e=e; g=g;
 		BOOST_THROW_EXCEPTION( not_implemented() );
 	};
 
 	inline void clear_vertex(Graph::vertex_descriptor u, Graph &g)
 	{
+		u=u; g=g;
 		BOOST_THROW_EXCEPTION( not_implemented() );
 	};
 
 	inline void remove_vertex(Graph::vertex_descriptor u, Graph &g)
 	{
+		u=u; g=g;
 		BOOST_THROW_EXCEPTION( not_implemented() );
 	};
 	//@}
