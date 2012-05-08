@@ -43,62 +43,9 @@ class Function;
 /// @name Control Flow Graph definitions.
 //@{
 
-/// Vertex properties for the CFG graph.
-struct CFGVertexProperties
-{
-	/// The Statement at this vertex of the CFG.
-	StatementBase *m_statement;
-	
-	/// The Function which contains this vertex.
-	Function *m_containing_function;
-};
-
-typedef boost::property<boost::vertex_index_t, size_t,
-		boost::property<boost::vertex_bundle_t, CFGVertexProperties> > T_CFG_VERTEX_PROPERTIES;
-
-
-/// Edge properties for the CFG graph.
-struct CFGEdgeProperties
-{
-	/// The Edge Type.
-	/// May be a FunctionCall, fallthrough, goto, etc.
-	CFGEdgeTypeBase *m_edge_type;
-};
-
-/*
-/// Typedef for the CFG graph.
-typedef boost::adjacency_list
-		<
-		/// Selector type to specify the out edge list storage type.
-		boost::listS,
-		/// Selector type to specify the Vertex list storage type.
-		/// @todo REMOVE: boost::vecS,
-		boost::listS,
-		/// Selector type to specify the directedness of the graph.
-		boost::bidirectionalS,
-		/// The Vertex properties type.
-		T_CFG_VERTEX_PROPERTIES,
-		/// The Edge properties type.
-		CFGEdgeProperties
-		> T_CFG;
-*/
-
 // Forward declare the FilteredGraph class template.
 template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
 class FilteredGraph;
-
-/*
-struct CastToStatementBaseReference
-{
-	StatementBase*& operator()(Vertex* const &v) const
-	{
-		return (StatementBase*&)v;
-	};
-
-	/// This is for boost::result_of().
-	typedef StatementBase*& result_type;
-};
-*/
 
 /// The vertex descriptor type for ControlFlowGraphs.
 //typedef DescriptorBaseClass<StatementBase> CFGVertexDescriptor;
@@ -208,12 +155,6 @@ private:
 /// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
 
-
-	ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/);
-	ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/);
-	inline ControlFlowGraph::degree_size_type out_degree(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph& /*g*/) { return u->OutDegree(); };
-	inline ControlFlowGraph::degree_size_type in_degree(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph& /*g*/) { return u->InDegree(); };
-
 	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
 		out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
 	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
@@ -221,6 +162,8 @@ private:
 
 	//std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(ControlFlowGraph& g) { return vertices(g); };
 	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g);
+
+
 #if 0
 namespace boost
 {
