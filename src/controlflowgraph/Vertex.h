@@ -30,9 +30,7 @@
 class Graph;
 //class Edge;
 #include "Edge.h"
-#include "DescriptorBaseClass.h"
 
-//typedef DescriptorBaseClass<Edge> EdgeDescriptor;
 typedef Edge* EdgeDescriptor;
 
 
