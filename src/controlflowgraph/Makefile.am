@@ -25,12 +25,10 @@ libcontrolflowgraph_a_SOURCES = \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
-	DescriptorBaseClass.cpp DescriptorBaseClass.h \
 	Edge.cpp Edge.h \
 	Graph.cpp Graph.h \
 	GraphAdapter.cpp GraphAdapter.h \
 	Vertex.cpp Vertex.h \
-	VertexDescriptor.cpp VertexDescriptor.h \
 	VertexID.cpp VertexID.h
 
 #	ControlFlowGraphTemplateHelper.h \#
@@ -45,8 +43,8 @@ GTESTDIR = /home/Gary/src/gtest-1.6.0
 check_LIBRARIES =  libcontrolflowgraphtest.a
 libcontrolflowgraphtest_a_SOURCES = \
 	GraphTest.cpp GraphTest.h \
-	ControlFlowGraph_test.cpp \
-	VertexDescriptor_test.cpp
+	ControlFlowGraph_test.cpp
+	
 libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraphtest_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraphtest_a_CXXFLAGS = $(AM_CXXFLAGS)
