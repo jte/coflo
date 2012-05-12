@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -34,7 +34,7 @@ class enum_class_name \
 {\
 public:\
 	/** The underlying value type, which is still an enum. */ \
-	enum value_type { __VA_ARGS__ };\
+	enum value_type { enum_class_name##UNINITIALIZED, __VA_ARGS__ };\
 \
 	enum_class_name() {};\
 	enum_class_name(value_type value) : m_value(value) {};\

@@ -54,42 +54,6 @@
 
 #include "gcc_gimple_parser.h"
 
-/// Property map typedef which allows us to get at the edge type pointer stored at
-/// CFGEdgeProperties::m_edge_type in the T_CFG.
-//typedef boost::property_map<T_CFG, CFGEdgeTypeBase* CFGEdgeProperties::*>::type T_EDGE_TYPE_PROPERTY_MAP;
-
-#if 0
-/**
- * Predicate for filtering the CFG for only the vertices of the given function.
- */
-struct vertex_filter_predicate
-{
-	vertex_filter_predicate()
-	{
-	};
-	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vertex_prop_map,
-			Function *parent_function) :
-			m_vertex_prop_map(vertex_prop_map),
-			m_parent_function(parent_function)
-	{
-	};
-	bool operator()(const T_CFG_VERTEX_DESC& vid) const
-	{
-		if (m_parent_function == get(m_vertex_prop_map, vid))
-		{
-			// This vertex belongs to the function we're concerned with.
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	};
-
-	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
-	Function *m_parent_function;
-};
-#endif
 
 Function::Function(TranslationUnit *parent_tu, const std::string &function_id)
 {
@@ -130,6 +94,10 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 	boost::graph_traits<ControlFlowGraph>::vertex_iterator vit, vend;
 	boost::tie(vit, vend) = vertices(*m_the_cfg);
 
+	typedef boost::graph_traits<ControlFlowGraph>::vertex_descriptor T_VERTEX_DESC;
+	typedef std::pair<T_VERTEX_DESC, T_VERTEX_DESC> T_VERTEX_DESCRIPTOR_PAIR;
+	std::vector<T_VERTEX_DESCRIPTOR_PAIR> vertex_replacement_info;
+
 	for (; vit != vend; vit++)
 	{
 		FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*vit);
@@ -152,11 +120,23 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 
 				// Replace the FunctionCallUnresolved with a FunctionCallResolved.
 				FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
-				dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
-				m_the_cfg->ReplaceVertex(*vit, fcr);
-				dlog_cfg << "INFO: Replaced Vertex." << std::endl;
+
+				// Add the vertexes to the replacement info list.  We can't do the replacement here
+				// because the iterators would be invalidated.
+				vertex_replacement_info.push_back(std::make_pair(*vit, fcr));
+				//dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
+				//m_the_cfg->ReplaceVertex(*vit, fcr);
+				//dlog_cfg << "INFO: Replaced Vertex." << std::endl;
 			}
 		}
+	}
+
+	// Now replace the unlinked vertices with the linked ones.
+	BOOST_FOREACH(T_VERTEX_DESCRIPTOR_PAIR p, vertex_replacement_info)
+	{
+		dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
+		m_the_cfg->ReplaceVertex(p.first, p.second);
+		dlog_cfg << "INFO: Replaced Vertex." << std::endl;
 	}
 }
 
