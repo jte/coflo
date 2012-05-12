@@ -49,15 +49,19 @@ void Vertex::CopyFrom(Vertex* other)
 
 void Vertex::TransferOwnedResourcesTo(Vertex* other)
 {
+	// Point the in edges of this Vertex to the other Vertex.
 	BOOST_FOREACH(Edge *i, m_in_edges)
 	{
 		i->SetTarget(other);
 	}
+
+	// Point the out edges of this Vertex to the other Vertex.
 	BOOST_FOREACH(Edge *i, m_out_edges)
 	{
 		i->SetSource(other);
 	}
 
+	// Swap edge lists between the two vertices.
 	m_in_edges.swap(other->m_in_edges);
 	m_out_edges.swap(other->m_out_edges);
 }

@@ -125,26 +125,15 @@ bool Function::IsCalled() const
 void Function::Link(const std::map<std::string, Function*> &function_map,
 		T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
 {
-	//T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = m_the_cfg->GetPropMap_ContainingFunction();
+	// Iterate over all the vertices in this CFG, looking for FunctionCallUnresolved's.
 
-	/*vertex_filter_predicate the_filter(vpm, this);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
-			vertex_filter_predicate> T_FILTERED_CFG;
-	T_FILTERED_CFG graph_of_this_function(*m_cfg, boost::keep_all(),
-			the_filter);*/
+	boost::graph_traits<ControlFlowGraph>::vertex_iterator vit, vend;
+	boost::tie(vit, vend) = vertices(*m_the_cfg);
 
-	//typedef FilteredGraph<boost::keep_all, vertex_filter_predicate> T_FG;
-	//T_FG *graph_of_this_function
-	//		= ((OverallControlFlowGraph*)m_the_cfg)->CreateFilteredGraph<boost::keep_all, vertex_filter_predicate>(boost::keep_all(), the_filter);
-
-	//boost::graph_traits<T_FG::underlying_graph_type_t>::vertex_iterator vit, vend;
-	ControlFlowGraph::vertex_iterator vit, vend;
-	//boost::tie(vit, vend) = graph_of_this_function->Vertices();
-	m_the_cfg->Vertices(&vit, &vend);
 	for (; vit != vend; vit++)
 	{
 		FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*vit);
-				//dynamic_cast<FunctionCallUnresolved*>((*m_cfg)[*vit].m_statement);
+
 		if (fcu != NULL)
 		{
 			std::map<std::string, Function*>::const_iterator it;
@@ -160,92 +149,12 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 			else
 			{
 				// Found it.
+
 				// Replace the FunctionCallUnresolved with a FunctionCallResolved.
-				FunctionCallResolved *fcr = new FunctionCallResolved(it->second,
-						fcu);
-				// Delete the FunctionCallUnresolved object...
-				//delete fcu;
-				// ...and replace it with the FunctionCallResolved object.
-				//(*m_cfg)[*vit].m_statement = fcr;
-				//m_the_cfg->ReplaceStatementPtr(*vit, fcr);
+				FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
+				dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
 				m_the_cfg->ReplaceVertex(*vit, fcr);
-
-				// Now add the appropriate CFG edges.
-				// The FunctionCall->Function->entrypoint edge.
-				CFGEdgeTypeFunctionCall *call_edge_type =
-						new CFGEdgeTypeFunctionCall(fcr);
-				ControlFlowGraph::edge_descriptor new_edge_desc;
-				bool ok;
-
-				/*new_edge_desc =*/ m_the_cfg->AddEdge(*vit, it->second->GetEntryVertexDescriptor(), call_edge_type);
-				new_edge_desc = call_edge_type;
-				/*
-				boost::tie(new_edge_desc, ok) = boost::add_edge(*vit,
-						it->second->GetEntryVertexDescriptor(), *m_cfg);
-				if (ok)
-				{
-					// Edge was added OK, let's connect the edge properties.
-					(*m_cfg)[new_edge_desc].m_edge_type = call_edge_type;
-				}
-				else
-				{
-					// We couldn't add the edge.  This should never happen.
-					std::cerr << "ERROR: Can't add call edge." << std::endl;
-				}
-				*/
-
-				// Add the return edge.
-				// The return edge goes from the EXIT of the called function to
-				// the node in the CFG which is after the FunctionCall.  There is
-				// only ever one normal (i.e. fallthrough) edge from the FunctionCall
-				// to the next statement in its containing function.
-				ControlFlowGraph::edge_descriptor function_call_out_edge;
-
-				boost::tie(function_call_out_edge, ok) = (*vit)->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>();
-				if (!ok)
-				{
-					// Couldn't find the return.
-					std::cerr
-							<< "ERROR: COULDN'T FIND OUT EDGE OF TYPE CFGEdgeTypeFallthrough"
-							<< std::endl;
-					std::cerr << "Edges found are:" << std::endl;
-					//PrintOutEdgeTypes(*vit, *m_cfg);
-				}
-
-				/*boost::tie(new_edge_desc, ok) = boost::add_edge(
-						it->second->GetExitVertexDescriptor(),
-						boost::target(function_call_out_edge, *m_cfg), *m_cfg);
-						*/
-				//if (ok)
-				//{
-					// Return edge was added OK.  Create and connect the edge's properties.
-					CFGEdgeTypeReturn *return_edge_type = new CFGEdgeTypeReturn(fcr);
-					//(*m_cfg)[new_edge_desc].m_edge_type = return_edge_type;
-					// Copy the fallthrough edge's properties to the newly-added return edge.
-					/// @todo Find a cleaner way to do this.
-					//return_edge_type->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
-					return_edge_type->CopyBasePropertiesFrom(*function_call_out_edge);
-
-					// Change the type of FunctionCall's out edge to a "FunctionCallBypass".
-					// For graphing just the function itself, we'll look at these edges and not the
-					// call/return edges.
-					CFGEdgeTypeFunctionCallBypass *fcbp = new CFGEdgeTypeFunctionCallBypass();
-					// Copy the fallthrough edge's properties to its replacement.
-					/// @todo Find a cleaner way to do this.
-					//fcbp->MarkAsBackEdge((*m_cfg)[function_call_out_edge].m_edge_type->IsBackEdge());
-					fcbp->CopyBasePropertiesFrom(*function_call_out_edge);
-					//delete (*m_cfg)[function_call_out_edge].m_edge_type;
-					//(*m_cfg)[function_call_out_edge].m_edge_type = fcbp;
-					BOOST_THROW_EXCEPTION( not_implemented() );
-					/// @todo FIXME m_the_cfg->ReplaceEdgeTypePtr(function_call_out_edge, fcbp);
-				/*}
-				else
-				{
-					// We couldn't add the edge.  This should never happen.
-					std::cerr << "ERROR: Can't add return edge." << std::endl;
-				}*/
-				m_the_cfg->AddEdge(it->second->GetExitVertexDescriptor(), function_call_out_edge->Target(), return_edge_type);
-				new_edge_desc = return_edge_type;
+				dlog_cfg << "INFO: Replaced Vertex." << std::endl;
 			}
 		}
 	}
