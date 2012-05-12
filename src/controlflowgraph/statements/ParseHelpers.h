@@ -104,7 +104,7 @@ private:
 class IfUnlinked : public FlowControlUnlinked
 {
 public:
-	IfUnlinked() : FlowControlUnlinked() {};
+	IfUnlinked() : FlowControlUnlinked(), m_true(NULL), m_false(NULL) {};
 	IfUnlinked(const Location &loc, const std::string &condition,
 			GotoUnlinked *goto_true, GotoUnlinked *goto_false) : FlowControlUnlinked(loc)
 	{
