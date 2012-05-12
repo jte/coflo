@@ -153,7 +153,7 @@ void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP 
 	bool only_list_ids = true;
 
 	// See if we have any unresolved calls.
-	if(unresolved_function_calls->size() > 0)
+	if(!unresolved_function_calls->empty())
 	{
 		// We couldn't link some function calls.
 		std::cout << "WARNING: Unresolved function calls:" << std::endl;
