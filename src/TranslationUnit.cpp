@@ -44,7 +44,7 @@
 
 #include "libexttools/ToolCompiler.h"
 
-#include "gcc_gimple_parser.h"
+#include "parsers/gcc_gimple_parser.h"
 
 using namespace boost;
 using namespace boost::filesystem;
