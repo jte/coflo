@@ -52,7 +52,7 @@
 
 #include "libexttools/ToolDot.h"
 
-#include "gcc_gimple_parser.h"
+#include "parsers/gcc_gimple_parser.h"
 
 
 Function::Function(TranslationUnit *parent_tu, const std::string &function_id)

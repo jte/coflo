@@ -16,20 +16,10 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug_utils libexttools
+SUBDIRS = controlflowgraph debug_utils libexttools parsers
 
-# Make sure to distribute the Doxygen configuration file and the parser built source.
+# Make sure to distribute the Doxygen configuration file.
 EXTRA_DIST = Doxyfile 
-# @todo Currently we need to have DParser installed in order to build (need its library), so there's
-# not much point in distributing the .cpp files it generates.  We'll put this back once we figure out how to
-# avoid the configure-time dependency on an installed DParser.
-#$(srcdir)/gcc_gimple_parser.cpp
-
-# The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files.
-# @todo Put this back once we figure out how to avoid the configure-time dependency on an installed DParser.  For now we're
-# always building them, so they go in MOSTLYCLEANFILES.
-#MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp
-MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug
 
 COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
@@ -39,19 +29,11 @@ COMMONSOURCES = Function.cpp Function.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
 	UEI.cpp UEI.h \
-	safe_enum.h \
-	\
-	gcc_gimple_parser.g gcc_gimple_parser.h
+	safe_enum.h
 
 # The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp $(COMMONSOURCES)
-
-	
-# Path to the make_dparser executable.
-PROG_ABSPATH_MAKE_DPARSER = $(top_builddir)/third_party/make_dparser
-# Flags for make_dparser.
-DPARSER_FLAGS = --verbose=2 --debug --ext=cpp --grammar_ident=gcc_gimple_parser
 
 # Collect all the Boost libraries we found into a single variable.
 if BOOST_USE_BUILT_BOOST
@@ -69,6 +51,7 @@ ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LI
 endif
 
 NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
+	./parsers/libparsers.a \
 	./controlflowgraph/analysis/libanalysis.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
@@ -99,7 +82,7 @@ gtest-all.cc: $(GTESTDIR)/src/gtest-all.cc
 	cp $< $@
 
 BUILT_SOURCES = gtest-all.cc
-MOSTLYCLEANFILES += gtest-all.cc
+MOSTLYCLEANFILES = gtest-all.cc
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
@@ -111,22 +94,3 @@ coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
 coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(CPPUNIT_LIBS) $(ALLBOOSTLIBS)
-
-
-# Suffix for DParser grammars.
-SUFFIX = .g
-
-# Rule to make *.cpp from *.g using DParser.
-# Note:
-# - The output file (*.cpp) is built source, but we don't want the user to have to have dparser installed,
-# so it is created under $(srcdir) and gets distributed.
-# - @TODO Actually, at the moment we're going to require the user to have DParser, so we won't do either.
-# - The intermediate file in the rule below, *.g.gdebug, is generated under $(bindir) so as not to cause "make distcheck" to fail.
-.g.cpp:
-	TARGET="$$(basename "$@")" && \
-	SOURCE="$(srcdir)/$$(basename "$<")" && \
-	INTER="$$(basename "$<").gdebug" && \
-	"$(PROG_ABSPATH_MAKE_DPARSER)" $(DPARSER_FLAGS) "$${SOURCE}" --output="$${INTER}" && \
-	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
-	mv "$${TARGET}-temp" "$${TARGET}"
-

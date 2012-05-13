@@ -315,6 +315,7 @@ AC_CONFIG_FILES([Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile
 	src/controlflowgraph/visitors/Makefile
+	src/parsers/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
 	third_party/Makefile])
