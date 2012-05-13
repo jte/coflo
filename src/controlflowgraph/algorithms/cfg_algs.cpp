@@ -31,13 +31,6 @@
 #include "../edges/CFGEdgeTypeImpossible.h"
 
 
-/// Property map typedef for property maps which allow us to get at the function pointer stored at
-/// CFGVertexProperties::m_containing_function in the T_CFG.
-//typedef boost::property_map<ControlFlowGraph, Function* StatementBase::*>::type T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION;
-
-//typedef boost::property_map<ControlFlowGraph, size_t StatementBase::*>::type T_VERTEX_PROPERTY_MAP_INDEX;
-
-
 void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor entry)
 {
 	// Check that BackEdgeFixupVisitor models DFSVisitorConcept.
@@ -77,7 +70,6 @@ void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor ent
 
 		// Change this edge type to a back edge.
 		e->MarkAsBackEdge(true);
-		(*g)[e]->MarkAsBackEdge(true);
 
 		// Skip the rest if this is a self edge.
 		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<ControlFlowGraph>::null_vertex())
@@ -92,10 +84,6 @@ void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor ent
 		src = /*boost::*/source(e, *g);
 		if (/*boost::*/out_degree(src, *g) == 1)
 		{
-			/*ControlFlowGraph::edge_descriptor newedge;
-			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, fixinfo.m_impossible_target_vertex, g);
-			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;*/
 			g->AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
 			dlog_cfg << "Retargetting back edge " << e->GetDescriptorIndex()
@@ -324,9 +312,11 @@ void RemoveRedundantNodes(ControlFlowGraph *g)
 	for(;it != it2; ++it)
 	{
 		StatementBase *sbp = *it;
-		if(sbp->IsType<Goto>())
+
+		if(sbp->IsType<Goto>() || (sbp->IsType<Label>() && (dynamic_cast<Label*>(sbp)->GetIdentifier())[0] == '<'))
 		{
-			// This is a Goto.  Check if it's redundant.
+			// This is a Goto or a compiler-generated Label (i.e. "<D.1234>").  Check if it's redundant.
+			/// @todo Find a better way to handle the detection of compiler-generated Labels.
 			if(/*boost::*/in_degree(*it, *g)==1 && /*boost::*/out_degree(*it, *g)==1)
 			{
 				// It's redundant.
