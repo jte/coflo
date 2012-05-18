@@ -73,12 +73,16 @@ coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 coflo_LDADD = $(NORMALLIBS) $(ALLBOOSTLIBS)
 
 
-# Automake rules for the coflotest unit test executable.
+###
+### Automake rules for the coflotest unit test executable.
+###
 
 TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
-GTESTDIR = /home/Gary/src/gtest-1.6.0
 
-gtest-all.cc: $(GTESTDIR)/src/gtest-all.cc
+# For Google Test, we need the following to be defined by configure:
+# - GTEST_ROOT: The directory of source distribution.
+
+gtest-all.cc: $(GTEST_ROOT)/src/gtest-all.cc
 	cp $< $@
 
 BUILT_SOURCES = gtest-all.cc
@@ -86,7 +90,7 @@ MOSTLYCLEANFILES = gtest-all.cc
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
-coflotest_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
