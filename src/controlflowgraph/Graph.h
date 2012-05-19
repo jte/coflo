@@ -33,7 +33,7 @@
 //class Edge;
 #include "DescriptorBaseClass.h"
 
-//typedef DescriptorBaseClass<Vertex> VertexDescriptor;
+/// The vertex descriptor for Graphs is simply a Vertex pointer.
 typedef Vertex* VertexDescriptor;
 
 struct VertexDescriptorConv
