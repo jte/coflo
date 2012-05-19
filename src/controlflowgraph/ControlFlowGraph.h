@@ -160,64 +160,10 @@ private:
 	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
 		in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
 
+
 	//std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(ControlFlowGraph& g) { return vertices(g); };
 	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g);
 
-
-#if 0
-namespace boost
-{
-	/// Property map traits specializations.
-	template <>
-	struct property_map<ControlFlowGraph, vertex_index_t>
-	{
-		typedef Graph_vertex_index_map type;
-		typedef const Graph_vertex_index_map const_type;
-	};
-	template <>
-	struct property_map<const ControlFlowGraph, vertex_index_t>
-	{
-		typedef const Graph_vertex_index_map const_type;
-	};
-}
-#endif
-
-#if 0
-	// Vertex ID
-	class ControlFlowGraph_vertex_id_map
-		: public boost::put_get_helper<long, ControlFlowGraph_vertex_id_map>
-	{
-	public:
-		typedef boost::readable_property_map_tag category;
-		typedef long value_type;
-		typedef long reference;
-		typedef Vertex* key_type;
-		//Graph_vertex_id_map() : m_g(0) { }
-		ControlFlowGraph_vertex_id_map(const ControlFlowGraph& g) : m_g(g) { }
-		long operator[](StatementBase* v) const { return (long)v /*- m_g->vertices*/; }
-	protected:
-		const ControlFlowGraph& m_g;
-	};
-	inline ControlFlowGraph_vertex_id_map get(boost::vertex_index_t, const ControlFlowGraph& g)
-	{
-		return ControlFlowGraph_vertex_id_map(g);
-	}
-
-	/// Property map traits classes.
-	template <>
-	struct property_map<ControlFlowGraph&, boost::vertex_index_t>
-	{
-		typedef ControlFlowGraph_vertex_id_map type;
-		typedef ControlFlowGraph_vertex_id_map const_type;
-	};
-	template <>
-	struct property_map<const ControlFlowGraph&, boost::vertex_index_t>
-	{
-		typedef ControlFlowGraph_vertex_id_map const_type;
-	};
-
-	inline ControlFlowGraph_vertex_id_map get(boost::vertex_index_t, const ControlFlowGraph& g);
-#endif
 
 	inline void checker(ControlFlowGraph&)
 	{
