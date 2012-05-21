@@ -19,11 +19,18 @@
 #define GRAPHADAPTER_H
 
 #include "Graph.h"
+#include "ControlFlowGraph.h"
+
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
+
 #include "coflo_exceptions.hpp"
 
 /// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
 
+/// @name Functions for the IncidenceGraph concept.
+///@{
 template <typename GraphType>
 inline typename boost::graph_traits<GraphType>::vertex_descriptor target(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
 {
@@ -43,17 +50,22 @@ inline typename GraphType::degree_size_type out_degree(typename GraphType::verte
 };
 
 template <typename GraphType>
-inline typename GraphType::degree_size_type in_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
-{
-	return u->InDegree();
-};
-
-template <typename GraphType>
 inline std::pair<typename GraphType::out_edge_iterator, typename GraphType::out_edge_iterator>
 out_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 {
 	return u->OutEdges();
 };
+
+///@}
+
+/// @name The BidirectionalGraph concept adds these.
+///@
+template <typename GraphType>
+inline typename GraphType::degree_size_type in_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
+{
+	return u->InDegree();
+};
+
 
 template <typename GraphType>
 inline std::pair<typename GraphType::in_edge_iterator, typename GraphType::in_edge_iterator>
@@ -61,6 +73,10 @@ in_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 {
 	return u->InEdges();
 };
+///@}
+
+/// @name the VertexListGraph concept adds these to the Graph concept.
+///@{
 
 template <typename GraphType>
 inline std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> vertices(const GraphType& g)
@@ -78,43 +94,61 @@ inline typename GraphType::vertices_size_type num_vertices(const GraphType& g)
 	return g.NumVertices();
 };
 
+///@}
+
 // VertexIndexGraphConcept requires this.
 inline void renumber_vertex_indices(Graph &/*g*/) {};
 
-/// Vertex index (vertex_index_t) property map.
-class Graph_vertex_index_map
+/// Index property map (for vertex_index_t and edge_index_t).
+template <typename VertexOrEdgeDescriptorType>
+class Generic_index_map
 {
 public:
 	typedef boost::readable_property_map_tag category;
 	typedef std::size_t value_type;
 	typedef std::size_t reference;
-	typedef Graph::vertex_descriptor key_type;
-	Graph_vertex_index_map() /*: m_g(0)*/ { };
-	Graph_vertex_index_map(const Graph& /*g*/) /*: m_g(&g)*/ { }
-	Graph_vertex_index_map(const Graph_vertex_index_map& /*other*/) {};
+	typedef VertexOrEdgeDescriptorType key_type;
+	Generic_index_map() /*: m_g(0)*/ { };
+	Generic_index_map(const Graph& /*g*/) /*: m_g(&g)*/ { }
+	Generic_index_map(const Generic_index_map& /*other*/) {};
 	//reference operator[](const key_type v) const { return (*v)->GetVertexIndex(); };
 protected:
 	//const Graph* m_g;
 };
 
-inline Graph_vertex_index_map::reference get(const Graph_vertex_index_map& /*pmap*/,  const Graph_vertex_index_map::key_type& key)
+template <typename VertexOrEdgeDescriptorType>
+inline typename Generic_index_map<VertexOrEdgeDescriptorType>::reference get(const Generic_index_map<VertexOrEdgeDescriptorType>& /*pmap*/,
+		const typename Generic_index_map<VertexOrEdgeDescriptorType>::key_type& key)
 {
-	return key->GetVertexIndex();
+	return key->GetIndex();
 };
 
+typedef Generic_index_map<Graph::vertex_descriptor> Graph_vertex_index_map;
+typedef Generic_index_map<Graph::edge_descriptor> Graph_edge_index_map;
+
+#if 0
 inline Graph_vertex_index_map get(boost::vertex_index_t, Graph& g)
 {
 	return Graph_vertex_index_map(g);
 };
+inline Graph_edge_index_map get(boost::edge_index_t, Graph& g)
+{
+	return Graph_edge_index_map(g);
+};
+#endif
 
 inline Graph_vertex_index_map get(boost::vertex_index_t, const Graph& g)
 {
 	return Graph_vertex_index_map(g);
 };
-
-inline long get(boost::vertex_index_t, const Graph& /*g*/, Graph::vertex_descriptor v)
+inline Graph_edge_index_map get(boost::edge_index_t, const Graph& g)
 {
-	return v->GetVertexIndex();
+	return Graph_edge_index_map(g);
+};
+
+inline std::size_t get(boost::vertex_index_t, const Graph& /*g*/, Graph::vertex_descriptor v)
+{
+	return v->GetIndex();
 };
 
 namespace boost
@@ -170,10 +204,10 @@ inline void remove_edge(Graph::vertex_descriptor u, Graph::vertex_descriptor v, 
 	BOOST_THROW_EXCEPTION( not_implemented() );
 };
 
-inline void remove_edge(Graph::edge_descriptor e, Graph &g)
+template <typename GraphType>
+inline void remove_edge(typename GraphType::edge_descriptor e, GraphType &g)
 {
-	e=e; g=g;
-	BOOST_THROW_EXCEPTION( not_implemented() );
+	g.RemoveEdge(e);
 };
 
 inline void clear_vertex(Graph::vertex_descriptor u, Graph &g)
@@ -182,10 +216,13 @@ inline void clear_vertex(Graph::vertex_descriptor u, Graph &g)
 	BOOST_THROW_EXCEPTION( not_implemented() );
 };
 
-inline void remove_vertex(Graph::vertex_descriptor u, Graph &g)
+typedef void (Graph::*GraphMemberFunction)(typename Graph::vertex_descriptor);
+
+template <typename GraphType>
+inline /*typename boost::enable_if<typename GraphType::is_derived_from_Graph_t, void>::type*/ void
+remove_vertex(typename GraphType::vertex_descriptor u, GraphType &g)
 {
-	u=u; g=g;
-	BOOST_THROW_EXCEPTION( not_implemented() );
+	g.RemoveVertex(u);
 };
 //@}
 

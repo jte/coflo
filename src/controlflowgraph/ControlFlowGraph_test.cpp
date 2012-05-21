@@ -79,7 +79,7 @@ TEST_F(ControlFlowGraphTest, AddVertsAndEdge)
 	g->AddVertex(v2);
 
 	// Check to be sure the vertices have different vertex indices.
-	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+	EXPECT_NE(v1->GetIndex(), v2->GetIndex());
 
 	EXPECT_EQ(g->NumVertices(), 2);
 
@@ -136,7 +136,7 @@ TEST_F(ControlFlowGraphTest, AddVertsAndEdgeBoost)
 	g->AddVertex(v2);
 
 	// Check to be sure the vertices have different vertex indices.
-	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+	EXPECT_NE(v1->GetIndex(), v2->GetIndex());
 
 	EXPECT_EQ(g->NumVertices(), 2);
 

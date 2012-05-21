@@ -46,13 +46,15 @@ public:
 	void SetTarget(Vertex *target);
 
 	/// @todo Friend this only to DescriptorBaseClass.
-	/// @bug Make this return a real index.
 	/// This is for the use of the DescriptorBaseClass.
-	std::size_t GetDescriptorIndex() const { return 0; };
+	std::size_t GetIndex() const { return m_edge_index; };
 
 private:
 	Vertex *m_source;
 	Vertex *m_target;
+
+	// This Edge's index.
+	std::size_t m_edge_index;
 };
 
 #endif /* EDGE_H_ */

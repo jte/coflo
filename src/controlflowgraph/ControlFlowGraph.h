@@ -52,13 +52,15 @@ class FilteredGraph;
 typedef StatementBase* CFGVertexDescriptor;
 
 
+/**
+ * Functor for use with transform_iterator<> to convert VertexDescriptor's into CFGVertexDescriptor's.
+ */
 struct CFGVertexDescriptorConv
 {
-	//CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return CFGVertexDescriptor(v); };
-	CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return dynamic_cast<CFGVertexDescriptor>(v); };
-
 	/// This is for boost::result_of().
 	typedef CFGVertexDescriptor result_type;
+
+	CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return dynamic_cast<CFGVertexDescriptor>(v); };
 };
 
 
@@ -71,6 +73,10 @@ class ControlFlowGraph : public Graph //: boost::noncopyable
 public:
 	/// @name Public member types.
 	//@{
+
+	/// Tag for identifying anything derived from Graph.
+	//typedef struct { static const bool value = true; } is_derived_from_Graph_t;
+
 	typedef CFGVertexDescriptor vertex_descriptor;
 	typedef boost::transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator> vertex_iterator;
 	//typedef Graph::vertex_iterator vertex_iterator;
@@ -184,5 +190,7 @@ private:
 #include "visitors/ControlFlowGraphVisitorBase.h"
 #include "algorithms/topological_visit_kahn.h"
 //@}
+
+
 
 #endif	/* CONTROLFLOWGRAPH_H */

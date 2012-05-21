@@ -85,7 +85,7 @@ TEST_F(GraphTest, AddVertsAndEdge)
 	g->AddVertex(v2);
 
 	// Check to be sure the vertices have different vertex indices.
-	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+	EXPECT_NE(v1->GetIndex(), v2->GetIndex());
 
 	EXPECT_EQ(g->NumVertices(), 2);
 
@@ -142,7 +142,7 @@ TEST_F(GraphTest, AddVertsAndEdgeBoost)
 	g->AddVertex(v2);
 
 	// Check to be sure the vertices have different vertex indices.
-	EXPECT_NE(v1->GetVertexIndex(), v2->GetVertexIndex());
+	EXPECT_NE(v1->GetIndex(), v2->GetIndex());
 
 	EXPECT_EQ(g->NumVertices(), 2);
 
@@ -200,7 +200,7 @@ TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
 	std::cout << "Vertex Index, In Degree, Out Degree" << std::endl;
 	for(; i != j; ++i)
 	{
-		std::cout << "Vertex Index: " << (*i)->GetVertexIndex() << std::endl;
+		std::cout << "Vertex Index: " << (*i)->GetIndex() << std::endl;
 		std::cout << "In Degree:    " << in_degree(*i, *g) << std::endl;
 		std::cout << "Out Degree:   " << out_degree(*i, *g) << std::endl;
 		std::cout << "  Source vertices:";
@@ -210,7 +210,7 @@ TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
 			boost::tie(ei, eend) = in_edges(*i, *g);
 			for(; ei != eend; ei++)
 			{
-				std::cout << " " << source(*ei, *g)->GetVertexIndex();
+				std::cout << " " << source(*ei, *g)->GetIndex();
 			}
 		}
 		else
@@ -225,7 +225,7 @@ TEST_F(GraphTest, CreateRandomGraphWithBoost_generate_random_graph)
 			boost::tie(ei, eend) = out_edges(*i, *g);
 			for(; ei != eend; ei++)
 			{
-				std::cout << " "  << target(*ei, *g)->GetVertexIndex();
+				std::cout << " "  << target(*ei, *g)->GetIndex();
 			}
 		}
 		else
