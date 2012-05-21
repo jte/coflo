@@ -86,9 +86,9 @@ void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor ent
 		{
 			g->AddEdge(src, fixinfo.m_impossible_target_vertex, new CFGEdgeTypeImpossible);
 
-			dlog_cfg << "Retargetting back edge " << e->GetDescriptorIndex()
+			dlog_cfg << "Retargetting back edge " << e->GetIndex()
 					<< " to "
-					<< fixinfo.m_impossible_target_vertex->GetDescriptorIndex() << std::endl;
+					<< fixinfo.m_impossible_target_vertex->GetIndex() << std::endl;
 		}
 	}
 
@@ -340,7 +340,8 @@ void RemoveRedundantNodes(ControlFlowGraph *g)
 				in_edge->ChangeTarget(target_vertex_desc);
 
 				// Remove our outgoing edge.
-				g->RemoveEdge(out_edge);
+				//g->RemoveEdge(out_edge);
+				remove_edge(out_edge, *g);
 
 				// We should now have no edges.
 				if(/*boost::*/in_degree(*it, *g) != 0 || out_degree(*it, *g))
@@ -360,7 +361,8 @@ void RemoveRedundantNodes(ControlFlowGraph *g)
 	// Remove all the vertices we found.
 	BOOST_FOREACH(ControlFlowGraph::vertex_descriptor i, vertices_to_remove)
 	{
-		g->RemoveVertex(i);
+		//g->RemoveVertex(i);
+		remove_vertex(i, *g);
 		delete i;
 	}
 

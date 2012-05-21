@@ -58,8 +58,11 @@ struct Graph_traversal_tag :
 class Graph
 {
 public:
-	/// @name Public member types.
+	/// @name Public member typenames.
 	//@{
+
+    	/// Tag for identifying anything derived from Graph.
+    	//typedef struct { static const bool value = true; } is_derived_from_Graph_t;
 
 		/// The type for the collection of all vertices in the graph.
 		typedef std::tr1::unordered_set< Vertex* > vertex_list_type;
@@ -165,15 +168,18 @@ public:
 		static edge_descriptor null_edge() { return NULL; };
 
 
-		/// @name For vertex_index_t.
+		/// @name Various proprties.
 		//@{
 			typedef std::size_t vertex_index_type;
 			typedef std::size_t edge_index_type;
 			typedef boost::property<boost::vertex_index_t, vertex_index_type> VertexProperty;
+			typedef boost::property<boost::vertex_index_t, edge_index_type> EdgeProperty;
 			typedef VertexProperty vertex_property_type;
-			typedef typename boost::graph_detail::edge_prop<boost::no_property>::property edge_property_type;
+			typedef EdgeProperty edge_property_type;
 			typedef typename boost::graph_detail::graph_prop<boost::no_property>::property graph_property_type;
 			//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
+			typedef void vertex_bundled;
+			typedef void edge_bundled;
 		//@}
 
 		/// Mutability
@@ -202,7 +208,8 @@ public:
 	virtual void AddEdge(Vertex *source, Vertex *target, Edge *e);
 	virtual void RemoveEdge(Edge *e);
 
-	Graph::vertex_index_type GetVertexIndex(Vertex *v) const { return v->GetVertexIndex(); };
+	Graph::vertex_index_type GetIndex(Vertex *v) const { return v->GetIndex(); };
+	Graph::edge_index_type GetIndex(Edge *e) const { return e->GetIndex(); };
 
 	//std::pair<vertex_iterator, vertex_iterator> Vertices();
 	virtual void Vertices(std::pair<Graph::vertex_iterator, Graph::vertex_iterator> *iterator_pair) const;

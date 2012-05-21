@@ -34,7 +34,10 @@ class Function;
  * Base class for ControlFlowGraph visitors.
  * ControlFlowGraphVisitorBase adds a call stack usable by derived classes.
  */
-class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>
+class ControlFlowGraphVisitorBase : public ImprovedDFSVisitorBase<
+	typename boost::graph_traits<ControlFlowGraph>::vertex_descriptor,
+	typename boost::graph_traits<ControlFlowGraph>::edge_descriptor,
+	ControlFlowGraph>
 {
 public:
 

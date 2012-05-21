@@ -597,8 +597,8 @@ struct graph_property_writer
 		out << "labeljust = \"l\";" << std::endl;
 		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
 		out << "edge [style=solid]" << std::endl;
-		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetVertexIndex() << "; }" << std::endl;
-		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetVertexIndex() << "; }" << std::endl;
+		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetIndex() << "; }" << std::endl;
+		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetIndex() << "; }" << std::endl;
 	}
 
 	ControlFlowGraph &m_g;
@@ -619,7 +619,7 @@ public:
 		if (sbp != NULL)
 		{
 			out << "[label=\"";
-			out << v->GetVertexIndex() << " " << sbp->GetStatementTextDOT();
+			out << v->GetIndex() << " " << sbp->GetStatementTextDOT();
 			out << "\\n" << sbp->GetLocation() << "\"";
 			out << ", color=" << sbp->GetDotSVGColor();
 			out << ", shape=" << sbp->GetShapeTextDOT();

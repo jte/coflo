@@ -86,7 +86,7 @@ public:
 	 * Get the vertex's index.  The index is guaranteed to be unique to the containing Graph.
 	 * Note that Vertex's don't have indexes until they're added to a Graph.
 	 */
-	std::size_t GetVertexIndex() const { return m_vertex_index; };
+	std::size_t GetIndex() const { return m_vertex_index; };
 
 	void AddInEdge(Edge *e);
 	void RemoveInEdge(Edge *e);

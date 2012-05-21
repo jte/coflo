@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -25,7 +25,6 @@
 #include <map>
 
 #include "controlflowgraph/ControlFlowGraph.h"
-//#include "controlflowgraph/ControlFlowGraphTemplateHelper.h"
 
 class TranslationUnit;
 class Function;
@@ -89,14 +88,10 @@ public:
 	bool PrintFunctionCFG(const std::string &function_identifier, bool only_function_calls, bool cfg_vertex_ids);
 	
 	/**
-	 * Get a reference to the underlying T_CFG.
+	 * Return a pointer to the Program's ControlFlowGraph.
 	 *
-	 * @deprecated Should eventually not be necessary due to the encapsulation provided by ControlFlowGraph.
-	 *
-	 * @return A reference to the underlying T_CFG.
+	 * @return
 	 */
-	//T_CFG& GetControlFlowGraph() { return m_cfg.GetT_CFG(); };
-	
 	ControlFlowGraph* GetControlFlowGraphPtr() { return &m_cfg; };
 
 private:

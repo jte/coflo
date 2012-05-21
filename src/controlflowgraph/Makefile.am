@@ -28,6 +28,7 @@ libcontrolflowgraph_a_SOURCES = \
 	Edge.cpp Edge.h \
 	Graph.cpp Graph.h \
 	GraphAdapter.cpp GraphAdapter.h \
+	Metagraph.cpp Metagraph.h \
 	Vertex.cpp Vertex.h \
 	VertexID.cpp VertexID.h
 
@@ -42,8 +43,9 @@ libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 GTESTDIR = /home/Gary/src/gtest-1.6.0
 check_LIBRARIES =  libcontrolflowgraphtest.a
 libcontrolflowgraphtest_a_SOURCES = \
-	GraphTest.cpp GraphTest.h \
-	ControlFlowGraph_test.cpp
+	GraphTest.cpp \
+	ControlFlowGraph_test.cpp \
+	Metagraph_test.cpp
 	
 libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTESTDIR)/include -I $(GTESTDIR) -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraphtest_a_CFLAGS = $(AM_CFLAGS)
