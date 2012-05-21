@@ -104,7 +104,7 @@ void ControlFlowGraphTraversalDFS::Traverse(ControlFlowGraph::vertex_descriptor 
 	u = source;
 
 	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
-	TopCallStack()->GetColorMap()->set(u, T_COLOR::gray());
+	TopCallStack()->GetColorMap()->put(u, T_COLOR::gray());
 
 	// Let the visitor look at the vertex via discover_vertex().
 	visitor_vertex_return_value = visitor->discover_vertex(u);
@@ -212,7 +212,7 @@ void ControlFlowGraphTraversalDFS::Traverse(ControlFlowGraph::vertex_descriptor 
 				u = v;
 
 				// Mark the next vertex as touched.
-				TopCallStack()->GetColorMap()->set(u, T_COLOR::gray());
+				TopCallStack()->GetColorMap()->put(u, T_COLOR::gray());
 
 				// Visit the next vertex with discover_vertex(u).
 				visitor_vertex_return_value = visitor->discover_vertex(u);
@@ -270,7 +270,7 @@ void ControlFlowGraphTraversalDFS::Traverse(ControlFlowGraph::vertex_descriptor 
 		}
 
 		// All successors have been visited, so mark the vertex black.
-		TopCallStack()->GetColorMap()->set(u, T_COLOR::black());
+		TopCallStack()->GetColorMap()->put(u, T_COLOR::black());
 
 		// Finish the vertex.
 		visitor->finish_vertex(u);

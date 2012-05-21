@@ -187,8 +187,8 @@ private:
 
 /// @name Other headers in this library.
 //@{
-#include "visitors/ControlFlowGraphVisitorBase.h"
-#include "algorithms/topological_visit_kahn.h"
+//#include "visitors/ControlFlowGraphVisitorBase.h"
+//#include "algorithms/topological_visit_kahn.h"
 //@}
 
 
