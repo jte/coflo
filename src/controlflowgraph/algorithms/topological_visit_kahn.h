@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -26,7 +26,8 @@
 #include <boost/concept/requires.hpp>
 #include <boost/concept_check.hpp>
 
-/// @todo #include "../visitors/ImprovedDFSVisitorBase.h"
+// For vertex_return_value_t and edge_return_value_t.
+#include "../visitors/ImprovedDFSVisitorBase.h"
 
 /**
  * Map of vertex descriptors to the remaining in degree value.
@@ -34,18 +35,17 @@
  * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
  * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
  */
-template < typename Graph >
+template < typename KeyType, typename ValueType >
 class RemainingInDegreeMap
 {
-	typedef typename boost::graph_traits<Graph>::degree_size_type T_DEGREE_SIZE_TYPE;
-	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
-	typedef boost::unordered_map<T_VERTEX_DESC, T_DEGREE_SIZE_TYPE> T_UNDERLYING_MAP;
+	typedef boost::unordered_map<KeyType, ValueType> T_UNDERLYING_MAP;
+	typedef typename T_UNDERLYING_MAP::iterator T_UNDERLYING_MAP_ITERATOR;
 
 public:
-	RemainingInDegreeMap(Graph &graph) : m_graph(graph) {};
+	RemainingInDegreeMap(/*Graph &graph*/) /*: m_graph(graph)*/ {};
 	~RemainingInDegreeMap() {};
 
-	void set(const T_VERTEX_DESC& vdesc, long val)
+	void set(const KeyType& vdesc, ValueType val)
 	{
 		if(val != 0)
 		{
@@ -60,9 +60,9 @@ public:
 		}
 	};
 
-	long get(const T_VERTEX_DESC& vdesc)
+	ValueType get(const KeyType& vdesc)
 	{
-		typename T_UNDERLYING_MAP::iterator it;
+		T_UNDERLYING_MAP_ITERATOR it;
 
 		it = m_remaining_in_degree_map.find(vdesc);
 		if (it == m_remaining_in_degree_map.end())
@@ -70,7 +70,7 @@ public:
 			// The target vertex wasn't in the map, which means we haven't
 			// encountered it before now.
 			// Pretend it was in the map and add it with its original in-degree.
-			T_DEGREE_SIZE_TYPE indegree;
+			ValueType indegree;
 			/// @todo We should find a better way to get this "filtered" in degree value.
 			indegree = filtered_in_degree(vdesc);
 			m_remaining_in_degree_map[vdesc] = indegree;
@@ -87,7 +87,7 @@ public:
 private:
 
 	/// Reference to the graph object whose vertices we're looking at.
-	Graph &m_graph;
+	//Graph &m_graph;
 
 	/// The underlying vertex descriptor to integer map.
 	T_UNDERLYING_MAP m_remaining_in_degree_map;
@@ -133,8 +133,10 @@ topological_visit_kahn(BidirectionalGraph &graph,
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
-	typedef RemainingInDegreeMap< BidirectionalGraph > T_IN_DEGREE_MAP;
-	T_IN_DEGREE_MAP in_degree_map(graph);
+	typedef RemainingInDegreeMap< T_VERTEX_DESC,
+			typename boost::graph_traits<BidirectionalGraph>::degree_size_type
+			> T_IN_DEGREE_MAP;
+	T_IN_DEGREE_MAP in_degree_map;
 
 	// Start at the source vertex.
 	no_remaining_in_edges_set.push(source);

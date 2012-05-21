@@ -22,23 +22,35 @@
 
 #include <boost/property_map/property_map.hpp>
 #include <boost/tr1/unordered_map.hpp>
+#include <boost/concept_check.hpp>
 
 
-template < typename Key, typename Value, Value DefaultValue >
+template < typename KeyType, typename ValueType, ValueType DefaultValue >
 class SparsePropertyMap
 {
-	typedef std::tr1::unordered_map<Key, Value> T_UNDERLYING_MAP;
+	/// Private convenience typedef for the underlying map type we'll use.
+	typedef std::tr1::unordered_map<KeyType, ValueType> T_UNDERLYING_MAP;
 
 public:
-    typedef Key key_type;
-    typedef Value value_type;
-    typedef value_type& reference;
+	/// @name Public typenames for the ReadablePropertyMap concept.
+	///@{
+    typedef KeyType key_type;
+    typedef ValueType value_type;
+    typedef value_type reference;
     typedef boost::read_write_property_map_tag category;
+    ///@}
 
 	SparsePropertyMap() {};
+	/**
+	 * ReadablePropertyMaps are a refinement of the CopyConstructable concept,
+	 * although it appears the ReadablePropertyMap concept checking class doesn't actually check for this.
+	 *
+	 * @param other  The SparsePropertyMap to copy from.
+	 */
+	SparsePropertyMap(const SparsePropertyMap& other) : m_underlying_map(other.m_underlying_map) {};
 	~SparsePropertyMap() {};
 
-	void set(const Key& vdesc, Value val)
+	void put(const KeyType& vdesc, ValueType val)
 	{
 		if(val != 0)
 		{
@@ -53,7 +65,7 @@ public:
 		}
 	};
 
-	Value get(const Key& vdesc)
+	const reference get(const KeyType& vdesc) const
 	{
 		typename T_UNDERLYING_MAP::iterator it;
 
@@ -76,11 +88,34 @@ public:
 
 private:
 	/// The underlying vertex descriptor to integer map.
-	T_UNDERLYING_MAP m_underlying_map;
+	mutable T_UNDERLYING_MAP m_underlying_map;
 };
 
+/// @nameFree functions to match the Boost PropertyMap concepts.
+///@{
+
+template < typename KeyType, typename ValueType, ValueType DefaultValue >
+inline const typename SparsePropertyMap<KeyType, ValueType, DefaultValue>::reference
+get(const SparsePropertyMap<KeyType, ValueType, DefaultValue> &map, const KeyType &key)
+{
+	return map.get(key);
+};
+
+template < typename KeyType, typename ValueType, ValueType DefaultValue >
+inline void
+put(SparsePropertyMap<KeyType, ValueType, DefaultValue> &map, const KeyType &key, const ValueType &value)
+{
+	map.put(key, value);
+};
+
+///@}
+
+
 /// Make sure we're correctly modeling the property map concept.
-//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<const boost::Graph_vertex_id_map, const Graph::vertex_descriptor> ));
+typedef SparsePropertyMap<int, int, 0> IntIntZeroPropMap;
+BOOST_CONCEPT_ASSERT(( boost::CopyConstructibleConcept<IntIntZeroPropMap> ));
+BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<IntIntZeroPropMap, const int> ));
+BOOST_CONCEPT_ASSERT(( boost::WritablePropertyMapConcept<IntIntZeroPropMap, const int> ));
 
 
 
