@@ -22,7 +22,8 @@ BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 	ControlFlowGraphOutputVisitor.cpp ControlFlowGraphOutputVisitor.h \
 	MergeNodeInsertionVisitor.cpp MergeNodeInsertionVisitor.h \
 	ImprovedDFSVisitorBase.h \
-	ReachabilityVisitor.cpp ReachabilityVisitor.h
+	ReachabilityVisitor.cpp ReachabilityVisitor.h \
+	WriteGraphvizDotFileVisitor.cpp WriteGraphvizDotFileVisitor.h 
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,

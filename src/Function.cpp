@@ -50,6 +50,9 @@
 #include "controlflowgraph/algorithms/cfg_algs.h"
 #include "controlflowgraph/algorithms/topological_visit_kahn.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
+//#include "controlflowgraph/ControlFlowGraphTraversalDFS.h"
+#include "controlflowgraph/algorithms/depth_first_traversal.hpp"
+#include "controlflowgraph/visitors/WriteGraphvizDotFileVisitor.h"
 
 #include "libexttools/ToolDot.h"
 
@@ -308,6 +311,7 @@ public:
 		m_cfg_verbose = cfg_verbose;
 		m_cfg_vertex_ids = cfg_vertex_ids;
 		m_last_discovered_vertex_is_recursive = false;
+		m_indent_level = 0;
 	};
 	function_control_flow_graph_visitor(
 			function_control_flow_graph_visitor &original) :
@@ -663,12 +667,20 @@ private:
 };
 
 
+
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
 {
 	std::clog << "Creating " << output_filename << std::endl;
 
 	std::ofstream outfile(output_filename.c_str());
 
+	WriteGraphvizDotFileVisitor visitor(*m_the_cfg, outfile);
+
+	//ControlFlowGraphTraversalDFS dfs(*m_the_cfg);
+	improved_depth_first_visit(*m_the_cfg, m_entry_vertex_desc, visitor);
+
+	//dfs.Traverse(m_entry_vertex_desc, &visitor);
+#if 0
 	boost::write_graphviz(outfile, static_cast<const Graph&>(*m_the_cfg),
 			cfg_vertex_property_writer(*m_the_cfg),
 			cfg_edge_property_writer(*m_the_cfg),
@@ -676,7 +688,9 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 
 	// graph_property_writer() added a subgraph, which "uses up" the "}" that write_graphviz streams out.
 	// Terminate the graph appropriately.
-	outfile << "\n}" << std::endl;
+#endif
+	outfile << " }" << std::endl;
+	outfile << "}" << std::endl;
 
 	outfile.close();
 }

@@ -49,7 +49,6 @@ struct Graph_traversal_tag :
     public virtual boost::bidirectional_graph_tag,
     public virtual boost::vertex_list_graph_tag,
     public virtual boost::edge_list_graph_tag
-    //public virtual boost::adjacency_graph_tag
     { };
 
 /**
@@ -60,10 +59,6 @@ class Graph
 public:
 	/// @name Public member typenames.
 	//@{
-
-    	/// Tag for identifying anything derived from Graph.
-    	//typedef struct { static const bool value = true; } is_derived_from_Graph_t;
-
 		/// The type for the collection of all vertices in the graph.
 		typedef std::tr1::unordered_set< Vertex* > vertex_list_type;
 		/// The type for the collection of all edges in the graph.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -114,7 +114,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	visitor_vertex_return_value = visitor.discover_vertex(u);
 
 	// Get iterators to the out edges of vertex u.
-	boost::tie(ei, eend) = boost::out_edges(u, graph);
+	boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -182,7 +182,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 
 			// Get the target vertex of the current edge.
-			v = boost::target(*ei, graph);
+			v = /*boost::*/target(*ei, graph);
 
 			//
 			// Get the target vertex's color.
@@ -245,7 +245,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				visitor_vertex_return_value = visitor.discover_vertex(u);
 
 				// Get the out-edges of this vertex.
-				boost::tie(ei, eend) = boost::out_edges(u, graph);
+				boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{

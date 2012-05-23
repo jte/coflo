@@ -124,6 +124,18 @@ public:
 	virtual StatementBase* Source();
 	virtual StatementBase* Target();
 
+	/**
+	 * When called like "IsType<SomeDerivedType>()", returns whether it's dynamic_castable to
+	 * that type or not.
+	 *
+	 * @deprecated This is one step removed from switch/case.  At the moment this exists for the
+	 * benefit of function_control_flow_graph_visitor, but there's got to be a better way to do it.
+	 *
+	 * @return
+	 */
+	template<typename DerivedType>
+	bool IsType() const { return NULL != dynamic_cast<const DerivedType*>(this); };
+
 private:
 	
 	typedef Edge base_class_t;
