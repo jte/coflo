@@ -76,7 +76,7 @@ Location::~Location()
 {
 }
 
-const Location Location::operator=(const Location &other)
+const Location& Location::operator=(const Location &other)
 {
 	// Check for self-assignment.
 	if(this == &other)

@@ -23,6 +23,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/any.hpp>
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/iterator/filter_iterator.hpp>
 #include <utility>
 
 #include "VertexID.h"
@@ -93,8 +94,39 @@ public:
 	void AddOutEdge(Edge *e);
 	void RemoveOutEdge(Edge *e);
 
+	/**
+	 * Get a begin() and end() iterator over all in edges.
+	 *
+	 * @return
+	 */
 	std::pair<Vertex::in_edge_iterator, Vertex::in_edge_iterator> InEdges();
 	std::pair<Vertex::out_edge_iterator, Vertex::out_edge_iterator> OutEdges();
+
+	template <typename Predicate>
+	std::pair<boost::filter_iterator<Predicate,Vertex::in_edge_iterator>, boost::filter_iterator<Predicate,Vertex::in_edge_iterator> >
+	InEdges()
+	{
+		typedef boost::filter_iterator<Predicate,Vertex::in_edge_iterator> T_RETVAL_ITER;
+		typedef std::pair<T_RETVAL_ITER, T_RETVAL_ITER> T_RETVAL;
+		T_RETVAL retval;
+
+		retval = InEdges();
+
+		return retval;
+	};
+
+	template <typename Predicate>
+	std::pair<boost::filter_iterator<Predicate,Vertex::out_edge_iterator>, boost::filter_iterator<Predicate,Vertex::out_edge_iterator> >
+	OutEdges()
+	{
+		typedef boost::filter_iterator<Predicate,Vertex::out_edge_iterator> T_RETVAL_ITER;
+		typedef std::pair<T_RETVAL_ITER, T_RETVAL_ITER> T_RETVAL;
+		T_RETVAL retval;
+
+		retval = OutEdges();
+
+		return retval;
+	}
 
 	degree_size_type InDegree() { return m_in_edges.size(); };
 	degree_size_type OutDegree() { return m_out_edges.size(); };
