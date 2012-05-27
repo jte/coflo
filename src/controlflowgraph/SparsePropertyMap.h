@@ -20,14 +20,41 @@
 #ifndef SPARSEPROPERTYMAP_H_
 #define SPARSEPROPERTYMAP_H_
 
-#include <boost/property_map/property_map.hpp>
 #include <boost/tr1/unordered_map.hpp>
+#include <boost/tr1/functional.hpp>
+#include <boost/property_map/property_map.hpp>
 #include <boost/concept_check.hpp>
 
 
-template < typename KeyType, typename ValueType, ValueType DefaultValue >
+/**
+ * Functor type for use as a default for SparsePropertyMap's DefaultValueFunctor in the common case
+ * where the default value is a constant equal to the EntryNoLongerNeededValue.
+ */
+template <typename KeyType, typename ValueType, const ValueType ConstDefaultValue>
+struct default_is_const : public std::unary_function<KeyType, ValueType>
+{
+	const ValueType operator()(const KeyType /*unused*/) const { return ConstDefaultValue; };
+};
+
+/**
+ * Sparse property map class.
+ * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
+ * call to either get() or put().  In the case of get(), a never-before-seen key will be initialized to
+ * the value returned by @a DefaultValueFunctor.
+ *
+ * @tparam KeyType
+ * @tparam ValueType
+ * @tparam EntryNoLongerNeededValue
+ * @tparam DefaultValueFunctor
+ */
+template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue,
+	typename DefaultValueFunctor = default_is_const<KeyType,ValueType,EntryNoLongerNeededValue> >
 class SparsePropertyMap
 {
+	/// Require the DefaultValueFunctor to have a signature like the following:
+	///   ValueType DefaultValueFunctor(KeyType);
+	BOOST_CONCEPT_ASSERT(( boost::UnaryFunction<DefaultValueFunctor, ValueType, KeyType> ));
+
 	/// Private convenience typedef for the underlying map type we'll use.
 	typedef std::tr1::unordered_map<KeyType, ValueType> T_UNDERLYING_MAP;
 
@@ -47,12 +74,13 @@ public:
 	 *
 	 * @param other  The SparsePropertyMap to copy from.
 	 */
-	SparsePropertyMap(const SparsePropertyMap& other) : m_underlying_map(other.m_underlying_map) {};
+	SparsePropertyMap(const SparsePropertyMap& other) : m_underlying_map(other.m_underlying_map),
+			m_default_value_functor(other.m_default_value_functor) {};
 	~SparsePropertyMap() {};
 
 	void put(const KeyType& vdesc, ValueType val)
 	{
-		if(val != 0)
+		if(val != EntryNoLongerNeededValue)
 		{
 			// Simply set the value.
 			m_underlying_map[vdesc] = val;
@@ -65,19 +93,20 @@ public:
 		}
 	};
 
-	const reference get(const KeyType& vdesc) const
+	const reference get(const KeyType& key) const
 	{
 		typename T_UNDERLYING_MAP::iterator it;
 
-		it = m_underlying_map.find(vdesc);
+		it = m_underlying_map.find(key);
 		if (it == m_underlying_map.end())
 		{
 			// The key wasn't in the map, which means we haven't
 			// encountered it before now.
 			// Pretend it was in the map and add it with its original value.
-			m_underlying_map[vdesc] = DefaultValue;
+			const ValueType default_value = m_default_value_functor(key);
+			m_underlying_map[key] = default_value;
 
-			return DefaultValue;
+			return default_value;
 		}
 		else
 		{
@@ -89,21 +118,24 @@ public:
 private:
 	/// The underlying vertex descriptor to integer map.
 	mutable T_UNDERLYING_MAP m_underlying_map;
+
+	/// A copy of the DefaultValueFunctor.
+	DefaultValueFunctor m_default_value_functor;
 };
 
 /// @nameFree functions to match the Boost PropertyMap concepts.
 ///@{
 
-template < typename KeyType, typename ValueType, ValueType DefaultValue >
-inline const typename SparsePropertyMap<KeyType, ValueType, DefaultValue>::reference
-get(const SparsePropertyMap<KeyType, ValueType, DefaultValue> &map, const KeyType &key)
+template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue, typename DefaultValueFunctor >
+inline const typename SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor>::reference
+get(const SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor> &map, const KeyType &key)
 {
 	return map.get(key);
 };
 
-template < typename KeyType, typename ValueType, ValueType DefaultValue >
+template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue, typename DefaultValueFunctor >
 inline void
-put(SparsePropertyMap<KeyType, ValueType, DefaultValue> &map, const KeyType &key, const ValueType &value)
+put(SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor> &map, const KeyType &key, const ValueType &value)
 {
 	map.put(key, value);
 };
@@ -112,7 +144,11 @@ put(SparsePropertyMap<KeyType, ValueType, DefaultValue> &map, const KeyType &key
 
 
 /// Make sure we're correctly modeling the property map concept.
-typedef SparsePropertyMap<int, int, 0> IntIntZeroPropMap;
+struct IntIntZeroPropMapDefaultValueFunctor
+{
+	int operator()(const int ) const { return 0; };
+};
+typedef SparsePropertyMap<int, int, 0, IntIntZeroPropMapDefaultValueFunctor > IntIntZeroPropMap;
 BOOST_CONCEPT_ASSERT(( boost::CopyConstructibleConcept<IntIntZeroPropMap> ));
 BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<IntIntZeroPropMap, const int> ));
 BOOST_CONCEPT_ASSERT(( boost::WritablePropertyMapConcept<IntIntZeroPropMap, const int> ));
