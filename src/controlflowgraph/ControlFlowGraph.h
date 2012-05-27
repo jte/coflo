@@ -32,7 +32,7 @@
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
 #include "VertexID.h"
-#include "SparsePropertyMap.h"
+//#include "SparsePropertyMap.h"
 
 #include "Graph.h"
 #include "GraphAdapter.h"
@@ -42,10 +42,6 @@ class Function;
 
 /// @name Control Flow Graph definitions.
 //@{
-
-// Forward declare the FilteredGraph class template.
-template < typename EdgeFilterPredicate, typename VertexFilterPredicate >
-class FilteredGraph;
 
 /// The vertex descriptor type for ControlFlowGraphs.
 //typedef DescriptorBaseClass<StatementBase> CFGVertexDescriptor;
@@ -73,9 +69,6 @@ class ControlFlowGraph : public Graph //: boost::noncopyable
 public:
 	/// @name Public member types.
 	//@{
-
-	/// Tag for identifying anything derived from Graph.
-	//typedef struct { static const bool value = true; } is_derived_from_Graph_t;
 
 	typedef CFGVertexDescriptor vertex_descriptor;
 	typedef boost::transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator> vertex_iterator;
@@ -184,13 +177,5 @@ private:
 
 
 //@}
-
-/// @name Other headers in this library.
-//@{
-//#include "visitors/ControlFlowGraphVisitorBase.h"
-//#include "algorithms/topological_visit_kahn.h"
-//@}
-
-
 
 #endif	/* CONTROLFLOWGRAPH_H */
