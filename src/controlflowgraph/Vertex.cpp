@@ -20,7 +20,7 @@
 #include "Vertex.h"
 
 #include <algorithm>
-#include <functional>
+#include <boost/tr1/functional.hpp>
 #include <boost/foreach.hpp>
 
 #include "coflo_exceptions.hpp"

@@ -39,6 +39,5 @@ public:
 
 };
 
-
 #endif	/* CFGEDGETYPERETURN_H */
 

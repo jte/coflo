@@ -35,6 +35,7 @@
  * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
  * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
  */
+#if 0
 template < typename KeyType, typename ValueType >
 class RemainingInDegreeMap
 {
@@ -42,10 +43,18 @@ class RemainingInDegreeMap
 	typedef typename T_UNDERLYING_MAP::iterator T_UNDERLYING_MAP_ITERATOR;
 
 public:
+	/// @name Public typenames for the ReadablePropertyMap concept.
+	///@{
+    typedef KeyType key_type;
+    typedef ValueType value_type;
+    typedef value_type reference;
+    typedef boost::read_write_property_map_tag category;
+    ///@}
+
 	RemainingInDegreeMap(/*Graph &graph*/) /*: m_graph(graph)*/ {};
 	~RemainingInDegreeMap() {};
 
-	void set(const KeyType& vdesc, ValueType val)
+	void put(const KeyType& vdesc, ValueType val)
 	{
 		if(val != 0)
 		{
@@ -90,8 +99,9 @@ private:
 	//Graph &m_graph;
 
 	/// The underlying vertex descriptor to integer map.
-	T_UNDERLYING_MAP m_remaining_in_degree_map;
+	mutable T_UNDERLYING_MAP m_remaining_in_degree_map;
 };
+#endif
 
 
 /**
@@ -104,13 +114,14 @@ private:
  * @param source An edge descriptor whose target vertex is the vertex where the graph traversal should begin.
  * @param visitor The visitor to notify of traversal events.
  */
-template<typename BidirectionalGraph, typename ImprovedDFSVisitor>
+template<typename BidirectionalGraph, typename ImprovedDFSVisitor, typename RemainingInDegreeMap>
 BOOST_CONCEPT_REQUIRES(
-	((boost::BidirectionalGraphConcept< BidirectionalGraph >)),
+	((boost::BidirectionalGraphConcept< BidirectionalGraph >))
+	((boost::ReadWritePropertyMapConcept<RemainingInDegreeMap,typename boost::graph_traits<BidirectionalGraph>::vertex_descriptor>)),
 	(void))
 topological_visit_kahn(BidirectionalGraph &graph,
 		typename boost::graph_traits<BidirectionalGraph>::edge_descriptor source,
-		ImprovedDFSVisitor &visitor)
+		ImprovedDFSVisitor &visitor, RemainingInDegreeMap &in_degree_map)
 {
 	// Required concepts of the passed graph type.
 	// Require a BidirectionGraph because we need efficient access to in edges as well as out edges.
@@ -133,10 +144,14 @@ topological_visit_kahn(BidirectionalGraph &graph,
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
 	// Map of the remaining in-degrees.
+	/*typedef SparsePropertyMap<T_VERTEX_DESC,
+			typename boost::graph_traits<BidirectionalGraph>::degree_size_type,
+			0,
+			filtered_in_degree> T_IN_DEGREE_MAP;
 	typedef RemainingInDegreeMap< T_VERTEX_DESC,
 			typename boost::graph_traits<BidirectionalGraph>::degree_size_type
-			> T_IN_DEGREE_MAP;
-	T_IN_DEGREE_MAP in_degree_map;
+			> T_IN_DEGREE_MAP;*/
+	//T_IN_DEGREE_MAP in_degree_map;
 
 	// Start at the source vertex.
 	no_remaining_in_edges_set.push(source);
@@ -206,7 +221,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 			--id;
 
 			// Store the decremented value back to the map.
-			in_degree_map.set(v, id);
+			in_degree_map.put(v, id);
 
 			if (id == 0)
 			{

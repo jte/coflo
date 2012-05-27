@@ -30,6 +30,7 @@ class FunctionCallResolved;
  */
 class CallStackFrameBase
 {
+
 public:
 	typedef SparsePropertyMap< ControlFlowGraph::vertex_descriptor, boost::default_color_type, boost::white_color > T_COLOR_MAP;
 

@@ -184,7 +184,7 @@ static void indent(long i)
 	};
 }
 
-static long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decision_predecessors = false)
+long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decision_predecessors = false)
 {
 	StatementBase::in_edge_iterator ieit, ieend;
 
@@ -568,6 +568,10 @@ private:
 	bool m_last_discovered_vertex_is_recursive;
 };
 
+struct filtered_in_degree_functor
+{
+	const long operator()(ControlFlowGraph::vertex_descriptor vd) const { return filtered_in_degree(vd); };
+};
 
 void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 {
@@ -583,9 +587,18 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 	// Do a depth-first search of the control flow graph.
 	improved_depth_first_visit(*m_cfg, m_entry_vertex_desc, cfg_visitor, color_map_stack);
 #else
+
+
+	// Set up the RemainingInDegreeMap.
+	typedef SparsePropertyMap<typename boost::graph_traits<ControlFlowGraph>::vertex_descriptor,
+				typename boost::graph_traits<ControlFlowGraph>::degree_size_type,
+				0,
+				filtered_in_degree_functor> T_IN_DEGREE_MAP;
+	T_IN_DEGREE_MAP remaining_in_degree_map;
+
 	// Set up the visitor.
 	function_control_flow_graph_visitor cfg_visitor(*m_the_cfg, m_exit_vertex_desc, cfg_verbose, cfg_vertex_ids);
-	topological_visit_kahn(*m_the_cfg, m_entry_vertex_self_edge, cfg_visitor);
+	topological_visit_kahn(*m_the_cfg, m_entry_vertex_self_edge, cfg_visitor, remaining_in_degree_map);
 #endif
 }
 
