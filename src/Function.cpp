@@ -48,6 +48,7 @@
 #include "controlflowgraph/edges/edge_types.h"
 #include "controlflowgraph/ControlFlowGraph.h"
 #include "controlflowgraph/algorithms/cfg_algs.h"
+#include "controlflowgraph/SparsePropertyMap.h"
 #include "controlflowgraph/algorithms/topological_visit_kahn.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
 //#include "controlflowgraph/ControlFlowGraphTraversalDFS.h"
