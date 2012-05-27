@@ -31,7 +31,7 @@
  * where the default value is a constant equal to the EntryNoLongerNeededValue.
  */
 template <typename KeyType, typename ValueType, const ValueType ConstDefaultValue>
-struct default_is_const : public std::unary_function<KeyType, ValueType>
+struct default_is_const : public std::unary_function<KeyType, const ValueType>
 {
 	const ValueType operator()(const KeyType /*unused*/) const { return ConstDefaultValue; };
 };
