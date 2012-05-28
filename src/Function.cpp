@@ -51,7 +51,6 @@
 #include "controlflowgraph/SparsePropertyMap.h"
 #include "controlflowgraph/algorithms/topological_visit_kahn.h"
 #include "controlflowgraph/visitors/ControlFlowGraphVisitorBase.h"
-//#include "controlflowgraph/ControlFlowGraphTraversalDFS.h"
 #include "controlflowgraph/algorithms/depth_first_traversal.hpp"
 #include "controlflowgraph/visitors/WriteGraphvizDotFileVisitor.h"
 
@@ -688,21 +687,13 @@ void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, c
 
 	std::ofstream outfile(output_filename.c_str());
 
+	// Create the visitor which will insert the GraphViz info into outfile.
 	WriteGraphvizDotFileVisitor visitor(*m_the_cfg, outfile);
 
-	//ControlFlowGraphTraversalDFS dfs(*m_the_cfg);
+	// Let the visitor visit all vertices and edges in the graph.
 	improved_depth_first_visit(*m_the_cfg, m_entry_vertex_desc, visitor);
 
-	//dfs.Traverse(m_entry_vertex_desc, &visitor);
-#if 0
-	boost::write_graphviz(outfile, static_cast<const Graph&>(*m_the_cfg),
-			cfg_vertex_property_writer(*m_the_cfg),
-			cfg_edge_property_writer(*m_the_cfg),
-			graph_property_writer(*m_the_cfg, this));
-
-	// graph_property_writer() added a subgraph, which "uses up" the "}" that write_graphviz streams out.
 	// Terminate the graph appropriately.
-#endif
 	outfile << " }" << std::endl;
 	outfile << "}" << std::endl;
 

@@ -25,10 +25,11 @@
 class Function;
 
 /**
- * Traverses the CFG of Function @a f and marks all back edges as such.
+ * Traverses the ControlFlowGraph of the Function starting at the Vertex specified by @a entry
+ * and marks all back edges as such.
  *
  * @param g Reference to the ControlFlowGraph to process.
- * @param f
+ * @param entry  Descriptor of the Entry vertex to start at.
  */
 void FixupBackEdges(ControlFlowGraph *g, ControlFlowGraph::vertex_descriptor entry);
 

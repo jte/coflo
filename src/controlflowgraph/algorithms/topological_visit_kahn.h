@@ -36,9 +36,10 @@
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting) the nodes of a graph.
  *
- * @tparam BidirectionalGraph    The graph type.  Must model the BidirectionalGraphConcept.
+ * @tparam BidirectionalGraph    The graph type.  Must model the BidirectionalGraphConcept because we need to access
+ * 			in edges.
  * @tparam ImprovedDFSVisitor    The type of the @a visitor object which will be notified of graph traversal events.
- * @tparam RemainingInDegreeMap  Map of vertex descriptors to the remaining in degree value.
+ * @tparam RemainingInDegreeMap  Map of vertex descriptors to their remaining in degree value.
  * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
  * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
  * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
