@@ -73,10 +73,10 @@ namespace po = boost::program_options;
 //@}
 
 /**
- * Additional command-line parser for '@file' response files.
+ * Additional command-line parser for '\@file' response files.
  * 
  * @param s String to check for a prefix of '@', indicating that this is a response file name.
- * @return If this isn't a '@filename' paramter, a std::pair<> of two empty strings.
+ * @return If this isn't a '\@filename' paramter, a std::pair<> of two empty strings.
  *         If it is, the pair <"response-file", filename>.
  */
 std::pair<std::string, std::string> at_option_parser(const std::string &s)
