@@ -21,7 +21,7 @@
 #define	SAFE_ENUM_H
 
 /**
- * @macro DECLARE_ENUM_CLASS Type-safe enumeration class macro.
+ * DECLARE_ENUM_CLASS Type-safe enumeration class macro.
  *
  * Macro for backwards- and forwards-compatible support of C++0x's "Strongly Typed Enums",
  * i.e. "enum class E { E1, E2, ...};"

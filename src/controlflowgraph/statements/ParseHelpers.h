@@ -26,6 +26,14 @@
 #include "../ControlFlowGraph.h"
 #include "FlowControlBase.h"
 
+/**
+ * @defgroup parsehelpers Parse Helper Classes
+ * The classes in this group exist for the purpose of assisting in the conversion between the parser's
+ * actions and the ultimate ControlFlowGraph we want.  Instances of these classes will not show up in the
+ * completed ControlFlowGraph.
+ * @{
+ */
+
 
 class LabelMap;
 
@@ -165,5 +173,6 @@ private:
 	std::vector<CaseUnlinked *> m_case_list;
 };
 
+///@} // Closing the @parsegroup.
 
 #endif /* PARSEHELPERS_H_ */

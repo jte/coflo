@@ -723,6 +723,7 @@ void Function::PrintControlFlowGraphBitmap(ToolDot *the_dot, const boost::filesy
 	the_dot->CompileDotToPNG(dot_filename.generic_string(), output_filename.generic_string());
 }
 
+
 class LabelMap : public std::map< std::string, ControlFlowGraph::vertex_descriptor>
 {
 

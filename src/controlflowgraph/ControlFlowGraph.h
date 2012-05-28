@@ -32,7 +32,6 @@
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
 #include "VertexID.h"
-//#include "SparsePropertyMap.h"
 
 #include "Graph.h"
 #include "GraphAdapter.h"

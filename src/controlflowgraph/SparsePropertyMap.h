@@ -123,7 +123,7 @@ private:
 	DefaultValueFunctor m_default_value_functor;
 };
 
-/// @nameFree functions to match the Boost PropertyMap concepts.
+/// @name Free functions to match the Boost PropertyMap concepts.
 ///@{
 
 template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue, typename DefaultValueFunctor >
