@@ -96,7 +96,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
-	// The vertex "context" stack.
+	// The depth-first search vertex "context" stack.
+	// This stack is used exclusively for the essentially ordinary stack-based depth first search.
 	std::stack<T_VERTEX_INFO> dfs_stack;
 
 	// Push a new color context onto the color map stack.
@@ -105,7 +106,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	// Start at the source vertex.
 	u = source;
 
-	visitor_vertex_return_value = visitor.start_subgraph_vertex(u);
+	// The first vertex gets a special visit.
+	visitor_vertex_return_value = visitor.start_vertex(u);
 
 	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
 	(*color_map_stack.top())[u] = T_COLOR::gray();

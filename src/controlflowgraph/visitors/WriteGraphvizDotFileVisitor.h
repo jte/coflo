@@ -22,20 +22,32 @@
 
 #include "ControlFlowGraphVisitorBase.h"
 
+/**
+ * Visitor which, when sent on a depth-first traversal of the ControlFlowGraph of a Function, will print out a
+ * Graphviz-dot-compatible file representing that Function's graph.
+ */
 class WriteGraphvizDotFileVisitor: public ControlFlowGraphVisitorBase
 {
 public:
 	WriteGraphvizDotFileVisitor(ControlFlowGraph &g, std::ostream& out);
 	virtual ~WriteGraphvizDotFileVisitor();
 
+	virtual vertex_return_value_t start_vertex(ControlFlowGraph::vertex_descriptor u);
+	virtual vertex_return_value_t discover_vertex(ControlFlowGraph::vertex_descriptor u);
 	virtual edge_return_value_t examine_edge(ControlFlowGraph::edge_descriptor u);
 	virtual edge_return_value_t tree_edge(ControlFlowGraph::edge_descriptor u);
 	virtual edge_return_value_t back_edge(ControlFlowGraph::edge_descriptor u);
 	virtual edge_return_value_t forward_or_cross_edge(ControlFlowGraph::edge_descriptor u);
-	virtual vertex_return_value_t discover_vertex(ControlFlowGraph::vertex_descriptor u);
 
 private:
 
+	/**
+	 * Helper function for streaming an edge's attributes to m_out_stream.
+	 * During a depth-first search, we must output tree_edge(), back_edge(), and forward_or_cross_edge()
+	 * attributes, and this helper cuts down on copy/paste code.
+	 *
+	 * @param u  Descriptor of the Edge whose attributes are to be inserted into m_out_stream.
+	 */
 	void StreamOutEdgeAttributes(ControlFlowGraph::edge_descriptor u);
 
 	/// Reference to the ostream we'll send our info to.

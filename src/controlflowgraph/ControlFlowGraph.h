@@ -109,12 +109,6 @@ public:
 	/// @name Graph construction helpers
 	//@{
 
-	/**
-	 * Traverses the CFG of Function @a f and marks all back edges.
-	 * @param f
-	 */
-	//virtual void FixupBackEdges(Function *f);
-
 	//virtual void InsertMergeNodes(Function *f);
 
 	//virtual void SplitCriticalEdges(Function *f);

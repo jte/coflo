@@ -79,9 +79,12 @@ public:
 	~ImprovedDFSVisitorBase() {};
 	
 	vertex_return_value_t initialize_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
+
+	/**
+	 * Called once at the start of the traversal.  Parameter @a u is the vertex which will be visited
+	 * by discover_vertex() first.
+	 */
 	vertex_return_value_t start_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
-	
-	vertex_return_value_t start_subgraph_vertex(VertexDescriptor u) { return vertex_return_value_t::ok; };
 	
 	/**
 	 * Called when Vertex u is seen for the first time.  Vertex u will have already been

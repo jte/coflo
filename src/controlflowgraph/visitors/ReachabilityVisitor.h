@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -21,7 +21,6 @@
 #define REACHABILITYVISITOR_H
 
 #include <deque>
-// Include the TR1 <functional> header.
 #include <boost/tr1/functional.hpp>
 
 #include "ControlFlowGraphVisitorBase.h"

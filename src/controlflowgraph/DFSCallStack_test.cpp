@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -15,16 +15,7 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ControlFlowGraphTraversalBase.h"
-#include "CallStackFrameBase.h"
+/** @file */
 
-ControlFlowGraphTraversalBase::ControlFlowGraphTraversalBase(ControlFlowGraph &control_flow_graph) : m_control_flow_graph(control_flow_graph)
-{
-
-}
-
-ControlFlowGraphTraversalBase::~ControlFlowGraphTraversalBase()
-{
-	// TODO Auto-generated destructor stub
-}
+#include "DFSCallStack.h"
 

@@ -20,27 +20,41 @@
 #include <ostream>
 
 #include "../edges/edge_types.h"
+#include "../Function.h"
 
 WriteGraphvizDotFileVisitor::WriteGraphvizDotFileVisitor(ControlFlowGraph &g, std::ostream& out)
 	: ControlFlowGraphVisitorBase(g), m_out_stream(out)
 {
+
+}
+
+WriteGraphvizDotFileVisitor::~WriteGraphvizDotFileVisitor()
+{
+	// TODO Auto-generated destructor stub
+}
+
+vertex_return_value_t WriteGraphvizDotFileVisitor::start_vertex(
+		ControlFlowGraph::vertex_descriptor u)
+{
+	// The first vertex will be an Entry vertex.  Get the name of the Function it belongs to.
+	Function *f = u->GetOwningFunction();
+	std::string name = f->GetIdentifier();
+
+	// Now stream out the dot graph definition info.
 	m_out_stream <<
 "\
 digraph G {\n\
 graph [clusterrank=local colorscheme=svg]\n\
 subgraph cluster0 {\n\
-label = \"INSERT_FUNCTION_NAME_HERE\";\n\
+label = \"" << name << "\";\n\
 labeljust = \"l\";\n\
 node [shape=rectangle fontname=\"Helvetica\"]\n\
 edge [style=solid]\n\
 { rank = source; 0; }\n\
 { rank = sink; 1; }\n\
 " << std::endl;
-}
 
-WriteGraphvizDotFileVisitor::~WriteGraphvizDotFileVisitor()
-{
-	// TODO Auto-generated destructor stub
+	return vertex_return_value_t::ok;
 }
 
 edge_return_value_t WriteGraphvizDotFileVisitor::examine_edge(

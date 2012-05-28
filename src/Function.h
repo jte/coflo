@@ -205,6 +205,7 @@ private:
 	ControlFlowGraph::vertex_descriptor m_exit_vertex_desc;
 	ControlFlowGraph::edge_descriptor m_exit_vertex_self_edge;
 	
+	/// The ControlFlowGraph of this function.
 	ControlFlowGraph *m_the_cfg;
 
 	/// @name Static properties of this function.
