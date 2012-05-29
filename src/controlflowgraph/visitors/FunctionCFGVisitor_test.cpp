@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -15,22 +15,7 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CallStackFrameBase.h"
+/** @file */
 
-CallStackFrameBase::CallStackFrameBase(FunctionCallResolved *function_call_which_pushed_this_frame,
-		ControlFlowGraph *cfg)
-{
-	m_function_call_which_pushed_this_frame = function_call_which_pushed_this_frame;
-
-	m_calling_cfg = cfg;
-
-	// Create a new color map.
-	m_color_map = new T_COLOR_MAP;
-}
-
-CallStackFrameBase::~CallStackFrameBase()
-{
-	// We own the color map, so destroy it.
-	delete m_color_map;
-}
+#include "FunctionCFGVisitor.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -22,6 +22,7 @@
 
 #include "CFGEdgeTypeBase.h"
 
+class ControlFlowGraph;
 class FunctionCallResolved;
 
 /**
@@ -36,10 +37,24 @@ public:
 	CFGEdgeTypeFunctionCall(const CFGEdgeTypeFunctionCall& orig);
 	virtual ~CFGEdgeTypeFunctionCall();
 	
+	CFGEdgeTypeFunctionCall& operator=(const CFGEdgeTypeFunctionCall& orig);
+
 //private:
-	/// The FunctionCall instance which resulted in this edge.
+	/// The FunctionCall Vertex instance which resulted in this edge.
 	/// We need this to determine e.g. what parameters were passed.
 	FunctionCallResolved *m_function_call;
+
+	/// The ControlFlowGraph which contains the target vertex of this edge.
+	ControlFlowGraph *m_target_cfg;
+
+private:
+
+	/**
+	 * Copy constructor / assignment operator helper.
+	 *
+	 * @param orig
+	 */
+	void Copy(const CFGEdgeTypeFunctionCall& orig);
 };
 
 #endif	/* CFGEDGETYPEFUNCTIONCALL_H */

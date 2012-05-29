@@ -126,17 +126,6 @@ inline typename Generic_index_map<VertexOrEdgeDescriptorType>::reference get(con
 typedef Generic_index_map<Graph::vertex_descriptor> Graph_vertex_index_map;
 typedef Generic_index_map<Graph::edge_descriptor> Graph_edge_index_map;
 
-#if 0
-inline Graph_vertex_index_map get(boost::vertex_index_t, Graph& g)
-{
-	return Graph_vertex_index_map(g);
-};
-inline Graph_edge_index_map get(boost::edge_index_t, Graph& g)
-{
-	return Graph_edge_index_map(g);
-};
-#endif
-
 inline Graph_vertex_index_map get(boost::vertex_index_t, const Graph& g)
 {
 	return Graph_vertex_index_map(g);

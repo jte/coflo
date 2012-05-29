@@ -34,41 +34,7 @@ class Function;
 //class CFGEdgeTypeBase;
 #include "../edges/CFGEdgeTypeBase.h"
 
-#if 0 // @todo NEEDTHIS
-template < typename CFGEdgeType >
-boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
-{
-	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
-	boost::tuple<T_CFG_EDGE_DESC, bool> retval;
-
-	boost::tie(eit, eend) = boost::out_edges(vdesc, cfg);
-	for(; eit != eend; eit++)
-	{
-		if(NULL != dynamic_cast<CFGEdgeType*>(cfg[*eit].m_edge_type))
-		{
-			// Found it.
-			retval = boost::make_tuple(*eit, true);
-			return retval;
-		}
-	}
-
-	// Couldn't find one.
-	retval = boost::make_tuple(*eit, false);
-	return retval;
-}
-
-struct CastToCFGEdgeTypeBasePtrReference
-{
-	/// This is for boost::result_of().
-	typedef const CFGEdgeTypeBase*& result_type;
-
-	result_type operator()(Edge* const &v) const
-	{
-		return (result_type)v;
-	};
-};
-#endif
-
+/// Edge descriptor type for ControlFlowGraphs.
 typedef CFGEdgeTypeBase* CFGEdgeDescriptor;
 
 /**
@@ -92,7 +58,6 @@ public:
 	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor> edge_iterator;
 	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > out_edge_iterator;
 	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
-	//typedef boost::unordered_set< Edge* >::size_type degree_size_t;
 
 public:
 	StatementBase() {};
@@ -104,24 +69,24 @@ public:
 	virtual void OutEdges(StatementBase::out_edge_iterator* ibegin, StatementBase::out_edge_iterator* iend);
 
 	template < typename EdgeType >
-	boost::tuple< CFGEdgeTypeBase*, bool > GetFirstOutEdgeOfType()
+	EdgeType* GetFirstOutEdgeOfType()
 	{
 		out_edge_iterator eit, eend;
-		boost::tuple<CFGEdgeTypeBase*, bool> retval;
+		EdgeType* retval;
 
 		OutEdges(&eit, &eend);
 		for(; eit != eend; eit++)
 		{
-			if(NULL != dynamic_cast<EdgeType*>(*eit))
+			retval = dynamic_cast<EdgeType*>(*eit);
+			if(NULL != retval)
 			{
 				// Found it.
-				retval = boost::make_tuple(*eit, true);
 				return retval;
 			}
 		}
 
 		// Couldn't find one.
-		retval = boost::make_tuple(*eit, false);
+		retval = NULL;
 		return retval;
 	};
 

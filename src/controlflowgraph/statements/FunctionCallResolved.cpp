@@ -45,4 +45,10 @@ std::string FunctionCallResolved::GetStatementTextDOT() const
 std::string FunctionCallResolved::GetIdentifier() const
 {
 	return m_target_function->GetIdentifier(); 
+
+}
+
+Function* FunctionCallResolved::GetCalledFunction() const
+{
+	return m_target_function;
 }

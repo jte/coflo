@@ -172,7 +172,6 @@ public:
 			typedef VertexProperty vertex_property_type;
 			typedef EdgeProperty edge_property_type;
 			typedef typename boost::graph_detail::graph_prop<boost::no_property>::property graph_property_type;
-			//typedef typename boost::property_map<Graph, size_t StatementBase::*>::type VertexIndexMapType;
 			typedef void vertex_bundled;
 			typedef void edge_bundled;
 		//@}
@@ -200,6 +199,16 @@ public:
 	virtual void RemoveVertex(Vertex *v);
 	virtual void ReplaceVertex(Vertex *old_vertex, Vertex *new_vertex);
 
+	/**
+	 * Adds Edge @a e to the graph.
+	 *
+	 * @pre Edge @a e has no source or target.
+	 * @post Edge @a e has source = @a source, target = @a target.
+	 *
+	 * @param source
+	 * @param target
+	 * @param e
+	 */
 	virtual void AddEdge(Vertex *source, Vertex *target, Edge *e);
 	virtual void RemoveEdge(Edge *e);
 

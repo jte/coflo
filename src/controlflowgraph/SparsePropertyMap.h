@@ -38,9 +38,14 @@ struct default_is_const : public std::unary_function<KeyType, const ValueType>
 
 /**
  * Sparse property map class.
- * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
- * call to either get() or put().  In the case of get(), a never-before-seen key will be initialized to
+ *
+ * This is a lazily-evaluated data structure, in that a @a key doesn't have a real entry in the underlying map until the first
+ * call to either get() or put().  In the case of get(), a never-before-seen @a key will be initialized to
  * the value returned by @a DefaultValueFunctor.
+ *
+ * The @a EntryNoLongerNeededValue template parameter tells the map when to remove a @a key from the underlying map.  When
+ * put() is called with this value, the key is removed from m_underlying_map.  If no DefaultValueFunctor is specified, the
+ * default DefaultValueFunctor also uses this value as the default constant value which all keys are initialized to.
  *
  * @tparam KeyType
  * @tparam ValueType
@@ -56,6 +61,7 @@ class SparsePropertyMap
 	BOOST_CONCEPT_ASSERT(( boost::UnaryFunction<DefaultValueFunctor, ValueType, KeyType> ));
 
 	/// Private convenience typedef for the underlying map type we'll use.
+	/// @todo This should come in as a template param, probably with this as a default.
 	typedef std::tr1::unordered_map<KeyType, ValueType> T_UNDERLYING_MAP;
 
 public:
@@ -87,7 +93,7 @@ public:
 		}
 		else
 		{
-			// If we're setting that value to 0, we no longer need the key.
+			// If we're setting that value to EntryNoLongerNeededValue, we no longer need the key.
 			// Let's erase it in the interest of conserving space.
 			m_underlying_map.erase(vdesc);
 		}
@@ -126,6 +132,13 @@ private:
 /// @name Free functions to match the Boost PropertyMap concepts.
 ///@{
 
+/**
+ * The non-member get() function for the SparsePropertyMap class.
+ *
+ * @param map
+ * @param key
+ * @return
+ */
 template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue, typename DefaultValueFunctor >
 inline const typename SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor>::reference
 get(const SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor> &map, const KeyType &key)
@@ -133,6 +146,13 @@ get(const SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, Defaul
 	return map.get(key);
 };
 
+/**
+ * The non-member put() function for the SparsePropertyMap class.
+ *
+ * @param map
+ * @param key
+ * @param value
+ */
 template < typename KeyType, typename ValueType, ValueType EntryNoLongerNeededValue, typename DefaultValueFunctor >
 inline void
 put(SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValueFunctor> &map, const KeyType &key, const ValueType &value)
@@ -142,6 +162,8 @@ put(SparsePropertyMap<KeyType, ValueType, EntryNoLongerNeededValue, DefaultValue
 
 ///@}
 
+/// @name SparsePropertyMap concept checks.
+///@{
 
 /// Make sure we're correctly modeling the property map concept.
 struct IntIntZeroPropMapDefaultValueFunctor
@@ -153,6 +175,6 @@ BOOST_CONCEPT_ASSERT(( boost::CopyConstructibleConcept<IntIntZeroPropMap> ));
 BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyMapConcept<IntIntZeroPropMap, const int> ));
 BOOST_CONCEPT_ASSERT(( boost::WritablePropertyMapConcept<IntIntZeroPropMap, const int> ));
 
-
+///@}
 
 #endif /* SPARSEPROPERTYMAP_H_ */
