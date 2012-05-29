@@ -155,6 +155,8 @@ public:
 	void DumpCFG();
 	//@}
 
+	ControlFlowGraph* GetCFGPointer() const { return m_the_cfg; };
+
 private:
 	
 	/**

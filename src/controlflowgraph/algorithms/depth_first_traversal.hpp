@@ -237,7 +237,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				vertex_info.Set(u, ei, eend);
 				dfs_stack.push(vertex_info);
 
-				// Go to the next vertex.
+				// Go to the target vertex.
 				u = v;
 
 				// Mark the next vertex as touched.
@@ -288,7 +288,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 		}
 
-		// Visited, so mark the vertex black.
+		// All successors have been visited, so mark the vertex black.
 		(*color_map_stack.top())[u] = T_COLOR::black();
 
 		// Finish the vertex.

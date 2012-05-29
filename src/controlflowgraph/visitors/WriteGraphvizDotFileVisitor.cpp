@@ -106,7 +106,6 @@ edge_return_value_t WriteGraphvizDotFileVisitor::forward_or_cross_edge(
 vertex_return_value_t WriteGraphvizDotFileVisitor::discover_vertex(
 		ControlFlowGraph::vertex_descriptor u)
 {
-	ControlFlowGraph::degree_size_type out_degree = u->OutDegree();
 	m_out_stream << u->GetIndex() << " ";
 	m_out_stream << "[label=\"";
 	m_out_stream << u->GetIndex() << " " << u->GetStatementTextDOT();

@@ -59,10 +59,6 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		typename boost::graph_traits<BidirectionalGraph>::edge_descriptor source,
 		ImprovedDFSVisitor &visitor, RemainingInDegreeMap &in_degree_map)
 {
-	// Required concepts of the passed graph type.
-	// Require a BidirectionGraph because we need efficient access to in edges as well as out edges.
-	//boost::function_requires< boost::BidirectionalGraphConcept<BidirectionalGraph> >();
-
 	// Some convenience typedefs.
 	typedef typename boost::graph_traits<BidirectionalGraph>::vertex_descriptor T_VERTEX_DESC;
 	typedef typename boost::graph_traits<BidirectionalGraph>::edge_descriptor T_EDGE_DESC;

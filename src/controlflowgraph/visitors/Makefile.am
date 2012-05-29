@@ -20,6 +20,7 @@ libvisitors_a_SOURCES = \
 BackEdgeFixupVisitor.cpp BackEdgeFixupVisitor.h \
 	ControlFlowGraphVisitorBase.cpp ControlFlowGraphVisitorBase.h \
 	ControlFlowGraphOutputVisitor.cpp ControlFlowGraphOutputVisitor.h \
+	FunctionCFGVisitor.cpp FunctionCFGVisitor.h \
 	MergeNodeInsertionVisitor.cpp MergeNodeInsertionVisitor.h \
 	ImprovedDFSVisitorBase.h \
 	ReachabilityVisitor.cpp ReachabilityVisitor.h \

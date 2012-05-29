@@ -24,16 +24,19 @@
 ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) :
 	ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>(cfg), m_cfg(cfg)
 {
+	m_call_stack = new DFSCallStack;
 }
 
 
 ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) :
 		ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>(orig), m_cfg(orig.m_cfg)
 {
+	/// @todo Do we need a shallow or deep copy here?
 }
 
 ControlFlowGraphVisitorBase::~ControlFlowGraphVisitorBase()
 {
+	delete m_call_stack;
 }
 
 vertex_return_value_t ControlFlowGraphVisitorBase::initialize_vertex(ControlFlowGraph::vertex_descriptor u)
@@ -76,6 +79,7 @@ vertex_return_value_t ControlFlowGraphVisitorBase::finish_vertex(ControlFlowGrap
 	return vertex_return_value_t::ok;
 };
 
+#if 0
 void ControlFlowGraphVisitorBase::PushCallStack(FunctionCallResolved* pushing_function_call)
 {
 	m_call_stack.push(pushing_function_call);
@@ -111,5 +115,5 @@ bool ControlFlowGraphVisitorBase::AreWeRecursing(Function *function)
 }
 
 
-
+#endif
 

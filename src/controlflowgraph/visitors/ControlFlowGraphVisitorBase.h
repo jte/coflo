@@ -27,6 +27,7 @@
 #include "../ControlFlowGraph.h"
 
 /// @todo This should probably be a template parameter.
+#include "../DFSCallStack.h"
 class FunctionCallResolved;
 class Function;
 
@@ -56,17 +57,22 @@ public:
 
 protected:
 
+	/// @todo Replace this with an instance of DFSCallStack
+#if 0
 	void PushCallStack(FunctionCallResolved* pushing_function_call);
 	void PopCallStack();
 	FunctionCallResolved* TopCallStack();
 	bool IsCallStackEmpty() const;
 	bool AreWeRecursing(Function* function);
-
+#endif
 	/// Reference to the ControlFlowGraph we're traversing.
 	ControlFlowGraph &m_cfg;
 
-private:
+	/// Our call stack.
+	DFSCallStack *m_call_stack;
 
+private:
+#if 0
 	/// The FunctionCall call stack.
 	std::stack<FunctionCallResolved*> m_call_stack;
 
@@ -77,6 +83,7 @@ private:
 	/// The set of Functions currently on the call stack.
 	/// This is currently used only to determine if our call stack has gone recursive.
 	T_FUNCTION_CALL_SET m_call_set;
+#endif
 };
 
 #endif	/* CFGDFSVISITOR_H */

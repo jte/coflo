@@ -54,6 +54,10 @@
 #include "controlflowgraph/algorithms/depth_first_traversal.hpp"
 #include "controlflowgraph/visitors/WriteGraphvizDotFileVisitor.h"
 
+// For the use of function_control_flow_graph_visitor
+//#include "controlflowgraph/CallStackFrameBase.h"
+#include "controlflowgraph/visitors/FunctionCFGVisitor.h"
+
 #include "libexttools/ToolDot.h"
 
 #include "parsers/gcc_gimple_parser.h"
@@ -102,6 +106,7 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 	typedef std::pair<T_VERTEX_DESC, T_VERTEX_DESC> T_VERTEX_DESCRIPTOR_PAIR;
 	std::vector<T_VERTEX_DESCRIPTOR_PAIR> vertex_replacement_info;
 
+	// Visit all vertices in this Function looking for unresolved function calls.
 	for (; vit != vend; vit++)
 	{
 		FunctionCallUnresolved *fcu = dynamic_cast<FunctionCallUnresolved*>(*vit);
@@ -122,15 +127,16 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 			{
 				// Found it.
 
-				// Replace the FunctionCallUnresolved with a FunctionCallResolved.
+				// Replace the FunctionCallUnresolved with a FunctionCallResolved.  We can't do the replacement here
+				// because the iterators would be invalidated, so we create the replacement vertex
+				// and add them both to the vertex_replacement_info list, which we'll traverse later and
+				// do the actual replacement.
+
+				// Create the replacement vertex.
 				FunctionCallResolved *fcr = new FunctionCallResolved(it->second, fcu);
 
-				// Add the vertexes to the replacement info list.  We can't do the replacement here
-				// because the iterators would be invalidated.
+				// Add the vertexes to the replacement info list.
 				vertex_replacement_info.push_back(std::make_pair(*vit, fcr));
-				//dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
-				//m_the_cfg->ReplaceVertex(*vit, fcr);
-				//dlog_cfg << "INFO: Replaced Vertex." << std::endl;
 			}
 		}
 	}
@@ -141,40 +147,23 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 		dlog_cfg << "INFO: Replacing Vertex..." << std::endl;
 		m_the_cfg->ReplaceVertex(p.first, p.second);
 		dlog_cfg << "INFO: Replaced Vertex." << std::endl;
+		dlog_cfg << "INFO: Deleting old Vertex..." << std::endl;
+		delete p.first;
+		dlog_cfg << "INFO: Deleted old Vertex." << std::endl;
+
+		// Now add the FunctionCall and Return edges.
+		FunctionCallResolved *fcr = dynamic_cast<FunctionCallResolved*>(p.second);
+		CFGEdgeTypeFunctionCall *call_edge = new CFGEdgeTypeFunctionCall(fcr);
+		CFGEdgeTypeReturn *return_edge = new CFGEdgeTypeReturn(fcr);
+		CFGEdgeTypeFallthrough *function_calls_fallthrough_edge = fcr->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>();
+		m_the_cfg->AddEdge(fcr, fcr->GetCalledFunction()->GetEntryVertexDescriptor(), call_edge);
+		// The return edge goes to the next vertex after the FunctionCallResolved vertex.
+		m_the_cfg->AddEdge(fcr->GetCalledFunction()->GetExitVertexDescriptor(),
+				function_calls_fallthrough_edge->Target(), return_edge);
 	}
 }
 
-/**
- * Predicate for filtering back edges out of the CFG.
- */
-struct back_edge_filter_predicate
-{
-	/// Must be default constructible because such predicates are stored by-value.
-	back_edge_filter_predicate()
-	{
-	};
-
-	/**
-	 * Returns false if @a eid is a back edge.
-	 *
-	 * @param eid Reference to an edge descriptor.
-	 * @return
-	 */
-	bool operator()(const ControlFlowGraph::edge_descriptor& eid) const
-	{
-		if (eid->IsBackEdge())
-		{
-			// This is a back edge, filter it out.
-			return false;
-		}
-		else
-		{
-			// This is not a back edge.
-			return true;
-		}
-	};
-};
-
+#if 0
 static void indent(long i)
 {
 	while (i > 0)
@@ -183,7 +172,7 @@ static void indent(long i)
 		i--;
 	};
 }
-
+#endif
 long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decision_predecessors = false)
 {
 	StatementBase::in_edge_iterator ieit, ieend;
@@ -232,6 +221,8 @@ long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decisio
 
 	return i;
 }
+
+
 
 ControlFlowGraph::edge_descriptor first_filtered_out_edge(ControlFlowGraph::vertex_descriptor v)
 {
@@ -295,6 +286,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+#if 0
 /**
  * Visitor which, when passed to topological_visit_kahn, prints out the control flow graph.
  */
@@ -327,7 +319,7 @@ public:
 		// The very first vertex has been popped.
 
 		// We're at the first function entry point.
-		PushCallStack(NULL);
+		m_call_stack->PushCallStack(NULL);
 		m_indent_level = 0;
 
 		return vertex_return_value_t::ok;
@@ -411,7 +403,7 @@ public:
 			// Assume we're not.
 			m_last_discovered_vertex_is_recursive = false;
 
-			if(AreWeRecursing(fcr->m_target_function))
+			if(m_call_stack->AreWeRecursing(fcr->m_target_function))
 			{
 				// We're recursing, we need to treat this vertex as if it were a FunctionCallUnresolved.
 				std::cout << "RECURSION DETECTED: Function \"" << fcr->m_target_function << "\"" << std::endl;
@@ -420,7 +412,7 @@ public:
 			else
 			{
 				// We're not recursing, push a normal stack frame and do the call.
-				PushCallStack(fcr);
+				m_call_stack->PushCallStack(new CallStackFrameBase(fcr, fcr->m_target_function->GetCFGPointer()));
 			}
 		}
 
@@ -460,18 +452,18 @@ public:
 		{
 			// This is a return edge.
 
-			if(IsCallStackEmpty())
+			if(m_call_stack->IsCallStackEmpty())
 			{
 				// Should never get here.
 				cout << "EMPTY" << endl;
 			}
-			else if(TopCallStack() == NULL)
+			else if(m_call_stack->TopCallStack() == NULL)
 			{
 				// We're at the top of the call stack, and we're trying to return.
 				cout << "NULL" << endl;
 				return edge_return_value_t::terminate_branch;
 			}
-			else if(ret->m_function_call != TopCallStack())
+			else if(ret->m_function_call != m_call_stack->TopCallStack()->GetPushingCall())
 			{
 				// This edge is a return, but not the one corresponding to the FunctionCall
 				// that brought us here.  Or, the call stack is empty, indicating that we got here
@@ -512,7 +504,7 @@ public:
 		if(p->IsType<Exit>())
 		{
 			// We're leaving the function we were in, pop the call stack entry it pushed.
-			PopCallStack();
+			m_call_stack->PopCallStack();
 
 			// Outdent.
 			m_indent_level--;
@@ -567,6 +559,7 @@ private:
 
 	bool m_last_discovered_vertex_is_recursive;
 };
+#endif
 
 struct filtered_in_degree_functor
 {
@@ -575,20 +568,6 @@ struct filtered_in_degree_functor
 
 void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 {
-#if 0
-	// Set up the color map stack.
-	typedef boost::color_traits<boost::default_color_type> T_COLOR;
-	typedef std::map< T_CFG_VERTEX_DESC, boost::default_color_type > T_COLOR_MAP;
-	std::vector< T_COLOR_MAP* > color_map_stack;
-
-	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_cfg, m_exit_vertex_desc);
-
-	// Do a depth-first search of the control flow graph.
-	improved_depth_first_visit(*m_cfg, m_entry_vertex_desc, cfg_visitor, color_map_stack);
-#else
-
-
 	// Set up the RemainingInDegreeMap.
 	typedef SparsePropertyMap<typename boost::graph_traits<ControlFlowGraph>::vertex_descriptor,
 				typename boost::graph_traits<ControlFlowGraph>::degree_size_type,
@@ -597,88 +576,9 @@ void Function::PrintControlFlowGraph(bool cfg_verbose, bool cfg_vertex_ids)
 	T_IN_DEGREE_MAP remaining_in_degree_map;
 
 	// Set up the visitor.
-	function_control_flow_graph_visitor cfg_visitor(*m_the_cfg, m_exit_vertex_desc, cfg_verbose, cfg_vertex_ids);
+	FunctionCFGVisitor cfg_visitor(*m_the_cfg, m_exit_vertex_desc, cfg_verbose, cfg_vertex_ids);
 	topological_visit_kahn(*m_the_cfg, m_entry_vertex_self_edge, cfg_visitor, remaining_in_degree_map);
-#endif
 }
-
-/// Functor for writing GraphViz dot-compatible info for the function's entire CFG.
-struct graph_property_writer
-{
-	graph_property_writer(ControlFlowGraph &g, Function * function) : m_g(g), m_function(function) {};
-
-	void operator()(std::ostream& out) const
-	{
-		out << "graph [clusterrank=local colorscheme=svg]" << std::endl;
-		out << "subgraph cluster0 {" << std::endl;
-		out << "label = \"" << m_function->GetIdentifier() << "\";" << std::endl;
-		out << "labeljust = \"l\";" << std::endl;
-		out << "node [shape=rectangle fontname=\"Helvetica\"]" << std::endl;
-		out << "edge [style=solid]" << std::endl;
-		out << "{ rank = source; " << m_function->GetEntryVertexDescriptor()->GetIndex() << "; }" << std::endl;
-		out << "{ rank = sink; " << m_function->GetExitVertexDescriptor()->GetIndex() << "; }" << std::endl;
-	}
-
-	ControlFlowGraph &m_g;
-	Function* m_function;
-};
-
-/**
- * Class for a vertex property writer, for use with write_graphviz().
- */
-class cfg_vertex_property_writer
-{
-public:
-	cfg_vertex_property_writer(Graph &cfg) : m_g(cfg) { };
-
-	void operator()(std::ostream& out, const Graph::vertex_descriptor& v)
-	{
-		StatementBase *sbp = dynamic_cast<StatementBase*>(v);
-		if (sbp != NULL)
-		{
-			out << "[label=\"";
-			out << v->GetIndex() << " " << sbp->GetStatementTextDOT();
-			out << "\\n" << sbp->GetLocation() << "\"";
-			out << ", color=" << sbp->GetDotSVGColor();
-			out << ", shape=" << sbp->GetShapeTextDOT();
-			out << "]";
-		}
-		else
-		{
-			out << "[label=\"NULL STMNT\"]";
-		}
-	}
-private:
-
-	/// The graph whose vertices we're writing the properties of.
-	Graph &m_g;
-};
-
-/**
- * Class for an edge property writer, for use with write_graphviz().
- */
-class cfg_edge_property_writer
-{
-public:
-	cfg_edge_property_writer(ControlFlowGraph &_g) : m_graph(_g)
-	{
-	}
-	void operator()(std::ostream& out, const Graph::edge_descriptor& e)
-	{
-		CFGEdgeTypeBase *etb = dynamic_cast<CFGEdgeTypeBase*>(e);
-		// Set the edge attributes.
-		out << "[";
-		out << "label=\"" << etb->GetDotLabel() << "\"";
-		out << ", color=" << etb->GetDotSVGColor();
-		out << ", style=" << etb->GetDotStyle();
-		out << "]";
-	};
-private:
-
-	/// The graph whose edges we're writing the properties of.
-	ControlFlowGraph &m_graph;
-};
-
 
 
 void Function::PrintControlFlowGraphDot(bool cfg_verbose, bool cfg_vertex_ids, const std::string & output_filename)
@@ -821,11 +721,6 @@ bool Function::CreateControlFlowGraph(const std::vector< StatementBase* > &state
 		m_the_cfg->AddEdge(prev_vertex, m_exit_vertex_desc, new CFGEdgeTypeFallthrough());
 	}
 
-	std::ofstream debug_file("temp_dotfile.txt");
-
-	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
-
 	//
 	// At this point, we've created the basic blocks and at the same time added all the fallthrough edges.
 	// Now we must link the basic blocks together.
@@ -858,9 +753,6 @@ bool Function::CreateControlFlowGraph(const std::vector< StatementBase* > &state
 	}
 	dlog_cfg << "INFO: Linking complete." << std::endl;
 
-	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
-
 	// Now we have to add Impossible in edges for any leader vertices which we haven't already linked above.
 	// This happens in the following cases:
 	//  - Infinite loops
@@ -888,9 +780,6 @@ bool Function::CreateControlFlowGraph(const std::vector< StatementBase* > &state
 	dlog_cfg << "INFO: Removing redundant nodes." << std::endl;
 	RemoveRedundantNodes(m_the_cfg);
 	dlog_cfg << "INFO: Redundant node removal complete." << std::endl;
-
-	/// @todo DELETEME
-	boost::write_graphviz(debug_file, static_cast<Graph&>(*m_the_cfg));
 
 	return true;
 }

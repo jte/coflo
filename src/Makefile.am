@@ -53,10 +53,10 @@ endif
 NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./parsers/libparsers.a \
 	./controlflowgraph/analysis/libanalysis.a \
-	./controlflowgraph/libcontrolflowgraph.a \
 	./controlflowgraph/statements/libstatements.a \
 	./controlflowgraph/edges/libedges.a \
 	./controlflowgraph/visitors/libvisitors.a \
+	./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
 	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
@@ -97,4 +97,4 @@ coflotest_CXXFLAGS = $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(CPPUNIT_LIBS) $(ALLBOOSTLIBS)
+coflotest_LDADD = $(TESTLIBS) $(CPPUNIT_LIBS) $(NORMALLIBS) $(ALLBOOSTLIBS)

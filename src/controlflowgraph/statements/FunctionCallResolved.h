@@ -42,6 +42,8 @@ public:
 	
 	virtual std::string GetIdentifier() const;
 	
+	virtual Function* GetCalledFunction() const;
+
 //private:
 	
 	/// Pointer to the function we're calling.
