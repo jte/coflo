@@ -140,8 +140,9 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 
 # Clear the "user defaults" for compiler optimization and debug flags.  This doesn't override any configure-time or make-time settings the builder may
 # specifiy for these variables, it just makes the values empty if they're not specified at configure- or make-time.
-# Otherwise, Autoconf assumes the builder wants to compile everything "-g -O2" by default, which overrides
+# Otherwise, Autoconf's AC_PROG_CXX et al macros assume the builder wants to compile everything "-g -O2" by default, which overrides
 # any AM_C*FLAGS.
+# This otherwise-frowned-upon touching of these user variables is sanctioned by the Autoconf manual for this purpose.
 : ${CPPFLAGS=""}	# Use an empty default.
 : ${CFLAGS=""}		# Don't default to "-g -O2".
 : ${CXXFLAGS=""}	# Don't default to "-g -O2".
@@ -149,7 +150,7 @@ AC_SUBST([AM_CXXFLAGS], ["-ggdb3 -O0"])
 # Check if the C++ compiler supports some flags we'd like to set.
 # Append them to AM_CXXFLAGS if it does. 
 AC_LANG_PUSH([C++])
-AX_APPEND_COMPILE_FLAGS([-fno-pretty-templates],[AM_CXXFLAGS])
+#AX_APPEND_COMPILE_FLAGS([-fno-pretty-templates],[AM_CXXFLAGS])
 AC_LANG_POP([C++])
 
 
@@ -200,6 +201,10 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 ### Checks for libraries
 ###
 
+# The Google Test library.
+# See if the user specified a path to it on the configure command line.
+COFLO_ARG_WITH_DIR([GTEST_ROOT], [gtest], [root directory of the Google C++ Testing Framework source distribution])
+
 
 # The DParser source distribution's tarball.
 # To avoid requiring the user to build and install DParser on their system, we'll take the tarball
@@ -223,8 +228,8 @@ COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost so
 AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
-AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,regex])
-# The "boost_1_4x_x" part of the filename.
+AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,random,regex])
+# Extract the "boost_1_4x_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
 BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")
 BOOST_TARBALL_TAR=$(basename "${BOOST_TARBALL_TARBZ2}" .bz2)
@@ -237,7 +242,7 @@ AM_COND_IF([BOOST_USE_BUILT_BOOST],
 [
 	# A path to a boost source tarball was specified.
 	# Populate the necessary variables.
-	AC_SUBST([BOOST_CPPFLAGS],['-I $(abs_top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)'])
+	AC_SUBST([BOOST_CPPFLAGS],['-I "$(top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)"'])
 	AM_CPPFLAGS="$AM_CPPFLAGS $BOOST_CPPFLAGS"
 	AC_SUBST([BOOST_LDFLAGS],[""])
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
@@ -281,6 +286,14 @@ AC_CHECK_FUNC(glob)
 ### Checks for optional libraries.
 ###
 
+# Google Test library.
+# Defines HAVE_GTEST="yes" or "no".
+# Vars if found are:
+# GTEST_CONFIG = full path to gtest-config.
+# GTEST_CPPFLAGS, GTEST_CXXFLAGS, GTEST_LDFLAGS, GTEST_LIBS = Vars to add to the compile/link lines.
+# GTEST_VERSION = The version found (e.g. "1.5.0").
+#GTEST_LIB_CHECK([1.5.0])
+
 # Allow the user to build with dmalloc.
 AX_WITH_DMALLOC
 
@@ -301,10 +314,12 @@ AC_CONFIG_FILES([Makefile
 	doc/Makefile
 	src/Makefile
 	src/controlflowgraph/Makefile
+	src/controlflowgraph/algorithms/Makefile
 	src/controlflowgraph/analysis/Makefile
 	src/controlflowgraph/statements/Makefile
 	src/controlflowgraph/edges/Makefile
 	src/controlflowgraph/visitors/Makefile
+	src/parsers/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
 	third_party/Makefile])

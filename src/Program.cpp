@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -125,8 +125,7 @@ void Program::Print(const std::string &output_path)
 	std::string index_html_filename = (output_dir /= "index.html").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
-	index_html_out << \
-"\
+	index_html_out << "\
 <!DOCTYPE html>\n\
 <html lang=\"en\">\n\
 <head>\n\
@@ -153,7 +152,7 @@ void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP 
 	bool only_list_ids = true;
 
 	// See if we have any unresolved calls.
-	if(unresolved_function_calls->size() > 0)
+	if(!unresolved_function_calls->empty())
 	{
 		// We couldn't link some function calls.
 		std::cout << "WARNING: Unresolved function calls:" << std::endl;

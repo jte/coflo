@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -96,7 +96,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	vertex_return_value_t visitor_vertex_return_value;
 	edge_return_value_t visitor_edge_return_value;
 
-	// The vertex "context" stack.
+	// The depth-first search vertex "context" stack.
+	// This stack is used exclusively for the essentially ordinary stack-based depth first search.
 	std::stack<T_VERTEX_INFO> dfs_stack;
 
 	// Push a new color context onto the color map stack.
@@ -105,7 +106,8 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	// Start at the source vertex.
 	u = source;
 
-	visitor_vertex_return_value = visitor.start_subgraph_vertex(u);
+	// The first vertex gets a special visit.
+	visitor_vertex_return_value = visitor.start_vertex(u);
 
 	// Mark this vertex as having been visited, but that there are still vertices reachable from it.
 	(*color_map_stack.top())[u] = T_COLOR::gray();
@@ -114,7 +116,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 	visitor_vertex_return_value = visitor.discover_vertex(u);
 
 	// Get iterators to the out edges of vertex u.
-	boost::tie(ei, eend) = boost::out_edges(u, graph);
+	boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 
 	// Push the first vertex onto the stack and we're ready to go.
 	if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
@@ -182,7 +184,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 
 			// Get the target vertex of the current edge.
-			v = boost::target(*ei, graph);
+			v = /*boost::*/target(*ei, graph);
 
 			//
 			// Get the target vertex's color.
@@ -235,7 +237,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				vertex_info.Set(u, ei, eend);
 				dfs_stack.push(vertex_info);
 
-				// Go to the next vertex.
+				// Go to the target vertex.
 				u = v;
 
 				// Mark the next vertex as touched.
@@ -245,7 +247,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 				visitor_vertex_return_value = visitor.discover_vertex(u);
 
 				// Get the out-edges of this vertex.
-				boost::tie(ei, eend) = boost::out_edges(u, graph);
+				boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 
 				if(visitor_vertex_return_value == vertex_return_value_t::terminate_branch)
 				{
@@ -286,7 +288,7 @@ void improved_depth_first_visit(IncidenceGraph &graph,
 			}
 		}
 
-		// Visited, so mark the vertex black.
+		// All successors have been visited, so mark the vertex black.
 		(*color_map_stack.top())[u] = T_COLOR::black();
 
 		// Finish the vertex.

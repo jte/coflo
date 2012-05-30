@@ -16,7 +16,8 @@
  */
 
 /**
- * @file Master header for the edges sub-library.
+ * @file
+ * Master header for the edges sub-library.
  */
 
 #ifndef EDGE_TYPES_H

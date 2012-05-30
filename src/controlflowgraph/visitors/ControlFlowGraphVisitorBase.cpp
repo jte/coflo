@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -21,59 +21,65 @@
 #include "../../Function.h"
 
 
-ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(cfg.GetConstT_CFG()), m_cfg(cfg)
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(ControlFlowGraph & cfg) :
+	ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>(cfg), m_cfg(cfg)
 {
+	m_call_stack = new DFSCallStack;
 }
 
 
-ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) : ImprovedDFSVisitorBase<T_CFG_VERTEX_DESC, T_CFG_EDGE_DESC, T_CFG>(orig), m_cfg(orig.m_cfg)
+ControlFlowGraphVisitorBase::ControlFlowGraphVisitorBase(const ControlFlowGraphVisitorBase& orig) :
+		ImprovedDFSVisitorBase<ControlFlowGraph::vertex_descriptor, ControlFlowGraph::edge_descriptor, ControlFlowGraph>(orig), m_cfg(orig.m_cfg)
 {
+	/// @todo Do we need a shallow or deep copy here?
 }
 
 ControlFlowGraphVisitorBase::~ControlFlowGraphVisitorBase()
 {
+	delete m_call_stack;
 }
 
-vertex_return_value_t ControlFlowGraphVisitorBase::initialize_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::initialize_vertex(ControlFlowGraph::vertex_descriptor u)
 {
 	return vertex_return_value_t::ok; 
 };
 
-vertex_return_value_t ControlFlowGraphVisitorBase::start_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::start_vertex(ControlFlowGraph::vertex_descriptor u)
 {
 	return vertex_return_value_t::ok;
 };
 
-vertex_return_value_t ControlFlowGraphVisitorBase::discover_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::discover_vertex(ControlFlowGraph::vertex_descriptor u)
 {
 	return vertex_return_value_t::ok;
 };
 
-edge_return_value_t ControlFlowGraphVisitorBase::examine_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::examine_edge(ControlFlowGraph::edge_descriptor u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t ControlFlowGraphVisitorBase::tree_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::tree_edge(ControlFlowGraph::edge_descriptor u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t ControlFlowGraphVisitorBase::back_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::back_edge(ControlFlowGraph::edge_descriptor u)
 {
 	return edge_return_value_t::ok;
 };
 
-edge_return_value_t ControlFlowGraphVisitorBase::forward_or_cross_edge(T_CFG_EDGE_DESC u)
+edge_return_value_t ControlFlowGraphVisitorBase::forward_or_cross_edge(ControlFlowGraph::edge_descriptor u)
 {
 	return edge_return_value_t::ok;
 };
 
-vertex_return_value_t ControlFlowGraphVisitorBase::finish_vertex(T_CFG_VERTEX_DESC u)
+vertex_return_value_t ControlFlowGraphVisitorBase::finish_vertex(ControlFlowGraph::vertex_descriptor u)
 {
 	return vertex_return_value_t::ok;
 };
 
+#if 0
 void ControlFlowGraphVisitorBase::PushCallStack(FunctionCallResolved* pushing_function_call)
 {
 	m_call_stack.push(pushing_function_call);
@@ -109,5 +115,5 @@ bool ControlFlowGraphVisitorBase::AreWeRecursing(Function *function)
 }
 
 
-
+#endif
 

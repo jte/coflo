@@ -22,27 +22,34 @@
 
 #include <string>
 #include "coflo_exceptions.hpp"
+#include "../Edge.h"
+
+class StatementBase;
 
 /**
  * Base class for control flow graph edge types.
  */
-class CFGEdgeTypeBase
+class CFGEdgeTypeBase : public Edge
 {
 
 public:
 	CFGEdgeTypeBase();
+
 	/**
 	 *  Copy constructor.
 	 *
 	 *  @param orig Reference to the CFGEdgeTypeBase object to copy.
 	 */
 	CFGEdgeTypeBase(const CFGEdgeTypeBase& orig);
+
 	/**
 	 *  Destructor.
 	 *  Pure virtual to force this to be an abstract base class.
 	 */
 	virtual ~CFGEdgeTypeBase() = 0;
 	
+	virtual void CopyBasePropertiesFrom(const CFGEdgeTypeBase& orig);
+
 	/**
 	 * Mark the edge as a back edge.  We keep this info around because we need it
 	 * for doing certain operations such as topological sorting, and for efficiency
@@ -110,8 +117,31 @@ public:
      */
 	std::string GetDotStyle() const;
 
+	/**
+	 * @note This overload works because the return type is covariant with a Vertex*.
+	 * @return
+	 */
+	virtual StatementBase* Source();
+	virtual StatementBase* Target();
+
+	/**
+	 * When called like "IsType<SomeDerivedType>()", returns whether it's dynamic_castable to
+	 * that type or not.
+	 *
+	 * @deprecated This is one step removed from switch/case.  At the moment this exists for the
+	 * benefit of function_control_flow_graph_visitor, but there's got to be a better way to do it.
+	 *
+	 * @return
+	 */
+	template<typename DerivedType>
+	bool IsType() const { return NULL != dynamic_cast<const DerivedType*>(this); };
+
 private:
 	
+	typedef Edge base_class_t;
+
+	base_class_t* GetBasePtr();
+
 	/// Flag indicating whether this edge has been determined to be a back edge or not.
 	bool m_is_back_edge;
 

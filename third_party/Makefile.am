@@ -18,15 +18,19 @@
 # This is a proxy Makefile.am which dispatches the Autotools rules to the real makefiles of
 # the third-party libraries/tools we may need.
 
+# Define some file extensions we know how to handle
+SUFFIXES = .tar.bz2 .tar.gz2 .tar
+
 # Some Boost lib directory variables.
 BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
-BOOST_LOCAL = $(abs_builddir)/boost_local
+BOOST_LOCAL = ./boost_local
 BOOST_STAGE_DIR = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage
 BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
 BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
 
 # DParser directory vars.
-DPARSER_PREFIX = $(abs_builddir)/dparser/local
+#$(abs_builddir)
+DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
@@ -67,7 +71,7 @@ stamp_dparser_src_built: stamp_dparser_src_untarred
 	
 stamp_dparser_src_installed: stamp_dparser_src_built
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=$(DPARSER_PREFIX) install
+	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 ###
@@ -79,6 +83,10 @@ COFLO_BOOST_THREADING = single
 COFLO_BOOST_BJAM_JOBS = -j$(CPU_COUNT)
 # @todo runtime-link option?  variant=debug|release?
 
+# Split the bunzipping and the untarring into separate rules so we can take better advantage of parallel builds. 
+#$(BOOST_TARBALL_TAR): $(FILE_PATH_BOOST_SOURCE_TARBALL)
+#	bunzip2 --keep --force "$<"
+
 stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 	rm -f $@-temp && echo "`date -u`" > $@-temp
 	@echo "In directory $$(pwd), attempting to untar \"$<\""
@@ -88,7 +96,8 @@ stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
 
 stamp_boost_src_configured: stamp_boost_src_untarred
 	rm -f $@-temp
-	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
+	@echo "Building b2 and configuring Boost..."; 
+	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="../$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
@@ -101,7 +110,8 @@ stamp_boost_src_configured: stamp_boost_src_untarred
 	
 stamp_boost_src_installed: stamp_boost_src_configured
 	rm -f $@-temp
-	cd $(BOOST_TARBALL_DIRNAME) && ./b2 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
+	@echo "Building Boost with b2...";
+	cd $(BOOST_TARBALL_DIRNAME) && ./b2 -d 1 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
 		link=static threading=$(COFLO_BOOST_THREADING)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
@@ -114,7 +124,7 @@ stamp_boost_src_installed: stamp_boost_src_configured
 #	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
-# Hook "mostlyclean" to avoid rm'ing the boost tarball when we don't have to.
+# Hook "mostlyclean" to avoid rm'ing the untarred boost tarball when we don't have to.
 mostlyclean-local:
 	@: 'Remove the Boost local installation tree.'
 	test ! -d "$(BOOST_LOCAL)" || rm -rf "$(BOOST_LOCAL)"

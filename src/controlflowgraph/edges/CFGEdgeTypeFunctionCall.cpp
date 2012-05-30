@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,18 +17,37 @@
 
 #include "CFGEdgeTypeFunctionCall.h"
 
+#include "../ControlFlowGraph.h"
+#include "../../Function.h"
+
 CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(FunctionCallResolved *function_call) : CFGEdgeTypeBase()
 {
 	m_function_call = function_call;
+
+	// We need to know the ControlFlowGraph the target vertex is in.  Get it from the Function
+	// that the FunctionCallResolved vertex is calling.
+	m_target_cfg = m_function_call->GetCalledFunction()->GetCFGPointer();
 }
 
 CFGEdgeTypeFunctionCall::CFGEdgeTypeFunctionCall(const CFGEdgeTypeFunctionCall& orig) : CFGEdgeTypeBase(orig)
 {
-	m_function_call = orig.m_function_call;
+	Copy(orig);
 }
 
 CFGEdgeTypeFunctionCall::~CFGEdgeTypeFunctionCall()
 {
-	// Nothing to destroy.  We don't own the m_function_call.
+	// Nothing to destroy.
 }
 
+void CFGEdgeTypeFunctionCall::Copy(const CFGEdgeTypeFunctionCall& orig)
+{
+	m_function_call = orig.m_function_call;
+	m_target_cfg = orig.m_target_cfg;
+}
+
+CFGEdgeTypeFunctionCall& CFGEdgeTypeFunctionCall::operator =(
+		const CFGEdgeTypeFunctionCall& orig)
+{
+	Copy(orig);
+	return *this;
+}

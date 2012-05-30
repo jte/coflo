@@ -37,7 +37,7 @@ typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CA
 /**
  * Class representing a single function in the source.
  */
-class Function
+class Function : boost::noncopyable
 {
 public:
 	Function(TranslationUnit *parent_tu, const std::string &m_function_id);
@@ -55,14 +55,12 @@ public:
 			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 	
 	/**
-	 * Add the control flow graph of this Function to \a cfg.
+	 * Add the statements passed in @a statement_list to the control flow graph of this Function.
 	 * 
-     * @param cfg The ControlFlowGraph to add this function's control-flow graph to.
+     * @param statement_list The list of statements to turn into a control flow graph.
      * @return true on success, false on failure.
      */
-	//bool CreateControlFlowGraph(ControlFlowGraph &cfg);
-	
-	bool CreateControlFlowGraph(ControlFlowGraph &cfg, const std::vector< StatementBase* > &statement_list);
+	bool CreateControlFlowGraph(const std::vector< StatementBase* > &statement_list);
 
 	/**
 	 * Return this Function's identifier.
@@ -132,25 +130,32 @@ public:
 	
 	
 	/**
-	 * Get the T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function.
+	 * Get the ControlFlowGraph::vertex_descriptor corresponding to the Entry vertex of this Function.
 	 *
-	 * @return T_CFG_VERTEX_DESC corresponding to the Entry vertex of this Function
+	 * @return ControlFlowGraph::vertex_descriptor corresponding to the Entry vertex of this Function
 	 */
-	T_CFG_VERTEX_DESC GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
-
-	T_CFG_EDGE_DESC GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
+	ControlFlowGraph::vertex_descriptor GetEntryVertexDescriptor() const { return m_entry_vertex_desc; };
 
 	/**
-	 * Get the T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 * Get the ENTRY vertex's self-edge.
 	 *
-	 * @return T_CFG_VERTEX_DESC corresponding to the Exit vertex of this Function.
+	 * @return
 	 */
-	T_CFG_VERTEX_DESC GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
+	ControlFlowGraph::edge_descriptor GetEntrySelfEdgeDescriptor() const { return m_entry_vertex_self_edge; };
+
+	/**
+	 * Get the ControlFlowGraph::vertex_descriptor corresponding to the Exit vertex of this Function.
+	 *
+	 * @return ControlFlowGraph::vertex_descriptor corresponding to the Exit vertex of this Function.
+	 */
+	ControlFlowGraph::vertex_descriptor GetExitVertexDescriptor() const { return m_exit_vertex_desc; };
 	
 	/// @name Debugging helpers
 	//@{
 	void DumpCFG();
 	//@}
+
+	ControlFlowGraph* GetCFGPointer() const { return m_the_cfg; };
 
 private:
 	
@@ -160,17 +165,17 @@ private:
 	 */
 	struct BasicBlockLeaderInfo
 	{
-		BasicBlockLeaderInfo(T_CFG_VERTEX_DESC leader, T_CFG_VERTEX_DESC immediate_predecessor)
+		BasicBlockLeaderInfo(ControlFlowGraph::vertex_descriptor leader, ControlFlowGraph::vertex_descriptor immediate_predecessor)
 		{
 			m_leader = leader;
 			m_immediate_predecessor = immediate_predecessor;
 		};
 
 		/// Vertex descriptor of the basic block leader.
-		T_CFG_VERTEX_DESC m_leader;
+		ControlFlowGraph::vertex_descriptor m_leader;
 
 		/// The vertex which ended the immediately-preceding basic block.
-		T_CFG_VERTEX_DESC m_immediate_predecessor;
+		ControlFlowGraph::vertex_descriptor m_immediate_predecessor;
 	};
 
 	/**
@@ -184,9 +189,10 @@ private:
 	void AddImpossibleEdges(ControlFlowGraph & cfg, std::vector< BasicBlockLeaderInfo > &leader_info_list);
 
 	bool CheckForNoInEdges(ControlFlowGraph & cfg,
-			std::vector< T_CFG_VERTEX_DESC > &list_of_statements_with_no_in_edge_yet,
-			std::vector< T_CFG_VERTEX_DESC > *output);
+			std::vector< ControlFlowGraph::vertex_descriptor > &list_of_statements_with_no_in_edge_yet,
+			std::vector< ControlFlowGraph::vertex_descriptor > *output);
 
+private:
 	/// The translation unit containing this function.
 	TranslationUnit *m_parent_tu;
 
@@ -194,15 +200,15 @@ private:
 	std::string m_function_id;
 
 	/// The first statement in the body of this function.
-	T_CFG_VERTEX_DESC m_entry_vertex_desc;
-	T_CFG_EDGE_DESC m_entry_vertex_self_edge;
+	ControlFlowGraph::vertex_descriptor m_entry_vertex_desc;
+	ControlFlowGraph::edge_descriptor m_entry_vertex_self_edge;
 	
 	/// The last statement in the body of this function.
-	T_CFG_VERTEX_DESC m_exit_vertex_desc;
-	T_CFG_EDGE_DESC m_exit_vertex_self_edge;
+	ControlFlowGraph::vertex_descriptor m_exit_vertex_desc;
+	ControlFlowGraph::edge_descriptor m_exit_vertex_self_edge;
 	
+	/// The ControlFlowGraph of this function.
 	ControlFlowGraph *m_the_cfg;
-	T_CFG *m_cfg;
 
 	/// @name Static properties of this function.
 	/// These are properties of the function determined at analysis-time which are invariant, such as

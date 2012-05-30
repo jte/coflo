@@ -44,7 +44,7 @@
 
 #include "libexttools/ToolCompiler.h"
 
-#include "gcc_gimple_parser.h"
+#include "parsers/gcc_gimple_parser.h"
 
 using namespace boost;
 using namespace boost::filesystem;
@@ -264,7 +264,7 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		(*function_map)[*(fi->m_identifier)] = f;
 
 		// Create the control flow graph for this function.
-		f->CreateControlFlowGraph(*(m_parent_program->GetControlFlowGraphPtr()), *(fi->m_statement_list));
+		f->CreateControlFlowGraph(*(fi->m_statement_list));
 	}
 }
 

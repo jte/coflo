@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -20,6 +20,10 @@
 
 #include "CFGEdgeTypeBase.h"
 
+/**
+ * Edge type denoting the simple flow of control from one statement to the next.
+ * This is the most basic type of CFG edge.
+ */
 class CFGEdgeTypeFallthrough : public CFGEdgeTypeBase
 {
 public:
@@ -27,6 +31,10 @@ public:
 	CFGEdgeTypeFallthrough(const CFGEdgeTypeFallthrough& orig);
 	virtual ~CFGEdgeTypeFallthrough();
 	
+	/**
+	 * Fallthrough edges don't have a label in dot graphs.
+	 * @return
+	 */
 	virtual std::string GetDotLabel() const { return ""; };
 
 private:

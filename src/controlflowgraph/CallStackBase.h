@@ -29,7 +29,7 @@ class Function;
 class CallStackBase
 {
 public:
-	virtual ~CallStackBase() = 0;
+	virtual ~CallStackBase() {};
 
 	/**
 	 * Push a new stack frame onto the call stack.

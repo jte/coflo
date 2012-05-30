@@ -26,6 +26,14 @@
 #include "../ControlFlowGraph.h"
 #include "FlowControlBase.h"
 
+/**
+ * @defgroup parsehelpers Parse Helper Classes
+ * The classes in this group exist for the purpose of assisting in the conversion between the parser's
+ * actions and the ultimate ControlFlowGraph we want.  Instances of these classes will not show up in the
+ * completed ControlFlowGraph.
+ * @{
+ */
+
 
 class LabelMap;
 
@@ -35,7 +43,7 @@ class LabelMap;
 	virtual std::string GetIdentifierCFG() const { return #name "_UNLINKED"; };
 
 #define M_DECLARE_FLOW_CONTROL_VIRTUALS(name) \
-		virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map);
+		virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map);
 
 class FlowControlUnlinked : public FlowControlBase
 {
@@ -52,7 +60,7 @@ public:
 	 * @return Pointer to a FlowControlBase-derived object which the caller is to use to replace this object with in the
 	 * 		vertex's CFGVertexProperties.  NULL if all links could not be resolved.
 	 */
-	virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, T_CFG_VERTEX_DESC this_vertex, LabelMap &label_map) = 0;
+	virtual FlowControlBase* ResolveLinks(ControlFlowGraph &cfg, StatementBase* this_vertex, LabelMap &label_map) = 0;
 
 };
 
@@ -104,7 +112,7 @@ private:
 class IfUnlinked : public FlowControlUnlinked
 {
 public:
-	IfUnlinked() : FlowControlUnlinked() {};
+	IfUnlinked() : FlowControlUnlinked(), m_true(NULL), m_false(NULL) {};
 	IfUnlinked(const Location &loc, const std::string &condition,
 			GotoUnlinked *goto_true, GotoUnlinked *goto_false) : FlowControlUnlinked(loc)
 	{
@@ -165,5 +173,6 @@ private:
 	std::vector<CaseUnlinked *> m_case_list;
 };
 
+///@} // Closing the @parsegroup.
 
 #endif /* PARSEHELPERS_H_ */

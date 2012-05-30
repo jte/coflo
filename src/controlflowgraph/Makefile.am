@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = analysis edges statements visitors
+SUBDIRS = algorithms analysis edges statements visitors
 
 noinst_LIBRARIES = libcontrolflowgraph.a
 libcontrolflowgraph_a_SOURCES = \
@@ -25,11 +25,23 @@ libcontrolflowgraph_a_SOURCES = \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
-	depth_first_traversal.hpp \
-	topological_visit_kahn.h
-	
+	DFSCallStack.cpp DFSCallStack.h \
+	Edge.cpp Edge.h \
+	Graph.cpp Graph.h \
+	GraphAdapter.cpp GraphAdapter.h \
+	Vertex.cpp Vertex.h \
+	VertexID.cpp VertexID.h
 
-libcontrolflowgraph_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libcontrolflowgraph_a_CPPFLAGS = -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libcontrolflowgraph_a_CFLAGS = $(AM_CFLAGS)
 libcontrolflowgraph_a_CXXFLAGS = $(AM_CXXFLAGS)
 
+# Unit tests.
+check_LIBRARIES =  libcontrolflowgraphtest.a
+libcontrolflowgraphtest_a_SOURCES = \
+	GraphTest.cpp \
+	ControlFlowGraph_test.cpp
+	
+libcontrolflowgraphtest_a_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libcontrolflowgraphtest_a_CFLAGS = $(AM_CFLAGS)
+libcontrolflowgraphtest_a_CXXFLAGS = $(AM_CXXFLAGS)

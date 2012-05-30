@@ -18,6 +18,7 @@
 /** @file */
 
 #include "CFGEdgeTypeBase.h"
+#include "../statements/StatementBase.h"
 
 CFGEdgeTypeBase::CFGEdgeTypeBase()
 {
@@ -25,13 +26,18 @@ CFGEdgeTypeBase::CFGEdgeTypeBase()
 	m_is_back_edge = false;
 }
 
-CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig)
+CFGEdgeTypeBase::CFGEdgeTypeBase(const CFGEdgeTypeBase& orig) : Edge(orig)
 {
 	m_is_back_edge = orig.m_is_back_edge;
 }
 
 CFGEdgeTypeBase::~CFGEdgeTypeBase() 
 {
+}
+
+void CFGEdgeTypeBase::CopyBasePropertiesFrom(const CFGEdgeTypeBase& orig)
+{
+	m_is_back_edge = orig.m_is_back_edge;
 }
 
 std::string CFGEdgeTypeBase::GetDotStyle() const
@@ -46,3 +52,21 @@ std::string CFGEdgeTypeBase::GetDotStyle() const
 		return "solid";
 	}
 }
+
+StatementBase* CFGEdgeTypeBase::Source()
+{
+	return dynamic_cast<StatementBase*>(Edge::Source());
+}
+
+
+StatementBase* CFGEdgeTypeBase::Target()
+{
+	return dynamic_cast<StatementBase*>(GetBasePtr()->Target());
+}
+
+CFGEdgeTypeBase::base_class_t* CFGEdgeTypeBase::GetBasePtr()
+{
+	return static_cast<base_class_t*>(this);
+}
+
+
