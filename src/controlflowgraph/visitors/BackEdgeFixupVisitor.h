@@ -21,6 +21,9 @@
 #define BACKEDGEFIXUPVISITOR_H
 
 #include <vector>
+
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/graph_concepts.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/graph/depth_first_search.hpp>
 
@@ -34,6 +37,12 @@
 template <typename GraphType>
 class BackEdgeFixupVisitor : public boost::default_dfs_visitor
 {
+	/// @name Concept checks.
+	//@{
+	/// Make sure GraphType models the Boost GraphConcept, which is the minimum necessary for use by the DFSVisitorConcept.
+	BOOST_CONCEPT_ASSERT(( boost::GraphConcept<GraphType> ));
+	//@}
+
 public:
 
 	typedef typename boost::graph_traits<GraphType>::vertex_descriptor T_VERTEX_DESC;
@@ -53,6 +62,10 @@ public:
 		boost::default_dfs_visitor(), m_back_edges(back_edges), m_predecessor_map()
 	{
 	};
+	// Copy constructor so we model the CopyConstructibleConcept, which DFSVisitorConcept must model.
+	BackEdgeFixupVisitor(const BackEdgeFixupVisitor& other) :
+		boost::default_dfs_visitor(other), m_back_edges(other.m_back_edges), m_predecessor_map(other.m_predecessor_map)
+	{};
 	~BackEdgeFixupVisitor() {};
 
 	/**
@@ -65,7 +78,7 @@ public:
 	void tree_edge(T_EDGE_DESC e, const GraphType &g)
 	{
 		// An edge just became part of the DFS search tree.  Capture the predecessor info this provides.
-		m_predecessor_map[boost::target(e, g)] = e;
+		m_predecessor_map[/*boost::*/target(e, g)] = e;
 	};
 
 	void back_edge(T_EDGE_DESC e, const GraphType &g)
@@ -81,7 +94,7 @@ public:
 		BackEdgeFixupInfo fui;
 
 		fui.m_back_edge = e;
-		if(boost::source(e,g) == boost::target(e,g))
+		if(/*boost::*/source(e,g) == /*boost::*/target(e,g))
 		{
 			dlog_cfg << "FOUND BACK EDGE (SELF): " << e << std::endl;
 			fui.m_impossible_target_vertex = boost::graph_traits<GraphType>::null_vertex();
@@ -97,20 +110,12 @@ public:
 
 private:
 
-	/// Reference to an external vector where we'll store the edges we'll mark later.
-	std::vector<BackEdgeFixupInfo> &m_back_edges;
-
-	/// Map where we'll store the predecessors we find during the depth-first-search.
-	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
-	/// to deal with back edges caused by loops.
-	boost::unordered_map<T_VERTEX_DESC, T_EDGE_DESC> m_predecessor_map;
-
 	T_EDGE_DESC FindDifferentOutEdge(T_EDGE_DESC e, const GraphType &cfg)
 	{
 		T_OUT_EDGE_ITERATOR ei, eend;
 
 		// Get a pair of iterators over the out edges of e's source node.
-		boost::tie(ei, eend) = boost::out_edges(boost::source(e, cfg), cfg);
+		boost::tie(ei, eend) = /*boost::*/out_edges(/*boost::*/source(e, cfg), cfg);
 
 		for(; ei != eend; ++ei)
 		{
@@ -146,8 +151,8 @@ private:
 		// The forward target we'll try to find.
 		T_VERTEX_DESC retval = boost::graph_traits<GraphType>::null_vertex();
 
-		u = boost::source(e, cfg);
-		v = boost::target(e, cfg);
+		u = /*boost::*/source(e, cfg);
+		v = /*boost::*/target(e, cfg);
 
 
 		// Walk back up the path by which the DFS got here until we reach the target of the back edge.
@@ -158,21 +163,21 @@ private:
 		{
 			// Get the predecessor of this vertex.
 			e = m_predecessor_map[u];
-			w = boost::source(e, cfg);
+			w = /*boost::*/source(e, cfg);
 
 			dlog_cfg << "WALKING PREDECESSOR TREE: VERTEX " << w << std::endl;
 
-			if(cfg[w].m_statement->IsDecisionStatement())
+			if(cfg[w]->IsDecisionStatement())
 			{
 				// It's a decision statement, this might be the way out.
 				dlog_cfg << "FOUND DECISION PREDECESSOR VERTEX: " << w << std::endl;
 
 				// Find an edge that's not this one out of the decision vertex.
 				/// @todo Make this more robust.  As far as I know, this isn't guaranteed to be the right way out, or even *a* way out.
-				T_CFG_EDGE_DESC other_edge;
+				T_EDGE_DESC other_edge;
 				other_edge = FindDifferentOutEdge(e, cfg);
 
-				retval = boost::target(other_edge, cfg);
+				retval = /*boost::*/target(other_edge, cfg);
 				break;
 			}
 
@@ -185,6 +190,19 @@ private:
 		return retval;
 	};
 
+private:
+	/// @name State
+	//@{
+
+	/// Reference to an external vector where we'll store the edges we'll mark later.
+	std::vector<BackEdgeFixupInfo> &m_back_edges;
+
+	/// Map where we'll store the predecessors we find during the depth-first-search.
+	/// We need this info to find a suitable target for the Impossible edges we'll add to the graph
+	/// to deal with back edges caused by loops.
+	boost::unordered_map<T_VERTEX_DESC, T_EDGE_DESC> m_predecessor_map;
+
+	//@}
 };
 
 #endif /* BACKEDGEFIXUPVISITOR_H */

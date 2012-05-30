@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -21,7 +21,7 @@
 #define	SAFE_ENUM_H
 
 /**
- * @macro DECLARE_ENUM_CLASS Type-safe enumeration class macro.
+ * DECLARE_ENUM_CLASS Type-safe enumeration class macro.
  *
  * Macro for backwards- and forwards-compatible support of C++0x's "Strongly Typed Enums",
  * i.e. "enum class E { E1, E2, ...};"
@@ -34,7 +34,7 @@ class enum_class_name \
 {\
 public:\
 	/** The underlying value type, which is still an enum. */ \
-	enum value_type { __VA_ARGS__ };\
+	enum value_type { enum_class_name##UNINITIALIZED, __VA_ARGS__ };\
 \
 	enum_class_name() {};\
 	enum_class_name(value_type value) : m_value(value) {};\

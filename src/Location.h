@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -68,7 +68,7 @@ public:
      * @param other
      * @return
      */
-	const Location operator=(const Location &other);
+	const Location& operator=(const Location &other);
 	//@}
 
 	/// @name Accessors for various components of the Location.

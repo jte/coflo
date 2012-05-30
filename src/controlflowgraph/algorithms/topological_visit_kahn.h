@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -26,96 +26,39 @@
 #include <boost/concept/requires.hpp>
 #include <boost/concept_check.hpp>
 
-#include "visitors/ImprovedDFSVisitorBase.h"
+// For vertex_return_value_t and edge_return_value_t.
+#include "../visitors/ImprovedDFSVisitorBase.h"
 
 /**
- * Map of vertex descriptors to the remaining in degree value.
- * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
- * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
- * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
+ *
  */
-template < typename Graph >
-class RemainingInDegreeMap
-{
-	typedef typename boost::graph_traits<Graph>::degree_size_type T_DEGREE_SIZE_TYPE;
-	typedef typename boost::graph_traits<Graph>::vertex_descriptor T_VERTEX_DESC;
-	typedef boost::unordered_map<T_VERTEX_DESC, T_DEGREE_SIZE_TYPE> T_UNDERLYING_MAP;
-
-public:
-	RemainingInDegreeMap(Graph &graph) : m_graph(graph) {};
-	~RemainingInDegreeMap() {};
-
-	void set(const T_VERTEX_DESC& vdesc, long val)
-	{
-		if(val != 0)
-		{
-			// Simply set the value.
-			m_remaining_in_degree_map[vdesc] = val;
-		}
-		else
-		{
-			// If we're setting that value to 0, we no longer need the key.
-			// Let's erase it in the interest of conserving space.
-			m_remaining_in_degree_map.erase(vdesc);
-		}
-	};
-
-	long get(const T_VERTEX_DESC& vdesc)
-	{
-		typename T_UNDERLYING_MAP::iterator it;
-
-		it = m_remaining_in_degree_map.find(vdesc);
-		if (it == m_remaining_in_degree_map.end())
-		{
-			// The target vertex wasn't in the map, which means we haven't
-			// encountered it before now.
-			// Pretend it was in the map and add it with its original in-degree.
-			T_DEGREE_SIZE_TYPE indegree;
-			/// @todo We should find a better way to get this "filtered" in degree value.
-			indegree = filtered_in_degree(vdesc, m_graph);
-			m_remaining_in_degree_map[vdesc] = indegree;
-
-			return indegree;
-		}
-		else
-		{
-			// Vertex was in the map.
-			return it->second;
-		}
-	};
-
-private:
-
-	/// Reference to the graph object whose vertices we're looking at.
-	Graph &m_graph;
-
-	/// The underlying vertex descriptor to integer map.
-	T_UNDERLYING_MAP m_remaining_in_degree_map;
-};
-
 
 /**
  * Kahn's algorithm for topologically sorting (in this case visiting) the nodes of a graph.
  *
- * @tparam BidirectionalGraph The graph type.  Must model the BidirectionalGraphConcept.
- * @tparam ImprovedDFSVisitor The type of the @a visitor object which will be notified of graph traversal events.
+ * @tparam BidirectionalGraph    The graph type.  Must model the BidirectionalGraphConcept because we need to access
+ * 			in edges.
+ * @tparam ImprovedDFSVisitor    The type of the @a visitor object which will be notified of graph traversal events.
+ * @tparam RemainingInDegreeMap  Map of vertex descriptors to their remaining in degree value.
+ * This is a lazily-evaluated data structure, in that vertices don't have real entries until the first
+ * call to either get() or set().  In the case of get(), a never-before-seen vertex will be initialized to
+ * a remaining in degree of its real boost::in_degree() (actually filtered_in_degree() at the moment).
  *
  * @param graph The graph to traverse.
  * @param source An edge descriptor whose target vertex is the vertex where the graph traversal should begin.
  * @param visitor The visitor to notify of traversal events.
+ * @param in_degree_map  Reference to the remaining in degree property map.  This map tracks the number of in edges
+ *     of each visited vertex which have not yet been traversed.
  */
-template<typename BidirectionalGraph, typename ImprovedDFSVisitor>
+template<typename BidirectionalGraph, typename ImprovedDFSVisitor, typename RemainingInDegreeMap>
 BOOST_CONCEPT_REQUIRES(
-	((boost::BidirectionalGraphConcept< BidirectionalGraph >)),
+	((boost::BidirectionalGraphConcept< BidirectionalGraph >))
+	((boost::ReadWritePropertyMapConcept<RemainingInDegreeMap,typename boost::graph_traits<BidirectionalGraph>::vertex_descriptor>)),
 	(void))
 topological_visit_kahn(BidirectionalGraph &graph,
 		typename boost::graph_traits<BidirectionalGraph>::edge_descriptor source,
-		ImprovedDFSVisitor &visitor)
+		ImprovedDFSVisitor &visitor, RemainingInDegreeMap &in_degree_map)
 {
-	// Required concepts of the passed graph type.
-	// Require a BidirectionGraph because we need efficient access to in edges as well as out edges.
-	boost::function_requires< boost::BidirectionalGraphConcept<BidirectionalGraph> >();
-
 	// Some convenience typedefs.
 	typedef typename boost::graph_traits<BidirectionalGraph>::vertex_descriptor T_VERTEX_DESC;
 	typedef typename boost::graph_traits<BidirectionalGraph>::edge_descriptor T_EDGE_DESC;
@@ -132,10 +75,6 @@ topological_visit_kahn(BidirectionalGraph &graph,
 	// The set of all edges whose target vertices have no remaining incoming edges.
 	std::stack<T_EDGE_DESC> no_remaining_in_edges_set;
 
-	// Map of the remaining in-degrees.
-	typedef RemainingInDegreeMap< BidirectionalGraph > T_IN_DEGREE_MAP;
-	T_IN_DEGREE_MAP in_degree_map(graph);
-
 	// Start at the source vertex.
 	no_remaining_in_edges_set.push(source);
 	visitor.start_vertex(source);
@@ -149,7 +88,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		e = no_remaining_in_edges_set.top();
 		no_remaining_in_edges_set.pop();
 
-		u = boost::target(e, graph);
+		u = /*boost::*/target(e, graph);
 
 		// Visit vertex u.  Vertices will be visited in the correct (i.e. not reverse-topologically-sorted) order.
 		visitor_vertex_return_value = visitor.discover_vertex(u, e);
@@ -164,7 +103,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 		//
 
 		// Get iterators to the out edges of vertex u.
-		boost::tie(ei, eend) = boost::out_edges(u, graph);
+		boost::tie(ei, eend) = /*boost::*/out_edges(u, graph);
 		T_EDGE_DESC first_edge_pushed;
 
 		while (ei != eend)
@@ -192,7 +131,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 			}
 
 			// Get the target vertex of this edge.
-			v = boost::target(*ei, graph);
+			v = /*boost::*/target(*ei, graph);
 
 			// Look up the current in-degree of the target vertex of *ei in the
 			// in-degree map.
@@ -204,7 +143,7 @@ topological_visit_kahn(BidirectionalGraph &graph,
 			--id;
 
 			// Store the decremented value back to the map.
-			in_degree_map.set(v, id);
+			in_degree_map.put(v, id);
 
 			if (id == 0)
 			{

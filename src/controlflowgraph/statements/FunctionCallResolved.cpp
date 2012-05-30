@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -45,4 +45,10 @@ std::string FunctionCallResolved::GetStatementTextDOT() const
 std::string FunctionCallResolved::GetIdentifier() const
 {
 	return m_target_function->GetIdentifier(); 
+
+}
+
+Function* FunctionCallResolved::GetCalledFunction() const
+{
+	return m_target_function;
 }

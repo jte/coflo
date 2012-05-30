@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -16,6 +16,7 @@
  */
 
 #include <string>
+#include <utility>
 #include <boost/regex.hpp>
 
 #include "StatementBase.h"
@@ -28,13 +29,37 @@ StatementBase::StatementBase(const Location &location) : m_location(location)
 {
 }
 
-StatementBase::StatementBase(const StatementBase& orig)  : m_location(orig.m_location)
+StatementBase::StatementBase(const StatementBase& orig) : Vertex(orig), m_location(orig.m_location)
 {
 	// Do a deep copy of the Location object.
 }
 
 StatementBase::~StatementBase()
 {
+}
+
+void StatementBase::SetOwningFunction(Function *owning_function)
+{
+	m_owning_function = owning_function;
+}
+
+Function* StatementBase::GetOwningFunction() const
+{
+	return m_owning_function;
+}
+
+void StatementBase::OutEdges(StatementBase::out_edge_iterator* ibegin,
+		StatementBase::out_edge_iterator* iend)
+{
+	*ibegin = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_out_edges.begin());
+	*iend = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_out_edges.end());
+}
+
+void StatementBase::InEdges(StatementBase::in_edge_iterator* ibegin,
+		StatementBase::in_edge_iterator* iend)
+{
+	*ibegin = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_in_edges.begin());
+	*iend = boost::make_transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator >(m_in_edges.end());
 }
 
 std::string StatementBase::EscapeifyForUseInDotLabel(const std::string & str)

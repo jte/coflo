@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -21,21 +21,78 @@
 #define	STATEMENTBASE_H
 
 #include <string>
+#include <utility>
+
+#include <boost/iterator/transform_iterator.hpp>
 
 #include "../../debug_utils/debug_utils.hpp"
 #include "../../Location.h"
+#include "../Vertex.h"
+//#include "../Edge.h"
+
+class Function;
+//class CFGEdgeTypeBase;
+#include "../edges/CFGEdgeTypeBase.h"
+
+/// Edge descriptor type for ControlFlowGraphs.
+typedef CFGEdgeTypeBase* CFGEdgeDescriptor;
+
+/**
+ * Functor for use by the various edge iterators of StatementBase to convert iterators which dereference to
+ * EdgeDescriptors into iterators which dereference to CFGEdgeDescriptors.
+ */
+struct CFGEdgeDescriptorConv
+{
+	CFGEdgeDescriptor operator()(Edge* e) const { return CFGEdgeDescriptor(e); };
+
+	/// This is for boost::result_of().
+	typedef CFGEdgeDescriptor result_type;
+};
 
 /**
  * Abstract base class for all statements and expressions in the control flow graph.
  */
-class StatementBase
+class StatementBase : public Vertex
 {
 public:
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor> edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > out_edge_iterator;
+	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
+
+public:
 	StatementBase() {};
-	StatementBase(const Location &location);
+	explicit StatementBase(const Location &location);
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
 	
+	virtual void InEdges(StatementBase::in_edge_iterator* ibegin, StatementBase::in_edge_iterator* iend);
+	virtual void OutEdges(StatementBase::out_edge_iterator* ibegin, StatementBase::out_edge_iterator* iend);
+
+	template < typename EdgeType >
+	EdgeType* GetFirstOutEdgeOfType()
+	{
+		out_edge_iterator eit, eend;
+		EdgeType* retval;
+
+		OutEdges(&eit, &eend);
+		for(; eit != eend; eit++)
+		{
+			retval = dynamic_cast<EdgeType*>(*eit);
+			if(NULL != retval)
+			{
+				// Found it.
+				return retval;
+			}
+		}
+
+		// Couldn't find one.
+		retval = NULL;
+		return retval;
+	};
+
+	void SetOwningFunction(Function *owning_function);
+	Function* GetOwningFunction() const;
+
 	void SetLocation(const Location &new_location) { m_location = new_location; };
 
 	/**
@@ -118,7 +175,11 @@ private:
 
 	/// The Location of this statement.
 	Location m_location;
+
+	/// The Function this statement belongs to.
+	Function *m_owning_function;
 };
+
 
 #endif	/* STATEMENTBASE_H */
 

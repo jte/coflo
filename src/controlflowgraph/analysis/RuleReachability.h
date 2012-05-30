@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -24,7 +24,8 @@
 
 #include "RuleDFSBase.h"
 
-class ControlFlowGraph;
+class CFGEdgeTypeBase;
+//class ControlFlowGraph;
 class Function;
 
 class RuleReachability : public RuleDFSBase
@@ -53,7 +54,7 @@ private:
 	const Function *m_sink;
 	
 	/// Array to store predecessor of each visited vertex.
-	std::deque<T_CFG_EDGE_DESC> m_predecessors;
+	std::deque<ControlFlowGraph::edge_descriptor> m_predecessors;
 };
 
 #endif	/* RULEREACHABILITY_H */

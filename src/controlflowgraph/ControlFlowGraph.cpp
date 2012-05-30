@@ -17,13 +17,18 @@
 
 /** @file */
 
-/// Always include a .cpp file's header first.  This ensures that the header file is
+/// Always include a .cpp file's own header first.  This ensures that the header file is
 /// idempotent at compile time.  If it isn't, the compile will fail, alerting you to the problem.
 #include "ControlFlowGraph.h"
 
+#include "GraphAdapter.h"
+
 #include <utility>
+
 #include <boost/foreach.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/graph_concepts.hpp>
+
 
 #include "visitors/BackEdgeFixupVisitor.h"
 #include "visitors/MergeNodeInsertionVisitor.h"
@@ -34,9 +39,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/// Property map typedef which allows us to get at the function pointer stored at
-/// CFGVertexProperties::m_containing_function in the T_CFG.
-typedef boost::property_map<T_CFG, Function* CFGVertexProperties::*>::type T_VERTEX_PROPERTY_MAP;
+#if 0
 
 /**
  * Predicate for filtering the CFG for only the vertices of the given function.
@@ -47,10 +50,9 @@ struct vertex_filter_predicate
 	{
 	}
 	;
-	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP vertex_prop_map,
+	vertex_filter_predicate(T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vertex_prop_map,
 			Function *parent_function) :
-			m_vertex_prop_map(vertex_prop_map), m_parent_function(
-					parent_function)
+			m_vertex_prop_map(vertex_prop_map), m_parent_function(parent_function)
 	{
 	}
 	;
@@ -68,104 +70,26 @@ struct vertex_filter_predicate
 	}
 	;
 
-	T_VERTEX_PROPERTY_MAP m_vertex_prop_map;
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION m_vertex_prop_map;
 	Function *m_parent_function;
 };
-
+#endif
 
 ControlFlowGraph::ControlFlowGraph()
 {
-
 }
 
 ControlFlowGraph::~ControlFlowGraph()
 {
-
 }
 
-void ControlFlowGraph::PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc)
-{
-	T_CFG_OUT_EDGE_ITERATOR ei, eend;
-	
-	boost::tie(ei, eend) = boost::out_edges(vdesc, m_cfg);
-	for(;ei!=eend; ++ei)
-	{
-		std::cout << typeid(*(m_cfg[*ei].m_edge_type)).name() << std::endl;
-	}
-}
-
-void ControlFlowGraph::PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc)
-{
-	T_CFG_IN_EDGE_ITERATOR ei, eend;
-	
-	boost::tie(ei, eend) = boost::in_edges(vdesc, m_cfg);
-	for(;ei!=eend; ++ei)
-	{
-		std::cout << typeid(*(m_cfg[*ei].m_edge_type)).name() << std::endl;
-	}
-}
-
-void ControlFlowGraph::FixupBackEdges(Function *f)
-{
-	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
-			&CFGVertexProperties::m_containing_function, m_cfg);
-	vertex_filter_predicate the_vertex_filter(vpm, f);
-	typedef boost::filtered_graph<T_CFG, boost::keep_all,
-					vertex_filter_predicate> T_FILTERED_GRAPH;
-	// Define a filtered view of only this function's CFG.
-	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
-
-	std::vector<BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo> back_edges;
-
-	// Define a visitor which will find all the back edges and send back the info
-	// we need to fix them up.
-	BackEdgeFixupVisitor<T_FILTERED_GRAPH> back_edge_finder(back_edges);
-
-	// Set the back_edge_finder visitor loose on the function's CFG, with its
-	// search strategy being a simple depth-first search.
-	// Locate all the back edges, and send the fix-up info back to the back_edges
-	// std::vector<> above.
-	boost::depth_first_search(graph_of_this_function, boost::visitor(back_edge_finder));
-
-	// Mark the edges we found as back edges.
-	BOOST_FOREACH(BackEdgeFixupVisitor<T_FILTERED_GRAPH>::BackEdgeFixupInfo fixinfo, back_edges)
-	{
-		T_CFG_EDGE_DESC e = fixinfo.m_back_edge;
-
-		// Change this edge type to a back edge.
-		m_cfg[e].m_edge_type->MarkAsBackEdge(true);
-
-		// Skip the rest if this is a self edge.
-		if(fixinfo.m_impossible_target_vertex == boost::graph_traits<T_FILTERED_GRAPH>::null_vertex())
-		{
-			dlog_cfg << "Self edge, no further action: " << e << std::endl;
-			continue;
-		}
-
-		// If the source node of this back edge now has no non-back-edge out-edges,
-		// add a CFGEdgeTypeImpossible edge to it, so topological sorting works correctly.
-		T_CFG_VERTEX_DESC src;
-		src = boost::source(e, m_cfg);
-		if (boost::out_degree(src, m_cfg) == 1)
-		{
-			T_CFG_EDGE_DESC newedge;
-			boost::tie(newedge, boost::tuples::ignore) =
-					boost::add_edge(src, fixinfo.m_impossible_target_vertex, m_cfg);
-			m_cfg[newedge].m_edge_type = new CFGEdgeTypeImpossible;
-
-			dlog_cfg << "Retargetting back edge " << e << " to " << fixinfo.m_impossible_target_vertex << std::endl;
-		}
-	}
-
-	dlog_cfg << "Back edge fixup complete." << std::endl;
-}
-
+#if 0
 
 void ControlFlowGraph::InsertMergeNodes(Function *f)
 {
+#if 0
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -248,13 +172,15 @@ void ControlFlowGraph::InsertMergeNodes(Function *f)
 			RemoveEdge(*eit);
 		}
 	}
+#endif
 }
 
 
 void ControlFlowGraph::SplitCriticalEdges(Function *f)
 {
+#if 0
 	// Property map for getting at the edge types in the CFG.
-	T_VERTEX_PROPERTY_MAP vpm = boost::get(
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = boost::get(
 			&CFGVertexProperties::m_containing_function, m_cfg);
 	vertex_filter_predicate the_vertex_filter(vpm, f);
 	typedef boost::filtered_graph<T_CFG, boost::keep_all,
@@ -316,50 +242,20 @@ void ControlFlowGraph::SplitCriticalEdges(Function *f)
 		m_cfg[new_edge_2].m_edge_type = new CFGEdgeTypeFallthrough();
 		boost::remove_edge(e, m_cfg);
 	}
+#endif
 }
 
-void ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target)
+#endif
+
+
+void ControlFlowGraph::Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend) const
 {
-	boost::add_edge(source, target, m_cfg);
+	*ibegin = boost::make_transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator>(m_vertices.begin());
+	*iend = boost::make_transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator>(m_vertices.end());
 }
 
-void ControlFlowGraph::ChangeEdgeTarget(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & target)
-{
-	/// @todo Implement this.
-}
 
-T_CFG_VERTEX_DESC ControlFlowGraph::AddVertex(StatementBase *statement, Function *containing_function)
-{
-	T_CFG_VERTEX_DESC retval;
-
-	retval = boost::add_vertex(m_cfg);
-	m_cfg[retval].m_statement = statement;
-	m_cfg[retval].m_containing_function = containing_function;
-
-	return retval;
-}
-
-T_CFG_EDGE_DESC ControlFlowGraph::AddEdge(const T_CFG_VERTEX_DESC & source, const T_CFG_VERTEX_DESC & target, CFGEdgeTypeBase *edge_type)
-{
-	T_CFG_EDGE_DESC eid;
-	bool ok;
-
-	boost::tie(eid, ok) = boost::add_edge(source, target, m_cfg);
-	// Since this edge is within the block, it is just a fallthrough.
-	m_cfg[eid].m_edge_type = edge_type;
-
-	return eid;
-}
-
-void ControlFlowGraph::ChangeEdgeSource(T_CFG_EDGE_DESC & e, const T_CFG_VERTEX_DESC & source)
-{
-}
-
-void ControlFlowGraph::RemoveEdge(const T_CFG_EDGE_DESC & e)
-{
-	boost::remove_edge(e, m_cfg);
-}
-
+#if 0
 void ControlFlowGraph::StructureCompoundConditionals(Function *f)
 {
 #if 0
@@ -399,3 +295,132 @@ void ControlFlowGraph::StructureCompoundConditionals(Function *f)
 	}
 #endif
 }
+
+
+void ControlFlowGraph::RemoveRedundantNodes(Function* f)
+{
+	// Property map for getting at the edge types in the CFG.
+	T_VERTEX_PROPERTY_MAP_CONTAINING_FUNCTION vpm = GetPropMap_ContainingFunction();
+	vertex_filter_predicate the_vertex_filter(vpm, f);
+	typedef boost::filtered_graph<T_CFG, boost::keep_all,
+					vertex_filter_predicate> T_FILTERED_GRAPH;
+	// Define a filtered view of only this function's CFG.
+	T_FILTERED_GRAPH graph_of_this_function(m_cfg, boost::keep_all(), the_vertex_filter);
+
+	std::vector<T_CFG_VERTEX_DESC> vertices_to_remove;
+
+	T_FILTERED_GRAPH::vertex_iterator it, it2;
+
+	boost::tie(it, it2) = boost::vertices(graph_of_this_function);
+
+	// Iterate over all vertices.
+	for(;it != it2; ++it)
+	{
+		StatementBase *sbp = GetStatementPtr(*it);
+		if(sbp->IsType<Goto>())
+		{
+			// This is a Goto.  Check if it's redundant.
+			if(boost::in_degree(*it, graph_of_this_function)==1 && boost::out_degree(*it, graph_of_this_function)==1)
+			{
+				// It's redundant.
+
+				T_FILTERED_GRAPH::in_edge_iterator in_eit;
+				T_FILTERED_GRAPH::out_edge_iterator out_eit;
+				T_CFG_EDGE_DESC in_edge, out_edge;
+
+				boost::tie(in_eit, boost::tuples::ignore) = boost::in_edges(*it, graph_of_this_function);
+				boost::tie(out_eit, boost::tuples::ignore) = boost::out_edges(*it, graph_of_this_function);
+				in_edge = *in_eit;
+				out_edge = *out_eit;
+
+				T_CFG_VERTEX_DESC source_vertex_desc, target_vertex_desc;
+				long target_id, source_od;
+
+				// Get the vertex descriptors.
+				source_vertex_desc = boost::source(in_edge, graph_of_this_function);
+				target_vertex_desc = boost::target(out_edge, graph_of_this_function);
+
+				// Point the incoming edge to the target of our outgoing edge, bypassing us.
+				ChangeEdgeTarget(in_edge, target_vertex_desc);
+
+				// Remove our outgoing edge.
+				RemoveEdge(out_edge);
+
+				// We should now have no edges.
+				if(boost::degree(*it, m_cfg) != 0)
+				{
+					std::cerr << "STILL HAS EDGES" << std::endl;
+				}
+				else
+				{
+					// Delete this vertex.
+					vertices_to_remove.push_back(*it);
+				}
+			}
+		}
+
+	}
+
+	// Remove all the vertices we found.
+	BOOST_FOREACH(T_CFG_VERTEX_DESC i, vertices_to_remove)
+	{
+		RemoveVertex(i);
+	}
+}
+
+#endif
+
+void ControlFlowGraph::PrintOutEdgeTypes(ControlFlowGraph::vertex_descriptor vdesc)
+{
+	out_edge_iterator ei, eend;
+
+	boost::tie(ei, eend) = out_edges(vdesc, *this);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
+	}
+}
+
+void ControlFlowGraph::PrintInEdgeTypes(ControlFlowGraph::vertex_descriptor vdesc)
+{
+	in_edge_iterator ei, eend;
+
+	boost::tie(ei, eend) = in_edges(vdesc, *this);
+	for(;ei!=eend; ++ei)
+	{
+		std::cout << typeid(*((*this)[*ei])).name() << std::endl;
+	}
+}
+
+/// @name Free-function definitions for adapting this graph class to the Boost graph library.
+//@{
+ControlFlowGraph::vertex_descriptor target(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/) { return e->Target(); };
+ControlFlowGraph::vertex_descriptor source(const ControlFlowGraph::edge_descriptor e, const ControlFlowGraph &/*g*/) { return e->Source(); };
+
+
+	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
+	out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/)
+	{
+		ControlFlowGraph::out_edge_iterator r1, r2;
+		u->OutEdges(&r1, &r2);
+		return std::make_pair(r1, r2);
+	};
+	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
+	in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/)
+	{
+		ControlFlowGraph::out_edge_iterator r1, r2;
+		u->InEdges(&r1, &r2);
+		return std::make_pair(r1, r2);
+	};
+
+	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g)
+	{
+		ControlFlowGraph::vertex_iterator ibegin, iend;
+
+		g.Vertices(&ibegin, &iend);
+
+		return std::make_pair(ibegin, iend);
+	}
+
+//@}
+

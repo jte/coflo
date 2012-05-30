@@ -36,6 +36,6 @@ libstatements_a_SOURCES = statements.h \
     StatementBase.cpp StatementBase.h \
     Switch.cpp Switch.h
 
-libstatements_a_CPPFLAGS = -I $(abs_top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
+libstatements_a_CPPFLAGS = -I $(top_srcdir)/src/debug_utils $(AM_CPPFLAGS)
 libstatements_a_CFLAGS = $(AM_CFLAGS)
 libstatements_a_CXXFLAGS = $(AM_CXXFLAGS)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -79,10 +79,10 @@ void ResponseFileParser::Parse(const std::string & filename, std::vector<std::st
 	}
 }
 
-void ResponseFileParser::LoadFileIntoVectorOfStrings(std::ifstream &ifs, std::vector<std::string> *vec_of_str)
+void ResponseFileParser::LoadFileIntoVectorOfStrings(std::istream &ifs, std::vector<std::string> *vec_of_str)
 {
 	std::string line;
-	while (getline(ifs, line))
+	while (std::getline(ifs, line))
 	{
 		size_t char_index;
 

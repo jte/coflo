@@ -73,10 +73,10 @@ namespace po = boost::program_options;
 //@}
 
 /**
- * Additional command-line parser for '@file' response files.
+ * Additional command-line parser for '\@file' response files.
  * 
  * @param s String to check for a prefix of '@', indicating that this is a response file name.
- * @return If this isn't a '@filename' paramter, a std::pair<> of two empty strings.
+ * @return If this isn't a '\@filename' paramter, a std::pair<> of two empty strings.
  *         If it is, the pair <"response-file", filename>.
  */
 std::pair<std::string, std::string> at_option_parser(const std::string &s)
@@ -105,344 +105,359 @@ static void print_build_info();
  */
 int main(int argc, char* argv[])
 {
-	Program *the_program;
-	Analyzer *the_analyzer;
-
-	// Subprograms we'll need.
-	std::string the_filter;
-	std::string the_gcc;
-	std::string the_dot;
-
-	// Name of the response file if we get one on the command line.
-	std::string response_filename;
-
-	// The HTML report output directory.
-	std::string report_output_directory;
-
-	// The output filename.
-	std::string output_filename;
-
-	// The CFG output format.
-	std::string cfg_fmt;
-
-	// Debug settings.
-	bool debug_parse = false;
-	bool debug_link = false;
-	bool debug_cfg = false;
-	
-	// Control flow graph option flags.
-	// Whether to limit display to only function calls, or to everything CoFlo
-	// recognizes.
-	bool cfg_verbose = false;
-	// Enable or disable outputting vertex IDs.
-	bool cfg_vertex_ids = false;
-
-	// Declare a variables_map to take the command line options we're passed.
-	po::variables_map vm;
-
-	// Catch any exceptions thrown by the command-line parser.
-	// Usually this will be an unrecognized parameter.
+	// Wrap the whole program in a try/catch block.
 	try
 	{
-		// Declare the objects that will describe the supported options.
-		// Declare general options.
-		po::options_description general_options("General Options");
-		// Declare preprocessing-related options.
-		po::options_description preproc_options("Preprocessing Options");
-		// Declare subprograms to use.
-		po::options_description subprogram_options("Subprogram Options");
-		// Rules to check.
-		po::options_description analysis_options("Analysis Options");
-		// Control Flow Graph options.
-		po::options_description cfg_options("Control Flow Graph Options");
-		// Options for debugging CoFlo itself and/or the program being analyzed.
-		po::options_description debugging_options("Debugging Options");
-		// Declare options_description object for options which won't be shown to
-		// the user in the help message.
-		po::options_description hidden_options("Hidden options");
-		// Declare a positional_options_description object to translate un-switched
-		// options on the command line into "--input-file=<whatever>" options.
-		po::positional_options_description positional_options;
-		// Almost all the command-line options, except for the hidden ones (for printing usage).
-		po::options_description non_hidden_cmdline_options;
-		// All command-line options descriptions.
-		po::options_description cmdline_options;
+		Program *the_program;
+		Analyzer *the_analyzer;
 
+		// Subprograms we'll need.
+		std::string the_filter;
+		std::string the_gcc;
+		std::string the_dot;
 
-		// Add the command-line options.
-		general_options.add_options()
-		(CLP_HELP, "Produce this help message.")
-		(CLP_VERSION",v", "Display the version number and copyright information.")
-		(CLP_BUILD_INFO, "Print information about library versions and options used to build this program.")
-		(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
-		(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
-		(CLP_OUTPUT_DIR",O", po::value< std::string >(&report_output_directory), "Put HTML report output in the given directory.")
-		;
-		preproc_options.add_options()
-		(CLP_DEFINE",D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
-		(CLP_INCLUDE_DIR",I", po::value< std::vector<std::string> >(), "Add an include directory")
-		;
-		subprogram_options.add_options()
-		(CLP_USE_FILTER, po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
-		(CLP_USE_GCC, po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
-		(CLP_USE_DOT, po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
-		;
-		analysis_options.add_options()
-		(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
-		;
-		cfg_options.add_options()
-		(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
-		(CLP_CFG_FMT, po::value< std::string >(&cfg_fmt), "Specifies the control flow graph output format.\n"
-				"Valid values are:\n"
-				"  txt: \tPrints a textual representation of the CFG to stdout.\n"
-				"  dot: \tGenerates a dot file which can be used as input to the Graphviz dot program.\n"
-				"  img: \tGenerates a graphical representation of the CFG using the Graphviz dot program.  Image file format is PNG."
-				)
-		(CLP_CFG_OUTPUT_FILENAME, po::value<std::string>(&output_filename), "Output filename.")
-		(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
-				"Output all statements and nodes CoFlo finds in the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
-		(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
-		;
-		debugging_options.add_options()
-		(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
-		(CLP_DEBUG_LINK, po::bool_switch(&debug_link), "Print debug info concerning the CFG linking stage.")
-		(CLP_DEBUG_CFG, po::bool_switch(&debug_cfg), "Print debug info concerning the CFG fix-up stages.")
-		;
-		hidden_options.add_options()
-		(CLP_INPUT_FILE, po::value< std::vector<std::string> >(), "input file")
-		;
-		positional_options.add("input-file", -1);
-		non_hidden_cmdline_options.add(general_options)
-				.add(preproc_options)
-				.add(subprogram_options)
-				.add(analysis_options)
-				.add(cfg_options)
-				.add(debugging_options);
-		cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
+		// Name of the response file if we get one on the command line.
+		std::string response_filename;
+
+		// The HTML report output directory.
+		std::string report_output_directory;
+
+		// The output filename.
+		std::string output_filename;
+
+		// The CFG output format.
+		std::string cfg_fmt;
 	
-		// Parse the command line.
-		po::store(po::command_line_parser(argc, argv).
-			extra_parser(at_option_parser).
-			options(cmdline_options).
-			positional(positional_options).run(), vm);
+		// Debug settings.
+		bool debug_parse = false;
+		bool debug_link = false;
+		bool debug_cfg = false;
+
+		// Control flow graph option flags.
+		// Whether to limit display to only function calls, or to everything CoFlo
+		// recognizes.
+		bool cfg_verbose = false;
+		// Enable or disable outputting vertex IDs.
+		bool cfg_vertex_ids = false;
 	
-		// Handle the parameters parsed so far, in particular CLP_RESPONSE_FILE, so that the response_filename variable
-		// gets populated, so the check for response files below works properly.
-		vm.notify();
-
-		// Parse any response files.
-		if(!response_filename.empty())
-		{
-			ResponseFileParser rfp;
-			std::vector<std::string> args;
-
-			// Parse the response file.
-			rfp.Parse(response_filename, &args);
-
-			// Store the options we found.
-			// Note that since this store is called after the store of the parameters actually
-			// presented on the command line, response-file params will be overridden by any command-line params.
-			po::store(po::command_line_parser(args).options(cmdline_options).positional(positional_options).run(), vm);
-		}
-
-		// Call the notify() functions for any options.
-		po::notify(vm);
-
-		// See if the user is asking for help, or didn't pass any parameters at all.
-		if (vm.count(CLP_HELP) || argc < 2)
-		{
-			/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
-			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
-			std::cout << std::endl;
-			std::cout << "Usage: coflo [options] file..." << std::endl;
-			std::cout << non_hidden_cmdline_options << std::endl;
-			std::cout << "Report bugs to: " << PACKAGE_BUGREPORT << std::endl;
-			std::cout << PACKAGE_NAME << " home page: <" << PACKAGE_URL << ">" << std::endl;
-			return 0;
-		}
-
-		// See if user is requesting version.
-		if (vm.count(CLP_VERSION))
-		{
-			// Print version info per GNU Coding Standards <http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dversion>.
-			// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y.Z".
-			/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
-			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
-			std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
-			std::cout << "License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>" << std::endl;
-			std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
-			std::cout << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
-			return 0;
-		}
-
-		// See of the user is requesting build info.
-		if(vm.count(CLP_BUILD_INFO))
-		{
-			/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
-			std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
-			std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
-			std::cout << std::endl;
-			std::cout << "Build info:" << std::endl << std::endl;
-			print_build_info();
-			return 0;
-		}
-
-	}
-	catch(std::exception &e)
-	{
-		// Something went wrong while trying to parse the command line.
-		// Print an error message and exit.
-		std::cerr << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
-		return 1;
-	}
-	catch(...)
-	{
-		std::cerr << "ERROR: Unknown exception" << std::endl;
-		return 1;
-	}
-
-	// Were any source files given on the command line?
-	if(vm.count(CLP_INPUT_FILE)>0)
-	{
-		// Yes, try to parse them and generate a CFG.
+		// Declare a variables_map to take the command line options we're passed.
+		po::variables_map vm;
+	
+		// Catch any exceptions thrown by the command-line parser.
+		// Usually this will be an unrecognized parameter.
 		try
 		{
-			// Enable/disable debug output.
-			/// @todo Add debug_link control.
-			dlog_parse_gimple.enable(debug_parse);
-			dlog_function.enable(debug_parse);
-			dlog_cfg.enable(debug_cfg);
+			// Declare the objects that will describe the supported options.
+			// Declare general options.
+			po::options_description general_options("General Options");
+			// Declare preprocessing-related options.
+			po::options_description preproc_options("Preprocessing Options");
+			// Declare subprograms to use.
+			po::options_description subprogram_options("Subprogram Options");
+			// Rules to check.
+			po::options_description analysis_options("Analysis Options");
+			// Control Flow Graph options.
+			po::options_description cfg_options("Control Flow Graph Options");
+			// Options for debugging CoFlo itself and/or the program being analyzed.
+			po::options_description debugging_options("Debugging Options");
+			// Declare options_description object for options which won't be shown to
+			// the user in the help message.
+			po::options_description hidden_options("Hidden options");
+			// Declare a positional_options_description object to translate un-switched
+			// options on the command line into "--input-file=<whatever>" options.
+			po::positional_options_description positional_options;
+			// Almost all the command-line options, except for the hidden ones (for printing usage).
+			po::options_description non_hidden_cmdline_options;
+			// All command-line options descriptions.
+			po::options_description cmdline_options;
 
-			the_program = new Program();
-			the_analyzer = new Analyzer();
 
-			const std::vector<std::string> *defines, *includes;
-			if(vm.count(CLP_DEFINE)>0)
+			// Add the command-line options.
+			general_options.add_options()
+			(CLP_HELP, "Produce this help message.")
+			(CLP_VERSION",v", "Display the version number and copyright information.")
+			(CLP_BUILD_INFO, "Print information about library versions and options used to build this program.")
+			(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
+			(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
+			(CLP_OUTPUT_DIR",O", po::value< std::string >(&report_output_directory), "Put HTML report output in the given directory.")
+			;
+			preproc_options.add_options()
+			(CLP_DEFINE",D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")
+			(CLP_INCLUDE_DIR",I", po::value< std::vector<std::string> >(), "Add an include directory")
+			;
+			subprogram_options.add_options()
+			(CLP_USE_FILTER, po::value< std::string >(&the_filter), "Pass all source through this filter prior to preprocessing and compiling.")
+			(CLP_USE_GCC, po::value< std::string >(&the_gcc)->default_value("gcc"), "GCC to invoke.")
+			(CLP_USE_DOT, po::value< std::string >(&the_dot)->default_value("dot"), "GraphViz dot program to use for drawing graphs.")
+			;
+			analysis_options.add_options()
+			(CLP_CONSTRAINT, po::value< std::vector<std::string> >(), "\"f1() -x f2()\" : Warn if f1 can reach f2.")
+			;
+			cfg_options.add_options()
+			(CLP_PRINT_FUNCTION_CFG, po::value< std::string >(), "Print the control flow graph of the given function to standard output.")
+			(CLP_CFG_FMT, po::value< std::string >(&cfg_fmt), "Specifies the control flow graph output format.\n"
+					"Valid values are:\n"
+					"  txt: \tPrints a textual representation of the CFG to stdout.\n"
+					"  dot: \tGenerates a dot file which can be used as input to the Graphviz dot program.\n"
+					"  img: \tGenerates a graphical representation of the CFG using the Graphviz dot program.  Image file format is PNG."
+					)
+			(CLP_CFG_OUTPUT_FILENAME, po::value<std::string>(&output_filename), "Output filename.")
+			(CLP_CFG_VERBOSE, po::bool_switch(&cfg_verbose),
+					"Output all statements and nodes CoFlo finds in the control flow graph.  Default is to limit output to function calls and flow control constructs only.")
+			(CLP_CFG_VERTEX_IDS, po::bool_switch(&cfg_vertex_ids), "Output numeric IDs of the control flow graph vertices.  Can help when comparing graphical and textual representations.")
+			;
+			debugging_options.add_options()
+			(CLP_DEBUG_PARSE, po::bool_switch(&debug_parse), "Print debug info concerning the CFG parsing stage.")
+			(CLP_DEBUG_LINK, po::bool_switch(&debug_link), "Print debug info concerning the CFG linking stage.")
+			(CLP_DEBUG_CFG, po::bool_switch(&debug_cfg), "Print debug info concerning the CFG fix-up stages.")
+			;
+			hidden_options.add_options()
+			(CLP_INPUT_FILE, po::value< std::vector<std::string> >(), "input file")
+			;
+			positional_options.add("input-file", -1);
+			non_hidden_cmdline_options.add(general_options)
+					.add(preproc_options)
+					.add(subprogram_options)
+					.add(analysis_options)
+					.add(cfg_options)
+					.add(debugging_options);
+			cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
+
+			// Parse the command line.
+			po::store(po::command_line_parser(argc, argv).
+				extra_parser(at_option_parser).
+				options(cmdline_options).
+				positional(positional_options).run(), vm);
+
+			// Handle the parameters parsed so far, in particular CLP_RESPONSE_FILE, so that the response_filename variable
+			// gets populated, so the check for response files below works properly.
+			vm.notify();
+
+			// Parse any response files.
+			if(!response_filename.empty())
 			{
-				defines = &(vm[CLP_DEFINE].as< std::vector<std::string> >());
-			}
-			else
-			{
-				defines = new std::vector<std::string>();
-			}
-			if(vm.count(CLP_INCLUDE_DIR)>0)
-			{
-				includes = &(vm[CLP_INCLUDE_DIR].as< std::vector<std::string> >());
-			}
-			else
-			{
-				includes = new std::vector<std::string>();
+				ResponseFileParser rfp;
+				std::vector<std::string> args;
+
+				// Parse the response file.
+				rfp.Parse(response_filename, &args);
+
+				// Store the options we found.
+				// Note that since this store is called after the store of the parameters actually
+				// presented on the command line, response-file params will be overridden by any command-line params.
+				po::store(po::command_line_parser(args).options(cmdline_options).positional(positional_options).run(), vm);
 			}
 
-			the_program->SetTheFilter(the_filter);
-			ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
-			std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
+			// Call the notify() functions for any options.
+			po::notify(vm);
 
-			// Check if this version of GCC is going to work.
-			std::string gcc_version_check_string;
-			bool gcc_ver_ok;
-			boost::tie(gcc_version_check_string, gcc_ver_ok) = tool_compiler->CheckIfVersionIsUsable();
-			if(gcc_ver_ok == false)
+			// See if the user is asking for help, or didn't pass any parameters at all.
+			if (vm.count(CLP_HELP) || argc < 2)
 			{
-				std::cerr << "ERROR: " << gcc_version_check_string << std::endl;
-				return 1;
-			}
-			the_program->SetTheGcc(tool_compiler);
-			the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
-
-			// Parse the program.
-			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP unresolved_function_calls;
-			if(!the_program->Parse(
-				*defines,
-				*includes,
-				&unresolved_function_calls,
-				debug_parse))
-			{
-				// Parse failed.
-				return 1;
+				/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
+				std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
+				std::cout << std::endl;
+				std::cout << "Usage: coflo [options] file..." << std::endl;
+				std::cout << non_hidden_cmdline_options << std::endl;
+				std::cout << "Report bugs to: " << PACKAGE_BUGREPORT << std::endl;
+				std::cout << PACKAGE_NAME << " home page: <" << PACKAGE_URL << ">" << std::endl;
+				return 0;
 			}
 
-			// Print any function calls that we couldn't link.
-			the_program->PrintUnresolvedFunctionCalls(&unresolved_function_calls);
+			// See if user is requesting version.
+			if (vm.count(CLP_VERSION))
+			{
+				// Print version info per GNU Coding Standards <http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dversion>.
+				// PACKAGE_STRING comes from autoconf, and has the format "CoFlo X.Y.Z".
+				/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
+				std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
+				std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
+				std::cout << "License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>" << std::endl;
+				std::cout << "This is free software: you are free to change and redistribute it." << std::endl;
+				std::cout << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+				return 0;
+			}
+
+			// See of the user is requesting build info.
+			if(vm.count(CLP_BUILD_INFO))
+			{
+				/// @todo Commenting out PACKAGE_VERSION_CONTROL_REVISION until I can get it to work properly in configure/make distcheck.
+				std::cout << PACKAGE_STRING /*<< PACKAGE_VERSION_CONTROL_REVISION*/ << std::endl;
+				std::cout << "Copyright (C) 2011, 2012 Gary R. Van Sickle" << std::endl;
+				std::cout << std::endl;
+				std::cout << "Build info:" << std::endl << std::endl;
+				print_build_info();
+				return 0;
+			}
+
 		}
-		catch( boost::exception & e )
+		catch(std::exception &e)
 		{
-			std::cerr << "ERROR: EXCEPTION CAUGHT: " << boost::diagnostic_information(e) << std::endl;
+			// Something went wrong while trying to parse the command line.
+			// Print an error message and exit.
+			std::cerr << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
 			return 1;
 		}
 		catch(...)
 		{
-			std::cerr << "ERROR: Unknown exception: " << std::endl;
-			return 1;
-		}
-	}
-
-	// Now we've parsed the source code and generated the CFG internally.
-	// What does the caller want us to do with this info?
-
-	if(vm.count(CLP_PRINT_FUNCTION_CFG))
-	{
-		// User wants a control flow graph.
-
-		// First see if the specified function exists.
-		Function *fp = the_program->LookupFunction(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>());
-		if(fp == NULL)
-		{
-			std::cerr << "ERROR: Unable to find function with identifier \"" << vm[CLP_PRINT_FUNCTION_CFG].as<std::string>() << "\"";
+			std::cerr << "ERROR: Unknown exception" << std::endl;
 			return 1;
 		}
 
-		// Check if they want it as text, a Graphviz dot input file, or a png generated by dot.
-		if(cfg_fmt == "img")
+		// Were any source files given on the command line?
+		if(vm.count(CLP_INPUT_FILE)>0)
 		{
-			if(output_filename.empty())
+			// Yes, try to parse them and generate a CFG.
+			try
 			{
-				std::cerr << "ERROR: Must specify output filename with img format." << std::endl;
+				// Enable/disable debug output.
+				/// @todo Add debug_link control.
+				dlog_parse_gimple.enable(debug_parse);
+				dlog_function.enable(debug_parse);
+				dlog_cfg.enable(debug_cfg);
+
+				the_program = new Program();
+				the_analyzer = new Analyzer();
+
+				const std::vector<std::string> *defines, *includes;
+				if(vm.count(CLP_DEFINE)>0)
+				{
+					defines = &(vm[CLP_DEFINE].as< std::vector<std::string> >());
+				}
+				else
+				{
+					defines = new std::vector<std::string>();
+				}
+				if(vm.count(CLP_INCLUDE_DIR)>0)
+				{
+					includes = &(vm[CLP_INCLUDE_DIR].as< std::vector<std::string> >());
+				}
+				else
+				{
+					includes = new std::vector<std::string>();
+				}
+
+				the_program->SetTheFilter(the_filter);
+				ToolCompiler *tool_compiler = new ToolCompiler(the_gcc);
+				std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
+
+				// Check if this version of GCC is going to work.
+				std::string gcc_version_check_string;
+				bool gcc_ver_ok;
+				boost::tie(gcc_version_check_string, gcc_ver_ok) = tool_compiler->CheckIfVersionIsUsable();
+				if(gcc_ver_ok == false)
+				{
+					std::cerr << "ERROR: " << gcc_version_check_string << std::endl;
+					return 1;
+				}
+				the_program->SetTheGcc(tool_compiler);
+				the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
+
+				// Parse the program.
+				T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP unresolved_function_calls;
+				if(!the_program->Parse(
+					*defines,
+					*includes,
+					&unresolved_function_calls,
+					debug_parse))
+				{
+					// Parse failed.
+					return 1;
+				}
+
+				// Print any function calls that we couldn't link.
+				the_program->PrintUnresolvedFunctionCalls(&unresolved_function_calls);
 			}
-			ToolDot *tool_dot = new ToolDot(the_dot);
-			fp->PrintControlFlowGraphBitmap(tool_dot, output_filename);
-		}
-		else if (cfg_fmt == "dot")
-		{
-			if(output_filename.empty())
+			catch( boost::exception & e )
 			{
-				std::cerr << "ERROR: Must specify output filename with dot format." << std::endl;
+				std::cerr << "ERROR: EXCEPTION CAUGHT: " << boost::diagnostic_information(e) << std::endl;
+				return 1;
 			}
-			fp->PrintControlFlowGraphDot(cfg_verbose, cfg_vertex_ids, output_filename);
-		}
-		else
-		{
-			if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose, cfg_vertex_ids))
+			catch(...)
 			{
-				// Something went wrong.
+				std::cerr << "ERROR: Unknown exception: " << std::endl;
 				return 1;
 			}
 		}
-	}
 
-	if(vm.count(CLP_CONSTRAINT) > 0)
-	{
-		// User wants to run some analysis.
+		// Now we've parsed the source code and generated the CFG internally.
+		// What does the caller want us to do with this info?
 
-		the_analyzer->AttachToProgram(the_program);
+		if(vm.count(CLP_PRINT_FUNCTION_CFG))
+		{
+			// User wants a control flow graph.
 
-		// Add the given constraints to the analysis.
-		the_analyzer->AddConstraints(vm[CLP_CONSTRAINT].as< std::vector<std::string> >());
+			// First see if the specified function exists.
+			Function *fp = the_program->LookupFunction(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>());
+			if(fp == NULL)
+			{
+				std::cerr << "ERROR: Unable to find function with identifier \"" << vm[CLP_PRINT_FUNCTION_CFG].as<std::string>() << "\"";
+				return 1;
+			}
 
-		// Perform the analysis.
-		the_analyzer->Analyze();
-	}
+			// Check if they want it as text, a Graphviz dot input file, or a png generated by dot.
+			if(cfg_fmt == "img")
+			{
+				if(output_filename.empty())
+				{
+					std::cerr << "ERROR: Must specify output filename with img format." << std::endl;
+				}
+				ToolDot *tool_dot = new ToolDot(the_dot);
+				fp->PrintControlFlowGraphBitmap(tool_dot, output_filename);
+			}
+			else if (cfg_fmt == "dot")
+			{
+				if(output_filename.empty())
+				{
+					std::cerr << "ERROR: Must specify output filename with dot format." << std::endl;
+				}
+				fp->PrintControlFlowGraphDot(cfg_verbose, cfg_vertex_ids, output_filename);
+			}
+			else
+			{
+				if(!the_program->PrintFunctionCFG(vm[CLP_PRINT_FUNCTION_CFG].as<std::string>(), cfg_verbose, cfg_vertex_ids))
+				{
+					// Something went wrong.
+					return 1;
+				}
+			}
+		}
+
+		if(vm.count(CLP_CONSTRAINT) > 0)
+		{
+			// User wants to run some analysis.
+
+			the_analyzer->AttachToProgram(the_program);
+
+			// Add the given constraints to the analysis.
+			the_analyzer->AddConstraints(vm[CLP_CONSTRAINT].as< std::vector<std::string> >());
+
+			// Perform the analysis.
+			the_analyzer->Analyze();
+		}
+
+		if(!report_output_directory.empty())
+		{
+			// User wants HTML output of the CFGs of all the functions.
+			ToolDot *tool_dot = new ToolDot(the_dot);
+			the_program->SetTheDot(tool_dot);
+			std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
+			the_program->Print(report_output_directory);
+		}
 	
-	if(!report_output_directory.empty())
-	{
-		// User wants HTML output of the CFGs of all the functions.
-		ToolDot *tool_dot = new ToolDot(the_dot);
-		the_program->SetTheDot(tool_dot);
-		std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
-		the_program->Print(report_output_directory);
+		// Normal return, no errors.
+		return 0;
 	}
-
-	return 0;
+	catch( boost::exception & e )
+	{
+		std::cerr << "ERROR: EXCEPTION CAUGHT: " << boost::diagnostic_information(e) << std::endl;
+		return 1;
+	}
+	catch(...)
+	{
+		std::cerr << "ERROR: Unknown exception: " << std::endl;
+		return 1;
+	}
 }
 
 static void print_build_info()

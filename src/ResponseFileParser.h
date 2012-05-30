@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -49,10 +49,10 @@ private:
 	/**
 	 * Read the entire file into a vector of strings to make things like single-line comments easier to remove.
 	 *
-	 * @param filename Name of the response file.
+	 * @param ifs Reference to the input stream of the response file.
 	 * @param vec_of_str Pointer to the vector of strings to populate with the lines of the file.
 	 */
-	void LoadFileIntoVectorOfStrings(std::ifstream &ifs, std::vector<std::string> *vec_of_str);
+	void LoadFileIntoVectorOfStrings(std::istream &ifs, std::vector<std::string> *vec_of_str);
 };
 
 #endif /* RESPONSEFILEPARSER_H */

@@ -21,9 +21,9 @@
 #include <boost/graph/graph_traits.hpp>
 
 #include "ControlFlowGraph.h"
-#include "CallStackFrameBase.h"
 #include "visitors/ControlFlowGraphVisitorBase.h"
 
+class CallStackBase;
 class CallStackFrameBase;
 
 /**
@@ -42,50 +42,16 @@ public:
 	 * @param source  The vertex to start the traversal from.
 	 * @param visitor The ControlFlowGraphVisitorBase()-derived visitor which will examine the nodes traversed and stop the traversal.
 	 */
-	virtual void Traverse(boost::graph_traits<T_CFG>::vertex_descriptor source,
+	virtual void Traverse(ControlFlowGraph::vertex_descriptor source,
 			ControlFlowGraphVisitorBase *visitor) = 0;
 
 protected:
 
 	/// @name Interface for maintaining a call stack.
-	//@{
-
-	/**
-	 * Push a new stack frame onto the call stack.
-	 * @param cfsb
-	 */
-	void PushCallStack(CallStackFrameBase* cfsb);
-
-	/**
-	 * Pop the topmost stack frame off the call stack.
-	 */
-	void PopCallStack();
-
-	/**
-	 * Access the topmost stack frame of the call stack.
-	 * @return
-	 */
-	CallStackFrameBase* TopCallStack();
-	bool IsCallStackEmpty() const;
-	bool AreWeRecursing(Function* function);
-
-	//@}
+	CallStackBase *m_call_stack;
 
 	/// Reference to the ControlFlowGraph we're visiting.
 	ControlFlowGraph &m_control_flow_graph;
-
-private:
-
-	/// The FunctionCall call stack.
-	std::stack<CallStackFrameBase*> m_call_stack;
-
-	/// Typedef for an unordered collection of Function pointers.
-	/// Used to efficiently track which functions are on the call stack, for checking if we're going recursive.
-	typedef boost::unordered_set<Function*> T_FUNCTION_CALL_SET;
-
-	/// The set of Functions currently on the call stack.
-	/// This is currently used only to determine if our call stack has gone recursive.
-	T_FUNCTION_CALL_SET m_call_set;
 };
 
 #endif /* CONTROLFLOWGRAPHTRAVERSALBASE_H_ */

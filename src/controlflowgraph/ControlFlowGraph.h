@@ -15,219 +15,160 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+/** @file
+ * Header for the ControlFlowGraph class.
+ */
 
 #ifndef CONTROLFLOWGRAPH_H
 #define	CONTROLFLOWGRAPH_H
 
+#include <utility>
+
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/utility.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
+#include "VertexID.h"
+
+#include "Graph.h"
+#include "GraphAdapter.h"
 
 class Function;
 
 
 /// @name Control Flow Graph definitions.
 //@{
-	
-/// Vertex properties for the CFG graph.
-struct CFGVertexProperties
+
+/// The vertex descriptor type for ControlFlowGraphs.
+//typedef DescriptorBaseClass<StatementBase> CFGVertexDescriptor;
+typedef StatementBase* CFGVertexDescriptor;
+
+
+/**
+ * Functor for use with transform_iterator<> to convert VertexDescriptor's into CFGVertexDescriptor's.
+ */
+struct CFGVertexDescriptorConv
 {
-	/// The Statement at this vertex of the CFG.
-	StatementBase *m_statement;
-	
-	/// The Function which contains this vertex.
-	Function *m_containing_function;
+	/// This is for boost::result_of().
+	typedef CFGVertexDescriptor result_type;
+
+	CFGVertexDescriptor operator()(const VertexDescriptor& v) const { return dynamic_cast<CFGVertexDescriptor>(v); };
 };
-
-/// Edge properties for the CFG graph.
-struct CFGEdgeProperties
-{
-	/// The Edge Type.
-	/// May be a FunctionCall, fallthrough, goto, etc.
-	CFGEdgeTypeBase *m_edge_type;
-};
-
-/// Typedef for the CFG graph.
-typedef boost::adjacency_list
-		<
-		/// Selector type to specify the out edge list storage type.
-		boost::listS,
-		/// Selector type to specify the Vertex list storage type.
-		boost::vecS,
-		/// Selector type to specify the directedness of the graph.
-		boost::bidirectionalS,
-		/// The Vertex properties type.
-		CFGVertexProperties,
-		/// The Edge properties type.
-		CFGEdgeProperties
-		> T_CFG;
-
-/// Typedef for the vertex_descriptors in the control flow graph.
-typedef boost::graph_traits<T_CFG>::vertex_descriptor T_CFG_VERTEX_DESC;
-
-/// Typedef for the edge_descriptors in the control flow graph.
-typedef boost::graph_traits<T_CFG>::edge_descriptor T_CFG_EDGE_DESC;
-
-/// Typedef for vertex iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::vertex_iterator T_CFG_VERTEX_ITERATOR;
-
-/// Typedef for out-edge iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::out_edge_iterator T_CFG_OUT_EDGE_ITERATOR;
-
-/// Typedef for in-edge iterators for the CFG.
-typedef boost::graph_traits< T_CFG >::in_edge_iterator T_CFG_IN_EDGE_ITERATOR;
-
-/// Typedef for the type used to represent vertex degrees.
-typedef boost::graph_traits< T_CFG >::degree_size_type T_CFG_DEGREE_SIZE_TYPE;
-
-template < typename CFGEdgeType >
-boost::tuple<T_CFG_EDGE_DESC, bool> GetFirstOutEdgeOfType(T_CFG_VERTEX_DESC vdesc, const T_CFG &cfg)
-{
-	boost::graph_traits< T_CFG >::out_edge_iterator eit, eend;
-	boost::tuple<T_CFG_EDGE_DESC, bool> retval;
-	
-	boost::tie(eit, eend) = boost::out_edges(vdesc, cfg);
-	for(; eit != eend; eit++)
-	{
-		if(NULL != dynamic_cast<CFGEdgeType*>(cfg[*eit].m_edge_type))
-		{
-			// Found it.
-			retval = boost::make_tuple(*eit, true);
-			return retval;
-		}
-	}
-
-	// Couldn't find one.
-	retval = boost::make_tuple(*eit, false);
-	return retval;
-}
-
 
 
 
 /**
  * The primary control flow graph class.
- * @todo Well, it will be.  At the moment too much functionality is implemented in terms of the Boost Graph Library's
- *       free functions acting on the underlying T_CFG.
  */
-class ControlFlowGraph : boost::noncopyable
+class ControlFlowGraph : public Graph //: boost::noncopyable
 {
 public:
+	/// @name Public member types.
+	//@{
+
+	typedef CFGVertexDescriptor vertex_descriptor;
+	typedef boost::transform_iterator< CFGVertexDescriptorConv, vertex_list_type::iterator> vertex_iterator;
+	//typedef Graph::vertex_iterator vertex_iterator;
+	typedef StatementBase::out_edge_iterator out_edge_iterator;
+
+	static inline vertex_descriptor null_vertex() { return NULL; /*CFGVertexDescriptor::GetNullDescriptor();*/ };
+
+
+	/// @name These are specifically for interoperability with the Boost graph library.
+	//@{
+	typedef CFGEdgeDescriptor edge_descriptor;
+	typedef StatementBase::edge_iterator edge_iterator;
+	typedef StatementBase::in_edge_iterator in_edge_iterator;
+	typedef StatementBase::degree_size_type degree_size_type;
+	typedef boost::directed_tag directed_category;
+	typedef boost::bidirectional_graph_tag traversal_category;
+	typedef boost::allow_parallel_edge_tag edge_parallel_category;
+	/// (@todo AFAICT, the BidirectionalGraph concept doesn't need the below three, but a concept check of that chokes if they're not
+	/// in here.  boost::graph_traits<> appears to always need them.)
+	// AdjacencyGraph
+	typedef vertex_iterator adjacency_iterator;
+	// VertexListGraph (efficient traversal of all vertices in graph)
+	typedef vertex_list_type::size_type vertices_size_type;
+	// EdgeListGraph (efficient traversal of all edges in graph)
+	typedef edge_list_type::size_type edges_size_type;
+
+	/// For vertex_index_t.
+	//typedef boost::property<boost::vertex_index_t, long> VertexProperty;
+	//typedef VertexProperty vertex_property_type;
+	//@}
+
+	//@}
+
+public:
 	ControlFlowGraph();
-	~ControlFlowGraph();
-
-
-	/**
-	 * This returns a reference to the underlying T_CFG object.
-	 *
-	 * @deprecated Ultimately, the goal is to make exposing this unnecessary.  Avoid using this interface if
-	 * at all possible.
-	 *
-	 * @return A reference to the underlying T_CFG (Boost Graph Library adjacency_list) object.
-	 */
-	const T_CFG& GetConstT_CFG() const { return m_cfg; };
-
-	T_CFG& GetT_CFG() { return m_cfg; };
+	virtual ~ControlFlowGraph();
 
 	/// @name Graph construction helpers
 	//@{
 
-	/**
-	 * Traverses the CFG of Function @a f and marks all back edges.
-	 * @param f
-	 */
-	void FixupBackEdges(Function *f);
+	//virtual void InsertMergeNodes(Function *f);
 
-	void InsertMergeNodes(Function *f);
+	//virtual void SplitCriticalEdges(Function *f);
 
-	void SplitCriticalEdges(Function *f);
+	//virtual void StructureCompoundConditionals(Function *f);
 
-	void StructureCompoundConditionals(Function *f);
+	//virtual void RemoveRedundantNodes(Function *f);
 
 	//@}
 
 	/// @name Debugging helper functions
 	//@{
-	void PrintOutEdgeTypes(T_CFG_VERTEX_DESC vdesc);
-	void PrintInEdgeTypes(T_CFG_VERTEX_DESC vdesc);
+	virtual void PrintOutEdgeTypes(vertex_descriptor vdesc);
+	virtual void PrintInEdgeTypes(vertex_descriptor vdesc);
 	//@}
 
-	T_CFG_VERTEX_DESC AddVertex(StatementBase * statement, Function *containing_function);
-	T_CFG_EDGE_DESC AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target, CFGEdgeTypeBase *edge_type);
-
-	/// @name Edge attribute accessors.
+	/// @name Property Map Functions
 	//@{
-
-	/**
-	 * Return the source vertex of edge @a e.
-	 *
-	 * @param e The graph edge to examine.
-	 * @return The source vertex of @a e.
-	 */
-	T_CFG_VERTEX_DESC Source(T_CFG_EDGE_DESC e) { return boost::source(e, m_cfg); };
-
-	/**
-	 * Return the target vertex of edge @a e.
-	 *
-	 * @param e The graph edge to examine.
-	 * @return The target vertex of @a e.
-	 */
-	T_CFG_VERTEX_DESC Target(T_CFG_EDGE_DESC e) { return boost::target(e, m_cfg); };
-
-	/**
-	 * Returns a pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
-	 *
-	 * @param e The graph edge to examine.
-	 * @return Pointer to the CFGEdgeTypeBase-derived edge type class associated with edge @a e.
-	 */
-	CFGEdgeTypeBase* GetEdgeTypePtr(T_CFG_EDGE_DESC e) { return m_cfg[e].m_edge_type; };
-
 	//@}
 
-	StatementBase* GetStatementPtr(T_CFG_VERTEX_DESC v) { return m_cfg[v].m_statement; };
 
-	/**
-	 * Return the in degree of vertex @a v.
-	 *
-	 * @param v
-	 * @return The in degree of @v.
-	 */
-	long InDegree(T_CFG_VERTEX_DESC v) { return boost::in_degree(v, m_cfg); };
+	StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) { return vd; };
+	CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) { return ed; };
+	const StatementBase* operator[](const ControlFlowGraph::vertex_descriptor vd) const { return vd; };
+	const CFGEdgeTypeBase* operator[](const ControlFlowGraph::edge_descriptor ed) const { return ed; };
 
+	virtual void Vertices(ControlFlowGraph::vertex_iterator* ibegin, ControlFlowGraph::vertex_iterator* iend) const;
 
 private:
 
-	/// @name Edge manipulation routines.
-	//@{
-
-	/**
-	 * Add an edge between the given source and target vertices.
-	 *
-	 * @param source Source vertex descriptor.
-	 * @param target Target vertex descriptor.
-	 */
-	void AddEdge(const T_CFG_VERTEX_DESC &source, const T_CFG_VERTEX_DESC &target);
-	void RemoveEdge(const T_CFG_EDGE_DESC &e);
-	void ChangeEdgeTarget(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &target);
-	void ChangeEdgeSource(T_CFG_EDGE_DESC &e, const T_CFG_VERTEX_DESC &source);
-
-	//@}
-
-	/// The Boost Graph Library graph we'll use for our underlying graph implementation.
-	T_CFG m_cfg;
 };
+
 
 //@}
 
-
-/// @name Other headers in this library.
+/// @name Free-function declarations for adapting this graph class to the Boost graph library.
 //@{
-#include "visitors/ControlFlowGraphVisitorBase.h"
-#include "topological_visit_kahn.h"
+
+	std::pair<ControlFlowGraph::out_edge_iterator, ControlFlowGraph::out_edge_iterator>
+		out_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
+	std::pair<ControlFlowGraph::in_edge_iterator, ControlFlowGraph::in_edge_iterator>
+		in_edges(ControlFlowGraph::vertex_descriptor u, const ControlFlowGraph &/*g*/);
+
+
+	//std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(ControlFlowGraph& g) { return vertices(g); };
+	std::pair<ControlFlowGraph::vertex_iterator, ControlFlowGraph::vertex_iterator> vertices(const ControlFlowGraph& g);
+
+
+	inline void checker(ControlFlowGraph&)
+	{
+		// Concept checks.
+		BOOST_CONCEPT_ASSERT(( boost::GraphConcept<ControlFlowGraph> ));
+		//BOOST_CONCEPT_ASSERT(( boost::VertexListGraphConcept<ControlFlowGraph> ));
+		//BOOST_CONCEPT_ASSERT(( boost::BidirectionalGraphConcept<ControlFlowGraph> ));
+		//BOOST_CONCEPT_ASSERT(( boost::MutableGraphConcept<ControlFlowGraph> ));
+		//BOOST_CONCEPT_ASSERT(( boost::MutablePropertyGraph<ControlFlowGraph> ));
+		//BOOST_CONCEPT_ASSERT(( boost::ReadablePropertyGraphConcept<ControlFlowGraph, ControlFlowGraph::vertex_descriptor, boost::vertex_index_t> ));
+	}
+
+
 //@}
 
 #endif	/* CONTROLFLOWGRAPH_H */

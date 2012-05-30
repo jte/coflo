@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -28,7 +28,7 @@
 class FlowControlBase: public StatementBase
 {
 public:
-	FlowControlBase(const Location &location);
+	explicit FlowControlBase(const Location &location);
 	FlowControlBase(const FlowControlBase& orig);
 	virtual ~FlowControlBase();
 };
