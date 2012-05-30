@@ -157,22 +157,14 @@ void Function::Link(const std::map<std::string, Function*> &function_map,
 		CFGEdgeTypeReturn *return_edge = new CFGEdgeTypeReturn(fcr);
 		CFGEdgeTypeFallthrough *function_calls_fallthrough_edge = fcr->GetFirstOutEdgeOfType<CFGEdgeTypeFallthrough>();
 		m_the_cfg->AddEdge(fcr, fcr->GetCalledFunction()->GetEntryVertexDescriptor(), call_edge);
-		// The return edge goes to the next vertex after the FunctionCallResolved vertex.
-		m_the_cfg->AddEdge(fcr->GetCalledFunction()->GetExitVertexDescriptor(),
+		// The return edge goes from the called Function's Exit vertex, which is in a different ControlFlowGraph,
+		// to the next vertex after the FunctionCallResolved vertex.
+		ControlFlowGraph *other_cfg = fcr->GetCalledFunction()->GetCFGPointer();
+		other_cfg->AddEdge(fcr->GetCalledFunction()->GetExitVertexDescriptor(),
 				function_calls_fallthrough_edge->Target(), return_edge);
 	}
 }
 
-#if 0
-static void indent(long i)
-{
-	while (i > 0)
-	{
-		std::cout << "    ";
-		i--;
-	};
-}
-#endif
 long filtered_in_degree(ControlFlowGraph::vertex_descriptor v, bool only_decision_predecessors = false)
 {
 	StatementBase::in_edge_iterator ieit, ieend;

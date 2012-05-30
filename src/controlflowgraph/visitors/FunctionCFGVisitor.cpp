@@ -256,7 +256,6 @@ edge_return_value_t FunctionCFGVisitor::examine_edge(ControlFlowGraph::edge_desc
 		else if(!m_last_discovered_vertex_is_recursive && (ed->IsType<CFGEdgeTypeFallthrough>()))
 		{
 			// Last vertex wasn't recursive, don't take the fallthrough.
-			std::cout << "skipft" <<std::endl;
 			return edge_return_value_t::terminate_branch;
 		}
 	}
