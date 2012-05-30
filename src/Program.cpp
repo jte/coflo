@@ -125,8 +125,7 @@ void Program::Print(const std::string &output_path)
 	std::string index_html_filename = (output_dir /= "index.html").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
-	index_html_out << \
-"\
+	index_html_out << "\
 <!DOCTYPE html>\n\
 <html lang=\"en\">\n\
 <head>\n\
