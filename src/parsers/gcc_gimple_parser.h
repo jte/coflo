@@ -63,7 +63,7 @@ struct gcc_gimple_parser_ParseNode_User
 	FunctionInfoList *m_function_info_list;
 };
 
-M_DECLARE_PARSER_INTERFACE(gcc_gimple)
+M_DECLARE_PARSER_INTERFACE(gcc_gimple_parser)
 
 #if 0
 D_Parser* new_gcc_gimple_Parser();

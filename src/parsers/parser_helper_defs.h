@@ -23,9 +23,9 @@
 #define M_DECLARE_PARSER_INTERFACE(grammar_id) \
 	D_Parser* new_##grammar_id##_Parser(); \
 	D_ParseNode* grammar_id##_dparse(D_Parser *parser, char* buffer, long length); \
-	long grammar_id##_parser_GetSyntaxErrorCount(D_Parser *parser); \
-	grammar_id##_parser_ParseNode_User* grammar_id##_parser_GetUserInfo(D_ParseNode *tree); \
-	grammar_id##_parser_ParseNode_Globals* grammar_id##_parser_GetGlobalInfo(D_ParseNode *tree); \
+	long grammar_id##_GetSyntaxErrorCount(D_Parser *parser); \
+	grammar_id##_ParseNode_User* grammar_id##_GetUserInfo(D_ParseNode *tree); \
+	grammar_id##_ParseNode_Globals* grammar_id##_GetGlobalInfo(D_ParseNode *tree); \
 	void free_##grammar_id##_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree); \
 	void free_##grammar_id##_Parser(D_Parser *parser);
 

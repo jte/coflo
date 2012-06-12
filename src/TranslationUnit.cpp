@@ -134,8 +134,8 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	//std::cout << "Read >>>>>" << buffer << "<<<<<" << std::endl;
 
 	// Create a new parser.
-	D_Parser *parser = new_gcc_gimple_Parser();
-	D_ParseNode *tree = gcc_gimple_dparse(parser, const_cast<char*>(buffer.c_str()), buffer.length());
+	D_Parser *parser = new_gcc_gimple_parser_Parser();
+	D_ParseNode *tree = gcc_gimple_parser_dparse(parser, const_cast<char*>(buffer.c_str()), buffer.length());
 
 	if (tree && !gcc_gimple_parser_GetSyntaxErrorCount(parser))
 	{
@@ -159,10 +159,10 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	if(tree != NULL)
 	{
 		// Destroy the parse tree.
-		free_gcc_gimple_ParseTreeBelow(parser, tree);
+		free_gcc_gimple_parser_ParseTreeBelow(parser, tree);
 	}
 	// Destroy the parser.
-	free_gcc_gimple_Parser(parser);
+	free_gcc_gimple_parser_Parser(parser);
 
 	return true;
 }
