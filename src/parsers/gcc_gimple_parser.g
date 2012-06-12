@@ -42,13 +42,27 @@ extern D_ParserTables parser_tables_gcc_gimple_parser;
 
 void gcc_gimple_parser_FreeNodeFn(D_ParseNode *d);
 
+/**
+ * Macro which creates a std::string from the pointers pointing to the text buffer for production the_n of a rule.
+ */
 #define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
+
+/**
+ * Macro which converts a production's matched string to an int.
+ */
+#define M_TO_INT(the_n) atoi(M_TO_STR(the_n).c_str())
+
+/**
+ * Macro which converts a production's matched string to an int.
+ */
+#define M_TO_DOUBLE(the_n) strtod(M_TO_STR(the_n).c_str(), NULL)
+
 #define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
 
 // The globals.
 static gcc_gimple_parser_ParseNode_Globals TheGlobals;
 
-D_Parser* new_gcc_gimple_Parser()
+D_Parser* new_gcc_gimple_parser_Parser()
 {
 	D_Parser *parser = new_D_Parser(&parser_tables_gcc_gimple_parser, sizeof(D_ParseNode_User));
 	parser->free_node_fn = gcc_gimple_parser_FreeNodeFn;
@@ -56,10 +70,19 @@ D_Parser* new_gcc_gimple_Parser()
 	parser->error_recovery = 1;
 	parser->save_parse_tree = 1;
 	
+	// Set up the initial location.
+	//parser->loc.pathname = strdup(filename.c_str());
+	//parser->loc.line = 1;
+	//parser->loc.col = 0;
+	
+	// Create the intial globals.
+	parser->initial_globals = new gcc_gimple_parser_ParseNode_Globals;
+	// Initialize members of parser->initial_globals here.
+	
 	return parser;
 }
 
-D_ParseNode* gcc_gimple_dparse(D_Parser *parser, char* buffer, long length)
+D_ParseNode* gcc_gimple_parser_dparse(D_Parser *parser, char* buffer, long length)
 {
 	D_ParseNode *tree = dparse(parser, buffer,length);
 	return tree;
@@ -75,17 +98,22 @@ gcc_gimple_parser_ParseNode_User* gcc_gimple_parser_GetUserInfo(D_ParseNode *tre
 	return &(tree->user);
 }
 
+/**
+ * Return a pointer to the user-defined global info.
+ * @param tree	Pointer to the root node of the parse tree.
+ */
 gcc_gimple_parser_ParseNode_Globals* gcc_gimple_parser_GetGlobalInfo(D_ParseNode *tree)
 {
 	return &TheGlobals;
+	//return tree->globals;
 }
 
-void free_gcc_gimple_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree)
+void free_gcc_gimple_parser_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree)
 {
 	free_D_ParseTreeBelow(parser, tree);
 }
 
-void free_gcc_gimple_Parser(D_Parser *parser)
+void free_gcc_gimple_parser_Parser(D_Parser *parser)
 {
 	free_D_Parser(parser);
 }
