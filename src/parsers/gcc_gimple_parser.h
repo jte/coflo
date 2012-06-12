@@ -21,6 +21,8 @@
 #include <vector>
 #include <string>
 
+#include "parser_helper_defs.h"
+
 /// Forward declaration of the parse node struct.
 struct D_ParseNode;
 struct D_Parser;
@@ -61,6 +63,9 @@ struct gcc_gimple_parser_ParseNode_User
 	FunctionInfoList *m_function_info_list;
 };
 
+M_DECLARE_PARSER_INTERFACE(gcc_gimple)
+
+#if 0
 D_Parser* new_gcc_gimple_Parser();
 D_ParseNode* gcc_gimple_dparse(D_Parser *parser, char* buffer, long length);
 long gcc_gimple_parser_GetSyntaxErrorCount(D_Parser *parser);
@@ -68,5 +73,6 @@ gcc_gimple_parser_ParseNode_User* gcc_gimple_parser_GetUserInfo(D_ParseNode *tre
 gcc_gimple_parser_ParseNode_Globals* gcc_gimple_parser_GetGlobalInfo(D_ParseNode *tree);
 void free_gcc_gimple_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree);
 void free_gcc_gimple_Parser(D_Parser *parser);
+#endif
 
 #endif /* GCC_GIMPLE_PARSER_H*/

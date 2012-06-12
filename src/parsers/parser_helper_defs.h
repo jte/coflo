@@ -1,0 +1,32 @@
+/*
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ *
+ * This file is part of CoFlo.
+ *
+ * CoFlo is free software: you can redistribute it and/or modify it under the
+ * terms of version 3 of the GNU General Public License as published by the Free
+ * Software Foundation.
+ *
+ * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** @ file */
+
+#ifndef PARSER_HELPER_DEFS_H
+#define PARSER_HELPER_DEFS_H
+
+#define M_DECLARE_PARSER_INTERFACE(grammar_id) \
+	D_Parser* new_##grammar_id##_Parser(); \
+	D_ParseNode* grammar_id##_dparse(D_Parser *parser, char* buffer, long length); \
+	long grammar_id##_parser_GetSyntaxErrorCount(D_Parser *parser); \
+	grammar_id##_parser_ParseNode_User* grammar_id##_parser_GetUserInfo(D_ParseNode *tree); \
+	grammar_id##_parser_ParseNode_Globals* grammar_id##_parser_GetGlobalInfo(D_ParseNode *tree); \
+	void free_##grammar_id##_ParseTreeBelow(D_Parser *parser, D_ParseNode *tree); \
+	void free_##grammar_id##_Parser(D_Parser *parser);
+
+#endif
