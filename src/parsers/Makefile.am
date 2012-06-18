@@ -33,10 +33,12 @@ ANTLRCPPINCDIR = '/home/Gary/src/antlr_cpp_target/include'
 # @todo Put this back once we figure out how to avoid the configure-time dependency on an installed DParser.  For now we're
 # always building them, so they go in MOSTLYCLEANFILES.
 #MAINTAINERCLEANFILES = $(srcdir)/gcc_gimple_parser.cpp $(srcdir)/coflo_c_parser.cpp
-MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.g.gdebug $(ANTLRBUILTSRC) 
+MOSTLYCLEANFILES = gcc_gimple_parser.cpp gcc_gimple_parser.dparser.gdebug $(ANTLRBUILTSRC)
+
+BUILT_SOURCES = gcc_gimple_parser.cpp $(ANTLRBUILTSRC)
 
 noinst_LIBRARIES = libparsers.a 
-libparsers_a_SOURCES = gcc_gimple_parser.g gcc_gimple_parser.h $(ANTLRPARSERSRCS)
+libparsers_a_SOURCES = gcc_gimple_parser.dparser gcc_gimple_parser.h $(ANTLRPARSERSRCS)
 libparsers_a_CPPFLAGS = -I $(top_srcdir)/src -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(ANTLRCPPINCDIR) $(AM_CPPFLAGS)
 libparsers_a_CFLAGS = $(AM_CFLAGS)
@@ -48,9 +50,9 @@ PROG_ABSPATH_MAKE_DPARSER = $(top_builddir)/third_party/make_dparser
 DPARSER_FLAGS = --verbose=2 --debug --ext=cpp
 
 # Suffix for DParser grammars.
-SUFFIXES = .dparser.g .g
+SUFFIXES = .dparser
 # Suffixes for ANTLR grammars.
-SUFFIXES += .tokens Lexer.cpp Lexer.hpp Parser.cpp Parser.hpp 
+SUFFIXES += .g .tokens Lexer.cpp Lexer.hpp Parser.cpp Parser.hpp 
 
 # Rule to make *.cpp from *.g using DParser.
 # Note:
@@ -58,8 +60,8 @@ SUFFIXES += .tokens Lexer.cpp Lexer.hpp Parser.cpp Parser.hpp
 # so it is created under $(srcdir) and gets distributed.
 # - @TODO Actually, at the moment we're going to require the user to have DParser, so we won't do either.
 # - The intermediate file in the rule below, *.g.gdebug, is generated under $(bindir) so as not to cause "make distcheck" to fail.
-.dparser.g.cpp:
-	BASENAME="$$(basename "$<" .g)" && \
+.dparser.cpp:
+	BASENAME="$$(basename "$<" .dparser)" && \
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$(srcdir)/$$(basename "$<")" && \
 	INTER="$$(basename "$<").gdebug" && \
@@ -67,15 +69,9 @@ SUFFIXES += .tokens Lexer.cpp Lexer.hpp Parser.cpp Parser.hpp
 	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$${INTER}" > "$${TARGET}-temp" && \
 	mv "$${TARGET}-temp" "$${TARGET}"
 
-# Rules to make a *.cpp file from a *.g file using ANTLRv3.4.
-#coflo_c_parser.g.stamp_cpp_files_generated: coflo_c_parser.g
-#	@: org.antlr.Tool
-#	java -jar 'C:\cygwin\bin_java\antlr-3.4-with-cpp\antlr-3.4-with-cpp.jar' '$<' -report
-	
+
+# Rules to make the necessary .cpp and .h files from a *.g file using ANTLRv3.4.
 %.tokens %Lexer.cpp %Lexer.hpp %Parser.cpp %Parser.hpp: %.g
 	java -jar 'C:\cygwin\bin_java\antlr-3.4-with-cpp\antlr-3.4-with-cpp.jar' '$<' -report
 
-# Rule to make dependencies for ANTLR parsers.
-#.g.ANTLRdeps:
-#	java -jar 'C:\cygwin\bin_java\antlr-3.4-with-cpp\antlr-3.4-with-cpp.jar' '$<' -depend
 
