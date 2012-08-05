@@ -105,6 +105,9 @@ cppcheck-reports/cppcheck-result-NOVERSION.xml: FORCE
 $(top_srcdir)/sonar-project.properties: sonar-project.template.properties $(top_srcdir)/BuildInfoFile.sh FORCE
 	:;# Fill in the build date.
 	. $(top_srcdir)/BuildInfoFile.sh && cat '$<' | sed "s,:build_timestamp_utc:,$${BUILD_TIMESTAMP_UTC}," > '$@'
+	:;### Record Library Info.
+	:;## Boost libraries.
+	:;# @todo 
 
 analysis-run-sonar: $(top_srcdir)/sonar-project.properties $(top_builddir)/cppcheck-reports/cppcheck-result-NOVERSION.xml
 	PATH=/bin_native/sonar-runner-1.3/bin:$${PATH} && cd $(top_srcdir) && sonar-runner.bat
