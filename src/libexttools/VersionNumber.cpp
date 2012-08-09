@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,10 +17,13 @@
 
 /** @file */
 
+#include "VersionNumber.h"
+
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <iostream>
 
-#include "VersionNumber.h"
 
 VersionNumber::VersionNumber()
 {
@@ -62,6 +65,8 @@ void VersionNumber::Set(const std::string &version_string)
 		parser.get();
 		i++;
 	}
+	std::cout << "NO ERRORS" << std::endl;
+
 }
 
 const VersionNumber VersionNumber::operator=(const VersionNumber &other)

@@ -18,8 +18,14 @@
 # This is a proxy Makefile.am which dispatches the Autotools rules to the real makefiles of
 # the third-party libraries/tools we may need.
 
+## Much of this directory is conditionalized at configure time, so we define some vars at the top
+## which we'll append to later in the sections which are not conditionalized out.
+
+# Directory trees we need to delete on a "make clean".
+CLEAN_LOCAL_DIRS = 
 
 if COFLO_USE_BUILT_BOOST
+# Build the Boost library directly from a tarball.
 # Some Boost lib directory variables.
 BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
 BOOST_LOCAL = ./boost_local
@@ -30,14 +36,22 @@ BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
 BUILTSOURCES_BOOST = stamp_boost_src_installed
 MOSTLYCLEANFILES_BOOST = stamp_boost_src_built stamp_boost_src_installed
 CLEANFILES_BOOST = stamp_boost_src_configured
+
+# Remove the untarred Boost source tree on "make clean". 
+CLEAN_LOCAL_DIRS += $(builddir)/$(BOOST_TARBALL_DIRNAME)
+
 endif
 
 
 if !HAVE_SYSTEM_MAKE_DPARSER
+
 # DParser directory vars.
 #$(abs_builddir)
 DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
+
+# Add the untarred DParser source directory and the local install tree to the "make clean" list. 
+CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
 # We only need these during the build, so instead of requiring the user to install DParser, we'll build them
@@ -159,11 +173,14 @@ mostlyclean-local:
 
 # We need to hook 'clean' here because we need to rm the entire untarred source trees, not just individual files.	
 clean-local:
-	@: 'Remove the DParser source tree.'
-	test ! -d "$(builddir)/d" || rm -rf "$(builddir)/d"
-	@: 'Remove the Boost source tree.'
-	test ! -d "$(builddir)/$(BOOST_TARBALL_DIRNAME)" || rm -rf "$(builddir)/$(BOOST_TARBALL_DIRNAME)"
-	@: 'Remove the DParser local install tree.'
-	test ! -d "$(DPARSER_PREFIX)" || rm -rf "$(DPARSER_PREFIX)"
- 
+	@:; # Strip any spaces off the ends of the directory list.
+	@DIRLIST="$$(echo "$(CLEAN_LOCAL_DIRS)" | $(SED) -r 's/[ ]*(.*)[ ]*/\1/')"; \
+	if [ -n "$${DIRLIST}" ]; then \
+		for DIRNAME in "$${DIRLIST}"; \
+		do \
+			echo "Removing directory $${DIRNAME}...";\
+			test ! -d "$${DIRNAME}" || rm -rf "$${DIRNAME}"; \
+		done; \
+	fi;
+
 # Nothing in here to install or check, so no other *-local hooks.
