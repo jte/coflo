@@ -99,13 +99,13 @@ analysis-static-all: cppcheck-reports/cppcheck-result-NOVERSION.xml
 # cppcheck
 cppcheck-reports/cppcheck-result-NOVERSION.xml: FORCE
 	rm -rf '$@'
-	mkdir -p "$$(dirname '$@')"
+	$(MKDIR_P) "$$(dirname '$@')"
 	cppcheck --verbose --enable=all --xml --xml-version=2 -I ./third_party/boost_1_49_0/ $(srcdir)/src 2> '$@'
 
 # Run sonar-runner.
 $(top_srcdir)/sonar-project.properties: sonar-project.template.properties $(srcdir)/BuildInfoFile.sh FORCE
 	:;# Fill in the build date.
-	. $(srcdir)/BuildInfoFile.sh && cat '$<' | sed "s,:build_timestamp_utc:,$${BUILD_TIMESTAMP_UTC}," > '$@'
+	. $(srcdir)/BuildInfoFile.sh && cat '$<' | "$(SED)" "s,:build_timestamp_utc:,$${BUILD_TIMESTAMP_UTC}," > '$@'
 	:;### Record Library Info.
 	:;## Boost libraries.
 	:;# @todo 

@@ -290,19 +290,7 @@ int main(int argc, char* argv[])
 				return 0;
 			}
 
-		}
-		catch(std::exception &e)
-		{
-			// Something went wrong while trying to parse the command line.
-			// Print an error message and exit.
-			std::cerr << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
-			return 1;
-		}
-		catch(...)
-		{
-			std::cerr << "ERROR: Unknown exception" << std::endl;
-			return 1;
-		}
+
 
 		// Were any source files given on the command line?
 		if(vm.count(CLP_INPUT_FILE)>0)
@@ -342,19 +330,20 @@ int main(int argc, char* argv[])
 				std::cout << "Using GCC version: " << tool_compiler->GetVersion() << std::endl;
 
 				// Check if this version of GCC is going to work.
-				std::string gcc_version_check_string;
-				bool gcc_ver_ok;
-				boost::tie(gcc_version_check_string, gcc_ver_ok) = tool_compiler->CheckIfVersionIsUsable();
-				if(gcc_ver_ok == false)
+				VersionNumber compiler_version = tool_compiler->GetVersion();
+				if(compiler_version < VersionNumber("4.5.0"))
 				{
-					std::cerr << "ERROR: " << gcc_version_check_string << std::endl;
+					std::cerr << "ERROR: CoFlo requires a GCC version of at least 4.5.0, reported version was " << compiler_version << std::endl;
 					return 1;
 				}
+				std::cerr << "Setting GCC..." << std::endl;
 				the_program->SetTheGcc(tool_compiler);
+				std::cerr << "Adding source files..." << std::endl;
 				the_program->AddSourceFiles(vm[CLP_INPUT_FILE].as< std::vector<std::string> >());
 
 				// Parse the program.
 				T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP unresolved_function_calls;
+				std::cerr << "Parsing program..." << std::endl;
 				if(!the_program->Parse(
 					*defines,
 					*includes,
@@ -444,7 +433,21 @@ int main(int argc, char* argv[])
 			std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;
 			the_program->Print(report_output_directory);
 		}
-	
+
+		}
+		catch(std::exception &e)
+		{
+			// Something went wrong while trying to parse the command line.
+			// Print an error message and exit.
+			std::cerr << "ERROR: Couldn't parse command line: " << e.what() << std::endl;
+			return 1;
+		}
+		catch(...)
+		{
+			std::cerr << "ERROR: Unknown exception" << std::endl;
+			return 1;
+		}
+
 		// Normal return, no errors.
 		return 0;
 	}

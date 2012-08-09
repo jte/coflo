@@ -69,10 +69,10 @@ SUFFIXES = .dparser.g .dparser.g.gdebug
 #	set -e; rm -f '$@' && \
 #	BASENAME="$$(basename "$<" .dparser.g)" && \
 #	echo -n "$${BASENAME}.cpp $@: $< " > '$@-temp' && \
-#	grep -E '^include[ ]+' '$<' | \
+#	$(EGREP) '^include[ ]+' '$<' | \
 #	tr '\n' ' ' | \
-#	sed -r 's,include[ ]+,,g' | \
-#	sed -r 's,\"([^\"]*)\",\"\$$\(srcdir\)/\1\",g' >> '$@-temp' && \
+#	"$(SED)" -r 's,include[ ]+,,g' | \
+#	"$(SED)" -r 's,\"([^\"]*)\",\"\$$\(srcdir\)/\1\",g' >> '$@-temp' && \
 #	echo; echo '\t
 #	mv '$@-temp' '$@'
 #

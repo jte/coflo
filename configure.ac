@@ -280,35 +280,31 @@ AM_COND_IF([COFLO_USE_BUILT_BOOST],
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
 ],
 [
-	#AC_MSG_ERROR([Linking with system Boost libraries is currently unsupported.  Please download the Boost source tarball, version 1.48.0 or newer, and reconfigure using --with-boost-tarball.])
 	# Try to find a Boost version we can use.
 	# Use the Autoconf Macro Archive macros.
 	# Note that there is a bug in Boost.Filesystem prior to 1.47.0 which causes an exception to be thrown if the
 	# current locale as specified in the LANG environment variable is anything other than "C" (see
 	# <https://svn.boost.org/trac/boost/ticket/4688>).  For that reason, Boost 1.47.0 or greater is required.
-	#AX_BOOST_BASE([1.47.0])
-	#AX_BOOST_PROGRAM_OPTIONS
-	#AX_BOOST_REGEX
-	#AX_BOOST_SYSTEM
-	#AX_BOOST_FILESYSTEM
-	
+
 	# Use the boost.m4 macro.
 	BOOST_REQUIRE([1.47.0])
+	boost_type="s";
 	# Header-only libs
-	BOOST_FOREACH
-	BOOST_UTILITY
+	BOOST_FOREACH([$boost_type])
+	BOOST_UTILITY([$boost_type])
 	# Libs requiring linking
-	BOOST_GRAPH
-	BOOST_PROGRAM_OPTIONS
-	BOOST_REGEX
-	BOOST_SYSTEM
-	BOOST_FILESYSTEM
+	BOOST_GRAPH([$boost_type])
+	BOOST_PROGRAM_OPTIONS([$boost_type])
+	BOOST_REGEX([$boost_type])
+	BOOST_SYSTEM([$boost_type])
+	BOOST_FILESYSTEM([$boost_type])
 	
 	AC_MSG_NOTICE([The following Boost library flags will be used:])
 	AC_MSG_NOTICE([BOOST_LIB_VERSION=$BOOST_LIB_VERSION])
 	AC_MSG_NOTICE([BOOST_CPPFLAGS=$BOOST_CPPFLAGS])
 	AC_MSG_NOTICE([BOOST_LDPATH=$BOOST_LDPATH])
 	
+	# Let the user know what values we'll be using for the various Boost components.
 	m4_pattern_allow([BOOST_])
 	for NAME in FOREACH UTILITY GRAPH PROGRAM_OPTIONS REGEX SYSTEM FILESYSTEM;
 	do
@@ -320,9 +316,6 @@ AM_COND_IF([COFLO_USE_BUILT_BOOST],
 		AC_MSG_NOTICE([${LIBS_VAR}=${!LIBS_VAR}])
 	done;
 	m4_pattern_forbid([BOOST_])
-	
-	#AC_SUBST([BOOST_LIBTOOL_FLAGS], [-rpath `echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
-	#AC_MSG_NOTICE(["BOOST_LIBTOOL_FLAGS=$BOOST_LIBTOOL_FLAGS"])
 ])
 
 
