@@ -114,6 +114,9 @@ void StatementListPrint(StatementList *the_list)
 
 /// DParser declarations.
 
+${declare set_op_priority_from_rule}
+${declare longest_match}
+
 /// Nonterminals.
 
 gcc_gimple_file

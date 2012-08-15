@@ -25,6 +25,7 @@ libcontrolflowgraph_a_SOURCES = \
 	ControlFlowGraph.cpp ControlFlowGraph.h \
 	ControlFlowGraphTraversalBase.cpp ControlFlowGraphTraversalBase.h \
 	ControlFlowGraphTraversalDFS.cpp ControlFlowGraphTraversalDFS.h \
+	DescriptorBaseClass.cpp DescriptorBaseClass.h \
 	DFSCallStack.cpp DFSCallStack.h \
 	Edge.cpp Edge.h \
 	Graph.cpp Graph.h \

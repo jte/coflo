@@ -29,14 +29,14 @@ COMMONSOURCES = Function.cpp Function.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
 	UEI.cpp UEI.h \
-	safe_enum.h
+	safe_enum.h safe_enum.cpp
 
 # The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp $(COMMONSOURCES)
 
 # Collect all the Boost libraries we found into a single variable.
-if BOOST_USE_BUILT_BOOST
+if COFLO_USE_BUILT_BOOST
 BOOST_LOCAL_LIB = $(top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)/stage/lib
 ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_program_options.a \
@@ -45,9 +45,9 @@ ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_filesystem.a
 else
 # Boost libs determined by Autoconf Macro Archive macros.
-ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+#ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 # Boost libs determined by boost.m4.
-#ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
+ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
 endif
 
 NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
@@ -58,10 +58,14 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a \
-	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
+	./libexttools/libexttools.a 
 
-coflo_CPPFLAGS = -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+	
+#	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
+#-I $(top_builddir)/third_party/dparser/local/include
+
+coflo_CPPFLAGS = $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
+	-I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
@@ -70,7 +74,7 @@ coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflo_LDADD = $(NORMALLIBS) $(ALLBOOSTLIBS)
+coflo_LDADD = $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
 
 
 ###
@@ -90,11 +94,12 @@ MOSTLYCLEANFILES = gtest-all.cc
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
-coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) \
+	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflotest_LDADD = $(TESTLIBS) $(CPPUNIT_LIBS) $(NORMALLIBS) $(ALLBOOSTLIBS)
+coflotest_LDADD = $(TESTLIBS) $(CPPUNIT_LIBS) $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)

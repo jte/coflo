@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -17,10 +17,12 @@
 
 /** @file */
 
+#include "VersionNumber.h"
+
 #include <algorithm>
 #include <sstream>
+#include <string>
 
-#include "VersionNumber.h"
 
 VersionNumber::VersionNumber()
 {

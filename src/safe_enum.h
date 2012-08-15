@@ -20,6 +20,21 @@
 #ifndef SAFE_ENUM_H
 #define	SAFE_ENUM_H
 
+#include <string>
+
+class SafeEnumBaseClass
+{
+public:
+	SafeEnumBaseClass(const std::string &enum_names);
+	~SafeEnumBaseClass();
+
+	std::string asString(int value) const;
+
+private:
+	/** String of the enumerator names.*/
+	std::string m_names;
+};
+
 /**
  * DECLARE_ENUM_CLASS Type-safe enumeration class macro.
  *
@@ -30,14 +45,14 @@
  * to an enum class {}; in that regard.
  */
 #define DECLARE_ENUM_CLASS(enum_class_name, ...) \
-class enum_class_name \
+class enum_class_name : public SafeEnumBaseClass \
 {\
 public:\
 	/** The underlying value type, which is still an enum. */ \
 	enum value_type { enum_class_name##UNINITIALIZED, __VA_ARGS__ };\
 \
-	enum_class_name() {};\
-	enum_class_name(value_type value) : m_value(value) {};\
+	enum_class_name() : SafeEnumBaseClass("UNINITIALIZED, " #__VA_ARGS__), m_value(enum_class_name##UNINITIALIZED) {};\
+	enum_class_name(value_type value) : SafeEnumBaseClass("UNINITIALIZED, " #__VA_ARGS__), m_value(value) {};\
 \
 	/** @name Comparison operators */ \
 	/**@{*/\
@@ -47,9 +62,10 @@ public:\
 	bool operator != (const value_type & other) const { return m_value != other; }\
 	/**@}*/\
 \
-	/** An accessor to return the underlying integral type.  Unfortunately there isn't \
-	  * any real way around this if we want to support switch statements. */ \
+	/** An accessor to return the underlying integral type.  Unfortunately there isn't */ \
+	/** any real way around this if we want to support switch statements. */ \
 	value_type as_enum() const { return m_value; };\
+	std::string asString() const { return SafeEnumBaseClass::asString(static_cast<int>(m_value)); };\
 \
 private:\
 	/** The stored value type. */ \
