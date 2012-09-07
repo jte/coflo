@@ -18,6 +18,9 @@
 # This is a proxy Makefile.am which dispatches the Autotools rules to the real makefiles of
 # the third-party libraries/tools we may need.
 
+# Define some file extensions we know how to handle
+SUFFIXES = .tar.bz2 .tar.gz .tar
+
 ## Much of this directory is conditionalized at configure time, so we define some vars at the top
 ## which we'll append to later in the sections which are not conditionalized out.
 
@@ -72,9 +75,6 @@ BUILTSOURCES_DPARSER = stamp_dparser_src_installed
 MOSTLYCLEANFILES_DPARSER = stamp_dparser_src_built stamp_dparser_src_installed
 CLEANFILES_DPARSER = stamp_dparser_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 endif
-
-# Define some file extensions we know how to handle
-SUFFIXES = .tar.bz2 .tar.gz .tar
 
 # Force DParser and Boost to be rebuilt. 
 BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST)
