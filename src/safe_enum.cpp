@@ -22,49 +22,40 @@
 #include <string>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
+
+
+
 SafeEnumBaseClass::SafeEnumBaseClass(const std::string& enum_names)
 {
-	m_names = enum_names;
+	// Convert the stringized enumerator list into a vector of strings.
+	EnumeratorStringToVectorOfStrings(enum_names);
 }
 
 SafeEnumBaseClass::~SafeEnumBaseClass()
 {
 }
 
+void SafeEnumBaseClass::EnumeratorStringToVectorOfStrings(const std::string &enum_names)
+{
+	static const std::string delimiters = "\t ,";
+
+	boost::split(m_enumerator_names, enum_names, boost::is_any_of(delimiters), boost::token_compress_on);
+}
 
 std::string SafeEnumBaseClass::asString(int value) const
 {
-	std::string::const_iterator i;
-	std::string::const_iterator substring_start = m_names.begin();
-	int commas_left_to_find = static_cast<int>(value);
-	for(i=m_names.begin(); i!=m_names.end(); i++)
-	{
-		// Eat whitespace.
-		if(*i == ' ' || *i == '\t')
-		{
-			substring_start=i+1;
-			continue;
-		}
+	return m_enumerator_names[value];
+}
 
-		if(*i == ',' || (i+1) == m_names.end())
-		{
-			if(commas_left_to_find == 0)
-			{
-				if((i+1) == m_names.end())
-				{
-					i++;
-				}
-				return std::string(substring_start, i);
-			}
-			else
-			{
-				substring_start=i;
-				substring_start++;
-			}
-			commas_left_to_find--;
-		}
+std::string SafeEnumBaseClass::GetEnumeratorsAsString() const
+{
+	std::string retval;
+
+	std::cout << "Enumerators:" << std::endl;
+	BOOST_FOREACH(std::string s, m_enumerator_names)
+	{
+		retval += s + ", ";
 	}
-	/* If we get here, we couldn't find the string, which shouldn't be possible. */
-	std::cout << "ERROR: " << value << " " << m_names << std::endl;
-	return "ERROR";
 }

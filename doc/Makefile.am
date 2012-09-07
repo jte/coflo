@@ -27,5 +27,5 @@ BUILT_SOURCE = $(srcdir)/index.html
 $(srcdir)/index.html: $(srcdir)/index.template.html
 	cat $(srcdir)/index.template.html | "$(SED)" -r -e 's/[@]THIS_VERSION[@]/$(PACKAGE_VERSION)/g' > $(srcdir)/index.html
 
-MOSTLYCLEAN = index.html
+MOSTLYCLEAN = $(nobase_dist_html_DATA)
 

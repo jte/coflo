@@ -48,6 +48,15 @@ public:
 	 */
 	explicit Location(const std::string &location_string);
 
+	/**
+	 * Templated constructor primarily to allow conversion from DParser's d_loc_t type.
+	 *
+	 * @param other
+	 */
+	template <typename T>
+	explicit Location(const T& other) :
+		m_passed_file_path(other.pathname), m_line_number(other.line), m_column(other.col) {};
+
 	Location(const std::string &file_name, long line, long column=-1);
 
 
