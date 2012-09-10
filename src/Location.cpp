@@ -18,6 +18,7 @@
 #include "Location.h"
 
 #include <sstream>
+#include <string>
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>

@@ -24,10 +24,8 @@
 #include <sstream>
 #include <iostream>
 
-#include <boost/filesystem.hpp>
-
 /**
- * Class which encapsulates a location of something in a source file.
+ * Class which encapsulates the location of an item in a source file.
  */
 class Location
 {
@@ -37,6 +35,15 @@ public:
 	 * Default constructor, creates an "UNKNOWN" location.
 	 */
 	Location();
+
+	/**
+	 * Constructor which creates a Location object from a filename, line number, and optionally a column number.
+	 *
+	 * @param file_name The name of the file this Location refers to.
+	 * @param line      The 1-based line number of the location.
+	 * @param column    The optional 1-based column number of the location.
+	 */
+	Location(const std::string &file_name, long line, long column=-1);
 
 	/**
 	 * Constructor which takes a string with the following format as a parameter:
@@ -57,15 +64,16 @@ public:
 	explicit Location(const T& other) :
 		m_passed_file_path(other.pathname), m_line_number(other.line), m_column(other.col) {};
 
-	Location(const std::string &file_name, long line, long column=-1);
-
-
 	/**
 	 * Copy constructor.
 	 *
 	 * @param orig The Location object to copy.
 	 */
 	Location(const Location& orig);
+
+	/**
+	 * Destructor.
+	 */
 	virtual ~Location();
 	
 	/// @name Overloaded operators.

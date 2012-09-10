@@ -21,6 +21,10 @@ SUBDIRS = controlflowgraph debug_utils libexttools parsers
 # Make sure to distribute the Doxygen configuration file.
 EXTRA_DIST = Doxyfile 
 
+# The /etc/coflo.conf file.
+dist_sysconf_DATA = coflo.conf
+
+# Source files common to both the normal CoFlo and the coflotest executables.
 COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
