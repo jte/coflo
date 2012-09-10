@@ -176,6 +176,15 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 	}
 }
 
+const char *str_template_regex_function_cfg = "IDENTIFIER_FUNCTION";
+std::string str_template_function_cfg = std::string(""
+		"<p>\n"
+		"    <h2><a name=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
+		"    <div style=\"text-align: center;\" class=\"div_cfg_image\">\n"
+		"        <IMG SRC=\"IDENTIFIER_FUNCTION.svg\" ALT=\"image\" height=\"100%\" width=\"100%\"/>\n"
+		"    </div>\n"
+		"</p>\n");
+
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
@@ -187,6 +196,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		std::cout << "Function: " << fp->GetIdentifier() << std::endl;
 	}
 	
+	// Create filenames for the index and primary css files.
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
 	
 	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
@@ -206,10 +216,13 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		std::string png_filename;
-		png_filename = fp->GetIdentifier()+".png";
+		png_filename = fp->GetIdentifier()+".svg";
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
-		index_html_out << "<p><h2><a name=\""+fp->GetIdentifier()+"\">Control Flow Graph for "+fp->GetIdentifier()+"()</a></h2>" << std::endl;
-		index_html_out << "<div style=\"text-align: center;\"><IMG SRC=\""+fp->GetIdentifier()+".png"+"\" ALT=\"image\"></div></p>" << std::endl;
+
+		// Output the HTML for this function.
+		std::ostream_iterator<char, char> out(index_html_out);
+		boost::regex_replace(out, str_template_function_cfg.begin(), str_template_function_cfg.end(),
+				boost::basic_regex<char>(str_template_regex_function_cfg), fp->GetIdentifier().c_str());
 	}
 }
 

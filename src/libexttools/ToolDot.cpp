@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -33,7 +33,7 @@ ToolDot::~ToolDot() { }
 
 bool ToolDot::CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename) const
 {
-	System((" -o"+output_filename+" -Tpng "+dot_filename).c_str());
+	System((" -o"+output_filename+" -Tsvg "+dot_filename).c_str());
 	
 	/// @todo Handle errors.
 	return true;

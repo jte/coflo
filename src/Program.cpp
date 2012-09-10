@@ -115,6 +115,17 @@ Function *Program::LookupFunction(const std::string &function_id)
 	}
 }
 
+
+static const char f_html_index_head[] = ""
+		"<!DOCTYPE html>\n"
+		"<html lang=\"en\">\n"
+		"<head>\n"
+		"    <meta charset=\"utf-8\">\n"
+		"    <link rel=\"stylesheet\" type=\"text/css\" href=\"index.css\" />\n"
+		"    <title>CoFlo Analysis Results</title>\n"
+		"</head>\n"
+		"";
+
 void Program::Print(const std::string &output_path)
 {
 	boost::filesystem::path output_dir = output_path;
@@ -122,17 +133,12 @@ void Program::Print(const std::string &output_path)
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	
-	std::string index_html_filename = (output_dir /= "index.html").generic_string();
+	std::string index_html_filename = (output_dir / "index.html").generic_string();
+	std::string index_css_filename = (output_dir / "index.css").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
-	index_html_out << "\
-<!DOCTYPE html>\n\
-<html lang=\"en\">\n\
-<head>\n\
-	<meta charset=\"utf-8\">\n\
-	<title>CoFlo Analysis Results</title>\n\
-</head>\n\
-<body>\n\
+	index_html_out << f_html_index_head <<
+"\n<body>\n\
 <h1>CoFlo Analysis Results</h1>" << std::endl;
 	
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
@@ -144,6 +150,11 @@ void Program::Print(const std::string &output_path)
 "\
 </body>\n\
 </html>" << std::endl;
+
+	// Create the primary stylesheet.
+	std::ofstream primary_css(index_css_filename.c_str());
+
+	primary_css << ".div_cfg_image { max-width:100%;}\n";
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)

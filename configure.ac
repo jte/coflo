@@ -367,6 +367,11 @@ AC_CONFIG_FILES([tests/Makefile tests/atlocal])
 
 
 ###
+### Create the default site configuration file for the program.
+###
+AC_CONFIG_FILES([src/coflo.conf])
+
+###
 ### Create the Makefiles for the program.
 ###
 AC_CONFIG_FILES([Makefile
