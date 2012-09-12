@@ -18,8 +18,10 @@
 # Subdirectories with their own Makefile{.am}'s.
 SUBDIRS = controlflowgraph debug_utils libexttools parsers
 
-# Make sure to distribute the Doxygen configuration file.
-EXTRA_DIST = Doxyfile 
+# Make sure to distribute:
+# - The Doxygen configuration file.
+# - The /etc/coflo.conf template file.
+EXTRA_DIST = Doxyfile coflo.conf.in
 
 # The /etc/coflo.conf file.
 dist_sysconf_DATA = coflo.conf
