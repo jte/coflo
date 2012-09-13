@@ -39,8 +39,6 @@ extern D_ParserTables parser_tables_gcc_gimple_parser;
 
 void gcc_gimple_parser_FreeNodeFn(D_ParseNode *d);
 
-//#define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
-//#define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
 
 // The globals.
 static gcc_gimple_parser_ParseNode_Globals TheGlobals;

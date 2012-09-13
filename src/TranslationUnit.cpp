@@ -176,14 +176,23 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 	}
 }
 
-const char *str_template_regex_function_cfg = "IDENTIFIER_FUNCTION";
-std::string str_template_function_cfg = std::string(""
+
+/**
+ * Template for HTML <div> for the function CFG image, with an <h2> title.
+ */
+const std::string str_template_function_cfg = std::string(""
 		"<p>\n"
 		"    <h2><a name=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
 		"    <div style=\"text-align: center;\" class=\"div_cfg_image\">\n"
-		"        <IMG SRC=\"IDENTIFIER_FUNCTION.svg\" ALT=\"image\" height=\"100%\" width=\"100%\"/>\n"
+		"        <img src=\"IDENTIFIER_FUNCTION.svg\" alt=\"image\" height=\"100%\" width=\"100%\"/>\n"
 		"    </div>\n"
 		"</p>\n");
+
+/**
+ * The "find" regex for inserting the function identifier into str_template_function_cfg.
+ */
+const boost::basic_regex<char> str_template_regex_function_cfg("IDENTIFIER_FUNCTION");
+
 
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
@@ -220,9 +229,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
 
 		// Output the HTML for this function.
-		std::ostream_iterator<char, char> out(index_html_out);
-		boost::regex_replace(out, str_template_function_cfg.begin(), str_template_function_cfg.end(),
-				boost::basic_regex<char>(str_template_regex_function_cfg), fp->GetIdentifier().c_str());
+		index_html_out << boost::regex_replace(str_template_function_cfg, str_template_regex_function_cfg, fp->GetIdentifier().c_str());
 	}
 }
 

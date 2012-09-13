@@ -136,4 +136,18 @@ std::string Location::asGNUCompilerMessageLocation() const
 	}
 
 	return retval.str();
+
+}
+
+std::string Location::asLineColumn() const
+{
+	std::stringstream retval;
+
+	retval << m_line_number;
+	if(m_column != -1)
+	{
+		retval << ":" << m_column;
+	}
+
+	return retval.str();
 }
