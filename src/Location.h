@@ -77,7 +77,7 @@ public:
 	virtual ~Location();
 	
 	/// @name Overloaded operators.
-	//@{
+	///@{
 
 	/**
 	 * Assignment from another Location object.
@@ -86,10 +86,10 @@ public:
      * @return
      */
 	const Location& operator=(const Location &other);
-	//@}
+	///@}
 
 	/// @name Accessors for various components of the Location.
-	//@{
+	///@{
 
 	/**
 	 * Returns the path that was initially passed during the construction of this Location.
@@ -101,16 +101,26 @@ public:
 	std::string GetAbsoluteFilePath() const;
 	
 	long GetLineNumber() const { return m_line_number; };
-	//@}
+
+	long GetColumn() const { return m_column; };
+
+	///@}
 	
 	/**
 	 * Returns the Location as a string formatted in the manner of the GNU recommendation for compilers
 	 * here: <http://www.gnu.org/prep/standards/html_node/Errors.html#Errors>.
 	 *
-	 * @return The Location in the following format: source-file-name:lineno:column.  Intention is that a ": message"
+	 * @return The Location in the following format: source-file-name:lineno(:column)?.  Intention is that a ": message"
 	 * would then be appended.
 	 */
 	std::string asGNUCompilerMessageLocation() const;
+
+	/**
+	 * Returns the Location as a string containing only the line number and column, separated by a colon.
+	 *
+	 * @return A string representing the line and column of the Location in the following format: lineno(:column)?.
+	 */
+	std::string asLineColumn() const;
 
 	/**
 	 * Stream insertion operator.  Inserts @a loc into stream @a os in the following format:
