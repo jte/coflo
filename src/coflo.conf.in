@@ -19,5 +19,8 @@
 ### Programs found during configure.
 ###
 
+# The default compiler.
+PROG_ABSPATH_COMPILER='@PROG_ABSPATH_COMPILER@'
+
 # The Graphviz dot program.
 PROG_ABSPATH_DOT='@PROG_ABSPATH_DOT@'

@@ -106,11 +106,24 @@ edge_return_value_t WriteGraphvizDotFileVisitor::forward_or_cross_edge(
 vertex_return_value_t WriteGraphvizDotFileVisitor::discover_vertex(
 		ControlFlowGraph::vertex_descriptor u)
 {
+	// Stream out this vertex.
 	m_out_stream << u->GetIndex() << " ";
 	m_out_stream << "[label=\"";
-	m_out_stream << u->GetIndex() << " " << u->GetStatementTextDOT();
-	m_out_stream << "\\n" << u->GetLocation() << "\"";
-	m_out_stream << ", color=" << u->GetDotSVGColor();
+
+	if(true /** @todo Make this switchable. */)
+	{
+		m_out_stream << u->GetIndex() << " ";
+	}
+
+	// Insert the core text of the vertex.
+	m_out_stream << u->GetStatementTextDOT();
+
+	if(true /** @todo Make this switchable. */)
+	{
+		// Insert only the line number and column.
+		m_out_stream << "\\n" << u->GetLocation().asLineColumn();
+	}
+	m_out_stream  << "\", color=" << u->GetDotSVGColor();
 	m_out_stream << ", shape=" << u->GetShapeTextDOT();
 	m_out_stream << "];" << std::endl;
 
