@@ -126,17 +126,23 @@ static const char f_html_index_head[] = ""
 		"</head>\n"
 		"";
 
+#define M_STRINGIZE_HELPER(t) #t
+#define M_STRINGIZE(s) M_STRINGIZE_HELPER(s)
+
 void Program::Print(const std::string &output_path)
 {
+	boost::filesystem::path template_dir = std::string(M_STRINGIZE(COFLO_PKGDATA_DIR) "/templates");
 	boost::filesystem::path output_dir = output_path;
 	
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
+	std::string index_css_template_filename = (template_dir / "css" / "index.css").generic_string();
 	std::string index_css_filename = (output_dir / "index.css").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
+	std::cout << "TEMPLATE=" << index_css_template_filename << std::endl;
 	index_html_out << f_html_index_head <<
 "\n<body>\n\
 <h1>CoFlo Analysis Results</h1>" << std::endl;
@@ -151,10 +157,12 @@ void Program::Print(const std::string &output_path)
 </body>\n\
 </html>" << std::endl;
 
-	// Create the primary stylesheet.
+	// Create the primary stylesheet from the template.
+	std::ifstream primary_css_template(index_css_template_filename.c_str());
 	std::ofstream primary_css(index_css_filename.c_str());
 
-	primary_css << ".div_cfg_image { max-width:100%;}\n";
+	// Just copy it for now.
+	primary_css << primary_css_template.rdbuf();
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)

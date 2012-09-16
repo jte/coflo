@@ -15,7 +15,7 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+/** @file Implementation file for the TranslationUnit class. */
 
 #include "TranslationUnit.h"
 
@@ -180,13 +180,21 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 /**
  * Template for HTML <div> for the function CFG image, with an <h2> title.
  */
+/*const std::string str_template_function_cfg = std::string(""
+		"<h2><a id=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
+		"<div>\n"
+		"    <embed class=\"max_width center\" src=\"IDENTIFIER_FUNCTION.svg\" alt=\"Control flow graph for IDENTIFIER_FUNCTION()\" type=\"image/svg+xml\"/>\n"
+		"</div>\n");
+*/
+
 const std::string str_template_function_cfg = std::string(""
-		"<p>\n"
-		"    <h2><a name=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
-		"    <div style=\"text-align: center;\" class=\"div_cfg_image\">\n"
-		"        <img src=\"IDENTIFIER_FUNCTION.svg\" alt=\"image\" height=\"100%\" width=\"100%\"/>\n"
-		"    </div>\n"
-		"</p>\n");
+		"<h2><a id=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
+		"<div style=\"margin:0 auto; max-width=600px;\">\n"
+		"	<div style=\"margin:0 auto; max-width=50%;\">\n"
+		"		<object style=\"display:block; width:100%;\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
+		"	</div>\n"
+		"</div>\n");
+
 
 /**
  * The "find" regex for inserting the function identifier into str_template_function_cfg.
@@ -209,7 +217,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
 	
 	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
-	index_html_out << "<p>Control Flow Graphs:<ul>" << std::endl;
+	index_html_out << "<p>Control Flow Graphs:\n<ul>" << std::endl;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
@@ -220,7 +228,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		}
 		index_html_out << "</li>" << std::endl;
 	}
-	index_html_out << "</ul></p>" << std::endl;
+	index_html_out << "</ul>\n</p>" << std::endl;
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
