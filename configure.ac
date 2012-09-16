@@ -133,7 +133,7 @@ AC_SUBST([CPU_COUNT])
 # Increase the default GCC warning level.
 # For Boost.Filesystem, set CPP flags to the Version 3 interface and to remove all deprecated interfaces.
 # Add "COFLO_PKGDATA_DIR" as a -D preprocessor define, defined to whatever $(pkgdatadir) is defined to at make time.
-AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra -DBOOST_FILESYSTEM_NO_DEPRECATED=1 -DBOOST_FILESYSTEM_VERSION=3 -DCOFLO_PKGDATA_DIR='$(pkgdatadir)'"])
+AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra -DBOOST_FILESYSTEM_NO_DEPRECATED=1 -DBOOST_FILESYSTEM_VERSION=3"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])
 # -Wold-style-cast
@@ -346,14 +346,6 @@ AM_COND_IF([HAVE_SYSTEM_MAKE_DPARSER],
 		#	[AC_MSG_WARN([dparse check failed])])
 		#AC_CHECK_LIB([dparse],[dparse])
 	])
-
-# Google Test library.
-# Defines HAVE_GTEST="yes" or "no".
-# Vars if found are:
-# GTEST_CONFIG = full path to gtest-config.
-# GTEST_CPPFLAGS, GTEST_CXXFLAGS, GTEST_LDFLAGS, GTEST_LIBS = Vars to add to the compile/link lines.
-# GTEST_VERSION = The version found (e.g. "1.5.0").
-#GTEST_LIB_CHECK([1.5.0])
 
 # Allow the user to build with dmalloc.
 AX_WITH_DMALLOC
