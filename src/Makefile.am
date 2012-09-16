@@ -28,6 +28,15 @@ dist_sysconf_DATA = coflo.conf
 # The template files.
 nobase_dist_pkgdata_DATA = templates/css/index.css
 
+templates/css/index.css: $(srcdir)/templates/css/index.template.css Makefile
+	rm -f $@ $@.tmp
+	$(MKDIR_P) templates/css
+	srcdir=''; \
+		test -f ./templates/css/index.template.css || srcdir=$(srcdir)/; \
+        cp $${srcdir}templates/css/index.template.css $@.tmp
+	mv $@.tmp $@
+
+
 # Source files common to both the normal CoFlo and the coflotest executables.
 COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
@@ -74,7 +83,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 
 coflo_CPPFLAGS = $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
 	-I $(top_srcdir)/src/debug_utils \
-	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) \
+	-DCOFLO_PKGDATA_DIR='$(pkgdatadir)' $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,

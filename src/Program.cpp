@@ -129,11 +129,22 @@ static const char f_html_index_head[] = ""
 #define M_STRINGIZE_HELPER(t) #t
 #define M_STRINGIZE(s) M_STRINGIZE_HELPER(s)
 
+
 void Program::Print(const std::string &output_path)
 {
-	boost::filesystem::path template_dir = std::string(M_STRINGIZE(COFLO_PKGDATA_DIR) "/templates");
+	boost::filesystem::path template_dir;
 	boost::filesystem::path output_dir = output_path;
 	
+	const char *pkgdatadir = getenv("COFLO_PKGDATA_DIR");
+	if(pkgdatadir != NULL)
+	{
+		template_dir = std::string(pkgdatadir) + "/templates";
+	}
+	else
+	{
+		template_dir = std::string(M_STRINGIZE(COFLO_PKGDATA_DIR) "/templates");
+	}
+
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	
