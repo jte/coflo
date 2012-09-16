@@ -168,9 +168,15 @@ int main(int argc, char* argv[])
 			po::positional_options_description positional_options;
 			// Almost all the command-line options, except for the hidden ones (for printing usage).
 			po::options_description non_hidden_cmdline_options;
+
 			// All command-line options descriptions.
 			po::options_description cmdline_options;
 
+			// All configuration file options valid in the PREFIX/etc/coflo/coflo.conf.
+			po::options_description sysconf_config_file_options;
+
+			// All configuration file options valid in ~/.coflo.conf.
+			po::options_description user_config_file_options;
 
 			// Add the command-line options.
 			general_options.add_options()
@@ -228,6 +234,20 @@ int main(int argc, char* argv[])
 				extra_parser(at_option_parser).
 				options(cmdline_options).
 				positional(positional_options).run(), vm);
+
+			// Find the user's .coflo.conf file, if any.
+			const char *user_home_dir = getenv("HOME");
+			if(user_home_dir == NULL)
+			{
+				// No HOME environment variable.  Check /etc/passwd.
+				struct passwd *pw = getpwuid(getuid());
+				user_home_dir = pw->pw_dir;
+			}
+			if(user_home_dir != NULL)
+			{
+
+			}
+			po::store(po::parse_config_file())
 
 			// Handle the parameters parsed so far, in particular CLP_RESPONSE_FILE, so that the response_filename variable
 			// gets populated, so the check for response files below works properly.

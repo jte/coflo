@@ -42,11 +42,14 @@ COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
+	RuntimeConfiguration.cpp RuntimeConfiguration.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
 	UEI.cpp UEI.h \
 	safe_enum.h safe_enum.cpp
+	
+TESTSOURCES = RuntimeConfiguration_test.cpp
 
 # The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
@@ -109,8 +112,9 @@ gtest-all.cc: $(GTEST_ROOT)/src/gtest-all.cc
 
 BUILT_SOURCES = gtest-all.cc
 MOSTLYCLEANFILES = gtest-all.cc
+
 check_PROGRAMS = coflotest
-coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
+coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
 coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
