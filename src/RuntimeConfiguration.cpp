@@ -20,7 +20,8 @@
 #include "RuntimeConfiguration.h"
 
 #include <pwd.h>
-#include <boost/filesystem.hpp>
+#include <sys/stat.h>
+//#include <boost/filesystem.hpp>
 
 #include "ResponseFileParser.h"
 
@@ -105,6 +106,8 @@ void RuntimeConfiguration::ParseAllOptionSources(int argc, char* argv[])
 	// Declare options_description object for options which won't be shown to
 	// the user in the help message.
 	po::options_description hidden_options("Hidden options");
+	// Options which are only allowed in a configuration file.
+	po::options_description conf_file_options("~/.coflo.conf options");
 	// Declare a positional_options_description object to translate un-switched
 	// options on the command line into "--input-file=<whatever>" options.
 	po::positional_options_description positional_options;
@@ -171,6 +174,11 @@ void RuntimeConfiguration::ParseAllOptionSources(int argc, char* argv[])
 			.add(debugging_options);
 	cmdline_options.add(non_hidden_cmdline_options).add(hidden_options);
 
+	conf_file_options.add_options()
+			(CLP_CONF_FILE_FORMAT_VERSION, po::value<std::string>()->required(), "Conf file format version.")
+			;
+	user_config_file_options.add(conf_file_options);
+
 	/**
 	 * Setup is done.  Now parse the runtime configurations sources in the following order:
 	 * - Command line
@@ -196,15 +204,16 @@ void RuntimeConfiguration::ParseAllOptionSources(int argc, char* argv[])
 	}
 	if(user_home_dir != NULL)
 	{
-		boost::filesystem::path user_conf_file = std::string(user_home_dir) + "/.coflo.conf";
+		struct stat s;
+		int retval;
 
-		//std::cout << "USERCONF=" << user_conf_file << std::endl;
+		std::string user_conf_file = std::string(user_home_dir) + "/.coflo.conf";
+		retval = stat(user_conf_file.c_str(), &s);
 
-		boost::filesystem::file_status fs = status(user_conf_file);
-		if(boost::filesystem::is_regular_file(fs) /** @todo && is readable */)
+		if(S_ISREG(s.st_mode) /** @todo && is readable */)
 		{
 			// Parse the user's ~/.coflo.conf file.
-			po::store(po::parse_config_file<char>(user_conf_file.generic_string().c_str(), user_config_file_options), m_vm);
+			po::store(po::parse_config_file<char>(user_conf_file.c_str(), user_config_file_options), m_vm);
 		}
 	}
 
