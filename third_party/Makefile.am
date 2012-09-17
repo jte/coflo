@@ -120,7 +120,8 @@ if COFLO_USE_BUILT_BOOST
 # @todo Determine if this should be single or multi from configure.
 COFLO_BOOST_THREADING = single
 COFLO_BOOST_BJAM_JOBS = -j$(CPU_COUNT)
-# @todo runtime-link option?  variant=debug|release?
+COFLO_BOOST_RUNTIME_LINK = shared
+COFLO_BOOST_VARIANT = debug
 
 # Split the bunzipping and the untarring into separate rules so we can take better advantage of parallel builds. 
 #$(BOOST_TARBALL_TAR): $(FILE_PATH_BOOST_SOURCE_TARBALL)
@@ -151,7 +152,7 @@ stamp_boost_src_installed: stamp_boost_src_configured
 	rm -f $@-temp
 	@echo "Building Boost with b2...";
 	cd $(BOOST_TARBALL_DIRNAME) && ./b2 -d 1 --build-dir=../boost_build_dir -q $(COFLO_BOOST_BJAM_JOBS) --prefix=../boost_local \
-		link=static threading=$(COFLO_BOOST_THREADING)
+		variant=$(COFLO_BOOST_VARIANT) link=static runtime-link=$(COFLO_BOOST_RUNTIME_LINK) threading=$(COFLO_BOOST_THREADING)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 # @todo I'd still like to install this to a local directory (i.e. ./boost_local), but AFAICT it's nothing more

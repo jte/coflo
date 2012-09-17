@@ -56,6 +56,8 @@
 #define CLP_CONSTRAINT "constraint"
 
 #define CLP_INPUT_FILE "input-file"
+
+#define CLP_CONF_FILE_FORMAT_VERSION "file.info.format_version"
 ///@}
 
 /**
