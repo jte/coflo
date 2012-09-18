@@ -104,7 +104,7 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 	
 	if test "x$coflo_exit_no_path_specified" != "xyes"; then
 		# If we haven't failed yet, make sure the path we return is an absolute path.
-		VARIABLE=`readlink -f "$VARIABLE"`		
+		VARIABLE=`readlink -fn "$VARIABLE"`		
 		
 		# Check if the specified file exists and is a regular file.
 		AS_CASE(["TEST_D_OR_F"],

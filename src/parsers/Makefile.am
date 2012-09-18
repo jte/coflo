@@ -32,7 +32,7 @@ MOSTLYCLEANFILES = $(DPARSER_BUILTSRC)
 
 #BUILT_SOURCES = $(DPARSER_BUILTSRC)
 noinst_LIBRARIES = libparsers.a 
-libparsers_a_SOURCES = gcc_gimple_parser.dparser.g gcc_gimple_parser.h
+libparsers_a_SOURCES = parser_grammar_helper.h gcc_gimple_parser.dparser.g gcc_gimple_parser.h
 libparsers_a_CPPFLAGS = -I $(top_srcdir)/src $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS)
 libparsers_a_CFLAGS = -Wno-missing-field-initializers $(AM_CFLAGS)
