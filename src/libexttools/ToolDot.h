@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -24,14 +24,41 @@
 
 #include <string>
 
+/**
+ * Facade for the [Graphviz] dot tool.
+ *
+ * [Graphviz]: http://www.graphviz.org/ "Graphviz"
+ */
 class ToolDot : public ToolBase
 {
+public:
+	/// @name Member types.
+	///@{
+
+	/// Enumerator for specifying the output format.
+	enum OUTPUT_FORMAT_DOT { SVG, PNG };
+
+	/// The corresponding format strings to pass to dot.
+	static const char* format_strings[];
+
+	///@}
+
 public:
 	ToolDot(const std::string &cmd);
 	ToolDot(const ToolDot& orig);
 	virtual ~ToolDot();
 	
-	bool CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename) const;
+	/**
+	 * Generates a bitmap- or vector-graphic file from the given *.dot file.
+	 *
+	 * @param dot_filename    Path to the input dot file.
+	 * @param output_filename Path to the output file.
+	 * @param output_format   The output format to be generated.
+	 *
+	 * @return
+	 */
+	bool CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename,
+			OUTPUT_FORMAT_DOT output_format = ToolDot::SVG) const;
 	
 protected:
 	

@@ -27,7 +27,7 @@
 #include "VersionNumber.h"
 
 /**
- * Base class for wrappers around external executables we need to run.
+ * Base class for facades around external executables.
  */
 class ToolBase
 {
