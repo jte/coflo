@@ -132,7 +132,6 @@ AC_SUBST([CPU_COUNT])
 # Set up the maintainer compiler flags.
 # Increase the default GCC warning level.
 # For Boost.Filesystem, set CPP flags to the Version 3 interface and to remove all deprecated interfaces.
-# Add "COFLO_PKGDATA_DIR" as a -D preprocessor define, defined to whatever $(pkgdatadir) is defined to at make time.
 AC_SUBST([AM_CPPFLAGS], ["-Wall -Wextra -DBOOST_FILESYSTEM_NO_DEPRECATED=1 -DBOOST_FILESYSTEM_VERSION=3"])
 # By default, compile C and C++ with the maximum possible debugging info and least optimization for maximum debugability.
 AC_SUBST([AM_CFLAGS], ["-ggdb3 -O0"])

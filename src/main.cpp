@@ -40,11 +40,6 @@
 #include "controlflowgraph/analysis/Analyzer.h"
 
 /**
- * Prints the versions of the various libraries we were compiled against.
- */
-static void print_build_info();
-
-/**
  * CoFlo entry point.
  * 
  * @param argc Number of command line arguments.
@@ -104,7 +99,6 @@ int main(int argc, char* argv[])
 			// Get the vars we need.
 			the_gcc = vm[CLP_USE_GCC].as<std::string>();
 			the_dot = vm[CLP_USE_DOT].as<std::string>();
-			report_output_directory = vm[CLP_OUTPUT_DIR].as<std::string>();
 			output_filename = vm[CLP_CFG_OUTPUT_FILENAME].as<std::string>();
 			cfg_verbose = vm[CLP_CFG_VERBOSE].as<bool>();
 			cfg_vertex_ids = vm[CLP_CFG_VERTEX_IDS].as<bool>();
@@ -246,9 +240,11 @@ int main(int argc, char* argv[])
 				the_analyzer->Analyze();
 			}
 
-			if(!report_output_directory.empty())
+			// Does the user want a report generated?
+			if(vm.count(CLP_OUTPUT_DIR) > 0)
 			{
 				// User wants HTML output of the CFGs of all the functions.
+				report_output_directory = vm[CLP_OUTPUT_DIR].as<std::string>();
 				ToolDot *tool_dot = new ToolDot(the_dot);
 				the_program->SetTheDot(tool_dot);
 				std::cout << "Using Dot version: " << tool_dot->GetVersion() << std::endl;

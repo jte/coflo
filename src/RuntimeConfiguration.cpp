@@ -29,6 +29,9 @@
 // Define a shorter namespace alias for boost::program_options.
 namespace po = boost::program_options;
 
+/**
+ * Prints the versions of the various libraries we were compiled against.
+ */
 static void print_build_info()
 {
 	/// @todo Should add:
@@ -130,7 +133,7 @@ void RuntimeConfiguration::ParseAllOptionSources(int argc, char* argv[])
 	(CLP_BUILD_INFO, "Print information about library versions and options used to build this program.")
 	(CLP_RESPONSE_FILE, po::value<std::string>(&response_filename), "Read command line options from file. Can also be specified with '@name'.")
 	(CLP_TEMPS_DIR, po::value< std::string >(), "The directory in which to put intermediate files during the analysis.")
-	(CLP_OUTPUT_DIR",O", po::value< std::string >()->default_value("output_dir"), "Put HTML report output in the given directory.")
+	(CLP_OUTPUT_DIR",O", po::value< std::string >(), "Put HTML report output in the given directory.")
 	;
 	preproc_options.add_options()
 	(CLP_DEFINE",D", po::value< std::vector<std::string> >(), "Define a preprocessing macro")

@@ -96,6 +96,7 @@ public:\
 	/** An accessor to return the underlying integral type.  Unfortunately there isn't */ \
 	/** any real way around this if we want to support switch statements. */ \
 	value_type as_enum() const { return m_value; };\
+	/** Returns the current value of this safe enum as a string. */ \
 	std::string asString() const { return SafeEnumBaseClass::asString(static_cast<int>(m_value)); };\
 \
 private:\
