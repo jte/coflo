@@ -16,7 +16,7 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug_utils libexttools parsers
+SUBDIRS = controlflowgraph debug_utils libexttools parsers templates
 
 # Make sure to distribute:
 # - The Doxygen configuration file.
@@ -78,7 +78,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a 
+	./libexttools/libexttools.a \
+	./templates/libtemplates.a
 
 	
 #	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
