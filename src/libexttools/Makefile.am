@@ -20,11 +20,11 @@ libexttools_a_SOURCES = ToolBase.cpp ToolBase.h \
     ToolCompiler.cpp ToolCompiler.h \
     ToolDot.cpp ToolDot.h \
     VersionNumber.cpp VersionNumber.h \
-    toollib.h toollib.c
+    toollib.cpp toollib.h
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
-# the ordinary �AM_� form of the flags variable is not automatically included in the compilation
+# the ordinary "AM_" form of the flags variable is not automatically included in the compilation
 # (however, the user form of the variable is included)."
 libexttools_a_CPPFLAGS = $(AM_CPPFLAGS)
 libexttools_a_CFLAGS = $(AM_CFLAGS)

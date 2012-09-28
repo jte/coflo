@@ -20,7 +20,7 @@
 nobase_dist_html_DATA = index.html img/loop_test_1.png
 
 # The non-generated documentation.
-EXTRA_DIST=doxygen_filter.sh MainPage.dox index.template.html
+EXTRA_DIST = doxygen_filter.sh MainPage.dox index.template.html
 
 BUILT_SOURCE = $(srcdir)/index.html
 

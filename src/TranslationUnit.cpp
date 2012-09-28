@@ -43,6 +43,7 @@
 #include "controlflowgraph/statements/Switch.h"
 
 #include "libexttools/ToolCompiler.h"
+#include "libexttools/toollib.h"
 
 #include "parsers/gcc_gimple_parser.h"
 
@@ -196,12 +197,6 @@ const std::string str_template_function_cfg = std::string(""
 		"</div>\n");
 
 
-/**
- * The "find" regex for inserting the function identifier into str_template_function_cfg.
- */
-const boost::basic_regex<char> str_template_regex_function_cfg("IDENTIFIER_FUNCTION");
-
-
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
@@ -237,8 +232,9 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
 
 		// Output the HTML for this function.
-		index_html_out << boost::regex_replace(str_template_function_cfg, str_template_regex_function_cfg, fp->GetIdentifier().c_str());
+		index_html_out << regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier().c_str());
 	}
+
 }
 
 void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,

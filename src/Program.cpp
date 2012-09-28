@@ -122,7 +122,7 @@ static const char f_html_index_head[] = ""
 		"<head>\n"
 		"    <!-- Generated @DATETIME@ by CoFlo @VERSION@ -->\n"
 		"    <meta charset=\"utf-8\">\n"
-		"    <link rel=\"stylesheet\" type=\"text/css\" href=\"index.css\" />\n"
+		"    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/index.css\" />\n"
 		"    <title>CoFlo Analysis Results</title>\n"
 		"</head>\n"
 		"";
@@ -146,12 +146,18 @@ void Program::Print(const std::string &output_path)
 		template_dir = std::string(M_STRINGIZE(COFLO_PKGDATA_DIR) "/templates");
 	}
 
+	/*
+	 * Create the report output directory structure.
+	 */
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+	mkdir((output_dir.string() + "/css").c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+	mkdir((output_dir.string() + "/js").c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+
 	
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
 	std::string index_css_template_filename = (template_dir / "css" / "index.css").generic_string();
-	std::string index_css_filename = (output_dir / "index.css").generic_string();
+	std::string index_css_filename = (output_dir / "css/index.css").generic_string();
 	std::ofstream index_html_out(index_html_filename.c_str());
 
 	std::cout << "TEMPLATE=" << index_css_template_filename << std::endl;

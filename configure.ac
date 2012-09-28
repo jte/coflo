@@ -186,6 +186,9 @@ AC_SUBST([LIBTOOL_DEPS])
 # Autotest needs autom4te, or 'missing's stub for it. 
 AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
+# We need xxd to convert the templates into C arrays.
+AM_MISSING_PROG([XXD], [xxd])
+
 
 # Check for an installed make_dparser.
 COFLO_SEARCH_PACKAGE([dparser], [dparse], [dparse], [dparse.h], [make_dparser], [/usr/local:/usr], [], [])
@@ -378,6 +381,7 @@ AC_CONFIG_FILES([Makefile
 	src/parsers/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
+	src/templates/Makefile
 	third_party/Makefile])
 AC_OUTPUT
 
