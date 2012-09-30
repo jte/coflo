@@ -25,7 +25,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<style>
 	#resizable { width: 150px; height: 150px; padding: 0.5em; }
 	#resizable h3 { text-align: center; margin: 0; }
-	.svg-cfg { display:block; /*max-width:50%;*/ }
+	.svg-cfg
+	{
+		display:block;
+		/* Center the svg in its container. */
+		margin-left:auto;
+ 		margin-right:auto;
+	}
 	
 	/*.ui-tabs .ui-tabs-hide {
     position: absolute;
@@ -37,68 +43,49 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="js/jquery-ui-1.8.24.custom.min.js"></script>
 	<script src="js/coflo.resizer.js"></script>
 	<script>
-	
-	/**
-	 * Event handler callback for fitting the svg's to the tab control.
-	 */
-	function onTabsShow(event, ui)
-	{
-		// Get the svg for this tab.
-		var svg = $(ui.panel).find(".svg-cfg");
-		
-		// Fit it to its container.
-		fitToContainer(svg, ui.panel /*".svg-cfg"*/);
-		//$( "#cfdebugout" ).text("ui.panel.id=" + ui.panel.id);
-	}
-	
 	$(function() {
-		$( "#tabs" ).tabs().bind('tabsshow', onTabsShow);
-		/*
-		$( "#tabs" ).bind('tabsshow', function(event, ui) {
-			if(true)
-			{
-				fitToContainer(".svg-cfg");
-				$( "#cfdebugout" ).text("1234");
-			}
-		});
-		*/
+		
+		function onWindowResize()
+		{
+			// Get any non-hidden tab panels.
+			var active_panels = $(".ui-tabs-panel:not(:has(.ui-tabs-hide))");
+			
+			active_panels.each(function(){
+				// Get the svg for this tab.
+				var svg = $(this).find(".svg-cfg");
+				
+				// Fit it to its container.
+				fitToContainer(svg, this);
+			});
+		}
+		
+		/**
+		 * Event handler callback for fitting the svg's to the tab control.
+		 */
+		function onTabsShow(event, ui)
+		{
+			// Get the svg for this tab.
+			var svg = $(ui.panel).find(".svg-cfg");
+			
+			// Fit it to its container.
+			fitToContainer(svg, ui.panel);
+		}
+		
+		/// Initialize the tabs.
+		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
+		$( "#tabs" ).bind("tabsshow", onTabsShow);
+		// Do the final init and activate the tabs.
+		$( "#tabs" ).tabs();
 
-		/*
-		$( ".svg-cfg" ).resizable({
-			containment: "parent",
-			maxWidth: 200
-		});
-		
-		$( ".svg-cfg" ).resizable({
-			maxWidth: 100
-		});
-		*/
-		/*
-		$( "#resizable" ).resizable({
-			aspectRatio: true;
-			containment: "parent";
-		});
-		
-		$( "#svg1" ).resizable({
-			aspectRatio: true;
-			containment: "#resizable";
-		});
-		
-		
-		
-		$( "#cfdebugout" ).html("12345");
-		*/
+		// Bind a resize handler to the window resize event.
+		$(window).resize(onWindowResize);
+
 		$( "#cfdebugbutton" ).click(function(){
 			$( "#cfdebugout" ).html( "aaa" );
 			/* $(".svg-cfg").width("100%"); */
 			fitToContainer(".svg-cfg");
 		});
 	});
-	/*
-	$(window).resize(function()
-	{
-		fitToContainer(".svg-cfg");
-	});*/
 	</script>
 </head>
 
@@ -108,11 +95,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <p>Debug info:</p>
 <p id="cfdebugout">xxxx</p>
 <button id="cfdebugbutton">Debug Button</button>
-</div>
-
-<div id="resizable" class="ui-widget-content">
-	<h3 class="ui-widget-header">Test</h3>
-	<object id="svg1" class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 </div>
 
 <div id="tabs" class="ui-tabs">

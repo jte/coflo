@@ -60,16 +60,21 @@ function fitToContainer( objects, container_obj )
 		var width_obj = intrinsic_dims.width;
 		var width_obj_container = the_obj_container.width();
 		
-		if(width_obj > width_obj_container)
+		if(width_obj_container < 10)
+		{
+			// Width is so small that nothing would be visible.  Don't resize.
+			// We'll get 0 here on at least IE9 while resizing the browser window.
+		}
+		else if(width_obj > width_obj_container)
 		{
 			/* Object is wider than its container.  Shrink it to fit. */
-			the_obj.outerWidth( width_obj_container );
+			//the_obj.outerWidth( width_obj_container );
 			
 			/// @todo Or is it better to set the width through css?
-			//the_obj.css({"width": width_obj_container});
+			the_obj.css({"width": width_obj_container});
 		}
-		
 		
 		$("#cfdebugout").text("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 	});
 }
+
