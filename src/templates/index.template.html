@@ -37,6 +37,10 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="js/jquery-ui-1.8.24.custom.min.js"></script>
 	<script src="js/coflo.resizer.js"></script>
 	<script>
+	
+	/**
+	 * Event handler callback for fitting the svg's to the tab control.
+	 */
 	function onTabsShow(event, ui)
 	{
 		// Get the svg for this tab.
@@ -46,6 +50,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		fitToContainer(svg, ui.panel /*".svg-cfg"*/);
 		//$( "#cfdebugout" ).text("ui.panel.id=" + ui.panel.id);
 	}
+	
 	$(function() {
 		$( "#tabs" ).tabs().bind('tabsshow', onTabsShow);
 		/*
