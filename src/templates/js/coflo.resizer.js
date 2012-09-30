@@ -28,19 +28,20 @@ function fitToContainer( selector )
 	the_selected_objects.each(function()
 	{
 		var the_obj = $(this);
-		var the_obj_container = $(this).parent();
+		var the_obj_container = $(this).parent().parent();
 		
-		var width_obj = the_obj.outerWidth();
-		var width_obj_container = the_obj_container.width();
+		var width_obj = the_obj.outerWidth(true);
+		var width_obj_container = the_obj_container.innerWidth();
 		
 		if(width_obj > width_obj_container)
 		{
 			/* Object is wider than its container.  Shrink it to fit. */
 			the_obj.outerWidth( width_obj_container );
+			//the_obj.css({"width": width_obj_container});
 		}
 		
 		
-		//$("#cfdebugout").text("svg2 outerWidth: " + the_obj.outerWidth() + ", svg2 container width: " + the_obj_container.innerWidth());
+		$("#cfdebugout").text("outerWidth: " + width_obj + ", container width: " + width_obj_container);
 		
 		
 		/*return true;*/

@@ -21,27 +21,38 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 	<title>Insert title here</title>
 
-	<link rel="stylesheet" type="text/css" href="css/base/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.24.custom.css">
 	<style>
 	#resizable { width: 150px; height: 150px; padding: 0.5em; }
 	#resizable h3 { text-align: center; margin: 0; }
 	.svg-cfg { display:block; /*max-width:50%;*/ }
+	
+	/*.ui-tabs .ui-tabs-hide {
+    position: absolute;
+    left: -10000px;
+	}*/
 	</style>
 	
-	<script src="js/jquery-1.8.0.js"></script>
-	<script src="js/jquery-ui.min.js"></script>
+	<script src="js/jquery-1.8.0.min.js"></script>
+	<script src="js/jquery-ui-1.8.24.custom.min.js"></script>
 	<script src="js/coflo.resizer.js"></script>
 	<script>
+	function onTabsShow(event, ui)
+	{
+		fitToContainer(".svg-cfg");
+		//$( "#cfdebugout" ).text("ui.panel.id=" + ui.panel.id);
+	}
 	$(function() {
-		$( "#tabs" ).tabs();
-		
-		$( "#tabs" ).bind('tabshow', function(event, ui) {
+		$( "#tabs" ).tabs().bind('tabsshow', onTabsShow);
+		/*
+		$( "#tabs" ).bind('tabsshow', function(event, ui) {
 			if(true)
 			{
 				fitToContainer(".svg-cfg");
 				$( "#cfdebugout" ).text("1234");
 			}
 		});
+		*/
 
 		/*
 		$( ".svg-cfg" ).resizable({
@@ -95,7 +106,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<object id="svg1" class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 </div>
 
-<div id="tabs">
+<div id="tabs" class="ui-tabs">
 	<ul>
 		<li><a href="#tabs-1">decode_switches()</a></li>
 		<li><a href="#tabs-2">die()</a></li>
@@ -103,11 +114,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	</ul>
 	<div id="tabs-1">
 		<p>Paragraph</p>
-		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 	</div>
 	<div id="tabs-2">
 		<p>die()</p>
-		<object id="svg2" class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	</div>
 	<div id="tabs-3">
 		<p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
