@@ -53,10 +53,11 @@ function fitToContainer( objects, container_obj )
 		var the_obj = $(this);
 		var the_obj_container = $(container_obj);
 		
-		var width_obj = the_obj.outerWidth(true);
+		//var width_obj = the_obj.outerWidth(true);
 		
 		// Get the real dimensions of the svg.
 		var intrinsic_dims = getIntrinsicDimensions($(this)[0]);
+		var width_obj = intrinsic_dims.width;
 		var width_obj_container = the_obj_container.width();
 		
 		if(width_obj > width_obj_container)
