@@ -23,7 +23,7 @@ BUILT_SOURCES = $(intermediate_cpp_files)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
-libtemplates_a_SOURCES = templates.h $(template_src)
+libtemplates_a_SOURCES = templates.h $(intermediate_cpp_files) $(template_src)
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
@@ -53,11 +53,11 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	:;{ \
 	echo "// Generated file, do not edit." && \
 	echo "// File generated $$(date)" && \
-	echo "const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.],_,'g)"[] = {" ; \
+	echo "extern const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.],_,'g)"[] = {" ; \
 	} > "$@.tmp" && \
 	$(XXD) -i < "$<" >> "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
-	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
+	mv "$@.tmp" "$${RELATIVE_SOURCE_NAME}.cpp"
 
 index.template.html.cpp: $(srcdir)/index.template.html
 	$(recipie_any_file_to_cpp_array)

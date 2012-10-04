@@ -173,8 +173,8 @@ void Program::Print(const std::string &output_path)
 	std::string index_html = std::string(index_template_html);
 	std::string index_css = std::string(css_index_template_css);
 
-	regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
-	regex_append_after(index_template_html, "", "");
+	index_html = regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
+	//regex_append_after(index_template_html, "", "");
 
 //	index_html_out << f_html_index_head <<
 //"\n<body>\n\
@@ -185,17 +185,19 @@ void Program::Print(const std::string &output_path)
 		tu->Print(m_the_dot, output_path, index_html);
 	}
 	
-	index_html_out << \
-"\
-</body>\n\
-</html>" << std::endl;
+	index_html_out << index_html << std::endl;
+
+//	index_html_out << \
+//"\
+//</body>\n\
+//</html>" << std::endl;
 
 	// Create the primary stylesheet from the template.
 	std::ifstream primary_css_template(index_css_template_filename.c_str());
 	std::ofstream primary_css(index_css_filename.c_str());
 
-	// Just copy it for now.
-	primary_css << primary_css_template.rdbuf();
+	/// @todo Just copy it for now.
+	primary_css << index_css << std::endl;
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
