@@ -227,9 +227,9 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		std::string png_filename;
-		png_filename = fp->GetIdentifier()+".svg";
-		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / png_filename);
+		std::string cfg_image_filename;
+		cfg_image_filename = fp->GetIdentifier()+".svg";
+		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
 
 		// Output the HTML for this function.
 		index_html_out << regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier().c_str());
