@@ -15,19 +15,26 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Program.h"
 
 #include <fstream>
 #include <iostream>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <boost/foreach.hpp>
 
-#include "Program.h"
+
 #include "TranslationUnit.h"
 //#include "RuleReachability.h"
 #include "controlflowgraph/statements/FunctionCall.h"
 #include "Function.h"
+
+// Include the templates for the output HTML, CSS, etc. files.
+#include "templates/templates.h"
+
+#include "libexttools/toollib.h"
 
 Program::Program()
 {
@@ -161,13 +168,21 @@ void Program::Print(const std::string &output_path)
 	std::ofstream index_html_out(index_html_filename.c_str());
 
 	std::cout << "TEMPLATE=" << index_css_template_filename << std::endl;
-	index_html_out << f_html_index_head <<
-"\n<body>\n\
-<h1>CoFlo Analysis Results</h1>" << std::endl;
-	
+
+	// Load the template strings.
+	std::string index_html = std::string(index_template_html);
+	std::string index_css = std::string(css_index_template_css);
+
+	regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
+	regex_append_after(index_template_html, "", "");
+
+//	index_html_out << f_html_index_head <<
+//"\n<body>\n\
+//<h1>CoFlo Analysis Results</h1>" << std::endl;
+
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		tu->Print(m_the_dot, output_path, index_html_out);
+		tu->Print(m_the_dot, output_path, index_html);
 	}
 	
 	index_html_out << \
