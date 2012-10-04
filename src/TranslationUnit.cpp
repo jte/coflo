@@ -190,9 +190,8 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 
 const std::string str_template_function_cfg = std::string(""
 		"<div id=\"tabs-TABNUMBER\">\n"
-		"<h2><a id=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
-		"	<div style=\"margin:0 auto; max-width=50%;\">\n"
-		"		<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
+		"	<h2>Control Flow Graph for IDENTIFIER_FUNCTION()</h2>\n"
+		"	<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
 		"</div>\n");
 
 
@@ -214,11 +213,11 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	index_html_out << "<p>Control Flow Graphs:\n<ul>" << std::endl;
 */
 	std::stringstream ss;
-	int i = 0;
+	int i = 1;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
+		ss.str("");
 		ss << "<li><a href=\"#tabs-" << i << "\">" << fp->GetIdentifier();
-		i++;
 		if(!fp->IsCalled())
 		{
 			ss << " (possible entry point)";
@@ -231,10 +230,15 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		cfg_image_filename = fp->GetIdentifier()+".svg";
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
 
-		// Output the HTML for this function.
+		// Output the tab panel HTML for this function.
+		ss.str("");
+		ss << i;
 		index_html_out = regex_append_after(index_html_out,
 				"<!-- TAB_PANEL_LIST -->",
-				regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier()));
+				regex_replace(regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier()),
+						"TABNUMBER",
+						ss.str()));
+		i++;
 
 //		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
 //

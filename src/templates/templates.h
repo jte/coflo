@@ -15,5 +15,5 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const char *index_template_html;
-const char *css_index_template_css;
+extern const char index_template_html[];
+extern const char css_index_template_css[];
