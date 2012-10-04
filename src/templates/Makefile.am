@@ -15,13 +15,16 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-#EXTRA_DIST = index.template.html
+# It appears we have to list the built sources in EXTRA_DIST or they get built in the build directory.
+# It's unclear why this is so.  Possibly unconnected, but "nobase_" doesn't work as a prefix to _LIBRARIES.
+intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
+template_src = $(srcdir)/index.template.html $(srcdir)/css/index.template.css
+BUILT_SOURCES = $(intermediate_cpp_files)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
-libtemplates_a_SOURCES = templates.h \
-	index.template.html.cpp
-	
+libtemplates_a_SOURCES = templates.h $(template_src)
+
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
 # the ordinary "AM_" form of the flags variable is not automatically included in the compilation
@@ -30,17 +33,34 @@ libtemplates_a_CPPFLAGS = $(AM_CPPFLAGS)
 libtemplates_a_CFLAGS = $(AM_CFLAGS)
 libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
-MOSTLYCLEANFILES = $(srcdir)/index.template.html.cpp
+# We have to manually register the built sources for cleaning.
+MOSTLYCLEANFILES = $(template_src)
 
-SUFFIXES = .html.cpp .html
+# The template files.
+#nobase_dist_pkgdata_DATA = css/index.css
+#
+#css/index.css: $(srcdir)/templates/css/index.template.css Makefile
+#	rm -f $@ $@.tmp
+#	$(MKDIR_P) templates/css
+#	srcdir=''; \
+#		test -f ./templates/css/index.template.css || srcdir=$(srcdir)/; \
+#       cp $${srcdir}templates/css/index.template.css $@.tmp
+#	mv $@.tmp $@
 
-.html.html.cpp:
-	rm -f "$@.tmp"
-	@ :;{ \
+# Makefile action to turn any input file into a file containing a '0'-terminated C++ const char array.
+recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
+	RELATIVE_SOURCE_NAME=$$(realpath --relative-to=$(srcdir) "$<") && \
+	:;{ \
 	echo "// Generated file, do not edit." && \
 	echo "// File generated $$(date)" && \
-	echo "const char "$$(basename "$@" | sed 's/\./_/'g)"[] = {" ; \
-	} > "$@.tmp"
-	$(XXD) -i < "$<" >> "$@.tmp"
-	echo ', 0 };' >> "$@.tmp"
-	mv "$@.tmp" "$@"
+	echo "const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.],_,'g)"[] = {" ; \
+	} > "$@.tmp" && \
+	$(XXD) -i < "$<" >> "$@.tmp" && \
+	echo ', 0 };' >> "$@.tmp" && \
+	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
+
+index.template.html.cpp: $(srcdir)/index.template.html
+	$(recipie_any_file_to_cpp_array)
+	
+css/index.template.css.cpp: $(srcdir)/css/index.template.css
+	$(recipie_any_file_to_cpp_array)

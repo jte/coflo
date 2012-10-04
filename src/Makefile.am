@@ -25,17 +25,6 @@ EXTRA_DIST = Doxyfile coflo.conf.in
 
 # The /etc/coflo.conf file.
 dist_sysconf_DATA = coflo.conf
-# The template files.
-nobase_dist_pkgdata_DATA = templates/css/index.css
-
-templates/css/index.css: $(srcdir)/templates/css/index.template.css Makefile
-	rm -f $@ $@.tmp
-	$(MKDIR_P) templates/css
-	srcdir=''; \
-		test -f ./templates/css/index.template.css || srcdir=$(srcdir)/; \
-        cp $${srcdir}templates/css/index.template.css $@.tmp
-	mv $@.tmp $@
-
 
 # Source files common to both the normal CoFlo and the coflotest executables.
 COMMONSOURCES = Function.cpp Function.h \
