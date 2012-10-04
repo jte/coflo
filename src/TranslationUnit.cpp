@@ -181,13 +181,6 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 /**
  * Template for HTML <div> for the function CFG image, with an <h2> title.
  */
-/*const std::string str_template_function_cfg = std::string(""
-		"<h2><a id=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
-		"<div>\n"
-		"    <embed class=\"max_width center\" src=\"IDENTIFIER_FUNCTION.svg\" alt=\"Control flow graph for IDENTIFIER_FUNCTION()\" type=\"image/svg+xml\"/>\n"
-		"</div>\n");
-*/
-
 const std::string str_template_function_cfg = std::string(""
 		"<div id=\"tabs-TABNUMBER\">\n"
 		"	<h2>Control Flow Graph for IDENTIFIER_FUNCTION()</h2>\n"
