@@ -189,15 +189,14 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 */
 
 const std::string str_template_function_cfg = std::string(""
+		"<div id=\"tabs-TABNUMBER\">\n"
 		"<h2><a id=\"IDENTIFIER_FUNCTION\">Control Flow Graph for IDENTIFIER_FUNCTION()</a></h2>\n"
-		"<div style=\"margin:0 auto; max-width=600px;\">\n"
 		"	<div style=\"margin:0 auto; max-width=50%;\">\n"
-		"		<object style=\"display:block; width:100%;\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
-		"	</div>\n"
+		"		<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
 		"</div>\n");
 
 
-void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_out)
+void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::string & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
@@ -210,30 +209,52 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	
 	// Create filenames for the index and primary css files.
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
-	
+/*
 	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
 	index_html_out << "<p>Control Flow Graphs:\n<ul>" << std::endl;
+*/
+	std::stringstream ss;
+	int i = 0;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
-		
+		ss << "<li><a href=\"#tabs-" << i << "\">" << fp->GetIdentifier();
+		i++;
 		if(!fp->IsCalled())
 		{
-			index_html_out << " (possible entry point)";
+			ss << " (possible entry point)";
 		}
-		index_html_out << "</li>" << std::endl;
-	}
-	index_html_out << "</ul>\n</p>" << std::endl;
-	
-	BOOST_FOREACH(Function* fp, m_function_defs)
-	{
+		ss << "</a></li>\n";
+
+		index_html_out = regex_append_after(index_html_out, "<!-- TAB_LIST -->", ss.str());
+
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
 
 		// Output the HTML for this function.
-		index_html_out << regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier().c_str());
+		index_html_out = regex_append_after(index_html_out,
+				"<!-- TAB_PANEL_LIST -->",
+				regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier()));
+
+//		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
+//
+//		if(!fp->IsCalled())
+//		{
+//			index_html_out << " (possible entry point)";
+//		}
+//		index_html_out << "</li>" << std::endl;
 	}
+//	index_html_out << "</ul>\n</p>" << std::endl;
+	
+//	BOOST_FOREACH(Function* fp, m_function_defs)
+//	{
+//		std::string cfg_image_filename;
+//		cfg_image_filename = fp->GetIdentifier()+".svg";
+//		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
+//
+//		// Output the HTML for this function.
+//		/*index_html_out*/ ss << regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier().c_str());
+//	}
 
 }
 

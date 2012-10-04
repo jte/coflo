@@ -75,7 +75,7 @@ public:
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 
-	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
+	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::string & index_html_stream);
 	
 	std::string GetFilePath() const { return m_source_filename.string(); };
 	
