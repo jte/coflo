@@ -23,7 +23,8 @@ BUILT_SOURCES = $(intermediate_cpp_files)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
-libtemplates_a_SOURCES = templates.h $(intermediate_cpp_files) $(template_src)
+libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp \
+	$(intermediate_cpp_files) $(template_src)
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
