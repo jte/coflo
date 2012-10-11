@@ -45,6 +45,8 @@
 #include "libexttools/ToolCompiler.h"
 #include "libexttools/toollib.h"
 
+#include "templates/FileTemplate.h"
+
 #include "parsers/gcc_gimple_parser.h"
 
 using namespace boost;
@@ -188,7 +190,7 @@ const std::string str_template_function_cfg = std::string(""
 		"</div>\n");
 
 
-void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::string & index_html_out)
+void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, FileTemplate & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
@@ -217,7 +219,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		}
 		ss << "</a></li>\n";
 
-		index_html_out = regex_append_after(index_html_out, "<!-- TAB_LIST -->", ss.str());
+		index_html_out.regex_append_after("<!-- TAB_LIST -->", ss.str());
 
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
@@ -226,11 +228,12 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		// Output the tab panel HTML for this function.
 		ss.str("");
 		ss << i;
-		index_html_out = regex_append_after(index_html_out,
-				"<!-- TAB_PANEL_LIST -->",
-				regex_replace(regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier()),
-						"TABNUMBER",
-						ss.str()));
+		FileTemplate function_cfg(str_template_function_cfg);
+		function_cfg.regex_replace("IDENTIFIER_FUNCTION", fp->GetIdentifier());
+		function_cfg.regex_replace("TABNUMBER",	ss.str());
+		function_cfg.Apply();
+		index_html_out.regex_append_after("<!-- TAB_PANEL_LIST -->", function_cfg.str());
+
 		i++;
 
 //		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";

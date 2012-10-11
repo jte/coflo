@@ -44,6 +44,12 @@ public:
 			m_regex_to_match = new boost::regex(regex_to_match);
 			m_replacement = new std::string(replacement);
 		};
+		modifier_base_t(const char* regex_to_match, const char* replacement)
+		{
+			/// @todo Make this exception-safe.
+			m_regex_to_match = new boost::regex(regex_to_match);
+			m_replacement = new std::string(replacement);
+		};
 		~modifier_base_t() { delete m_replacement; delete m_regex_to_match; };
 
 		virtual void Apply(std::string &text) = 0;
@@ -53,12 +59,16 @@ public:
 	};
 	class simple_replace_t : public modifier_base_t
 	{
-		public: simple_replace_t(const std::string& regex_to_match, const std::string& replacement) : modifier_base_t(regex_to_match, replacement) {};
+	public:
+		simple_replace_t(const std::string& regex_to_match, const std::string& replacement)
+			: modifier_base_t(regex_to_match, replacement) {};
 		virtual void Apply(std::string &text);
 	};
 	class append_after_t : public modifier_base_t
 	{
-		public: append_after_t(const std::string& regex_to_match, const std::string& replacement) : modifier_base_t(regex_to_match, replacement) {};
+	public:
+		append_after_t(const std::string& regex_to_match, const std::string& replacement)
+			: modifier_base_t("("+regex_to_match+")", replacement+"\n$1") {};
 		virtual void Apply(std::string &text);
 	};
 	///@}
@@ -77,9 +87,16 @@ public:
 	FileTemplate& regex_replace(const std::string &regex_to_match, const std::string &replacement);
 	FileTemplate& regex_append_after(const std::string &regex_to_match, const std::string &replacement);
 
+	void Apply();
+
 	std::ostream& InsertionHelper(std::ostream& os) const;
 
+	std::string str() const { return m_current_file_contents; };
+
 private:
+
+
+
 	/// A string containing the contents of the file.
 	std::string m_current_file_contents;
 
@@ -87,7 +104,7 @@ private:
 	std::vector<modifier_base_t*> m_filter_list;
 };
 
-std::ostream& operator<<(std::ostream& os, const FileTemplate &ft)
+inline std::ostream& operator<<(std::ostream& os, const FileTemplate &ft)
 {
 	return ft.InsertionHelper(os);
 }

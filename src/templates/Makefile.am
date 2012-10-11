@@ -20,6 +20,7 @@
 intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
 template_src = $(srcdir)/index.template.html $(srcdir)/css/index.template.css
 BUILT_SOURCES = $(intermediate_cpp_files)
+EXTRA_DIST = $(intermediate_cpp_files)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
