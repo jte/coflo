@@ -33,6 +33,7 @@
 
 // Include the templates for the output HTML, CSS, etc. files.
 #include "templates/templates.h"
+#include "templates/FileTemplate.h"
 
 #include "libexttools/toollib.h"
 
@@ -172,8 +173,12 @@ void Program::Print(const std::string &output_path)
 	// Load the template strings.
 	std::string index_html = std::string(index_template_html);
 	std::string index_css = std::string(css_index_template_css);
+	FileTemplate index_htmlt(index_html);
+	FileTemplate index_csst(index_css);
 
-	index_html = regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
+	index_htmlt.regex_replace("<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
+	//index_htmlt.regex_append_after();
+	///index_html = regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
 	//regex_append_after(index_template_html, "", "");
 
 //	index_html_out << f_html_index_head <<
@@ -182,10 +187,12 @@ void Program::Print(const std::string &output_path)
 
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
-		tu->Print(m_the_dot, output_path, index_html);
+		tu->Print(m_the_dot, output_path, index_htmlt);
 	}
 	
-	index_html_out << index_html << std::endl;
+	index_htmlt.Apply();
+
+	index_html_out << index_htmlt << std::endl;
 
 //	index_html_out << \
 //"\

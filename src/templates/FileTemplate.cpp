@@ -19,18 +19,21 @@
 
 #include "FileTemplate.h"
 
+#include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 
-#include "../libexttools/toollib.h"
+//#include "../libexttools/toollib.h"
 
 void FileTemplate::simple_replace_t::Apply(std::string &text)
 {
-	::regex_replace(text, (*m_regex_to_match).str(), *m_replacement);
+	//::regex_replace(text, (*m_regex_to_match).str(), *m_replacement);
+	text = boost::regex_replace(text, *m_regex_to_match, *m_replacement);
 }
 
 void FileTemplate::append_after_t::Apply(std::string &text)
 {
-	::regex_append_after(text, (*m_regex_to_match).str(), *m_replacement);
+	//::regex_append_after(text, (*m_regex_to_match).str(), *m_replacement);
+	text = boost::regex_replace(text, *m_regex_to_match, *m_replacement);
 }
 
 
@@ -42,7 +45,7 @@ FileTemplate::FileTemplate()
 
 FileTemplate::~FileTemplate()
 {
-	// TODO Auto-generated destructor stub
+	/// @todo Memeory leak, delete all members of m_filter_list.
 }
 
 FileTemplate& FileTemplate::regex_replace(const std::string& regex_to_match,
@@ -67,16 +70,17 @@ FileTemplate& FileTemplate::regex_append_after(const std::string& regex_to_match
 
 std::ostream& FileTemplate::InsertionHelper(std::ostream& os) const
 {
-	// Copy the string.
-	std::string s;
-
-	// Apply the filters in sequence.
-	BOOST_FOREACH(modifier_base_t *m, m_filter_list)
-	{
-		m->Apply(s);
-	}
-
-	os << s;
+	// Stream out the resulting string.
+	os << m_current_file_contents;
 
 	return os;
+}
+
+void FileTemplate::Apply()
+{
+	// Apply all attached filters in sequence.
+	BOOST_FOREACH(modifier_base_t *m, m_filter_list)
+	{
+		m->Apply(m_current_file_contents);
+	}
 }
