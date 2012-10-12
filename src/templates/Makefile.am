@@ -17,7 +17,7 @@
 
 # It appears we have to list the built sources in EXTRA_DIST or they get built in the build directory.
 # It's unclear why this is so.  Possibly unconnected, but "nobase_" doesn't work as a prefix to _LIBRARIES.
-intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
+intermediate_cpp_files = $(srcdir)/index.template.html.cpp $(srcdir)/css/index.template.css.cpp
 template_src = $(srcdir)/index.template.html $(srcdir)/css/index.template.css
 BUILT_SOURCES = $(intermediate_cpp_files)
 EXTRA_DIST = $(intermediate_cpp_files)
@@ -61,8 +61,8 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
 	mv "$@.tmp" "$${RELATIVE_SOURCE_NAME}.cpp"
 
-index.template.html.cpp: $(srcdir)/index.template.html
+$(srcdir)/index.template.html.cpp: $(srcdir)/index.template.html
 	$(recipie_any_file_to_cpp_array)
 	
-css/index.template.css.cpp: $(srcdir)/css/index.template.css
+$(srcdir)/css/index.template.css.cpp: $(srcdir)/css/index.template.css
 	$(recipie_any_file_to_cpp_array)

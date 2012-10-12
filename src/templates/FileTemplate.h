@@ -64,10 +64,10 @@ public:
 			: modifier_base_t(regex_to_match, replacement) {};
 		virtual void Apply(std::string &text);
 	};
-	class append_after_t : public modifier_base_t
+	class insert_before : public modifier_base_t
 	{
 	public:
-		append_after_t(const std::string& regex_to_match, const std::string& replacement)
+		insert_before(const std::string& regex_to_match, const std::string& replacement)
 			: modifier_base_t("("+regex_to_match+")", replacement+"\n$1") {};
 		virtual void Apply(std::string &text);
 	};
