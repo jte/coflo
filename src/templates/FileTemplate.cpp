@@ -22,17 +22,14 @@
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 
-//#include "../libexttools/toollib.h"
 
 void FileTemplate::simple_replace_t::Apply(std::string &text)
 {
-	//::regex_replace(text, (*m_regex_to_match).str(), *m_replacement);
 	text = boost::regex_replace(text, *m_regex_to_match, *m_replacement);
 }
 
-void FileTemplate::append_after_t::Apply(std::string &text)
+void FileTemplate::insert_before::Apply(std::string &text)
 {
-	//::regex_append_after(text, (*m_regex_to_match).str(), *m_replacement);
 	text = boost::regex_replace(text, *m_regex_to_match, *m_replacement);
 }
 
@@ -62,7 +59,7 @@ FileTemplate& FileTemplate::regex_append_after(const std::string& regex_to_match
 		const std::string& replacement)
 {
 	// Append a simple replacement functor to the modifier list.
-	append_after_t *r = new append_after_t(regex_to_match, replacement);
+	insert_before *r = new insert_before(regex_to_match, replacement);
 	m_filter_list.push_back(r);
 
 	return *this;
