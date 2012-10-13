@@ -15,17 +15,19 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-# It appears we have to list the built sources in EXTRA_DIST or they get built in the build directory.
-# It's unclear why this is so.  Possibly unconnected, but "nobase_" doesn't work as a prefix to _LIBRARIES.
-intermediate_cpp_files = $(srcdir)/index.template.html.cpp $(srcdir)/css/index.template.css.cpp
-template_src = $(srcdir)/index.template.html $(srcdir)/css/index.template.css
+#SUFFIXES = .html .css template_html.cpp template_css.cpp
+
+# The template source files.  These will be converted to C++ arrays and compiled into the binary.
+templates = index.template.html css/index.template.css
+
+intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
 BUILT_SOURCES = $(intermediate_cpp_files)
-EXTRA_DIST = $(intermediate_cpp_files)
+EXTRA_DIST = $(templates)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp \
-	$(intermediate_cpp_files) $(template_src)
+	 $(intermediate_cpp_files)
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
@@ -36,7 +38,7 @@ libtemplates_a_CFLAGS = $(AM_CFLAGS)
 libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
 # We have to manually register the built sources for cleaning.
-MOSTLYCLEANFILES = $(template_src)
+MOSTLYCLEANFILES = $(intermediate_cpp_files)
 
 # The template files.
 #nobase_dist_pkgdata_DATA = css/index.css
@@ -61,8 +63,9 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
 	mv "$@.tmp" "$${RELATIVE_SOURCE_NAME}.cpp"
 
-$(srcdir)/index.template.html.cpp: $(srcdir)/index.template.html
+	
+index.template.html.cpp: $(srcdir)/index.template.html
 	$(recipie_any_file_to_cpp_array)
 	
-$(srcdir)/css/index.template.css.cpp: $(srcdir)/css/index.template.css
+css/index.template.css.cpp: $(srcdir)/css/index.template.css
 	$(recipie_any_file_to_cpp_array)

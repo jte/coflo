@@ -177,14 +177,8 @@ void Program::Print(const std::string &output_path)
 	FileTemplate index_csst(index_css);
 
 	index_htmlt.regex_replace("<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
-	//index_htmlt.regex_append_after();
-	///index_html = regex_replace(index_template_html, "<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
-	//regex_append_after(index_template_html, "", "");
 
-//	index_html_out << f_html_index_head <<
-//"\n<body>\n\
-//<h1>CoFlo Analysis Results</h1>" << std::endl;
-
+	// Generate the resulting report files and add the appropriate markup for each translation unit.
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
 	{
 		tu->Print(m_the_dot, output_path, index_htmlt);
@@ -194,17 +188,14 @@ void Program::Print(const std::string &output_path)
 
 	index_html_out << index_htmlt << std::endl;
 
-//	index_html_out << \
-//"\
-//</body>\n\
-//</html>" << std::endl;
-
 	// Create the primary stylesheet from the template.
 	std::ifstream primary_css_template(index_css_template_filename.c_str());
 	std::ofstream primary_css(index_css_filename.c_str());
 
 	/// @todo Just copy it for now.
 	primary_css << index_css << std::endl;
+
+	// Copy the JavaScript and supporting css verbatim.
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)

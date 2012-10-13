@@ -19,6 +19,8 @@
 
 #include "toollib.h"
 
+#include <fstream>
+
 #include <boost/regex.hpp>
 
 std::string regex_replace(const std::string &input_string,
@@ -37,4 +39,14 @@ std::string regex_append_after(const std::string& input_string,
 	boost::basic_regex<char> matcher("(" + regex_to_match + ")");
 
 	return regex_replace(input_string, matcher, replacement+"\n$1");
+}
+
+void fcopy(const std::string& from, const std::string& to)
+{
+	// Open the two files.
+	std::ifstream from_stream(from.c_str());
+	std::ofstream to_stream(to.c_str());
+
+	// Do the copy.
+	to_stream << from_stream << std::endl;
 }

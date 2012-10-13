@@ -28,5 +28,7 @@ std::string regex_append_after(const std::string &input_string,
 		const std::string &regex_to_match,
 		const std::string &replacement);
 
+void fcopy(const std::string &from, const std::string &to);
+
 #endif // TOOLLIB_H
 
