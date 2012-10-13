@@ -21,13 +21,11 @@
 templates = index.template.html css/index.template.css
 
 intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
-BUILT_SOURCES = $(intermediate_cpp_files)
-EXTRA_DIST = $(templates)
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp \
-	 $(intermediate_cpp_files)
+	$(intermediate_cpp_files) $(templates)
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
@@ -61,11 +59,11 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	} > "$@.tmp" && \
 	$(XXD) -i < "$<" >> "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
-	mv "$@.tmp" "$${RELATIVE_SOURCE_NAME}.cpp"
+	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 
 	
-index.template.html.cpp: $(srcdir)/index.template.html
+$(srcdir)/index.template.html.cpp: $(srcdir)/index.template.html Makefile
 	$(recipie_any_file_to_cpp_array)
 	
-css/index.template.css.cpp: $(srcdir)/css/index.template.css
+$(srcdir)/css/index.template.css.cpp: $(srcdir)/css/index.template.css Makefile
 	$(recipie_any_file_to_cpp_array)
