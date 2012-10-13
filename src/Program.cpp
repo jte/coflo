@@ -171,11 +171,13 @@ void Program::Print(const std::string &output_path)
 	std::cout << "TEMPLATE=" << index_css_template_filename << std::endl;
 
 	// Load the template strings.
-	std::string index_html = std::string(index_template_html);
 	std::string index_css = std::string(css_index_template_css);
-	FileTemplate index_htmlt(index_html);
-	FileTemplate index_csst(index_css);
+	FileTemplate index_htmlt(index_template_html);
+	FileTemplate index_csst(css_index_template_css);
 
+	// Remove the sections which are for development only.
+	index_htmlt.regex_replace("(?s:<!-- REMOVE_START.*?REMOVE_END -->)", "<!-- REMOVED DEV TEXT -->");
+	// Insert the title.
 	index_htmlt.regex_replace("<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
 
 	// Generate the resulting report files and add the appropriate markup for each translation unit.
@@ -196,6 +198,8 @@ void Program::Print(const std::string &output_path)
 	primary_css << index_css << std::endl;
 
 	// Copy the JavaScript and supporting css verbatim.
+	std::ofstream js((output_dir / "js/coflo.resizer.js").generic_string().c_str());
+	js << js_coflo_resizer_js << std::endl;
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)

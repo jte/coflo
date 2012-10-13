@@ -15,5 +15,10 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file Header containing declarations for the template files.
+ */
+
 extern const char index_template_html[];
 extern const char css_index_template_css[];
+extern const char js_coflo_resizer_js[];
