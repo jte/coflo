@@ -68,9 +68,8 @@ function fitToContainer( objects, container_obj )
 		else if(width_obj > width_obj_container)
 		{
 			/* Object is wider than its container.  Shrink it to fit. */
+			/// @todo Not sure which way is better.
 			//the_obj.outerWidth( width_obj_container );
-			
-			/// @todo Or is it better to set the width through css?
 			the_obj.css({"width": width_obj_container});
 		}
 		

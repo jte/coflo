@@ -15,17 +15,23 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-#SUFFIXES = .html .css template_html.cpp template_css.cpp
+SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp
 
 # The template source files.  These will be converted to C++ arrays and compiled into the binary.
-templates = index.template.html css/index.template.css
+templates = index.template.html \
+	css/index.template.css \
+	js/coflo.resizer.js
 
-intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp
+intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp js/coflo.resizer.js.cpp
 
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp \
-	$(intermediate_cpp_files) $(templates)
+	$(intermediate_cpp_files)
+# Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
+# for the libtemplates.a library.  If we do so, Automake generates dependency tracking files (*.Po) in the source tree
+# for them.  I haven't been able to find a better workaround. 
+EXTRA_DIST = $(templates)
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,
@@ -36,18 +42,8 @@ libtemplates_a_CFLAGS = $(AM_CFLAGS)
 libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
 # We have to manually register the built sources for cleaning.
-MOSTLYCLEANFILES = $(intermediate_cpp_files)
-
-# The template files.
-#nobase_dist_pkgdata_DATA = css/index.css
-#
-#css/index.css: $(srcdir)/templates/css/index.template.css Makefile
-#	rm -f $@ $@.tmp
-#	$(MKDIR_P) templates/css
-#	srcdir=''; \
-#		test -f ./templates/css/index.template.css || srcdir=$(srcdir)/; \
-#       cp $${srcdir}templates/css/index.template.css $@.tmp
-#	mv $@.tmp $@
+## @todo This should really be maintainer clean.
+MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
 
 # Makefile action to turn any input file into a file containing a '0'-terminated C++ const char array.
 recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
@@ -61,9 +57,12 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
 	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 
-	
-$(srcdir)/index.template.html.cpp: $(srcdir)/index.template.html Makefile
+
+.css.css.cpp:
+	$(recipie_any_file_to_cpp_array)
+
+.html.html.cpp:
 	$(recipie_any_file_to_cpp_array)
 	
-$(srcdir)/css/index.template.css.cpp: $(srcdir)/css/index.template.css Makefile
+.js.js.cpp:
 	$(recipie_any_file_to_cpp_array)
