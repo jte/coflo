@@ -20,9 +20,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<meta charset="utf-8">
 
 	<title>Insert title here</title>
+	
+	<!-- Dojo -->
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
 
 	<!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"> -->
 	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="index.template.css" media="screen">
 	<style>
 	.svg-cfg
 	{
@@ -135,19 +139,47 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			/* $(".svg-cfg").width("100%"); */
 			fitToContainer(".svg-cfg");
 		});
+		
+		$( ".treectl1" ).accordion({
+			heightStyle: "content"
+		});
 	});
 	</script>
 </head>
 
 <body>
 
-<p><!-- P_TITLE --></p>
+<p><h1>Insert Header Paragraph Here</h1></p>
 
+<!-- REMOVE_START -->
 <div>
 <p>Debug info:</p>
 <p id="cfdebugout">xxxx</p>
 <button id="cfdebugbutton">Debug Button</button>
 </div>
+
+<div class="treectl1">
+	<h3>File1</h3>
+	<div>
+		<p>Content1</p>
+	</div>
+	<h3>File2</h3>
+	<div class="treectl1">
+		<h3>File3</h3>
+		<div>
+			<p>Content1</p>
+		</div>
+		<h3>File4</h3>
+		<div>
+			<p>Content2</p>
+		</div>
+	</div>
+</div>
+
+<div class="panel1">
+</div>
+
+<!-- REMOVE_END -->
 
 <div id="tabs" class="ui-tabs">
 	<ul>
@@ -179,6 +211,12 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- TAB_PANEL_LIST_START -->	
 	<!-- TAB_PANEL_LIST -->
 </div>
+
+
+	<!-- load dojo and provide config via data attribute -->
+	<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"
+	        data-dojo-config="async: 1, parseOnLoad: 1">
+	</script>
 
 </body>
 </html>

@@ -178,7 +178,7 @@ void Program::Print(const std::string &output_path)
 	// Remove the sections which are for development only.
 	index_htmlt.regex_replace("(?s:<!-- REMOVE_START.*?REMOVE_END -->)", "<!-- REMOVED DEV TEXT -->");
 	// Insert the title.
-	index_htmlt.regex_replace("<!-- P_TITLE -->", "<h1>CoFlo Analysis Results</h1>");
+	index_htmlt.regex_replace("<h1>Insert Header Paragraph Here</h1>", "<h1>CoFlo Analysis Results</h1>");
 
 	// Generate the resulting report files and add the appropriate markup for each translation unit.
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)

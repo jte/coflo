@@ -211,6 +211,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	int i = 1;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
+		// Generate the tab list item for this function.
 		ss.str("");
 		ss << "<li><a href=\"#tabs-" << i << "\">" << fp->GetIdentifier();
 		if(!fp->IsCalled())
@@ -219,7 +220,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		}
 		ss << "</a></li>\n";
 
-		index_html_out.regex_append_after("<!-- TAB_LIST -->", ss.str());
+		index_html_out.regex_insert_before("<!-- TAB_LIST -->", ss.str());
 
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
@@ -232,30 +233,10 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		function_cfg.regex_replace("IDENTIFIER_FUNCTION", fp->GetIdentifier());
 		function_cfg.regex_replace("TABNUMBER",	ss.str());
 		function_cfg.Apply();
-		index_html_out.regex_append_after("<!-- TAB_PANEL_LIST -->", function_cfg.str());
+		index_html_out.regex_insert_before("<!-- TAB_PANEL_LIST -->", function_cfg.str());
 
 		i++;
-
-//		index_html_out << "<li><a href=\"#"+fp->GetIdentifier()+"\">"+fp->GetIdentifier()+"</a>";
-//
-//		if(!fp->IsCalled())
-//		{
-//			index_html_out << " (possible entry point)";
-//		}
-//		index_html_out << "</li>" << std::endl;
 	}
-//	index_html_out << "</ul>\n</p>" << std::endl;
-	
-//	BOOST_FOREACH(Function* fp, m_function_defs)
-//	{
-//		std::string cfg_image_filename;
-//		cfg_image_filename = fp->GetIdentifier()+".svg";
-//		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
-//
-//		// Output the HTML for this function.
-//		/*index_html_out*/ ss << regex_replace(str_template_function_cfg, "IDENTIFIER_FUNCTION", fp->GetIdentifier().c_str());
-//	}
-
 }
 
 void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,
