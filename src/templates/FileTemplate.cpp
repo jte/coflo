@@ -55,7 +55,7 @@ FileTemplate& FileTemplate::regex_replace(const std::string& regex_to_match,
 	return *this;
 }
 
-FileTemplate& FileTemplate::regex_append_after(const std::string& regex_to_match,
+FileTemplate& FileTemplate::regex_insert_before(const std::string& regex_to_match,
 		const std::string& replacement)
 {
 	// Append a simple replacement functor to the modifier list.

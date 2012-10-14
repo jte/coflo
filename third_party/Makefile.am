@@ -27,29 +27,13 @@ SUFFIXES = .tar.bz2 .tar.gz .tar
 # Directory trees we need to delete on a "make clean".
 CLEAN_LOCAL_DIRS = 
 
-if COFLO_USE_BUILT_BOOST
-# Build the Boost library directly from a tarball.
-# Some Boost lib directory variables.
-BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
-BOOST_LOCAL = ./boost_local
-BOOST_STAGE_DIR = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage
-BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
-BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
-
-BUILTSOURCES_BOOST = stamp_boost_src_installed
-MOSTLYCLEANFILES_BOOST = stamp_boost_src_built stamp_boost_src_installed
-CLEANFILES_BOOST = stamp_boost_src_configured
-
-# Remove the untarred Boost source tree on "make clean". 
-CLEAN_LOCAL_DIRS += $(builddir)/$(BOOST_TARBALL_DIRNAME)
-
-endif
-
 
 if !HAVE_SYSTEM_MAKE_DPARSER
+###
+### The Automake rules for building DParser from an upstream tarball.
+###
 
 # DParser directory vars.
-#$(abs_builddir)
 DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
 
@@ -74,22 +58,6 @@ LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 BUILTSOURCES_DPARSER = stamp_dparser_src_installed
 MOSTLYCLEANFILES_DPARSER = stamp_dparser_src_built stamp_dparser_src_installed
 CLEANFILES_DPARSER = stamp_dparser_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
-endif
-
-# Force DParser and Boost to be rebuilt. 
-BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST)
-
-# Delete all the stamps except for the untarring ones for any clean.
-MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST)
-	 
-# Additional files to clean during a "make clean".
-CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 
-
-
-if !HAVE_SYSTEM_MAKE_DPARSER
-###
-### The Automake rules for building DParser from an upstream tarball.
-###
 
 # Untar the DParser source tarball and create a stamp file indicating that we did it.
 stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL)
@@ -117,6 +85,22 @@ if COFLO_USE_BUILT_BOOST
 ### The Automake rules for building static versions of the Boost libraries we need from an upstream source tarball.
 ###
 
+# The Boost build-from-tarball process is untarred->configured->built->installed.
+
+# Some Boost lib directory variables.
+BOOST_BUILD_DIR = $(abs_builddir)/boost_build_dir
+BOOST_LOCAL = ./boost_local
+BOOST_STAGE_DIR = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage
+BOOST_LOCAL_LIB = $(abs_builddir)/$(BOOST_TARBALL_DIRNAME)/stage/lib
+BOOST_LOCAL_INCLUDE = $(BOOST_LOCAL)/include
+
+BUILTSOURCES_BOOST = stamp_boost_src_installed
+MOSTLYCLEANFILES_BOOST = stamp_boost_src_built stamp_boost_src_installed
+CLEANFILES_BOOST = stamp_boost_src_configured stamp_boost_src_untarred
+
+# Remove the untarred Boost source tree on "make clean". 
+CLEAN_LOCAL_DIRS += $(builddir)/$(BOOST_TARBALL_DIRNAME)
+
 # @todo Determine if this should be single or multi from configure.
 COFLO_BOOST_THREADING = single
 COFLO_BOOST_BJAM_JOBS = -j$(CPU_COUNT)
@@ -128,11 +112,11 @@ COFLO_BOOST_VARIANT = debug
 #	bunzip2 --keep --force "$<"
 
 stamp_boost_src_untarred: $(FILE_PATH_BOOST_SOURCE_TARBALL)
-	rm -f $@-temp && echo "`date -u`" > $@-temp
+	rm -f $@-temp
 	@echo "In directory $$(pwd), attempting to untar \"$<\""
 	@: 'Untar the Boost source distro into our build directory.'
 	tar -xaf "$<"
-	mv $@-temp $@
+	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 stamp_boost_src_configured: stamp_boost_src_untarred
 	rm -f $@-temp
@@ -140,14 +124,6 @@ stamp_boost_src_configured: stamp_boost_src_untarred
 	cd $(BOOST_TARBALL_DIRNAME) && ./bootstrap.sh --prefix="../$(BOOST_LOCAL)" --with-libraries="$(COFLO_BOOST_LIBS)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
-
-#		compileflags="$(libboost_static_rollup_a_CPPFLAGS) $(CPPFLAGS)" \
-#		cflags="$(libboost_static_rollup_a_CXXFLAGS) $(CXXFLAGS)" \
-#		cxxflags="$(libboost_static_rollup_a_CXXFLAGS) $(CXXFLAGS)" \
-#		linkflags="$(libboost_static_rollup_a_LDFLAGS) $(LDFLAGS)"
-# $(COFLO_BOOST_LIBS_WITH) \		#
-#
-	
 stamp_boost_src_installed: stamp_boost_src_configured
 	rm -f $@-temp
 	@echo "Building Boost with b2...";
@@ -164,6 +140,16 @@ stamp_boost_src_installed: stamp_boost_src_configured
 #	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 endif
+
+
+# Force DParser and Boost to be rebuilt. 
+BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST)
+
+# Delete all the stamps except for the untarring ones for any clean.
+MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST)
+	 
+# Additional files to clean during a "make clean".
+CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 
 
 # Hook "mostlyclean" to avoid rm'ing the untarred boost tarball when we don't have to.
 mostlyclean-local:
