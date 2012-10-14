@@ -24,8 +24,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"> -->
 	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css">
 	<style>
-	#resizable { width: 150px; height: 150px; padding: 0.5em; }
-	#resizable h3 { text-align: center; margin: 0; }
 	.svg-cfg
 	{
 		display:block;
@@ -34,8 +32,47 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
  		margin-right:auto;
 	}
 	</style>
+	<style>
+	<!-- CSS styles for left-hand-side vertical tabs. -->
+	.ui-tabs-vertical { position: relative; padding-left: 6.5em; }
+	.ui-tabs-vertical .ui-tabs-nav
+	{
+		/* Use absolute positioning to make the tab gutter extend the entire height of the tab column. */
+		position: absolute;
+		left: 0.25em;
+		top: 0.25em;
+		bottom: 0.25em;
+		width: 12em;
+		padding: 0.2em 0 0.2em 0.2em;
+	}
+	.ui-tabs-vertical .ui-tabs-nav li 
+	{
+		clear: left;
+		right: 1px;
+		width: 100%;
+		border-right-style: none;
+		border-bottom-width: 1px !important;
+	}
+	.ui-tabs-vertical .ui-tabs-nav li a
+	{
+		float: right;
+		width: 100%;
+		text-align: right;
+	}
+	.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active
+	{
+		/*padding-bottom: 0;
+		padding-right: .1em;*/
+		border-right-width: 1px;
+		border-right-style: solid;
+		border-right-color: transparent;
+		/*border-right: 1px solid transparent;*/
+	}
+	.ui-tabs-vertical .ui-tabs-panel { padding: 1em; margin-left: 12em; }
+	</style>
 	
 	<!-- 
+	@todo Put this or something like it back when we use local copies of these libraries.
 	<script src="js/jquery-1.8.2.js"></script>
 	<script src="js/jquery-ui-1.9.0.custom.min.js"></script>
 	-->
@@ -45,17 +82,24 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script>
 	$(function() {
 		
+		/**
+		 * Event handler callback for fitting the active svg to the tab control when the window is resized.
+		 */
 		function onWindowResize()
 		{
-			// Get any non-hidden tab panels.
-			var active_panels = $(".ui-tabs-panel:not(:has(.ui-tabs-hide))");
+			// Get all tab controls.
+			var tab_ctls = $("#tabs");
 			
-			active_panels.each(function(){
-				// Get the svg for this tab.
-				var svg = $(this).find(".svg-cfg");
+			tab_ctls.each(function(){
+				// Get the active tab.
+				var active_tab_number = $(this).tabs("option", "active");
+				//console.log( "Active tab:" + active_tab_number +"\n");
+				var active_tab_panel = $(this).find(".ui-tabs-panel").eq(active_tab_number);
+				// Get the svg <object> for this tab.
+				var svg = active_tab_panel.find(".svg-cfg");
 				
 				// Fit it to its container.
-				fitToContainer(svg, this);
+				fitToContainer(svg, active_tab_panel);
 			});
 		}
 		
@@ -65,17 +109,23 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		function onTabsShow(event, ui)
 		{
 			// Get the svg for this tab.
-			var svg = $(ui.panel).find(".svg-cfg");
+			var svg = ui.newPanel.find(".svg-cfg");
 			
 			// Fit it to its container.
-			fitToContainer(svg, ui.panel);
+			fitToContainer(svg, ui.newPanel);
+			
+			//console.log( "Active tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
 		}
 		
 		/// Initialize the tabs.
 		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
-		$( "#tabs" ).bind("tabsshow", onTabsShow);
+		$( "#tabs" ).bind("tabsactivate", onTabsShow);
+		// Set the tabs up for vertical display.
+		$( "#tabs" ).addClass( "ui-tabs-vertical ui-helper-clearfix" );
+		$( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
 		// Do the final init and activate the tabs.
 		$( "#tabs" ).tabs();
+
 
 		// Bind a resize handler to the window resize event.
 		$(window).resize(onWindowResize);
@@ -104,7 +154,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		<!-- REMOVE_START -->
 		<li><a href="#tabs-1">decode_switches()</a></li>
 		<li><a href="#tabs-2">die()</a></li>
-		<li><a href="#tabs-3">Aenean lacinia</a></li>
+		<li><a href="#tabs-3">Another die()</a></li>
 		<!-- REMOVE_END -->
 		
 		<!-- TAB_LIST_START -->
@@ -121,7 +171,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	</div>
 	<div id="tabs-3">
-		<p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
+		<p>Second instance of die()</p>
 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	</div>
 	<!-- REMOVE_END -->

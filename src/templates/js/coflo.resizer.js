@@ -36,9 +36,12 @@ function getIntrinsicDimensions(DOMElement)
 	var pts_per_in = 72.0;
 	// The conversion factor.
 	var pts_to_pixels = current_dpi/pts_per_in;
+	
+	// Get the bounding box.
+	var bbox = svgelem.getBBox();
 
 	// Scale and return the bounding box.
-	return { width: svgelem.getBBox().width*pts_to_pixels, height: svgelem.getBBox().height*pts_to_pixels };
+	return { width: bbox.width*pts_to_pixels, height: bbox.height*pts_to_pixels };
 
 }
 
@@ -58,6 +61,9 @@ function fitToContainer( objects, container_obj )
 		// Get the real dimensions of the svg.
 		var intrinsic_dims = getIntrinsicDimensions($(this)[0]);
 		var width_obj = intrinsic_dims.width;
+		// Get the width of the content area of the container.
+		// Note that .width() is correct here, and not .innerWidth(), which includes the padding, somewhat
+		// contrary to what one might expect, given the CSS definition of the width attribute.
 		var width_obj_container = the_obj_container.width();
 		
 		if(width_obj_container < 10)
