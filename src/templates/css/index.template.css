@@ -19,16 +19,34 @@
   * @file Template for the top level css file.
   */
   
- .coflo-svg-container-outer
- {
- }
- 
- .coflo-svg-container-inner
- {
- }
- 
- .coflo-svg-cfg-object
- {
- }
- 
- 
+.svg-cfg
+{
+	display:block;
+	/* Center the svg in its container. */
+	margin-left:auto;
+	margin-right:auto;
+}
+
+/* Styling for the Dojo widgets */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+#appLayout {
+    height: 100%;
+}
+#leftCol {
+    width: 14em;
+}
+
+.claro .demoLayout .edgePanel {
+    background-color: #d0e9fc;
+}
+
+#viewsChart {
+	width: 550px;
+	height: 550px;
+}

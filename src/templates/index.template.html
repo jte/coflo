@@ -21,23 +21,18 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 	<title>Insert title here</title>
 	
-	<!-- Dojo -->
-	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
+	<!-- Dojo theme stylesheet. -->
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
 
-	<!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"> -->
-	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css">
-	<link rel="stylesheet" href="index.template.css" media="screen">
+	<!-- The jQueryUI CSS stylesheet. -->
+	<!-- <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css"> -->
+	
+	<!-- CoFlo's CSS stylesheet -->
+	<link rel="stylesheet" href="css/index.template.css" media="screen">
+
+	<!--
 	<style>
-	.svg-cfg
-	{
-		display:block;
-		/* Center the svg in its container. */
-		margin-left:auto;
- 		margin-right:auto;
-	}
-	</style>
-	<style>
-	<!-- CSS styles for left-hand-side vertical tabs. -->
+	/* CSS styles for left-hand-side vertical tabs. */
 	.ui-tabs-vertical { position: relative; padding-left: 6.5em; }
 	.ui-tabs-vertical .ui-tabs-nav
 	{
@@ -74,15 +69,19 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	}
 	.ui-tabs-vertical .ui-tabs-panel { padding: 1em; margin-left: 12em; }
 	</style>
+	-->
 	
 	<!-- 
 	@todo Put this or something like it back when we use local copies of these libraries.
 	<script src="js/jquery-1.8.2.js"></script>
 	<script src="js/jquery-ui-1.9.0.custom.min.js"></script>
 	-->
+	<!-- 
 	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
 	<script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+	-->
 	<script src="js/coflo.resizer.js"></script>
+	<!-- 
 	<script>
 	$(function() {
 		
@@ -136,7 +135,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 		$( "#cfdebugbutton" ).click(function(){
 			$( "#cfdebugout" ).html( "aaa" );
-			/* $(".svg-cfg").width("100%"); */
 			fitToContainer(".svg-cfg");
 		});
 		
@@ -145,77 +143,157 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		});
 	});
 	</script>
+	-->
 </head>
 
-<body>
-
+<body class="claro">
+<!--
 <p><h1>Insert Header Paragraph Here</h1></p>
-
+-->
 <!-- REMOVE_START -->
-<div>
-<p>Debug info:</p>
-<p id="cfdebugout">xxxx</p>
-<button id="cfdebugbutton">Debug Button</button>
-</div>
+<!-- <div> -->
+<!-- <p>Debug info:</p> -->
+<!-- <p id="cfdebugout">xxxx</p> -->
+<!-- <button id="cfdebugbutton">Debug Button</button> -->
+<!-- </div> -->
 
-<div class="treectl1">
-	<h3>File1</h3>
-	<div>
-		<p>Content1</p>
-	</div>
-	<h3>File2</h3>
-	<div class="treectl1">
-		<h3>File3</h3>
-		<div>
-			<p>Content1</p>
-		</div>
-		<h3>File4</h3>
-		<div>
-			<p>Content2</p>
-		</div>
-	</div>
-</div>
+<!-- <div class="treectl1"> -->
+<!-- 	<h3>File1</h3> -->
+<!-- 	<div> -->
+<!-- 		<p>Content1</p> -->
+<!-- 	</div> -->
+<!-- 	<h3>File2</h3> -->
+<!-- 	<div class="treectl1"> -->
+<!-- 		<h3>File3</h3> -->
+<!-- 		<div> -->
+<!-- 			<p>Content1</p> -->
+<!-- 		</div> -->
+<!-- 		<h3>File4</h3> -->
+<!-- 		<div> -->
+<!-- 			<p>Content2</p> -->
+<!-- 		</div> -->
+<!-- 	</div> -->
+<!-- </div> -->
 
-<div class="panel1">
-</div>
+<!-- <div class="panel1"> -->
+<!-- </div> -->
 
 <!-- REMOVE_END -->
 
-<div id="tabs" class="ui-tabs">
-	<ul>
-		<!-- REMOVE_START -->
-		<li><a href="#tabs-1">decode_switches()</a></li>
-		<li><a href="#tabs-2">die()</a></li>
-		<li><a href="#tabs-3">Another die()</a></li>
-		<!-- REMOVE_END -->
+<!-- DOJO -->
+<div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer"
+            data-dojo-props="design: 'headline'">
+            <div class="centerPanel" data-dojo-type="dijit/layout/ContentPane"
+                data-dojo-props="region: 'center'">
+            
+	            <div>
+	                <h4>Group 1 Content</h4>
+	                <button id="btn" data-dojo-type="dijit/form/Button"
+				        data-dojo-props="onClick:function(){ console.log('First button was clicked!'); }">
+				        Click Me!
+				    </button>
+	                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	            </div>
+	            <div>
+	                <h4>Group 2 Content</h4>
+	                <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+	            </div>
+	            <div>
+	                <h4>Group 3 Content</h4>
+	            </div>
+<!-- DOJO -->
+
+<!-- <div id="tabs" class="ui-tabs"> -->
+<!-- 	<ul> -->
+ 		<!-- REMOVE_START -->
+<!-- 		<li><a href="#tabs-1">decode_switches()</a></li> -->
+<!-- 		<li><a href="#tabs-2">die()</a></li> -->
+<!-- 		<li><a href="#tabs-3">Another die()</a></li> -->
+ 		<!-- REMOVE_END -->
 		
-		<!-- TAB_LIST_START -->
-		<!-- TAB_LIST -->
-	</ul>
+ 		<!-- TAB_LIST_START -->
+ 		<!-- TAB_LIST -->
+<!-- 	</ul> -->
 	
-	<!-- REMOVE_START -->
-	<div id="tabs-1">
-		<p>Paragraph</p>
-		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
-	</div>
-	<div id="tabs-2">
-		<p>die()</p>
-		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	</div>
-	<div id="tabs-3">
-		<p>Second instance of die()</p>
-		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	</div>
-	<!-- REMOVE_END -->
+ 	<!-- REMOVE_START -->
+<!-- 	<div id="tabs-1"> -->
+<!-- 		<p>Paragraph</p> -->
+<!-- 		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
+<!-- 	</div> -->
+<!-- 	<div id="tabs-2"> -->
+<!-- 		<p>die()</p> -->
+<!-- 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
+<!-- 	</div> -->
+<!-- 	<div id="tabs-3"> -->
+<!-- 		<p>Second instance of die()</p> -->
+<!-- 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
+<!-- 	</div> -->
+ 	<!-- REMOVE_END -->
 
-	<!-- TAB_PANEL_LIST_START -->	
-	<!-- TAB_PANEL_LIST -->
+ 	<!-- TAB_PANEL_LIST_START -->
+ 	<!-- TAB_PANEL_LIST -->
+<!-- </div> -->
+
+<!-- DOJO -->
+	</div>
+	<div class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
+		data-dojo-props="region: 'top'">Header content (top)</div>
+	<div id="leftCol" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
+		data-dojo-props="region: 'left', splitter: true">
+		Sidebar content (left)
+		<div data-dojo-type="dojo/store/Memory" data-dojo-id="myStore">
+		    <!-- Create store with inlined data.
+		        For larger data sets should use dojo.store.JsonRest etc. instead of dojo.store.Memory. -->
+		    <script type="dojo/method">
+         this.setData([
+            { id: 'all_files', name:'All Files', type:'theroot' },
+            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
+            { id: 'func1', name:'function1', type:'function', parent: 'file1_c' },
+			{ id: 'func2', name:'function2', type:'function', parent: 'file1_c' },
+            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
+			{ id: 'func3', name:'function3', type:'function', parent: 'file2_c' },
+        ]);
+    	</script>
+			<script type="dojo/method" data-dojo-event="getChildren" data-dojo-args="object">
+        		// Supply a getChildren() method to store for the data model where
+         		// children objects point to their parent (aka relational model)
+        		return this.query({parent: object.id});
+    	</script>
+    	<!-- For changing the icons.
+    	<script type="dojo/method" data-dojo-event="getIconClass" data-dojo-args="item, opened">
+    	if(item == this.model.root){
+        	return (opened ? "customFolderOpenedIcon" : "customFolderClosedIcon");
+    		}else{
+        	return myStore.getValue(item, "type") + "Icon";
+    	}
+		</script>
+    	-->
+    	<script type="dojo/method" data-dojo-event="onClick" data-dojo-args="item">
+    	if(item.id == 1)
+		{
+        	return (opened ? "customFolderOpenedIcon" : "customFolderClosedIcon");
+    	}else{
+        	return myStore.getValue(item, "type") + "Icon";
+    	}
+		</script>
+		</div>
+		<!-- Create the model bridging the store and the Tree -->
+		<div data-dojo-type="dijit/tree/ObjectStoreModel" data-dojo-id="myModel"
+		  data-dojo-props="store: myStore, query: {id: 'all_files'}"></div>
+		<!-- Create the tree -->
+		<div data-dojo-type="dijit/Tree" id="myTree" data-dojo-props="model: myModel, openOnClick: true"></div>
+	</div>
 </div>
+<!-- DOJO -->
 
-
-	<!-- load dojo and provide config via data attribute -->
-	<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"
-	        data-dojo-config="async: 1, parseOnLoad: 1">
+	<!-- load dojo and provide config via the "data-dojo-config" data attribute -->
+	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
+		data-dojo-config="parseOnLoad: true"></script>
+	<script>
+    require(["dojo/parser", "dojo/ready", "dijit/form/Button",
+             "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+             "dijit/Tree", 
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory"]);
 	</script>
 
 </body>
