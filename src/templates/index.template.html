@@ -183,10 +183,12 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <!-- DOJO -->
 <div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer"
             data-dojo-props="design: 'headline'">
-            <div class="centerPanel" data-dojo-type="dijit/layout/ContentPane"
-                data-dojo-props="region: 'center'">
-            
-	            <div>
+            <div id="cfgstack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
+                data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
+	            <script type="dojo/method" data-dojo-event="onShow" data-dojo-args="">
+    	        	console.log('cp was shown');
+				</script>          
+	            <div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
 	                <h4>Group 1 Content</h4>
 	                <button id="btn" data-dojo-type="dijit/form/Button"
 				        data-dojo-props="onClick:function(){ console.log('First button was clicked!'); }">
@@ -194,11 +196,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 				    </button>
 	                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 	            </div>
-	            <div>
+	            <div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
 	                <h4>Group 2 Content</h4>
 	                <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 	            </div>
-	            <div>
+	            <div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
 	                <h4>Group 3 Content</h4>
 	            </div>
 <!-- DOJO -->
@@ -248,13 +250,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
          this.setData([
             { id: 'all_files', name:'All Files', type:'theroot' },
             { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
-            { id: 'func1', name:'function1', type:'function', parent: 'file1_c' },
-			{ id: 'func2', name:'function2', type:'function', parent: 'file1_c' },
+            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
+			{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
             { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
-			{ id: 'func3', name:'function3', type:'function', parent: 'file2_c' },
+			{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
         ]);
     	</script>
-			<script type="dojo/method" data-dojo-event="getChildren" data-dojo-args="object">
+		<script type="dojo/method" data-dojo-event="getChildren" data-dojo-args="object">
         		// Supply a getChildren() method to store for the data model where
          		// children objects point to their parent (aka relational model)
         		return this.query({parent: object.id});
@@ -268,33 +270,73 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
     	}
 		</script>
     	-->
-    	<script type="dojo/method" data-dojo-event="onClick" data-dojo-args="item">
-    	if(item.id == 1)
-		{
-        	return (opened ? "customFolderOpenedIcon" : "customFolderClosedIcon");
-    	}else{
-        	return myStore.getValue(item, "type") + "Icon";
-    	}
-		</script>
 		</div>
 		<!-- Create the model bridging the store and the Tree -->
 		<div data-dojo-type="dijit/tree/ObjectStoreModel" data-dojo-id="myModel"
 		  data-dojo-props="store: myStore, query: {id: 'all_files'}"></div>
 		<!-- Create the tree -->
-		<div data-dojo-type="dijit/Tree" id="myTree" data-dojo-props="model: myModel, openOnClick: true"></div>
+		<div data-dojo-type="dijit/Tree" id="myTree" data-dojo-props="model: myModel, openOnClick: true">
+    	<script type="dojo/method" data-dojo-event="onClick" data-dojo-args="item">
+    	if(item.type == "function")
+		{
+        	console.log('Tab '+item.tabid+' was clicked!');
+			myStackContainer.selectChild(item.tabid, false);
+    	}
+		</script>
+		</div>
 	</div>
 </div>
 <!-- DOJO -->
 
-	<!-- load dojo and provide config via the "data-dojo-config" data attribute -->
+	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
 	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
-		data-dojo-config="parseOnLoad: true"></script>
+		data-dojo-config="async: true"></script>
 	<script>
-    require(["dojo/parser", "dojo/ready", "dijit/form/Button",
+    require(["dojo/parser", "dojo/ready", "dojo/query", "dojo/on", "dijit/Destroyable",
              "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
-             "dijit/Tree", 
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory"]);
-	</script>
+             "dijit/Tree", "dijit/form/Button",
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory"],
+             function(parser, ready, query, on, Destroyable)
+             {        
+             	ready(function()
+             	{            
+             		parser.parse();        
+				
+ 	             	query("#tabs-2").on("Show", function()
+ 							{
+							console.log("CFG shown.");
+						});
+//  	             	panes.forEach(function(node, index, nodeList)
+//  	             	{
+//  	             		node.on("show", function()
+//  							{
+//  								console.log("CFG shown.");
+//  							});
+//  	             	});
+             	});
+             });
+    require(["dojo/on", "dojo/dom", "dojo/query", "dojo/domReady!"],
+    		function(on, dom){         
+    	var myObject = {            
+    			id: "myObject",            
+    			onShow: function(evt){                
+    				alert("The scope of this handler is " + this.id);            
+    				}        
+    	};        
+    	var div = dom.byId("cfgstack");        
+    	on(div, ".cfg-pane:show", myObject.onShow);
+    	});
+    </script>
+<!--     <script> -->
+//     require(["dojo/parser", "dojo/query", "dojo/on", "dojo/ready!"],
+//     		function(parser, query)
+//     		{
+// //       			query(".cfg-pane").on("show", function()
+// // 				{
+// // 					console.log("CFG shown.");
+// // 				});    	
+//     		});
+<!-- 	</script> -->
 
 </body>
 </html>
