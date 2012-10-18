@@ -22,7 +22,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<title>Insert title here</title>
 	
 	<!-- Dojo theme stylesheet. -->
-	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
+	<!-- <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen"> -->
+	<link rel="stylesheet" href="js/dojo-release-1.8.1-src/dijit/themes/claro/claro.css" media="screen">
 
 	<!-- The jQueryUI CSS stylesheet. -->
 	<!-- <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css"> -->
@@ -81,6 +82,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
 	-->
 	<script src="js/coflo.resizer.js"></script>
+	<script src="js/coflo.report.js"></script>
 	<!-- 
 	<script>
 	$(function() {
@@ -144,6 +146,100 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	});
 	</script>
 	-->
+	
+	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
+		data-dojo-config="async: true"></script> -->
+	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"
+		data-dojo-config="async: true"></script>
+	<script>
+    require(["dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+             "dijit/layout/StackContainer", "dijit/Tree", "dojo/query",
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
+             	function(ready, registry, BorderContainer, ContentPane, StackContainer, Tree, query, 
+             			ObjectStoreModel, Memory)
+             	{
+    				ready(function()
+					{
+						// Create the main layout BorderContainer.
+						var appLayout = new BorderContainer({
+							design: "headline"
+						}, "appLayout");
+						
+						// Create and add the Header pane.
+						var headerPane = new ContentPane({
+							region: "top",
+							"class": "edgePanel",
+							content: "Header content (top)"
+							}, "header_pane");
+						appLayout.addChild(headerPane);
+						
+						// Create an in-memory store for the tree.
+						var myStore = new Memory({
+							data: [
+						            { id: 'all_files', name:'All Files', type:'theroot' },
+						            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
+						            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
+									{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
+						            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
+									{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
+        							],
+					        getChildren: function(object){
+					        	return this.query({parent: object.id});
+					        	}
+							});
+						
+						var myModel = new ObjectStoreModel({
+							store: myStore,
+							query: {id: 'all_files'},
+							mayHaveChildren: function(item){
+								return item.type != "function";
+								}
+							});
+						
+						var myTree = new Tree({
+							model: myModel,
+							id: "myTree",
+							onOpenClick: true,
+							onClick: function(item){
+								if(item.type == "function")
+								{
+									console.log('Tab '+item.tabid+' was clicked!');
+									cfgstack.selectChild(item.tabid, false);
+								}
+							}
+						}, "my_tree");
+						
+						// Create and add the navigation sidebar.
+						navPane = new ContentPane({
+							region: "left",
+							id: "nav_pane",
+							"class": "edgePanel",
+							/*content: myTree*/ /*"Sidebar content (left)",*/
+							splitter: true}, "nav_pane");
+						navPane.addChild(myTree);
+						appLayout.addChild(navPane);
+						
+						// Create the main content stack.
+						var cfgstack = new StackContainer({
+							region: "center",
+							id: "cfgstack",
+							tabPosition: "bottom",
+							"class": "centerPanel"}, "cfgstack");
+						
+						// Get a list of all the main content panes.
+ 						var panes = query(".cfg-pane");
+ 						panes.forEach(function(node, index, nodeList)
+ 						{
+ 							var cp1 = new ContentPane({ title: "Title Here" }, node);
+ 							cfgstack.addChild(cp1);
+ 						});
+						appLayout.addChild(cfgstack);
+						
+						appLayout.startup();
+					});
+             	});
+    </script>
 </head>
 
 <body class="claro">
@@ -185,9 +281,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             data-dojo-props="design: 'headline'">
             <div id="cfgstack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
                 data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
-	            <script type="dojo/method" data-dojo-event="onShow" data-dojo-args="">
-    	        	console.log('cp was shown');
-				</script>          
 	            <div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
 	                <h4>Group 1 Content</h4>
 	                <button id="btn" data-dojo-type="dijit/form/Button"
@@ -202,6 +295,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	            </div>
 	            <div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
 	                <h4>Group 3 Content</h4>
+	                <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	            </div>
 <!-- DOJO -->
 
@@ -238,105 +332,16 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 <!-- DOJO -->
 	</div>
-	<div class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
+	<div id="header_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
 		data-dojo-props="region: 'top'">Header content (top)</div>
-	<div id="leftCol" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
+	<div id="nav_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
 		data-dojo-props="region: 'left', splitter: true">
 		Sidebar content (left)
-		<div data-dojo-type="dojo/store/Memory" data-dojo-id="myStore">
-		    <!-- Create store with inlined data.
-		        For larger data sets should use dojo.store.JsonRest etc. instead of dojo.store.Memory. -->
-		    <script type="dojo/method">
-         this.setData([
-            { id: 'all_files', name:'All Files', type:'theroot' },
-            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
-            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
-			{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
-            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
-			{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
-        ]);
-    	</script>
-		<script type="dojo/method" data-dojo-event="getChildren" data-dojo-args="object">
-        		// Supply a getChildren() method to store for the data model where
-         		// children objects point to their parent (aka relational model)
-        		return this.query({parent: object.id});
-    	</script>
-    	<!-- For changing the icons.
-    	<script type="dojo/method" data-dojo-event="getIconClass" data-dojo-args="item, opened">
-    	if(item == this.model.root){
-        	return (opened ? "customFolderOpenedIcon" : "customFolderClosedIcon");
-    		}else{
-        	return myStore.getValue(item, "type") + "Icon";
-    	}
-		</script>
-    	-->
-		</div>
-		<!-- Create the model bridging the store and the Tree -->
-		<div data-dojo-type="dijit/tree/ObjectStoreModel" data-dojo-id="myModel"
-		  data-dojo-props="store: myStore, query: {id: 'all_files'}"></div>
-		<!-- Create the tree -->
-		<div data-dojo-type="dijit/Tree" id="myTree" data-dojo-props="model: myModel, openOnClick: true">
-    	<script type="dojo/method" data-dojo-event="onClick" data-dojo-args="item">
-    	if(item.type == "function")
-		{
-        	console.log('Tab '+item.tabid+' was clicked!');
-			myStackContainer.selectChild(item.tabid, false);
-    	}
-		</script>
-		</div>
+		<!-- Div for the tree -->
+		<div id="my_tree"></div>
 	</div>
 </div>
 <!-- DOJO -->
-
-	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
-	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
-		data-dojo-config="async: true"></script>
-	<script>
-    require(["dojo/parser", "dojo/ready", "dojo/query", "dojo/on", "dijit/Destroyable",
-             "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
-             "dijit/Tree", "dijit/form/Button",
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory"],
-             function(parser, ready, query, on, Destroyable)
-             {        
-             	ready(function()
-             	{            
-             		parser.parse();        
-				
- 	             	query("#tabs-2").on("Show", function()
- 							{
-							console.log("CFG shown.");
-						});
-//  	             	panes.forEach(function(node, index, nodeList)
-//  	             	{
-//  	             		node.on("show", function()
-//  							{
-//  								console.log("CFG shown.");
-//  							});
-//  	             	});
-             	});
-             });
-    require(["dojo/on", "dojo/dom", "dojo/query", "dojo/domReady!"],
-    		function(on, dom){         
-    	var myObject = {            
-    			id: "myObject",            
-    			onShow: function(evt){                
-    				alert("The scope of this handler is " + this.id);            
-    				}        
-    	};        
-    	var div = dom.byId("cfgstack");        
-    	on(div, ".cfg-pane:show", myObject.onShow);
-    	});
-    </script>
-<!--     <script> -->
-//     require(["dojo/parser", "dojo/query", "dojo/on", "dojo/ready!"],
-//     		function(parser, query)
-//     		{
-// //       			query(".cfg-pane").on("show", function()
-// // 				{
-// // 					console.log("CFG shown.");
-// // 				});    	
-//     		});
-<!-- 	</script> -->
 
 </body>
 </html>
