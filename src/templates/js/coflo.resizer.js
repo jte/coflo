@@ -45,26 +45,34 @@ function getIntrinsicDimensions(DOMElement)
 
 }
 
+
+
 /**
  * Fit all display:block objects matching the given selector to their container's width.
  */
 function fitToContainer( objects, container_obj )
 {
 	var the_selected_objects = objects;
-	the_selected_objects.each(function()
+	//the_selected_objects.each(function()
+	the_selected_objects.forEach(function(node, index, nodeList)
 	{
-		var the_obj = $(this);
-		var the_obj_container = $(container_obj);
+		//var the_obj = $(this);
+		//var the_obj_container = $(container_obj);
+		var the_obj = node;
+		var the_obj_container = container_obj;
 		
 		//var width_obj = the_obj.outerWidth(true);
 		
 		// Get the real dimensions of the svg.
-		var intrinsic_dims = getIntrinsicDimensions($(this)[0]);
+		//var intrinsic_dims = getIntrinsicDimensions($(this)[0]);
+		var intrinsic_dims = getIntrinsicDimensions(node);
 		var width_obj = intrinsic_dims.width;
 		// Get the width of the content area of the container.
-		// Note that .width() is correct here, and not .innerWidth(), which includes the padding, somewhat
+		// Note that in jQuery, .width() is correct here, and not .innerWidth(), which includes the padding, somewhat
 		// contrary to what one might expect, given the CSS definition of the width attribute.
-		var width_obj_container = the_obj_container.width();
+		//var width_obj_container = the_obj_container.width();
+		var domGeom = require("dojo/dom-geometry");
+		var width_obj_container = domGeom.getContentBox(the_obj_container).w;
 		
 		if(width_obj_container < 10)
 		{
@@ -76,10 +84,11 @@ function fitToContainer( objects, container_obj )
 			/* Object is wider than its container.  Shrink it to fit. */
 			/// @todo Not sure which way is better.
 			//the_obj.outerWidth( width_obj_container );
-			the_obj.css({"width": width_obj_container});
+			//the_obj.css({"width": width_obj_container});
+			domGeom.setContentSize(the_obj, {w:width_obj_container});
 		}
 		
-		$("#cfdebugout").text("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
+		console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 	});
 }
 

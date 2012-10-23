@@ -81,7 +81,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
 	<script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
 	-->
-	<script src="js/coflo.resizer.js"></script>
+	<!-- <script src="js/coflo.resizer.js"></script> -->
 	<script src="js/coflo.report.js"></script>
 	<!-- 
 	<script>
@@ -150,12 +150,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
 	<!-- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
 		data-dojo-config="async: true"></script> -->
-	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"
-		data-dojo-config="async: true"></script>
+	<script data-dojo-config="async: true" src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
 	<script>
     require(["dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
              "dijit/layout/StackContainer", "dijit/Tree", "dojo/query",
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
              	function(ready, registry, BorderContainer, ContentPane, StackContainer, Tree, query, 
              			ObjectStoreModel, Memory)
              	{
@@ -204,7 +203,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 							onClick: function(item){
 								if(item.type == "function")
 								{
-									console.log('Tab '+item.tabid+' was clicked!');
+									console.log('Tab with tabid='+item.tabid+' was clicked.');
 									cfgstack.selectChild(item.tabid, false);
 								}
 							}
@@ -215,7 +214,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 							region: "left",
 							id: "nav_pane",
 							"class": "edgePanel",
-							/*content: myTree*/ /*"Sidebar content (left)",*/
+							/*content: myTree,*/ /*"Sidebar content (left)",*/
 							splitter: true}, "nav_pane");
 						navPane.addChild(myTree);
 						appLayout.addChild(navPane);
@@ -227,11 +226,24 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 							tabPosition: "bottom",
 							"class": "centerPanel"}, "cfgstack");
 						
-						// Get a list of all the main content panes.
+						// Get a list of all the main content divs and create ContentPanes for them.
  						var panes = query(".cfg-pane");
  						panes.forEach(function(node, index, nodeList)
  						{
- 							var cp1 = new ContentPane({ title: "Title Here" }, node);
+ 							var cp1 = new ContentPane({
+ 								title: "Title Here",
+ 								// Add an onShow() handler which will resize the svg.
+ 								onShow: function(){
+ 									console.log("on show");
+ 									// Find the contained svg.
+ 									var the_svg = query(".svg-cfg", node);
+ 									if(the_svg.length != 1)
+ 									{
+ 										console.warn("Found ", the_svg.length, " SVG(s) in ", node, ", expected 1.");
+ 									}
+ 									fitToContainer(the_svg, node);
+ 								}
+ 							}, node);
  							cfgstack.addChild(cp1);
  						});
 						appLayout.addChild(cfgstack);
@@ -290,11 +302,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 	            </div>
 	            <div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
-	                <h4>Group 2 Content</h4>
 	                <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 	            </div>
 	            <div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
-	                <h4>Group 3 Content</h4>
 	                <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	            </div>
 <!-- DOJO -->
