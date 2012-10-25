@@ -33,7 +33,7 @@ function getIntrinsicDimensions(DOMElement)
 	var svgdoc = obj.contentDocument; 
 	 // Get the SVG element
 	var svgelem = svgdoc.documentElement;
-	/// @todo This is what dot assumes.  I'm not sure if we should assume this or determine it if possible.
+	/// @todo This is what dot assumes by default.  I'm not sure if we should assume this or determine it if possible.
 	var current_dpi = 96.0;
 	var pts_per_in = 72.0;
 	// The conversion factor.

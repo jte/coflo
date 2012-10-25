@@ -26,8 +26,8 @@
 
 #include <boost/regex.hpp>
 
-/*
- *
+/**
+ * Class for building completed files from templates.
  */
 class FileTemplate
 {
@@ -74,6 +74,9 @@ public:
 	///@}
 
 public:
+	/**
+	 * Default constructor.
+	 */
 	FileTemplate();
 
 	/**
@@ -84,18 +87,53 @@ public:
 	FileTemplate(const std::string& s) : m_current_file_contents(s) { };
 	~FileTemplate();
 
+	/**
+	 * Replace all instances of @a regex_to_match with @a replacement.
+	 *
+	 * @param regex_to_match
+	 * @param replacement
+	 * @return
+	 */
 	FileTemplate& regex_replace(const std::string &regex_to_match, const std::string &replacement);
+
+	/**
+	 * Insert @a replacement immediately before @a regex_to_match.
+	 *
+	 * @param regex_to_match
+	 * @param replacement
+	 * @return
+	 */
 	FileTemplate& regex_insert_before(const std::string &regex_to_match, const std::string &replacement);
 
-	void Apply();
 
-	std::ostream& InsertionHelper(std::ostream& os) const;
+	/**
+	 * Return this FileTemplate's contents, with all attached modifiers applied, as a std::string.
+	 */
+	std::string str();
 
-	std::string str() const { return m_current_file_contents; };
+	/**
+	 * Friend declaration for the stream insertion operator.
+	 *
+	 * @param os
+	 * @param ft
+	 * @return
+	 */
+	friend inline std::ostream& operator<<(std::ostream& os, FileTemplate &ft);
 
 private:
 
+	/**
+	 * Apply all attached modifiers to m_current_file_contents.
+	 */
+	void Apply();
 
+	/**
+	 * Helper function for the stream insertion operator.
+	 *
+	 * @param os
+	 * @return
+	 */
+	std::ostream& InsertionHelper(std::ostream& os);
 
 	/// A string containing the contents of the file.
 	std::string m_current_file_contents;
@@ -104,7 +142,7 @@ private:
 	std::vector<modifier_base_t*> m_filter_list;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const FileTemplate &ft)
+inline std::ostream& operator<<(std::ostream& os, FileTemplate &ft)
 {
 	return ft.InsertionHelper(os);
 }

@@ -160,6 +160,7 @@ void Program::Print(const std::string &output_path)
 	std::cout << "Creating output dir: " << output_dir << std::endl;
 	mkdir(output_dir.string().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	mkdir((output_dir.string() + "/css").c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+	mkdir((output_dir.string() + "/img").c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 	mkdir((output_dir.string() + "/js").c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
 
 	
@@ -186,8 +187,7 @@ void Program::Print(const std::string &output_path)
 		tu->Print(m_the_dot, output_path, index_htmlt);
 	}
 	
-	index_htmlt.Apply();
-
+	// Create the actual index.html file.
 	index_html_out << index_htmlt << std::endl;
 
 	// Create the primary stylesheet from the template.
