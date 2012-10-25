@@ -232,7 +232,6 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		FileTemplate function_cfg(str_template_function_cfg);
 		function_cfg.regex_replace("IDENTIFIER_FUNCTION", fp->GetIdentifier());
 		function_cfg.regex_replace("TABNUMBER",	ss.str());
-		function_cfg.Apply();
 		index_html_out.regex_insert_before("<!-- TAB_PANEL_LIST -->", function_cfg.str());
 
 		i++;

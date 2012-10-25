@@ -65,8 +65,20 @@ FileTemplate& FileTemplate::regex_insert_before(const std::string& regex_to_matc
 	return *this;
 }
 
-std::ostream& FileTemplate::InsertionHelper(std::ostream& os) const
+std::string FileTemplate::str()
 {
+	// Apply the modifiers.
+	Apply();
+
+	// Return the resulting string.
+	return m_current_file_contents;
+}
+
+std::ostream& FileTemplate::InsertionHelper(std::ostream& os)
+{
+	// Apply the modifiers.
+	Apply();
+
 	// Stream out the resulting string.
 	os << m_current_file_contents;
 
