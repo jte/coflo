@@ -22,6 +22,8 @@
 /**
  * Determine the intrinsic (aka "natural") dimensions of an svg file embedded as a <object> element.
  * 
+ * @param DOMElement The HTML DOM element from which to obtain the intrinsic width and height.
+ *  
  * @return .width and .height in pixels.
  */
 function getIntrinsicDimensions(DOMElement)
