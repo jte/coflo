@@ -92,4 +92,12 @@ void FileTemplate::Apply()
 	{
 		m->Apply(m_current_file_contents);
 	}
+
+	// We're done with the filters, so remove them.
+	BOOST_FOREACH(modifier_base_t *m, m_filter_list)
+	{
+		delete m;
+	}
+
+	m_filter_list.clear();
 }

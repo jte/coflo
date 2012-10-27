@@ -76,19 +76,24 @@ function fitToContainer( objects, container_obj )
 		var domGeom = require("dojo/dom-geometry");
 		var width_obj_container = domGeom.getContentBox(the_obj_container).w;
 		
+		var width_new = width_obj;
+		
 		if(width_obj_container < 10)
 		{
 			// Width is so small that nothing would be visible.  Don't resize.
 			// We'll get 0 here on at least IE9 while resizing the browser window.
+			width_new = 10;
 		}
 		else if(width_obj > width_obj_container)
 		{
 			/* Object is wider than its container.  Shrink it to fit. */
-			/// @todo Not sure which way is better.
-			//the_obj.outerWidth( width_obj_container );
-			//the_obj.css({"width": width_obj_container});
-			domGeom.setContentSize(the_obj, {w:width_obj_container});
+			width_new = width_obj_container;
+
 		}
+		/// @todo Not sure which way is better.
+		//the_obj.outerWidth( width_obj_container );
+		//the_obj.css({"width": width_obj_container});
+		domGeom.setContentSize(the_obj, {w:width_new});
 		
 		console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 	});
