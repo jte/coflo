@@ -38,7 +38,7 @@ html, body {
 #appLayout {
     height: 100%;
 }
-#leftCol {
+#nav_pane {
     width: 14em;
 }
 
@@ -46,16 +46,3 @@ html, body {
     background-color: #d0e9fc;
 }
 
-#viewsChart {
-	width: 550px;
-	height: 550px;
-}
-
-#stackContainer {
-    border: 1px solid #ccc;
-    margin-top: 10px;
-}
-
-#stackContainer div {
-    padding: 5px;
-}

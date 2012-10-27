@@ -184,17 +184,23 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
  * Template for HTML <div> for the function CFG image, with an <h2> title.
  */
 const std::string str_template_function_cfg = std::string(""
-		"<div id=\"tabs-TABNUMBER\">\n"
+		"<div id=\"tabs-TABNUMBER\" class=\"cfg-pane\">\n"
 		"	<h2>Control Flow Graph for IDENTIFIER_FUNCTION()</h2>\n"
 		"	<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
 		"</div>\n");
 
+const char f_str_template_nav_tree_file_entry[] =
+		"{ id: \'@UNIQUE_FILE_ID@\', name:\'@FILENAME@\', type:\'file\', parent: \'all_files\' },";
+
+const char f_str_template_nav_tree_function_entry[] =
+		"{ id: \'@UNIQUE_FUNCTION_ID@\', tabid: \'tabs-@TABNUMBER@\', name:\'@IDENTIFIER_FUNCTION@\', type:\'function\', parent: \'@UNIQUE_FILE_ID@\' },";
 
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, FileTemplate & index_html_out)
 {
 	std::cout << "Translation Unit Filename: " << m_source_filename << std::endl;
 	std::cout << "Number of functions defined in this translation unit: " << m_function_defs.size() << std::endl;
 	std::cout << "Defined functions:" << std::endl;
+
 	// Print the identifiers of the functions defined in this translation unit.
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
@@ -207,32 +213,47 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
 	index_html_out << "<p>Control Flow Graphs:\n<ul>" << std::endl;
 */
+	// Create an entry for this file in the navigation tree.
+	FileTemplate nav_tree_table_entry(f_str_template_nav_tree_file_entry);
+
+	// Create a unique ID for this file which can be referenced by the other entries in the nav tree.
+	std::string unique_file_id = std::string("file_") + m_source_filename.c_str();
+	unique_file_id = regex_replace(unique_file_id, "[./]", "_");
+
+	nav_tree_table_entry.regex_replace("@UNIQUE_FILE_ID@", unique_file_id);
+	nav_tree_table_entry.regex_replace("@FILENAME@", m_source_filename.filename().c_str());
+
+	// Now insert it into the navigation tree.
+	index_html_out.regex_insert_before("<!-- TAB_LIST_END -->", nav_tree_table_entry.str());
+
 	std::stringstream ss;
 	int i = 1;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
 		// Generate the tab list item for this function.
 		ss.str("");
-		ss << "<li><a href=\"#tabs-" << i << "\">" << fp->GetIdentifier();
-		if(!fp->IsCalled())
+		ss << i;
+		/*if(!fp->IsCalled())
 		{
 			ss << " (possible entry point)";
-		}
-		ss << "</a></li>\n";
+		}*/
 
-		index_html_out.regex_insert_before("<!-- TAB_LIST -->", ss.str());
+		FileTemplate nav_tree_table_entry_function(f_str_template_nav_tree_function_entry);
+		nav_tree_table_entry_function.regex_replace("@UNIQUE_FILE_ID@", unique_file_id);
+		nav_tree_table_entry_function.regex_replace("@IDENTIFIER_FUNCTION@", fp->GetIdentifier());
+		nav_tree_table_entry_function.regex_replace("@UNIQUE_FUNCTION_ID@", fp->GetIdentifier());
+		nav_tree_table_entry_function.regex_replace("@TABNUMBER@", ss.str());
+		index_html_out.regex_insert_before("<!-- TAB_LIST_END -->", nav_tree_table_entry_function.str());
 
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
 		fp->PrintControlFlowGraphBitmap(the_dot, output_dir / cfg_image_filename);
 
 		// Output the tab panel HTML for this function.
-		ss.str("");
-		ss << i;
 		FileTemplate function_cfg(str_template_function_cfg);
 		function_cfg.regex_replace("IDENTIFIER_FUNCTION", fp->GetIdentifier());
 		function_cfg.regex_replace("TABNUMBER",	ss.str());
-		index_html_out.regex_insert_before("<!-- TAB_PANEL_LIST -->", function_cfg.str());
+		index_html_out.regex_insert_before("<!-- TAB_PANEL_LIST_END -->", function_cfg.str());
 
 		i++;
 	}

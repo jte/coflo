@@ -55,7 +55,6 @@ function getIntrinsicDimensions(DOMElement)
 function fitToContainer( objects, container_obj )
 {
 	var the_selected_objects = objects;
-	//the_selected_objects.each(function()
 	the_selected_objects.forEach(function(node, index, nodeList)
 	{
 		//var the_obj = $(this);
