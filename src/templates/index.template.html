@@ -25,128 +25,12 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen"> -->
 	<link rel="stylesheet" href="js/dojo-release-1.8.1-src/dijit/themes/claro/claro.css" media="screen">
 
-	<!-- The jQueryUI CSS stylesheet. -->
-	<!-- <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css"> -->
-	
 	<!-- CoFlo's CSS stylesheet -->
 	<link rel="stylesheet" href="css/index.template.css" media="screen">
 
-	<!--
-	<style>
-	/* CSS styles for left-hand-side vertical tabs. */
-	.ui-tabs-vertical { position: relative; padding-left: 6.5em; }
-	.ui-tabs-vertical .ui-tabs-nav
-	{
-		/* Use absolute positioning to make the tab gutter extend the entire height of the tab column. */
-		position: absolute;
-		left: 0.25em;
-		top: 0.25em;
-		bottom: 0.25em;
-		width: 12em;
-		padding: 0.2em 0 0.2em 0.2em;
-	}
-	.ui-tabs-vertical .ui-tabs-nav li 
-	{
-		clear: left;
-		right: 1px;
-		width: 100%;
-		border-right-style: none;
-		border-bottom-width: 1px !important;
-	}
-	.ui-tabs-vertical .ui-tabs-nav li a
-	{
-		float: right;
-		width: 100%;
-		text-align: right;
-	}
-	.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active
-	{
-		/*padding-bottom: 0;
-		padding-right: .1em;*/
-		border-right-width: 1px;
-		border-right-style: solid;
-		border-right-color: transparent;
-		/*border-right: 1px solid transparent;*/
-	}
-	.ui-tabs-vertical .ui-tabs-panel { padding: 1em; margin-left: 12em; }
-	</style>
-	-->
-	
-	<!-- 
-	@todo Put this or something like it back when we use local copies of these libraries.
-	<script src="js/jquery-1.8.2.js"></script>
-	<script src="js/jquery-ui-1.9.0.custom.min.js"></script>
-	-->
-	<!-- 
-	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
-	<script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
-	-->
 	<!-- <script src="js/coflo.resizer.js"></script> -->
-	<script src="js/coflo.report.js"></script>
-	<!-- 
-	<script>
-	$(function() {
+	<!-- <script src="js/coflo.report.js"></script> -->
 		
-		/**
-		 * Event handler callback for fitting the active svg to the tab control when the window is resized.
-		 */
-		function onWindowResize()
-		{
-			// Get all tab controls.
-			var tab_ctls = $("#tabs");
-			
-			tab_ctls.each(function(){
-				// Get the active tab.
-				var active_tab_number = $(this).tabs("option", "active");
-				//console.log( "Active tab:" + active_tab_number +"\n");
-				var active_tab_panel = $(this).find(".ui-tabs-panel").eq(active_tab_number);
-				// Get the svg <object> for this tab.
-				var svg = active_tab_panel.find(".svg-cfg");
-				
-				// Fit it to its container.
-				fitToContainer(svg, active_tab_panel);
-			});
-		}
-		
-		/**
-		 * Event handler callback for fitting the svg's to the tab control when a new tab is selected.
-		 */
-		function onTabsShow(event, ui)
-		{
-			// Get the svg for this tab.
-			var svg = ui.newPanel.find(".svg-cfg");
-			
-			// Fit it to its container.
-			fitToContainer(svg, ui.newPanel);
-			
-			//console.log( "Active tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
-		}
-		
-		/// Initialize the tabs.
-		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
-		$( "#tabs" ).bind("tabsactivate", onTabsShow);
-		// Set the tabs up for vertical display.
-		$( "#tabs" ).addClass( "ui-tabs-vertical ui-helper-clearfix" );
-		$( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-		// Do the final init and activate the tabs.
-		$( "#tabs" ).tabs();
-
-
-		// Bind a resize handler to the window resize event.
-		$(window).resize(onWindowResize);
-
-		$( "#cfdebugbutton" ).click(function(){
-			$( "#cfdebugout" ).html( "aaa" );
-			fitToContainer(".svg-cfg");
-		});
-		
-		$( ".treectl1" ).accordion({
-			heightStyle: "content"
-		});
-	});
-	</script>
-	-->
-	
 	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
 	<!-- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
 		data-dojo-config="async: true"></script> -->
@@ -154,9 +38,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script>
     require(["dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
              "dijit/layout/StackContainer", "dijit/Tree", "dojo/query",
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/aspect", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
              	function(ready, registry, BorderContainer, ContentPane, StackContainer, Tree, query, 
-             			ObjectStoreModel, Memory)
+             			ObjectStoreModel, Memory, aspect)
              	{
     				ready(function()
 					{
@@ -176,12 +60,14 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 						// Create an in-memory store for the tree.
 						var myStore = new Memory({
 							data: [
+<!-- REMOVE_START -->
 						            { id: 'all_files', name:'All Files', type:'theroot' },
 						            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
 						            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
 									{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
 						            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
 									{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
+<!-- REMOVE_END -->
         							],
 					        getChildren: function(object){
 					        	return this.query({parent: object.id});
@@ -226,24 +112,30 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 							tabPosition: "bottom",
 							"class": "centerPanel"}, "cfgstack");
 						
+						// Create a resizing function object.
+						var resize_hook = function(changeSize, resultSize){
+							console.log("resize hook called");
+							// Find the contained svg.
+							var the_this = this.domNode;
+							var the_svg = query(".svg-cfg", this.domNode);
+							if(the_svg.length != 1)
+							{
+								console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
+							}
+							fitToContainer(the_svg, this.domNode);
+						}
+						
 						// Get a list of all the main content divs and create ContentPanes for them.
  						var panes = query(".cfg-pane");
  						panes.forEach(function(node, index, nodeList)
  						{
  							var cp1 = new ContentPane({
- 								title: "Title Here",
- 								// Add an onShow() handler which will resize the svg.
- 								onShow: function(){
- 									console.log("on show");
- 									// Find the contained svg.
- 									var the_svg = query(".svg-cfg", node);
- 									if(the_svg.length != 1)
- 									{
- 										console.warn("Found ", the_svg.length, " SVG(s) in ", node, ", expected 1.");
- 									}
- 									fitToContainer(the_svg, node);
- 								}
+ 								title: "Title Here"
  							}, node);
+ 							
+ 							// Add the resize hook which will fit the SVG to the pane.
+							aspect.after(cp1, "resize", resize_hook, true);
+ 							
  							cfgstack.addChild(cp1);
  						});
 						appLayout.addChild(cfgstack);
@@ -255,59 +147,35 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 </head>
 
 <body class="claro">
-<!--
-<p><h1>Insert Header Paragraph Here</h1></p>
--->
-<!-- REMOVE_START -->
-<!-- <div> -->
-<!-- <p>Debug info:</p> -->
-<!-- <p id="cfdebugout">xxxx</p> -->
-<!-- <button id="cfdebugbutton">Debug Button</button> -->
-<!-- </div> -->
 
-<!-- <div class="treectl1"> -->
-<!-- 	<h3>File1</h3> -->
-<!-- 	<div> -->
-<!-- 		<p>Content1</p> -->
-<!-- 	</div> -->
-<!-- 	<h3>File2</h3> -->
-<!-- 	<div class="treectl1"> -->
-<!-- 		<h3>File3</h3> -->
-<!-- 		<div> -->
-<!-- 			<p>Content1</p> -->
-<!-- 		</div> -->
-<!-- 		<h3>File4</h3> -->
-<!-- 		<div> -->
-<!-- 			<p>Content2</p> -->
-<!-- 		</div> -->
-<!-- 	</div> -->
-<!-- </div> -->
-
-<!-- <div class="panel1"> -->
-<!-- </div> -->
-
-<!-- REMOVE_END -->
-
-<!-- DOJO -->
+<!-- Div for the top-level layout container. -->
 <div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer"
             data-dojo-props="design: 'headline'">
-            <div id="cfgstack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
-                data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
-	            <div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
-	                <h4>Group 1 Content</h4>
-	                <button id="btn" data-dojo-type="dijit/form/Button"
-				        data-dojo-props="onClick:function(){ console.log('First button was clicked!'); }">
-				        Click Me!
-				    </button>
-	                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-	            </div>
-	            <div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
-	                <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
-	            </div>
-	            <div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
-	                <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	            </div>
-<!-- DOJO -->
+
+	<!-- The StackContainer making up the central panel. -->
+	<div id="cfgstack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
+	    data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
+	
+	<!-- The individual panes. -->
+	<!-- REMOVE_START -->
+	<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
+		<h4>Group 1 Content</h4>
+		<button id="btn" data-dojo-type="dijit/form/Button"
+			data-dojo-props="onClick:function(){ console.log('First button was clicked!'); }">
+    		Click Me!
+		</button>
+	    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	</div>
+	<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
+	    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+	</div>
+	<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
+	    <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+	</div>
+	<!-- REMOVE_END -->
+	
+	<!-- TAB_PANEL_LIST_START -->
+ 	<!-- TAB_PANEL_LIST_END -->
 
 <!-- <div id="tabs" class="ui-tabs"> -->
 <!-- 	<ul> -->
@@ -321,27 +189,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
  		<!-- TAB_LIST -->
 <!-- 	</ul> -->
 	
- 	<!-- REMOVE_START -->
-<!-- 	<div id="tabs-1"> -->
-<!-- 		<p>Paragraph</p> -->
-<!-- 		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
-<!-- 	</div> -->
-<!-- 	<div id="tabs-2"> -->
-<!-- 		<p>die()</p> -->
-<!-- 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
-<!-- 	</div> -->
-<!-- 	<div id="tabs-3"> -->
-<!-- 		<p>Second instance of die()</p> -->
-<!-- 		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
-<!-- 	</div> -->
- 	<!-- REMOVE_END -->
-
- 	<!-- TAB_PANEL_LIST_START -->
- 	<!-- TAB_PANEL_LIST -->
-<!-- </div> -->
-
 <!-- DOJO -->
 	</div>
+	<!-- Div for the header pane. -->
 	<div id="header_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
 		data-dojo-props="region: 'top'">Header content (top)</div>
 	<div id="nav_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
