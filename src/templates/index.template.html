@@ -19,7 +19,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <head>
 	<meta charset="utf-8">
 
-	<title>Insert title here</title>
+	<title>@TITLE@</title>
 	
 	<!-- Dojo theme stylesheet. -->
 	<!-- <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen"> -->
@@ -28,26 +28,42 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- CoFlo's CSS stylesheet -->
 	<link rel="stylesheet" href="css/index.template.css" media="screen">
 
-	<!-- <script src="js/coflo.resizer.js"></script> -->
-	<!-- <script src="js/coflo.report.js"></script> -->
-		
 	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
-	<!-- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
-		data-dojo-config="async: true"></script> -->
 	<script data-dojo-config="async: true" src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
 	<script>
-    require(["dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+	//var x = 0;
+	// The BorderContainer Widget which will be our top-level container for the individual panes.
+	var appLayout;
+// 	require(["dojo/ready"], function(ready){ ready( function(){
+// 		console.log("First Require, x=" + x);
+// 		x = x + 1;
+// 		});
+// 	});
+// 	require(["dojo/ready"], function(ready){ ready( function(){
+// 		console.log("Second Require, x=" + x);
+// 		x = x + 1;
+// 		});
+// 	});
+	require(["dijit/layout/BorderContainer", "dojo/ready"], function(BorderContainer, ready){
+		ready(function(){
+			// Create the main layout BorderContainer.
+			appLayout = new BorderContainer({
+				design: "headline"
+			}, "appLayout");
+		});
+	});
+    require(["dojo/ready", "dijit/registry", /*"dijit/layout/BorderContainer",*/ "dijit/layout/ContentPane",
              "dijit/layout/StackContainer", "dijit/Tree", "dojo/query",
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/aspect", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable", "dijit/form/Button"],
-             	function(ready, registry, BorderContainer, ContentPane, StackContainer, Tree, query, 
-             			ObjectStoreModel, Memory, aspect)
+             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/aspect", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable"],
+             	function(ready, registry, /*BorderContainer,*/ ContentPane, StackContainer, Tree, query, 
+             			ObjectStoreModel, Memory, aspect, domGeom)
              	{
     				ready(function()
 					{
 						// Create the main layout BorderContainer.
-						var appLayout = new BorderContainer({
+						/*appLayout = new BorderContainer({
 							design: "headline"
-						}, "appLayout");
+						}, "appLayout");*/
 						
 						// Create and add the Header pane.
 						var headerPane = new ContentPane({
@@ -60,14 +76,16 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 						// Create an in-memory store for the tree.
 						var myStore = new Memory({
 							data: [
-<!-- REMOVE_START -->
 						            { id: 'all_files', name:'All Files', type:'theroot' },
+<!-- REMOVE_START -->
 						            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
 						            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
 									{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
 						            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
 									{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
 <!-- REMOVE_END -->
+							 		<!-- TAB_LIST_START -->
+							 		<!-- TAB_LIST -->
         							],
 					        getChildren: function(object){
 					        	return this.query({parent: object.id});
@@ -122,8 +140,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 							{
 								console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
 							}
-							fitToContainer(the_svg, this.domNode);
-						}
+							else
+							{
+								fitToContainer(the_svg, this.domNode);
+							}
+						};
 						
 						// Get a list of all the main content divs and create ContentPanes for them.
  						var panes = query(".cfg-pane");
@@ -133,8 +154,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
  								title: "Title Here"
  							}, node);
  							
- 							// Add the resize hook which will fit the SVG to the pane.
-							aspect.after(cp1, "resize", resize_hook, true);
+ 							// Add a resize hook which will fit the SVG to the pane.
+							//aspect.after(cp1, "resize", resize_hook, true);
  							
  							cfgstack.addChild(cp1);
  						});
@@ -159,17 +180,12 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- The individual panes. -->
 	<!-- REMOVE_START -->
 	<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
-		<h4>Group 1 Content</h4>
-		<button id="btn" data-dojo-type="dijit/form/Button"
-			data-dojo-props="onClick:function(){ console.log('First button was clicked!'); }">
-    		Click Me!
-		</button>
-	    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	</div>
 	<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
 	    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 	</div>
-	<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die" data-dojo-props="onShow:function(){ console.log('panel'); }">
+	<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die">
 	    <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
 	</div>
 	<!-- REMOVE_END -->
@@ -185,8 +201,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <!-- 		<li><a href="#tabs-3">Another die()</a></li> -->
  		<!-- REMOVE_END -->
 		
- 		<!-- TAB_LIST_START -->
- 		<!-- TAB_LIST -->
+
 <!-- 	</ul> -->
 	
 <!-- DOJO -->

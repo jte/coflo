@@ -34,8 +34,10 @@ struct FunctionInfo;
 class FileTemplate;
 
 /**
- * Class representing a single source file.
+ * Class representing a single translation unit.
  * 
+ * @todo Currently, this class makes the assumption that one translation unit == one source file.
+ *
  * @param file_path
  */
 class TranslationUnit
@@ -78,6 +80,11 @@ public:
 
 	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, FileTemplate & index_html_stream);
 	
+	/**
+	 * Returns the file path.
+	 *
+	 * @return std::string representing the path to the file.
+	 */
 	std::string GetFilePath() const { return m_source_filename.string(); };
 	
 	/**

@@ -180,6 +180,8 @@ void Program::Print(const std::string &output_path)
 	index_htmlt.regex_replace("(?s:<!-- REMOVE_START.*?REMOVE_END -->)", "<!-- REMOVED DEV TEXT -->");
 	// Insert the title.
 	index_htmlt.regex_replace("<h1>Insert Header Paragraph Here</h1>", "<h1>CoFlo Analysis Results</h1>");
+	// Change the name of the referenced stylesheet from "index.template.css" to "index.css".
+	index_htmlt.regex_replace("index.template.css", "index.css");
 
 	// Generate the resulting report files and add the appropriate markup for each translation unit.
 	BOOST_FOREACH(TranslationUnit *tu, m_translation_units)
