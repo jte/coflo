@@ -28,140 +28,228 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- CoFlo's CSS stylesheet -->
 	<link rel="stylesheet" href="css/index.template.css" media="screen">
 
-	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
-	<script data-dojo-config="async: true" src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
+	<!-- Set up the Dojo configuration.  We must do this in a separate <script> block prior to loading dojo.js. -->
 	<script>
-	//var x = 0;
-	// The BorderContainer Widget which will be our top-level container for the individual panes.
+		dojoConfig = 
+		{
+				has: {
+					"dojo-firebug": true,
+					"dojo-debug-messages": true
+					},
+					parseOnLoad: false,
+					async: true    
+		};
+	</script>
+	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
+	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
+	<script>
+
+	// The BorderContainer widget which will be our top-level container for the individual panes.
 	var appLayout;
-// 	require(["dojo/ready"], function(ready){ ready( function(){
-// 		console.log("First Require, x=" + x);
-// 		x = x + 1;
-// 		});
-// 	});
-// 	require(["dojo/ready"], function(ready){ ready( function(){
-// 		console.log("Second Require, x=" + x);
-// 		x = x + 1;
-// 		});
-// 	});
+	// The ObjectStore which contains the data for the navigation tree control.
+	var myStore;
+	// The navigation ContentPane widget.
+	var navPane;
+	// The central pane.
+	var cfgstack;
+	
+	/**
+	 * Function for computing the priority number for the below ready() calls based on 
+	 * the passed list of priority numbers of any ready() calls which must execute first.
+	 * 
+	 * @note I'm sure there's a better Dojo-specific way to do the equivalent of this, but afaict it's
+	 * to write your own AMD modules, and my JavaScript skills aren't to that point yet. 
+	 */
+	function deps()
+	{
+		// The base priority is 1000, which is the default Dojo priority given to require's ready() callback.
+		var result = 1000;
+		if(arguments.length == 0)
+		{
+			// Caller doesn't depend on any other ready callbacks, return the base priority.
+			return result;
+		}
+		for(var i=0; i<arguments.length; i++)
+		{
+			result = Math.max(result, arguments[i]);
+		}
+		// The priority is the max priority number of all dependencies, plus 1.
+		result += 1;
+		
+		return result;
+	}
+	
+	/* Create the Object Store which will back the navigation tree. */
+	var priority_nav_store = deps();
+	require(["dojo/store/Memory", "dojo/ready"], function(Memory, ready){
+		ready(priority_nav_store, function(){
+			
+			console.log("Creating nav tree Object Store");
+			
+			// Create an in-memory store for the nav tree.
+			myStore = new Memory({
+				data: [
+			            { id: 'all_files', name:'All Files', type:'theroot' },
+	<!-- REMOVE_START -->
+			            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
+			            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
+						{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
+			            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
+						{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' }
+	<!-- REMOVE_END -->
+				 		<!-- TAB_LIST_START -->
+				 		<!-- TAB_LIST_END -->
+						],
+		        getChildren: function(object){
+		        	return this.query({parent: object.id});
+		        	}
+			});
+			
+			console.log("Created nav tree Object Store");
+		});
+	});
+	
+	/* Create the top-level layout container. */
+	var priority_layout = deps();
 	require(["dijit/layout/BorderContainer", "dojo/ready"], function(BorderContainer, ready){
-		ready(function(){
+		ready(priority_layout, function(){
 			// Create the main layout BorderContainer.
+			console.log("Creating BorderContainer");
 			appLayout = new BorderContainer({
 				design: "headline"
 			}, "appLayout");
+			console.log("Created BorderContainer");
 		});
 	});
-    require(["dojo/ready", "dijit/registry", /*"dijit/layout/BorderContainer",*/ "dijit/layout/ContentPane",
-             "dijit/layout/StackContainer", "dijit/Tree", "dojo/query",
-             "dijit/tree/ObjectStoreModel", "dojo/store/Memory", "dojo/aspect", "dojo/dom-geometry", "./js/coflo.resizer.js", "dojo/on", "dijit/Destroyable"],
-             	function(ready, registry, /*BorderContainer,*/ ContentPane, StackContainer, Tree, query, 
-             			ObjectStoreModel, Memory, aspect, domGeom)
+
+ 	/* Create the stack container. */
+ 	var priority_center_stack = deps(priority_layout);
+ 	require([
+			"dijit/layout/StackContainer",
+            "dijit/layout/ContentPane",
+			"dojo/aspect",
+			"dojo/query",
+            "dojo/dom-geometry",
+            "./js/coflo.resizer.js",
+			"dojo/ready"
+ 	        ],
+ 	        function(StackContainer, ContentPane, aspect, query, domGeom, dummy, ready)
+ 	{
+ 		ready(priority_center_stack, function()
+ 		{
+			// Create the main content stack.
+			console.log("Creating center stack, priority="+priority_center_stack);
+			cfgstack = new StackContainer({
+				region: "center",
+				id: "cfgstack",
+				/*tabPosition: "bottom",*/
+				"class": "centerPanel"}, "cfgstack");
+			
+			// Create a resizing function object.
+			var resize_hook = function(changeSize, resultSize){
+				console.log("resize hook called");
+				// Find the contained svg.
+				var the_this = this.domNode;
+				var the_svg = query(".svg-cfg", this.domNode);
+				if(the_svg.length != 1)
+				{
+					console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
+				}
+				else
+				{
+					// Resize the one and only svg object we've found.
+					fitToContainer(the_svg[0], this.domNode);
+				}
+			};
+			
+			// Get a list of all the main content divs and create ContentPanes for them.
+			var panes = query(".cfg-pane");
+			panes.forEach(function(node, index, nodeList)
+			{
+				var cp1 = new ContentPane({
+					title: "Title Here"
+				}, node);
+				
+				// Add a resize hook which will fit the SVG to the pane.
+				aspect.after(cp1, "resize", resize_hook, true);
+				
+				cfgstack.addChild(cp1);
+			});
+			// Add the widget we just created to the stack.
+			appLayout.addChild(cfgstack);
+			console.log("Created center stack, priority="+priority_center_stack);
+ 		});
+ 	});
+ 	
+	/* Create the navigation pane. */
+	var priority_nav_pane = deps(priority_layout, priority_nav_store, priority_center_stack);
+ 	require([
+			"dijit/tree/ObjectStoreModel",
+			"dijit/Tree",
+			"dijit/layout/ContentPane",
+			"dojo/ready"],
+			function(
+				ObjectStoreModel,
+				Tree,
+				ContentPane,
+				ready){
+ 		ready(priority_nav_pane, function(){
+		console.log("Creating Nav pane, priority="+priority_nav_pane);
+		var myModel = new ObjectStoreModel({
+			store: myStore,
+			query: {id: 'all_files'},
+			mayHaveChildren: function(item){
+				return item.type != "function";
+				}
+			});
+		
+		var myTree = new Tree({
+			model: myModel,
+			id: "myTree",
+			onOpenClick: true,
+			onClick: function(item){
+				if(item.type == "function")
+				{
+					console.log('Tab with tabid='+item.tabid+' was clicked.');
+					cfgstack.selectChild(item.tabid, false);
+				}
+			}
+		}, "my_tree");
+		
+		// Create and add the navigation sidebar.
+		navPane = new ContentPane({
+			region: "left",
+			id: "nav_pane",
+			"class": "edgePanel",
+			/*content: myTree,*/ /*"Sidebar content (left)",*/
+			splitter: true}, "nav_pane");
+		navPane.addChild(myTree);
+		appLayout.addChild(navPane);
+		
+		console.log("Created Nav pane, priority="+priority_nav_pane);
+		});
+	}); 	
+ 	
+ 	var priority_finish = deps(priority_center_stack, priority_nav_pane);
+	require(["dojo/ready",
+             "dijit/layout/ContentPane"
+			],
+             	function(ready, ContentPane)
              	{
-    				ready(function()
+    				ready(priority_finish, function()
 					{
-						// Create the main layout BorderContainer.
-						/*appLayout = new BorderContainer({
-							design: "headline"
-						}, "appLayout");*/
-						
 						// Create and add the Header pane.
+						console.log("Running last ready(), priority="+priority_finish);
 						var headerPane = new ContentPane({
 							region: "top",
 							"class": "edgePanel",
-							content: "Header content (top)"
+							/*content: "Header content (top)"*/
 							}, "header_pane");
 						appLayout.addChild(headerPane);
 						
-						// Create an in-memory store for the tree.
-						var myStore = new Memory({
-							data: [
-						            { id: 'all_files', name:'All Files', type:'theroot' },
-<!-- REMOVE_START -->
-						            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
-						            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
-									{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
-						            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
-									{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' },
-<!-- REMOVE_END -->
-							 		<!-- TAB_LIST_START -->
-							 		<!-- TAB_LIST -->
-        							],
-					        getChildren: function(object){
-					        	return this.query({parent: object.id});
-					        	}
-							});
-						
-						var myModel = new ObjectStoreModel({
-							store: myStore,
-							query: {id: 'all_files'},
-							mayHaveChildren: function(item){
-								return item.type != "function";
-								}
-							});
-						
-						var myTree = new Tree({
-							model: myModel,
-							id: "myTree",
-							onOpenClick: true,
-							onClick: function(item){
-								if(item.type == "function")
-								{
-									console.log('Tab with tabid='+item.tabid+' was clicked.');
-									cfgstack.selectChild(item.tabid, false);
-								}
-							}
-						}, "my_tree");
-						
-						// Create and add the navigation sidebar.
-						navPane = new ContentPane({
-							region: "left",
-							id: "nav_pane",
-							"class": "edgePanel",
-							/*content: myTree,*/ /*"Sidebar content (left)",*/
-							splitter: true}, "nav_pane");
-						navPane.addChild(myTree);
-						appLayout.addChild(navPane);
-						
-						// Create the main content stack.
-						var cfgstack = new StackContainer({
-							region: "center",
-							id: "cfgstack",
-							tabPosition: "bottom",
-							"class": "centerPanel"}, "cfgstack");
-						
-						// Create a resizing function object.
-						var resize_hook = function(changeSize, resultSize){
-							console.log("resize hook called");
-							// Find the contained svg.
-							var the_this = this.domNode;
-							var the_svg = query(".svg-cfg", this.domNode);
-							if(the_svg.length != 1)
-							{
-								console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
-							}
-							else
-							{
-								fitToContainer(the_svg, this.domNode);
-							}
-						};
-						
-						// Get a list of all the main content divs and create ContentPanes for them.
- 						var panes = query(".cfg-pane");
- 						panes.forEach(function(node, index, nodeList)
- 						{
- 							var cp1 = new ContentPane({
- 								title: "Title Here"
- 							}, node);
- 							
- 							// Add a resize hook which will fit the SVG to the pane.
-							//aspect.after(cp1, "resize", resize_hook, true);
- 							
- 							cfgstack.addChild(cp1);
- 						});
-						appLayout.addChild(cfgstack);
-						
+						// Start the CoFlo report browser app.
 						appLayout.startup();
+						console.log("Ran last ready(), priority="+priority_finish);
 					});
              	});
     </script>
@@ -193,25 +281,16 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- TAB_PANEL_LIST_START -->
  	<!-- TAB_PANEL_LIST_END -->
 
-<!-- <div id="tabs" class="ui-tabs"> -->
-<!-- 	<ul> -->
- 		<!-- REMOVE_START -->
-<!-- 		<li><a href="#tabs-1">decode_switches()</a></li> -->
-<!-- 		<li><a href="#tabs-2">die()</a></li> -->
-<!-- 		<li><a href="#tabs-3">Another die()</a></li> -->
- 		<!-- REMOVE_END -->
-		
-
-<!-- 	</ul> -->
-	
-<!-- DOJO -->
 	</div>
+	
 	<!-- Div for the header pane. -->
-	<div id="header_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
-		data-dojo-props="region: 'top'">Header content (top)</div>
-	<div id="nav_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
-		data-dojo-props="region: 'left', splitter: true">
-		Sidebar content (left)
+	<div id="header_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
+		<h1>CoFlo Analysis Results</h1>
+	</div>
+	
+	<!-- Div for the navigation pane. -->
+	<div id="nav_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
+		<h2>Navigation:</h2>
 		<!-- Div for the tree control in the nav pane -->
 		<div id="my_tree"></div>
 	</div>

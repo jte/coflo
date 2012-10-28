@@ -18,7 +18,11 @@
  /**
   * @file Template for the top level css file.
   */
-  
+ 
+/**
+ * Class for use on svg <object>s.  Changes them to blocks and sets the margins
+ * so that the object is centered in its container.
+ */ 
 .svg-cfg
 {
 	display:block;

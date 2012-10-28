@@ -217,11 +217,11 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	FileTemplate nav_tree_table_entry(f_str_template_nav_tree_file_entry);
 
 	// Create a unique ID for this file which can be referenced by the other entries in the nav tree.
-	std::string unique_file_id = std::string("file_") + m_source_filename.c_str();
-	unique_file_id = regex_replace(unique_file_id, "[./]", "_");
+	std::string unique_file_id = std::string("file_") + m_source_filename.generic_string();
+	unique_file_id = regex_replace(unique_file_id, "[./-]", "_");
 
 	nav_tree_table_entry.regex_replace("@UNIQUE_FILE_ID@", unique_file_id);
-	nav_tree_table_entry.regex_replace("@FILENAME@", m_source_filename.filename().c_str());
+	nav_tree_table_entry.regex_replace("@FILENAME@", m_source_filename.filename().generic_string());
 
 	// Now insert it into the navigation tree.
 	index_html_out.regex_insert_before("<!-- TAB_LIST_END -->", nav_tree_table_entry.str());
@@ -230,7 +230,6 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	int i = 1;
 	BOOST_FOREACH(Function* fp, m_function_defs)
 	{
-		// Generate the tab list item for this function.
 		ss.str("");
 		ss << i;
 		/*if(!fp->IsCalled())
@@ -238,6 +237,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 			ss << " (possible entry point)";
 		}*/
 
+		// Generate the tab list item for this function.
 		FileTemplate nav_tree_table_entry_function(f_str_template_nav_tree_function_entry);
 		nav_tree_table_entry_function.regex_replace("@UNIQUE_FILE_ID@", unique_file_id);
 		nav_tree_table_entry_function.regex_replace("@IDENTIFIER_FUNCTION@", fp->GetIdentifier());
@@ -264,7 +264,7 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 										const std::vector< std::string > &include_paths)
 {
 	// Do the filter first.
-	/// \todo Add the prefilter functionality.
+	/// @todo Add the prefilter functionality.
 	
 	// Create the compile command.
 	std::string params;
@@ -287,6 +287,7 @@ void TranslationUnit::CompileSourceFile(const std::string& file_path, const std:
 	if(compile_retval != 0)
 	{
 		std::cerr << "ERROR: Compile string returned nonzero." << std::endl;
+		/// @todo This is rather inelegant error handling.
 		exit(1);
 	}
 }
