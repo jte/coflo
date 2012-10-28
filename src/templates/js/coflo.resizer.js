@@ -24,14 +24,21 @@
  * 
  * @param DOMElement The HTML DOM element from which to obtain the intrinsic width and height.
  *  
- * @return .width and .height in pixels.
+ * @return .width and .height of @a DOMElement in pixels.
  */
-function getIntrinsicDimensions(DOMElement)
+function getIntrinsicDimensions( DOMElement )
 {
 	var obj = DOMElement;
 	// reference to the SVG document
-	var svgdoc = obj.contentDocument; 
-	 // Get the SVG element
+	var svgdoc = obj.contentDocument;
+	
+	// Make sure the svg is loaded.
+	if(svgdoc == null)
+	{
+		return { width: 10, height: 10 };
+	}
+	
+	// Get the SVG element
 	var svgelem = svgdoc.documentElement;
 	/// @todo This is what dot assumes by default.  I'm not sure if we should assume this or determine it if possible.
 	var current_dpi = 96.0;
@@ -44,57 +51,49 @@ function getIntrinsicDimensions(DOMElement)
 
 	// Scale and return the bounding box.
 	return { width: bbox.width*pts_to_pixels, height: bbox.height*pts_to_pixels };
-
 }
 
 
 
 /**
- * Fit all display:block objects matching the given selector to their container's width.
+ * Fit the passed @a object to the width of @a container_obj, maintaining aspect ratio.
+ * Does not change the size of @a object if its intrinsic width is already less than the width of
+ * @a container_obj.
+ * 
+ * @param object The object to potentially resize.
+ * @param container_obj The container to fit @a object to.
  */
-function fitToContainer( objects, container_obj )
+function fitToContainer( object, container_obj )
 {
-	var the_selected_objects = objects;
-	the_selected_objects.forEach(function(node, index, nodeList)
-	{
-		//var the_obj = $(this);
-		//var the_obj_container = $(container_obj);
-		var the_obj = node;
-		var the_obj_container = container_obj;
-		
-		//var width_obj = the_obj.outerWidth(true);
-		
-		// Get the real dimensions of the svg.
-		//var intrinsic_dims = getIntrinsicDimensions($(this)[0]);
-		var intrinsic_dims = getIntrinsicDimensions(node);
-		var width_obj = intrinsic_dims.width;
-		// Get the width of the content area of the container.
-		// Note that in jQuery, .width() is correct here, and not .innerWidth(), which includes the padding, somewhat
-		// contrary to what one might expect, given the CSS definition of the width attribute.
-		//var width_obj_container = the_obj_container.width();
-		var domGeom = require("dojo/dom-geometry");
-		var width_obj_container = domGeom.getContentBox(the_obj_container).w;
-		
-		var width_new = width_obj;
-		
-		if(width_obj_container < 10)
-		{
-			// Width is so small that nothing would be visible.  Don't resize.
-			// We'll get 0 here on at least IE9 while resizing the browser window.
-			width_new = 10;
-		}
-		else if(width_obj > width_obj_container)
-		{
-			/* Object is wider than its container.  Shrink it to fit. */
-			width_new = width_obj_container;
+	var the_obj_container = container_obj;
+	
+	// Get the intrinsic dimensions of the svg.
+	var intrinsic_dims = getIntrinsicDimensions(object);
+	var width_obj = intrinsic_dims.width;
 
-		}
-		/// @todo Not sure which way is better.
-		//the_obj.outerWidth( width_obj_container );
-		//the_obj.css({"width": width_obj_container});
-		domGeom.setContentSize(the_obj, {w:width_new});
-		
-		console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
-	});
+	// Get the width of the content area of the container.
+	var domGeom = require("dojo/dom-geometry");
+	var width_obj_container = domGeom.getContentBox(the_obj_container).w;
+	
+	var width_new = width_obj;
+	
+	if(width_obj_container < 10)
+	{
+		// Width is so small that nothing would be visible.  Don't resize.
+		// We'll get 0 here on at least IE9 while resizing the browser window.
+		width_new = 10;
+	}
+	else if(width_obj > width_obj_container)
+	{
+		/* Object is wider than its container.  Shrink it to fit. */
+		width_new = width_obj_container;
+
+	}
+	/// @todo Not sure which way is better.
+	//the_obj.outerWidth( width_obj_container );
+	//the_obj.css({"width": width_obj_container});
+	domGeom.setContentSize(object, {w:width_new});
+	
+	console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 }
 
