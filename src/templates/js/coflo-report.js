@@ -14,45 +14,26 @@
  * You should have received a copy of the GNU General Public License along with
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
- /**
-  * @file Template for the top level css file.
-  */
- 
+
 /**
- * Class for use on svg <object>s.  Changes them to blocks and sets the margins
- * so that the object is centered in its container.
- */ 
-.svg-cfg
-{
-	display:block;
-	/* Center the svg in its container. */
-	margin-left:auto;
-	margin-right:auto;
-	width: 100%;
-}
+ * Helper functions for the generated CoFlo report.
+ */
 
-/* Styling for the Dojo widgets */
-html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-}
-
-#appLayout {
-    height: 100%;
-}
-#nav-pane {
-    width: 14em;
-}
-
-.claro .demoLayout .edgePanel {
-    background-color: #d0e9fc;
-}
-
-#cfg-stack
-{
-	width: 100%;
-	height: 100%;
-}
+define(["dojo/_base/declare",
+        "dojo/dom-geometry"],
+        function(declare, domGeom){
+	var CoFloReport = declare(null,
+		{
+			constructor: function(){
+				console.debug("CoFloReport constructor called");
+			}
+		});
+	
+	CoFloReport.something = "some text";
+	CoFloReport.aMethod = function(object, container_obj){
+		// Get the width of the container object.		
+		var width_obj_container = domGeom.getContentBox(container_obj).w;
+				return "aMethod called, container width=" + width_obj_container;
+				}
+	return CoFloReport;
+});

@@ -30,20 +30,30 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 	<!-- Set up the Dojo configuration.  We must do this in a separate <script> block prior to loading dojo.js. -->
 	<script>
+		var dojo_subdir = "dojo-release-1.8.1-src/"; 
 		dojoConfig = 
 		{
+				baseUrl: "js/",
+				tlmSiblingOfDojo: false,
+				packages: [
+					{ name: "dojo", location: "dojo-release-1.8.1-src/dojo" },
+					{ name: "dijit", location: "dojo-release-1.8.1-src/dijit" },
+					{ name: "dojox", location: "dojo-release-1.8.1-src/dojox" },
+					{ name: "util", location: "dojo-release-1.8.1-src/util" }
+				],
 				has: {
 					"dojo-firebug": true,
 					"dojo-debug-messages": true
 					},
-					parseOnLoad: false,
-					async: true    
+				parseOnLoad: false,
+				async: true    
 		};
 	</script>
-	<!-- load Dojo and provide config via the "data-dojo-config" data attribute -->
+	<!-- Load Dojo -->
+	<!-- <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js"></script> -->
 	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
+	
 	<script>
-
 	// The BorderContainer widget which will be our top-level container for the individual panes.
 	var appLayout;
 	// The ObjectStore which contains the data for the navigation tree control.
@@ -125,6 +135,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
  	/* Create the stack container. */
  	var priority_center_stack = deps(priority_layout);
  	require([
+ 	        "coflo-report",
 			"dijit/layout/StackContainer",
             "dijit/layout/ContentPane",
 			"dojo/aspect",
@@ -133,7 +144,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             "./js/coflo.resizer.js",
 			"dojo/ready"
  	        ],
- 	        function(StackContainer, ContentPane, aspect, query, domGeom, dummy, ready)
+ 	        function(CoFloReport, StackContainer, ContentPane, aspect, query, domGeom, dummy, ready)
  	{
  		ready(priority_center_stack, function()
  		{
@@ -142,8 +153,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			cfgstack = new StackContainer({
 				region: "center",
 				id: "cfgstack",
-				/*tabPosition: "bottom",*/
-				"class": "centerPanel"}, "cfgstack");
+				"class": "centerPanel"}, "cfg-stack");
 			
 			// Create a resizing function object.
 			var resize_hook = function(changeSize, resultSize){
@@ -158,7 +168,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 				else
 				{
 					// Resize the one and only svg object we've found.
-					fitToContainer(the_svg[0], this.domNode);
+					var intrinsic_width = getIntrinsicDimensions(the_svg[0]).width;
+					var new_width = Math.min(intrinsic_width, changeSize.w);
+					domGeom.setContentSize(the_svg[0], {w:new_width});
+					//fitToContainer(the_svg[0], this.domNode);
+					console.log(">>" + CoFloReport.something + CoFloReport.aMethod(the_svg[0], this));
 				}
 			};
 			
@@ -166,14 +180,22 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			var panes = query(".cfg-pane");
 			panes.forEach(function(node, index, nodeList)
 			{
-				var cp1 = new ContentPane({
-					title: "Title Here"
+				var cp = new ContentPane(
+				{
+					title: "Title Here",
+					"class": "contentPane",
+					preload: true,
+					onLoad: function(data)
+					{
+						console.log("on load");
+					}
+					
 				}, node);
 				
 				// Add a resize hook which will fit the SVG to the pane.
-				aspect.after(cp1, "resize", resize_hook, true);
+				cp.own(aspect.after(cp, "resize", resize_hook, true));
 				
-				cfgstack.addChild(cp1);
+				cfgstack.addChild(cp);
 			});
 			// Add the widget we just created to the stack.
 			appLayout.addChild(cfgstack);
@@ -184,11 +206,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	/* Create the navigation pane. */
 	var priority_nav_pane = deps(priority_layout, priority_nav_store, priority_center_stack);
  	require([
+ 	         "coflo-report",
 			"dijit/tree/ObjectStoreModel",
 			"dijit/Tree",
 			"dijit/layout/ContentPane",
 			"dojo/ready"],
 			function(
+				CoFloReport,
 				ObjectStoreModel,
 				Tree,
 				ContentPane,
@@ -214,7 +238,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 					cfgstack.selectChild(item.tabid, false);
 				}
 			}
-		}, "my_tree");
+		}, "nav-tree");
 		
 		// Create and add the navigation sidebar.
 		navPane = new ContentPane({
@@ -222,7 +246,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			id: "nav_pane",
 			"class": "edgePanel",
 			/*content: myTree,*/ /*"Sidebar content (left)",*/
-			splitter: true}, "nav_pane");
+			splitter: true}, "nav-pane");
+		
+		// Add the Digit tree control to the nav pane.
 		navPane.addChild(myTree);
 		appLayout.addChild(navPane);
 		
@@ -242,7 +268,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 						console.log("Running last ready(), priority="+priority_finish);
 						var headerPane = new ContentPane({
 							region: "top",
-							"class": "edgePanel",
+							"class": "edgePanel"
 							/*content: "Header content (top)"*/
 							}, "header_pane");
 						appLayout.addChild(headerPane);
@@ -262,24 +288,24 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             data-dojo-props="design: 'headline'">
 
 	<!-- The StackContainer making up the central panel. -->
-	<div id="cfgstack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
+	<div id="cfg-stack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
 	    data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
 	
-	<!-- The individual panes. -->
-	<!-- REMOVE_START -->
-	<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
-		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	</div>
-	<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
-	    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
-	</div>
-	<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die">
-	    <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	</div>
-	<!-- REMOVE_END -->
-	
-	<!-- TAB_PANEL_LIST_START -->
- 	<!-- TAB_PANEL_LIST_END -->
+		<!-- The individual panes. -->
+		<!-- REMOVE_START -->
+		<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
+			<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+		</div>
+		<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
+		    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+		</div>
+		<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die">
+		    <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+		</div>
+		<!-- REMOVE_END -->
+		
+		<!-- TAB_PANEL_LIST_START -->
+	 	<!-- TAB_PANEL_LIST_END -->
 
 	</div>
 	
@@ -289,13 +315,12 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	</div>
 	
 	<!-- Div for the navigation pane. -->
-	<div id="nav_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
-		<h2>Navigation:</h2>
+	<div id="nav-pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
+		<!-- <h2>Navigation:</h2> -->
 		<!-- Div for the tree control in the nav pane -->
-		<div id="my_tree"></div>
+		<div id="nav-tree"></div>
 	</div>
 </div>
-<!-- DOJO -->
 
 </body>
 </html>

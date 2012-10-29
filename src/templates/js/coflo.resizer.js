@@ -35,7 +35,7 @@ function getIntrinsicDimensions( DOMElement )
 	// Make sure the svg is loaded.
 	if(svgdoc == null)
 	{
-		return { width: 10, height: 10 };
+		return { width: 1000, height: 1000 };
 	}
 	
 	// Get the SVG element
