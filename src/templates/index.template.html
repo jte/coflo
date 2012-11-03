@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <!--
 Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 
@@ -12,39 +12,49 @@ Software Foundation.
 CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License along with
 CoFlo.  If not, see http://www.gnu.org/licenses/.
 -->
 <head>
-	<meta charset="utf-8">
-
-	<title>@TITLE@</title>
+	<title>TITLE</title>
+	
+	<meta name="generator" content="CoFlo 0.0.5">
+	<meta http-equiv="text/html; charset=UTF-8">
 	
 	<!-- Dojo theme stylesheet. -->
 	<!-- <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen"> -->
-	<link rel="stylesheet" href="js/dojo-release-1.8.1-src/dijit/themes/claro/claro.css" media="screen">
-
+	<link rel="stylesheet" type="text/css" href="js/dojo-release-1.8.1-src/dijit/themes/claro/claro.css">
+	
 	<!-- CoFlo's CSS stylesheet -->
-	<link rel="stylesheet" href="css/index.template.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="css/index.template.css">
 
 	<!-- Set up the Dojo configuration.  We must do this in a separate <script> block prior to loading dojo.js. -->
 	<script>
-		var dojo_subdir = "dojo-release-1.8.1-src/"; 
+		var path_of_this_html_file = location.pathname.replace(/\/[^/]+$/, '');
+		var url_of_this_files_directory = document.URL.replace(/[\\]/g, '/').replace(/\/[^/]+$/, '');
+		console.log("document.URL=" + document.URL);
+		console.log("url_of_this_files_directory="+url_of_this_files_directory);
+		console.log("path_of_this_html_file="+path_of_this_html_file);
+		console.log("Original document.domain=" + document.domain);
 		dojoConfig = 
 		{
-				baseUrl: "js/",
+				baseUrl: url_of_this_files_directory + /*path_of_this_html_file +*/ "/js/",
 				tlmSiblingOfDojo: false,
 				packages: [
 					{ name: "dojo", location: "dojo-release-1.8.1-src/dojo" },
 					{ name: "dijit", location: "dojo-release-1.8.1-src/dijit" },
 					{ name: "dojox", location: "dojo-release-1.8.1-src/dojox" },
-					{ name: "util", location: "dojo-release-1.8.1-src/util" }
+					{ name: "util", location: "dojo-release-1.8.1-src/util" },
+					{ name: "coflo-report", location: "coflo", main: "coflo-report" }
 				],
 				has: {
 					"dojo-firebug": true,
 					"dojo-debug-messages": true
 					},
+				//requestProvider: "dojo/request/iframe",
+				/* This should be an absolute path or problems arise with cross-site scripting. */
+				dojoBlankHtmlUrl: url_of_this_files_directory + '/js/dojo-release-1.8.1-src/dojo/resources/blank.html',
 				parseOnLoad: false,
 				async: true    
 		};
@@ -52,6 +62,16 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- Load Dojo -->
 	<!-- <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js"></script> -->
 	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
+	
+	<script>
+	// Dump the Dojo configuration to the console.
+	require(["dojo/json", "dojo/_base/config", "dojo/domReady!"],
+			function(JSON, config)
+			{    
+				// Dump the Dojo configuration to the console.
+				console.log(JSON.stringify(config, true));
+			});
+	</script> 
 	
 	<script>
 	// The BorderContainer widget which will be our top-level container for the individual panes.
@@ -62,6 +82,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	var navPane;
 	// The central pane.
 	var cfgstack;
+	
+	function handleError(error){
+		  console.log(error.src, error.id);
+		}
+	require.on("error", handleError);
 	
 	/**
 	 * Function for computing the priority number for the below ready() calls based on 
@@ -144,7 +169,14 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             "./js/coflo.resizer.js",
 			"dojo/ready"
  	        ],
- 	        function(CoFloReport, StackContainer, ContentPane, aspect, query, domGeom, dummy, ready)
+ 	        function(CoFloReport,
+ 	        		StackContainer,
+ 	        		ContentPane,
+ 	        		aspect,
+ 	        		query,
+ 	        		domGeom,
+ 	        		dummy,
+ 	        		ready)
  	{
  		ready(priority_center_stack, function()
  		{
@@ -159,16 +191,18 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			var resize_hook = function(changeSize, resultSize){
 				console.log("resize hook called");
 				// Find the contained svg.
-				var the_this = this.domNode;
-				var the_svg = query(".svg-cfg", this.domNode);
+				var theDOMNode = this.domNode;
+				var the_svg = query(".svg-cfg", theDOMNode);
 				if(the_svg.length != 1)
 				{
+					// Should only be exactly one SVG in the pane.
 					console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
 				}
 				else
 				{
 					// Resize the one and only svg object we've found.
 					var intrinsic_width = getIntrinsicDimensions(the_svg[0]).width;
+					var pane_width = domGeom.getContentBox(theDOMNode).w;
 					var new_width = Math.min(intrinsic_width, changeSize.w);
 					domGeom.setContentSize(the_svg[0], {w:new_width});
 					//fitToContainer(the_svg[0], this.domNode);
@@ -189,9 +223,18 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 					{
 						console.log("on load");
 					}
-					
 				}, node);
 				
+				/*
+				cp.set("onDownloadEnd", function(){
+				    console.log("Download complete!");
+				});
+				if(index == 0)
+				{
+					//cp.set('content','<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>');
+					cp.set('content','<embed src="die.svg" class="svg-cfg" type="image/svg+xml" />');
+				}
+				*/
 				// Add a resize hook which will fit the SVG to the pane.
 				cp.own(aspect.after(cp, "resize", resize_hook, true));
 				
@@ -256,7 +299,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		});
 	}); 	
  	
- 	var priority_finish = deps(priority_center_stack, priority_nav_pane);
+ 	var priority_finish = deps(priority_center_stack, priority_nav_pane, priority_layout);
 	require(["dojo/ready",
              "dijit/layout/ContentPane"
 			],
@@ -294,7 +337,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		<!-- The individual panes. -->
 		<!-- REMOVE_START -->
 		<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
-			<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+			<!-- <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
+			<embed class="svg-cfg" src="die.svg" type="image/svg+xml" />
 		</div>
 		<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
 		    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>

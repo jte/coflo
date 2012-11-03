@@ -29,7 +29,8 @@
 	/* Center the svg in its container. */
 	margin-left:auto;
 	margin-right:auto;
-	width: 100%;
+	/*width: 100%;*/
+	/*height: 100%;*/
 }
 
 /* Styling for the Dojo widgets */
