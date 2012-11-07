@@ -15,45 +15,66 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
  
- /**
-  * @file Template for the top level css file.
-  */
- 
 /**
- * Class for use on svg <object>s.  Changes them to blocks and sets the margins
- * so that the object is centered in its container.
- */ 
+ * @file Template for the top level css file.
+ */
+
+/**
+ *	Style for jQuery UI Layout Plug-in content panes. 
+ */
+.ui-layout-content 
+{
+	/* This makes the content divs add a scrollbar when the contents get too big. */
+	overflow:		auto;
+	/* Don't put a border on the top edge of the content pane, the tab buttons already 
+	have a border on the bottom edge. */
+	border-top:		0 !important;
+}
+
+/**
+ *	Tab theme adjustments required for the center panel's tab control.
+ */
+.ui-tabs-nav li
+{
+	white-space:	nowrap;
+}
+.ui-tabs-nav li a
+{
+	font-size:		1em !important;
+	padding:		4px 1.5ex 3px !important;
+}
+.ui-tabs-panel
+{
+	font-size:		1em !important;
+	padding:		0 1em !important;
+}
+
+/**
+ *	Styles for the center pane and the tab control it contains.
+ */
+.ui-layout-pane-center
+{
+	/* No padding around the tab control, we want it to fill the pane. */
+	padding:	0;
+	/* Clip any contents which overflow the boundaries. */
+	overflow:	hidden;
+}
+.ui-layout-pane-center .ui-tabs-nav
+{
+	/* Remove border and rounded corners so the tabs fill the pane. */
+	border: 0;
+	padding-bottom:	0 !important;
+	/** @note CSS3, requires IE9+ */
+	border-radius:		0;
+}
+
+/**
+ * Style for centering svg <object>s in their containing div.
+ */
 .svg-cfg
 {
 	display:block;
 	/* Center the svg in its container. */
 	margin-left:auto;
 	margin-right:auto;
-	/*width: 100%;*/
-	/*height: 100%;*/
-}
-
-/* Styling for the Dojo widgets */
-html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-}
-
-#appLayout {
-    height: 100%;
-}
-#nav-pane {
-    width: 14em;
-}
-
-.claro .demoLayout .edgePanel {
-    background-color: #d0e9fc;
-}
-
-#cfg-stack
-{
-	width: 100%;
-	height: 100%;
 }
