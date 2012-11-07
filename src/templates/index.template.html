@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <!--
 Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
 
@@ -12,359 +12,252 @@ Software Foundation.
 CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License along with
 CoFlo.  If not, see http://www.gnu.org/licenses/.
 -->
 <head>
-	<title>TITLE</title>
+	<meta charset="utf-8">
+
+	<title>Insert title here</title>
+
+	<!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"> -->
+	<!-- The jQuery UI stylesheet. -->
+	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 	
-	<meta name="generator" content="CoFlo 0.0.5">
-	<meta http-equiv="text/html; charset=UTF-8">
+	<!-- The jQuery UI Layout Plug-in's stylesheet. -->
+	<link rel="stylesheet" type="text/css" href="css/layout-default-latest.css">
 	
-	<!-- Dojo theme stylesheet. -->
-	<!-- <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen"> -->
-	<link rel="stylesheet" type="text/css" href="js/dojo-release-1.8.1-src/dijit/themes/claro/claro.css">
-	
-	<!-- CoFlo's CSS stylesheet -->
+	<!-- CoFlo's stylesheet. -->
 	<link rel="stylesheet" type="text/css" href="css/index.template.css">
-
-	<!-- Set up the Dojo configuration.  We must do this in a separate <script> block prior to loading dojo.js. -->
+	
+	
+	<!-- SCRIPTS -->
+	<!-- CoFlo's main support script. -->
+	<script src="js/coflo/coflo-report.js"></script>
+	<!-- 
+	@todo Put this or something like it back when we use local copies of these libraries.
+	<script src="js/jquery-1.8.2.js"></script>
+	<script src="js/jquery-ui-1.9.0.custom.min.js"></script>
+	-->
+	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+	<script src="js/jquery.layout-latest.js"></script>
+	<script src="js/jstree_pre1.0_fix_1/jquery.jstree.js"></script>
+	<script src="js/coflo.resizer.js"></script>
 	<script>
-		var path_of_this_html_file = location.pathname.replace(/\/[^/]+$/, '');
-		var url_of_this_files_directory = document.URL.replace(/[\\]/g, '/').replace(/\/[^/]+$/, '');
-		console.log("document.URL=" + document.URL);
-		console.log("url_of_this_files_directory="+url_of_this_files_directory);
-		console.log("path_of_this_html_file="+path_of_this_html_file);
-		console.log("Original document.domain=" + document.domain);
-		dojoConfig = 
+	$(document).ready(function() {
+		
+		/**
+		 * Event handler callback for fitting the active svg to the tab control when the window is resized.
+		 */
+		function onWindowResize()
 		{
-				baseUrl: url_of_this_files_directory + /*path_of_this_html_file +*/ "/js/",
-				tlmSiblingOfDojo: false,
-				packages: [
-					{ name: "dojo", location: "dojo-release-1.8.1-src/dojo" },
-					{ name: "dijit", location: "dojo-release-1.8.1-src/dijit" },
-					{ name: "dojox", location: "dojo-release-1.8.1-src/dojox" },
-					{ name: "util", location: "dojo-release-1.8.1-src/util" },
-					{ name: "coflo-report", location: "coflo", main: "coflo-report" }
-				],
-				has: {
-					"dojo-firebug": true,
-					"dojo-debug-messages": true
+			// Get all tab controls.
+			var tab_ctls = $("#tabs");
+			
+			tab_ctls.each(function(){
+				// Get the active tab.
+				var active_tab_number = $(this).tabs("option", "active");
+				//console.log( "Active tab:" + active_tab_number +"\n");
+				var active_tab_panel = $(this).find(".ui-tabs-panel").eq(active_tab_number);
+				// Get the svg <object> for this tab.
+				var svg = active_tab_panel.find(".svg-cfg");
+				
+				// Fit it to its container.
+				fitToContainer(svg, active_tab_panel);
+			});
+			
+			console.log("window resized");
+		}
+		
+		/**
+		 * Event handler callback for fitting the svg to the tab control when a new tab is selected.
+		 */
+		function onTabsShow(event, ui)
+		{
+			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
+			var svg = ui.newPanel.find(".svg-cfg");
+			
+			// Fit it to its container.
+			fitToContainer(svg, ui.newPanel);
+			
+			console.log( "Active tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
+		}
+		
+		/// Initialize the tabs.
+		var center_pane_tabs = $( "#tabs" )
+			.bind("tabsactivate", onTabsShow)
+			.tabs();
+		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
+		//center_pane_tabs.bind("tabsactivate", onTabsShow);
+		
+		// Set up the nav pane's tree control.
+		var nav_tree = $("#nav_tree_id").jstree({
+			"types" : {
+				"valid_children" : [ "source_file" ],
+				"types" : {
+					"source_file" : {
+						"valid_children" : [ "function" ]
 					},
-				//requestProvider: "dojo/request/iframe",
-				/* This should be an absolute path or problems arise with cross-site scripting. */
-				dojoBlankHtmlUrl: url_of_this_files_directory + '/js/dojo-release-1.8.1-src/dojo/resources/blank.html',
-				parseOnLoad: false,
-				async: true    
-		};
-	</script>
-	<!-- Load Dojo -->
-	<!-- <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js"></script> -->
-	<script src="js/dojo-release-1.8.1-src/dojo/dojo.js"></script>
-	
-	<script>
-	// Dump the Dojo configuration to the console.
-	require(["dojo/json", "dojo/_base/config", "dojo/domReady!"],
-			function(JSON, config)
-			{    
-				// Dump the Dojo configuration to the console.
-				console.log(JSON.stringify(config, true));
-			});
-	</script> 
-	
-	<script>
-	// The BorderContainer widget which will be our top-level container for the individual panes.
-	var appLayout;
-	// The ObjectStore which contains the data for the navigation tree control.
-	var myStore;
-	// The navigation ContentPane widget.
-	var navPane;
-	// The central pane.
-	var cfgstack;
-	
-	function handleError(error){
-		  console.log(error.src, error.id);
-		}
-	require.on("error", handleError);
-	
-	/**
-	 * Function for computing the priority number for the below ready() calls based on 
-	 * the passed list of priority numbers of any ready() calls which must execute first.
-	 * 
-	 * @note I'm sure there's a better Dojo-specific way to do the equivalent of this, but afaict it's
-	 * to write your own AMD modules, and my JavaScript skills aren't to that point yet. 
-	 */
-	function deps()
-	{
-		// The base priority is 1000, which is the default Dojo priority given to require's ready() callback.
-		var result = 1000;
-		if(arguments.length == 0)
-		{
-			// Caller doesn't depend on any other ready callbacks, return the base priority.
-			return result;
-		}
-		for(var i=0; i<arguments.length; i++)
-		{
-			result = Math.max(result, arguments[i]);
-		}
-		// The priority is the max priority number of all dependencies, plus 1.
-		result += 1;
-		
-		return result;
-	}
-	
-	/* Create the Object Store which will back the navigation tree. */
-	var priority_nav_store = deps();
-	require(["dojo/store/Memory", "dojo/ready"], function(Memory, ready){
-		ready(priority_nav_store, function(){
-			
-			console.log("Creating nav tree Object Store");
-			
-			// Create an in-memory store for the nav tree.
-			myStore = new Memory({
-				data: [
-			            { id: 'all_files', name:'All Files', type:'theroot' },
-	<!-- REMOVE_START -->
-			            { id: 'file1_c', name:'file1.c', type:'file', parent: 'all_files' },
-			            { id: 'func1', tabid: 'tabs-1', name:'function1', type:'function', parent: 'file1_c' },
-						{ id: 'func2', tabid: 'tabs-2', name:'function2', type:'function', parent: 'file1_c' },
-			            { id: 'file2_c', name:'file2.c', type:'file', parent: 'all_files' },
-						{ id: 'func3', tabid: 'tabs-3', name:'function3', type:'function', parent: 'file2_c' }
-	<!-- REMOVE_END -->
-				 		<!-- TAB_LIST_START -->
-				 		<!-- TAB_LIST_END -->
-						],
-		        getChildren: function(object){
-		        	return this.query({parent: object.id});
-		        	}
-			});
-			
-			console.log("Created nav tree Object Store");
-		});
-	});
-	
-	/* Create the top-level layout container. */
-	var priority_layout = deps();
-	require(["dijit/layout/BorderContainer", "dojo/ready"], function(BorderContainer, ready){
-		ready(priority_layout, function(){
-			// Create the main layout BorderContainer.
-			console.log("Creating BorderContainer");
-			appLayout = new BorderContainer({
-				design: "headline"
-			}, "appLayout");
-			console.log("Created BorderContainer");
-		});
-	});
-
- 	/* Create the stack container. */
- 	var priority_center_stack = deps(priority_layout);
- 	require([
- 	        "coflo-report",
-			"dijit/layout/StackContainer",
-            "dijit/layout/ContentPane",
-			"dojo/aspect",
-			"dojo/query",
-            "dojo/dom-geometry",
-            "./js/coflo.resizer.js",
-			"dojo/ready"
- 	        ],
- 	        function(CoFloReport,
- 	        		StackContainer,
- 	        		ContentPane,
- 	        		aspect,
- 	        		query,
- 	        		domGeom,
- 	        		dummy,
- 	        		ready)
- 	{
- 		ready(priority_center_stack, function()
- 		{
-			// Create the main content stack.
-			console.log("Creating center stack, priority="+priority_center_stack);
-			cfgstack = new StackContainer({
-				region: "center",
-				id: "cfgstack",
-				"class": "centerPanel"}, "cfg-stack");
-			
-			// Create a resizing function object.
-			var resize_hook = function(changeSize, resultSize){
-				console.log("resize hook called");
-				// Find the contained svg.
-				var theDOMNode = this.domNode;
-				var the_svg = query(".svg-cfg", theDOMNode);
-				if(the_svg.length != 1)
-				{
-					// Should only be exactly one SVG in the pane.
-					console.warn("Found ", the_svg.length, " SVG(s) in ", this, ", expected 1.");
-				}
-				else
-				{
-					// Resize the one and only svg object we've found.
-					var intrinsic_width = getIntrinsicDimensions(the_svg[0]).width;
-					var pane_width = domGeom.getContentBox(theDOMNode).w;
-					var new_width = Math.min(intrinsic_width, changeSize.w);
-					domGeom.setContentSize(the_svg[0], {w:new_width});
-					//fitToContainer(the_svg[0], this.domNode);
-					console.log(">>" + CoFloReport.something + CoFloReport.aMethod(the_svg[0], this));
-				}
-			};
-			
-			// Get a list of all the main content divs and create ContentPanes for them.
-			var panes = query(".cfg-pane");
-			panes.forEach(function(node, index, nodeList)
-			{
-				var cp = new ContentPane(
-				{
-					title: "Title Here",
-					"class": "contentPane",
-					preload: true,
-					onLoad: function(data)
-					{
-						console.log("on load");
+				"function" : {
+						"valid_children" : [ "none" ]
+					},
+				"default" : {
+	                    "valid_children" : [ "default" ]
 					}
-				}, node);
-				
-				/*
-				cp.set("onDownloadEnd", function(){
-				    console.log("Download complete!");
-				});
-				if(index == 0)
+				},
+			},
+			
+			// Configuration for jsTree's Themeroller support.
+			themeroller :
 				{
-					//cp.set('content','<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>');
-					cp.set('content','<embed src="die.svg" class="svg-cfg" type="image/svg+xml" />');
-				}
-				*/
-				// Add a resize hook which will fit the SVG to the pane.
-				cp.own(aspect.after(cp, "resize", resize_hook, true));
+					// We'll use a "document" item for the files.
+					item_open : "ui-icon-document",
+					item_clsd : "ui-icon-document",
+					
+					// For functions, we'll use the gear icon.
+					item_leaf : "ui-icon-gear"
+				},
 				
-				cfgstack.addChild(cp);
-			});
-			// Add the widget we just created to the stack.
-			appLayout.addChild(cfgstack);
-			console.log("Created center stack, priority="+priority_center_stack);
- 		});
- 	});
- 	
-	/* Create the navigation pane. */
-	var priority_nav_pane = deps(priority_layout, priority_nav_store, priority_center_stack);
- 	require([
- 	         "coflo-report",
-			"dijit/tree/ObjectStoreModel",
-			"dijit/Tree",
-			"dijit/layout/ContentPane",
-			"dojo/ready"],
-			function(
-				CoFloReport,
-				ObjectStoreModel,
-				Tree,
-				ContentPane,
-				ready){
- 		ready(priority_nav_pane, function(){
-		console.log("Creating Nav pane, priority="+priority_nav_pane);
-		var myModel = new ObjectStoreModel({
-			store: myStore,
-			query: {id: 'all_files'},
-			mayHaveChildren: function(item){
-				return item.type != "function";
-				}
-			});
-		
-		var myTree = new Tree({
-			model: myModel,
-			id: "myTree",
-			onOpenClick: true,
-			onClick: function(item){
-				if(item.type == "function")
-				{
-					console.log('Tab with tabid='+item.tabid+' was clicked.');
-					cfgstack.selectChild(item.tabid, false);
-				}
+			// Docs say to list themeroller last.
+			"plugins" : ["html_data", "ui", "types", "themeroller"],
+			"core" : 
+			{
+				// Start with all files open.
+				"initially_open" : [ "#nav_tree_file_1" ]
 			}
-		}, "nav-tree");
-		
-		// Create and add the navigation sidebar.
-		navPane = new ContentPane({
-			region: "left",
-			id: "nav_pane",
-			"class": "edgePanel",
-			/*content: myTree,*/ /*"Sidebar content (left)",*/
-			splitter: true}, "nav-pane");
-		
-		// Add the Digit tree control to the nav pane.
-		navPane.addChild(myTree);
-		appLayout.addChild(navPane);
-		
-		console.log("Created Nav pane, priority="+priority_nav_pane);
 		});
-	}); 	
- 	
- 	var priority_finish = deps(priority_center_stack, priority_nav_pane, priority_layout);
-	require(["dojo/ready",
-             "dijit/layout/ContentPane"
-			],
-             	function(ready, ContentPane)
-             	{
-    				ready(priority_finish, function()
-					{
-						// Create and add the Header pane.
-						console.log("Running last ready(), priority="+priority_finish);
-						var headerPane = new ContentPane({
-							region: "top",
-							"class": "edgePanel"
-							/*content: "Header content (top)"*/
-							}, "header_pane");
-						appLayout.addChild(headerPane);
-						
-						// Start the CoFlo report browser app.
-						appLayout.startup();
-						console.log("Ran last ready(), priority="+priority_finish);
-					});
-             	});
-    </script>
+		
+		// Bind to the nav tree's select event.
+		nav_tree.bind("select_node.jstree", function (event, data) 
+		{ 
+            // `data.rslt.obj` is the jquery extended node that was clicked
+            console.info("Node selected: " + data.rslt.obj.attr("id"));
+	    });
+
+		/**
+		 * Callback for handling the center pane's resize event.
+		 * The main thing we have to do here is resize the svg.
+		 */
+		var center_pane_resize_callback = function()
+		{
+			// Get the currently active tab panel.
+			var active_tab_index = $( "#tabs" ).tabs("option", "active") + 1;
+			var active_tab_panel = $( "#tabs-" + active_tab_index );
+			
+			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
+			var svg = active_tab_panel.find(".svg-cfg");
+			
+			// Fit it to its container.
+			fitToContainer(svg, active_tab_panel);
+			
+			console.info("center pane resized");
+		};
+		
+		// Initialize the jQuery UI Layout Plug-in.
+		var mainLayout = $("body").layout({
+			// The header pane.
+			north:
+				{
+					// Top pane can't be closed or resized.
+					closable: false,
+					resizable: false
+				},
+				
+			// Nav pane.
+			west__size:	.33,
+			
+			// Center pane.
+			center:
+				{
+					onresize: center_pane_resize_callback
+				},
+				
+				// Start with the bottom and right panes closed.
+				east__initClosed: true,
+				south__initClosed:	true
+			});
+	});
+	</script>
 </head>
 
-<body class="claro">
+<body>
 
-<!-- Div for the top-level layout container. -->
-<div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer"
-            data-dojo-props="design: 'headline'">
+<!-- The Report Header -->
+<div class="ui-layout-north">CoFlo Analysis</div>
 
-	<!-- The StackContainer making up the central panel. -->
-	<div id="cfg-stack" class="centerPanel" data-dojo-type="dijit/layout/StackContainer"
-	    data-dojo-props="region: 'center'" data-dojo-id="myStackContainer">
+<!-- The Navigation Pane -->
+<div id="nav_tree_id" class="ui-layout-west">
+<ul>
+	<!-- REMOVE_START -->
+	<li id="nav_tree_file_1" class="coflo-nav-tree-file">
+		<a href="#">File 1</a>
+		<ul>
+			<li id="nav_tree_2" rel="function">
+				<a href="#decode_switches">decode_switches()</a>
+			</li>
+			<li id="nav_tree_3" rel="function">
+				<a href="#">Function 2</a>
+			</li>
+		</ul>
+	</li>
+	<li id="nav_tree_file_2" class="coflo-nav-tree-file">
+		<a href="#">File 2</a>
+		<ul>
+			<li id="nav_tree_5" rel="function">
+				<a href="#">Function 3</a>
+			</li>
+			<li id="nav_tree_6" rel="function">
+				<a href="#">Function 4</a>
+			</li>
+		</ul>
+	</li>
+	<!-- REMOVE_END -->
 	
-		<!-- The individual panes. -->
+	<!-- NAV_START -->
+	<!-- NAV_END -->
+</ul>
+</div>
+
+<!-- The center pane's tab control -->
+<div id="tabs" class="ui-tabs ui-layout-center">
+	<ul>
 		<!-- REMOVE_START -->
-		<div id="tabs-1" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Questions">
-			<!-- <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
-			<embed class="svg-cfg" src="die.svg" type="image/svg+xml" />
-		</div>
-		<div id="tabs-2" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="decode_switches">
-		    <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
-		</div>
-		<div id="tabs-3" class="cfg-pane" data-dojo-type="dijit/layout/ContentPane" title="Another die">
-		    <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-		</div>
+		<li><a href="#tabs-1">Control Flow Graph</a></li>
+		<li><a href="#tabs-2">Source</a></li>
 		<!-- REMOVE_END -->
 		
-		<!-- TAB_PANEL_LIST_START -->
-	 	<!-- TAB_PANEL_LIST_END -->
-
-	</div>
+		<!-- TAB_LIST_START -->
+		<!-- TAB_LIST_END -->
+	</ul>
+	<!-- The tab panels are put in this special div which the layout plugin uses to keep the tabs from
+	being considered part of the scrollable area -->
+	<div class="ui-layout-content ui-widget-content ui-corner-bottom">
+		<!-- REMOVE_START -->
+		<div id="tabs-1">
+			<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+			<p><a id="decode_switches">decode_switches()</a></p>
+			<!-- <embed class="svg-cfg" type="image/svg+xml" src="decode_switches.svg"> -->
+			<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+			<!-- <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
+		</div>
+		<div id="tabs-2">
+			<p>Paragraph</p>
+			<P>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</P>
+		<P>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</P>
+			<!-- <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
+		</div>
+		<!-- REMOVE_END -->
 	
-	<!-- Div for the header pane. -->
-	<div id="header_pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
-		<h1>CoFlo Analysis Results</h1>
-	</div>
-	
-	<!-- Div for the navigation pane. -->
-	<div id="nav-pane" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
-		<!-- <h2>Navigation:</h2> -->
-		<!-- Div for the tree control in the nav pane -->
-		<div id="nav-tree"></div>
+		<!-- TAB_PANEL_LIST_START -->	
+		<!-- TAB_PANEL_LIST_END -->
 	</div>
 </div>
+
+<div class="ui-layout-east"></div>
+
+<div class="ui-layout-south">Bottom Pane</div>
 
 </body>
 </html>
