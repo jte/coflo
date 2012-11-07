@@ -16,24 +16,17 @@
  */
 
 /**
- * Helper functions for the generated CoFlo report.
+ * Helper functions for the generated CoFlo HTML report.
  */
 
-define(["dojo/_base/declare",
-        "dojo/dom-geometry"],
-        function(declare, domGeom){
-	var CoFloReport = declare(null,
-		{
-			constructor: function(){
-				console.debug("CoFloReport constructor called");
-			}
-		});
-	
-	CoFloReport.something = "some text";
-	CoFloReport.aMethod = function(object, container_obj){
-		// Get the width of the container object.		
-		var width_obj_container = domGeom.getContentBox(container_obj).w;
-				return "aMethod called, container width=" + width_obj_container;
-				}
-	return CoFloReport;
-});
+/**
+ * console.log()/.warn()/etc. stub, for running without Firebug and/or a console.
+ */
+if (!console) console = {
+		log:function(){},
+		debug:function(){},
+		warn:function(){},
+		info:function(){},
+		error:function(){}
+};
+
