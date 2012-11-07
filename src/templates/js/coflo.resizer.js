@@ -35,7 +35,8 @@ function getIntrinsicDimensions( DOMElement )
 	// Make sure the svg is loaded.
 	if(svgdoc == null)
 	{
-		return { width: 1000, height: 1000 };
+		console.warn("null svgdoc")
+		return { width: 10, height: 10 };
 	}
 	
 	// Get the SVG element
@@ -60,20 +61,28 @@ function getIntrinsicDimensions( DOMElement )
  * Does not change the size of @a object if its intrinsic width is already less than the width of
  * @a container_obj.
  * 
- * @param object The object to potentially resize.
- * @param container_obj The container to fit @a object to.
+ * @param object The jQuery object to potentially resize.
+ * @param container_obj The jQuery UI container to fit @a object to.
  */
 function fitToContainer( object, container_obj )
 {
+	// Validate the input.
+	if(object.length == 0)
+	{
+		console.warn("no object passed");
+		return;
+	}
 	var the_obj_container = container_obj;
 	
 	// Get the intrinsic dimensions of the svg.
-	var intrinsic_dims = getIntrinsicDimensions(object);
+	// We need to get this from its DOM element, not the jQuery object.
+	var intrinsic_dims = getIntrinsicDimensions(object[0]);
 	var width_obj = intrinsic_dims.width;
 
 	// Get the width of the content area of the container.
-	var domGeom = require("dojo/dom-geometry");
-	var width_obj_container = domGeom.getContentBox(the_obj_container).w;
+	// Note that .width() is correct here, and not .innerWidth(), which includes the padding, somewhat
+	// contrary to what one might expect, given the CSS definition of the width attribute.
+	var width_obj_container = the_obj_container.width();
 	
 	var width_new = width_obj;
 	
@@ -89,10 +98,11 @@ function fitToContainer( object, container_obj )
 		width_new = width_obj_container;
 
 	}
+
+	// Finally we set the size of object.
 	/// @todo Not sure which way is better.
-	//the_obj.outerWidth( width_obj_container );
-	//the_obj.css({"width": width_obj_container});
-	domGeom.setContentSize(object, {w:width_new});
+	object.outerWidth( width_new );
+	//object.css({"width": width_new});
 	
 	console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 }
