@@ -47,6 +47,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="js/coflo.resizer.js"></script>
 	<script>
 	$(document).ready(function() {
+		tabCounter = 3;
+
 		
 		/**
 		 * Event handler callback for fitting the active svg to the tab control when the window is resized.
@@ -86,11 +88,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		}
 		
 		/// Initialize the tabs.
-		var center_pane_tabs = $( "#tabs" )
-			.bind("tabsactivate", onTabsShow)
-			.tabs();
+		var center_pane_tabs = $( "#tabs" ).tabs();
 		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
-		//center_pane_tabs.bind("tabsactivate", onTabsShow);
+		center_pane_tabs.bind("tabsactivate", onTabsShow);
 		
 		// Set up the nav pane's tree control.
 		var nav_tree = $("#nav_tree_id").jstree({
@@ -133,7 +133,21 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		nav_tree.bind("select_node.jstree", function (event, data) 
 		{ 
             // `data.rslt.obj` is the jquery extended node that was clicked
-            console.info("Node selected: " + data.rslt.obj.attr("id"));
+            var selected_node = data.rslt.obj;
+            
+            // Get the href contained in the selected list item's <a> tag.
+            var selected_function_id = $(selected_node).find("a").attr("href");
+            console.info("href=" + selected_function_id);
+            //$("#tabs").hide();
+            //setTabPaneContent(center_pane_tabs.find("tabs-1"), "die.svg");
+            // Create a copy of the new tab contents.
+            // We have to do this or it will be deleted from the DOM.
+            var new_svg_pane_contents = $(selected_function_id).clone();
+            // Strip off the <div>.
+            //new_svg_pane_contents.unwrap();
+            center_pane_tabs.find("#tabs-1").empty().html(new_svg_pane_contents.contents());
+            $("#tabs").tabs("refresh");
+            console.info("Node selected: " + selected_node.attr("id"));
 	    });
 
 		/**
@@ -143,8 +157,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		var center_pane_resize_callback = function()
 		{
 			// Get the currently active tab panel.
-			var active_tab_index = $( "#tabs" ).tabs("option", "active") + 1;
-			var active_tab_panel = $( "#tabs-" + active_tab_index );
+			var active_tab_index = $( "#tabs" ).tabs("option", "active");
+			var active_tab_panel = $( "#tabs" ).find(".ui-tabs-panel").eq(active_tab_index);
 			
 			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
 			var svg = active_tab_panel.find(".svg-cfg");
@@ -198,7 +212,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 				<a href="#decode_switches">decode_switches()</a>
 			</li>
 			<li id="nav_tree_3" rel="function">
-				<a href="#">Function 2</a>
+				<a href="#die">die()</a>
 			</li>
 		</ul>
 	</li>
@@ -237,10 +251,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		<!-- REMOVE_START -->
 		<div id="tabs-1">
 			<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
-			<p><a id="decode_switches">decode_switches()</a></p>
-			<!-- <embed class="svg-cfg" type="image/svg+xml" src="decode_switches.svg"> -->
+			<!-- <p><a id="decode_switches">decode_switches()</a></p> -->
 			<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
-			<!-- <object class="svg-cfg" type="image/svg+xml" data="die.svg"></object> -->
 		</div>
 		<div id="tabs-2">
 			<p>Paragraph</p>
@@ -258,6 +270,20 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <div class="ui-layout-east"></div>
 
 <div class="ui-layout-south">Bottom Pane</div>
+
+<!-- The svgs. -->
+<div style="display:none">
+<div id="decode_switches">
+	<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+	<p><a id="file1-decode_switches">decode_switches()</a></p>
+	<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+</div>
+<div id="die">
+	<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+	<p><a id="file1-die">die()</a></p>
+	<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+</div>
+</div>
 
 </body>
 </html>
