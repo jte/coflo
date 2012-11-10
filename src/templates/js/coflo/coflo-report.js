@@ -27,6 +27,22 @@ if (!console) console = {
 		debug:function(){},
 		warn:function(){},
 		info:function(){},
-		error:function(){}
+		error:function(){},
+		group: function(){},
+		groupEnd: function(){}
 };
 
+// Create and add a tab.
+function setTabPaneContent(tab_pane, svg_url) 
+{
+	var tabTitle = $( "#tab_title" ),
+	tabContent = '<object class="svg-cfg" type="image/svg+xml" data="' + svg_url + '"></object>',
+	tabTemplate = "<li><a href='#{href}'>#{label}</a></li>";
+	var label = tabTitle.val() || "Tab " + tabCounter,
+	id = "tabs-" + tabCounter,
+	li = $( tabTemplate.replace( /#\{href\}/g, "#" + id ).replace( /#\{label\}/g, label ) ),                
+	tabContentHtml = tabContent;
+	tab_pane.replaceWith(tabContent);
+	center_pane_tabs.find( ".ui-tabs-nav" ).append( li );            
+	center_pane_tabs.append( "<div id='" + id + "'>" + tabContentHtml + "</div>" );
+}
