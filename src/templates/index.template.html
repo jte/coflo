@@ -126,23 +126,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			"plugins" : ["html_data", "ui", "types", "themeroller"],
 			"core" : 
 			{
-				// Start with all files open.
-				"initially_open" : [ "#nav_tree_file_1" ]
+				// Start with the first file open.
+				"initially_open" : [ $(".coflo-nav-tree-file").attr("id") ]
 			}
 		});
 
-        $(svg_placeholder).bind({
-			load: function()
-			{
-				console.log("one: bbox=" /*+ this.contentDocument.documentElement.getBBox()*/);
-			},
-			haschange: function()
-			{
-				console.log("haschange");
-			}
-		});
-		
-		// Bind to the nav tree's select event.
+		// Bind to the nav tree's select event.  Here we'll update the tab panels to match the
+		// function and file the user selected.
 		nav_tree.bind("select_node.jstree", function (event, data) 
 		{ 
             // `data.rslt.obj` is the jquery extended node that was clicked
@@ -150,9 +140,10 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             
             // Get the href contained in the selected list item's <a> tag.
             var selected_function_id = $(selected_node).find("a").attr("href");
-            var selected_function_svg_url = selected_function_id.replace(/#/,"") + ".svg";
+            // The identifier of the function as it appears in the source language.
+            var selected_function_identifier = selected_function_id.replace(/#/,"");
+            var selected_function_svg_url = selected_function_identifier + ".svg";
             console.info("href=" + selected_function_id);
-            //$("#tabs").hide();
             
             // Find the svg object placeholder.
             // "data" if the placeholder is an <object>.
@@ -160,26 +151,18 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             // "src" for iframes.
             //$(svg_placeholder).attr("src", selected_function_svg_url);
 
-            // Create a copy of the new tab contents.
-            // We have to do this or it will be deleted from the original DOM.
-            //var new_svg_pane_contents = $(selected_function_id).clone();
-            
-            //
    			            
-            // Strip off the <div>.
-            //new_svg_pane_contents.unwrap();
-            //center_pane_tabs.find("#tabs-1").empty().html(new_svg_pane_contents.contents());
+            // Update the header text of the tab panels.
+            center_pane_tabs.find("#tab-1-cfg-header-text").text("Control Flow Graph of function "
+            		+ selected_function_identifier + "():");
+            center_pane_tabs.find("#tab-2-cfg-header-text").text("Source code of function "
+            		+ selected_function_identifier + "():");
             
-            // Switch to the other tab momentarily, then switch back.
-            // This is a hackish way to cause a resize event, but I can't determine a better way to do it.
+            // Refresh the tab control.
             center_pane_tabs.tabs("refresh");
-            //center_pane_tabs.tabs("select", 1); //("option", "active", "1");
-            //center_pane_tabs.tabs("select", 0);
-            //center_pane_tabs.tabs("option", "select", "0");
 
             // Tell the center pane to resize its contents, mainly to cause the svg to be fit to the tab control.
-            mainLayout.sizeContent("center"); //.resizeContent("center");
-            //mainLayout.resizeAll();
+            mainLayout.sizeContent("center");
             
             console.info("Node selected: " + selected_node.attr("id"));
 	    });
@@ -237,8 +220,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			// Center pane.
 			center:
 				{
-					onresize: center_pane_resize_callback,
-					onsizecontent: center_pane_resize_callback
+					// Hook to the panel's resize event so we can resize the SVG.
+					onresize: center_pane_resize_callback
 				},
 				
 				// Start with the bottom and right panes closed.
@@ -290,34 +273,28 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <!-- The center pane's tab control -->
 <div id="tabs" class="ui-tabs ui-layout-center">
 	<ul>
-		<!-- REMOVE_START -->
 		<li><a href="#tabs-1">Control Flow Graph</a></li>
 		<li><a href="#tabs-2">Source</a></li>
-		<!-- REMOVE_END -->
-		
-		<!-- TAB_LIST_START -->
-		<!-- TAB_LIST_END -->
 	</ul>
 	<!-- The tab panels are put in this special div which the layout plugin uses to keep the tabs from
 	being considered part of the scrollable area -->
 	<div class="ui-layout-content ui-widget-content ui-corner-bottom">
-		<!-- REMOVE_START -->
+		
 		<div id="tabs-1">
 			<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
 			<!-- <p><a id="decode_switches">decode_switches()</a></p> -->
-			<p>Control Flow Graph goes here.</p>
+			<p id="tab-1-cfg-header-text">Select a function from the navigation list on the left.</p>
 			<!-- data="decode_switches.svg" -->
  			<object onload="ResizeSVG();" class="svg-cfg" type="image/svg+xml"></object>
  			<!-- <iframe onload="ResizeSVG();" class="svg-cfg"></iframe> -->
 		</div>
 		<div id="tabs-2">
-			<p>Source code for file @FILENAME@</p>
+			<p id="tab-2-cfg-header-text">Select a function from the navigation list on the left.</p>
 			<p>FEATURE NOT YET IMPLEMENTED</p>
 		</div>
 		<!-- REMOVE_END -->
 	
-		<!-- TAB_PANEL_LIST_START -->	
-		<!-- TAB_PANEL_LIST_END -->
+
 	</div>
 </div>
 
@@ -327,18 +304,21 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 <!-- The svgs. -->
 <div style="display:none">
-<div id="decode_switches">
-	<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
-	<p><a id="file1-decode_switches">decode_switches()</a></p>
-	<!-- <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
-	<embed id="test" class="svg-cfg" type="image/svg+xml" src="decode_switches.svg">
-</div>
-<div id="die">
-	<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
-	<p><a id="file1-die">die()</a></p>
-	<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
-	<!-- <embed onload="console.log('hello')" class="svg-cfg" type="image/svg+xml" src="die.svg"> -->
-</div>
+<!-- REMOVE_START -->
+	<div id="decode_switches">
+		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+		<p><a id="file1-decode_switches">decode_switches()</a></p>
+		<!-- <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
+		<embed id="test" class="svg-cfg" type="image/svg+xml" src="decode_switches.svg">
+	</div>
+	<div id="die">
+		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+		<p><a id="file1-die">die()</a></p>
+		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+	</div>
+<!-- REMOVE_END -->
+		<!-- TAB_PANEL_LIST_START -->	
+		<!-- TAB_PANEL_LIST_END -->
 </div>
 
 </body>
