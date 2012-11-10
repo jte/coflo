@@ -18,6 +18,9 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 -->
 <head>
 	<meta charset="utf-8">
+	
+	<!-- The date the report was generated (must be GMT in RFC 1123 format). -->
+	<meta http-equiv="date" content="Mon, 24 Jun 2012 12:34:56 GMT">
 
 	<title>Insert title here</title>
 
@@ -47,36 +50,16 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="js/coflo.resizer.js"></script>
 	<script>
 	$(document).ready(function() {
-		tabCounter = 3;
-
 		
-		/**
-		 * Event handler callback for fitting the active svg to the tab control when the window is resized.
-		 */
-		function onWindowResize()
-		{
-			// Get all tab controls.
-			var tab_ctls = $("#tabs");
-			
-			tab_ctls.each(function(){
-				// Get the active tab.
-				var active_tab_number = $(this).tabs("option", "active");
-				//console.log( "Active tab:" + active_tab_number +"\n");
-				var active_tab_panel = $(this).find(".ui-tabs-panel").eq(active_tab_number);
-				// Get the svg <object> for this tab.
-				var svg = active_tab_panel.find(".svg-cfg");
-				
-				// Fit it to its container.
-				fitToContainer(svg, active_tab_panel);
-			});
-			
-			console.log("window resized");
-		}
+		// The layout object.
+		var mainLayout;
+		var center_pane_resize_callback;
+		var center_pane_tabs;
 		
 		/**
 		 * Event handler callback for fitting the svg to the tab control when a new tab is selected.
 		 */
-		function onTabsShow(event, ui)
+		function onTabsActivate(event, ui)
 		{
 			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
 			var svg = ui.newPanel.find(".svg-cfg");
@@ -84,13 +67,28 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			// Fit it to its container.
 			fitToContainer(svg, ui.newPanel);
 			
-			console.log( "Active tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
+			console.log( "Tab Activated, tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
 		}
 		
+		function onTabsLoad(event, ui)
+		{
+			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
+			var svg = ui.panel.find(".svg-cfg");
+			
+			// Fit it to its container.
+			fitToContainer(svg, ui.panel);
+			
+			console.log( "Tab Loaded, tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
+		}
+		
+		// First hook the onTabsActivate callback to them, so the initially-shown tab is resized if necessary.
+		//$( "#tabs" ).bind("tabsactivate", onTabsActivate);
+
 		/// Initialize the tabs.
-		var center_pane_tabs = $( "#tabs" ).tabs();
-		// First hook the onTabsShow callback to them, so the initially-shown tab is resized if necessary.
-		center_pane_tabs.bind("tabsactivate", onTabsShow);
+		center_pane_tabs = $( "#tabs" ).tabs({
+			activate: onTabsActivate,
+			create: onTabsLoad
+		});
 		
 		// Set up the nav pane's tree control.
 		var nav_tree = $("#nav_tree_id").jstree({
@@ -139,14 +137,19 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
             var selected_function_id = $(selected_node).find("a").attr("href");
             console.info("href=" + selected_function_id);
             //$("#tabs").hide();
-            //setTabPaneContent(center_pane_tabs.find("tabs-1"), "die.svg");
+
             // Create a copy of the new tab contents.
-            // We have to do this or it will be deleted from the DOM.
+            // We have to do this or it will be deleted from the original DOM.
             var new_svg_pane_contents = $(selected_function_id).clone();
             // Strip off the <div>.
             //new_svg_pane_contents.unwrap();
             center_pane_tabs.find("#tabs-1").empty().html(new_svg_pane_contents.contents());
-            $("#tabs").tabs("refresh");
+            center_pane_tabs.tabs("refresh");
+
+            // Tell the center pane to resize its contents, mainly to cause the svg to be fit to the tab control.
+            //mainLayout.sizeContent("center"); //.resizeContent("center");
+            //mainLayout.resizeAll();
+            
             console.info("Node selected: " + selected_node.attr("id"));
 	    });
 
@@ -154,11 +157,11 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		 * Callback for handling the center pane's resize event.
 		 * The main thing we have to do here is resize the svg.
 		 */
-		var center_pane_resize_callback = function()
+		center_pane_resize_callback = function()
 		{
 			// Get the currently active tab panel.
-			var active_tab_index = $( "#tabs" ).tabs("option", "active");
-			var active_tab_panel = $( "#tabs" ).find(".ui-tabs-panel").eq(active_tab_index);
+			var active_tab_index = center_pane_tabs.tabs("option", "active");
+			var active_tab_panel = center_pane_tabs.find(".ui-tabs-panel").eq(active_tab_index);
 			
 			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
 			var svg = active_tab_panel.find(".svg-cfg");
@@ -170,17 +173,29 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 		};
 		
 		// Initialize the jQuery UI Layout Plug-in.
-		var mainLayout = $("body").layout({
+		mainLayout = $("body").layout({
+			
+			livePaneResizing: false,
+			
+			// We need this to allow natural resizing behavior with (at least) the svg's.
+			// For some reason, when you're resizing, the cursor doesn't want to drag the resizer when it
+			// goes over an SVG.  Enabling this allows it to work as expected.
+			maskIframesOnResize: true,
+			
 			// The header pane.
 			north:
 				{
 					// Top pane can't be closed or resized.
 					closable: false,
-					resizable: false
+					resizable: false,
+					size: "auto"
 				},
 				
 			// Nav pane.
-			west__size:	.33,
+			west:
+				{
+					size: "auto"
+				},
 			
 			// Center pane.
 			center:
