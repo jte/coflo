@@ -20,6 +20,25 @@
  */
 
 /**
+ * console.log()/.warn()/etc. stub, for running without Firebug and/or a console.
+ */
+if (!console) console = {
+		log:function(){},
+		debug:function(){},
+		warn:function(){},
+		info:function(){},
+		error:function(){},
+		group: function(){},
+		groupEnd: function(){}
+};
+
+/**
+ * IE 9 (at least) doesn't support console.group/groupEnd.
+ */
+if (!console.group) console.group = function(){};
+if (!console.groupEnd) console.groupEnd = function(){};
+
+/**
  * Determine the intrinsic (aka "natural") dimensions of an svg file embedded as a <object> element.
  * 
  * @param DOMElement The HTML DOM element from which to obtain the intrinsic width and height.
@@ -36,7 +55,7 @@ function getIntrinsicDimensions( DOMElement )
 	if(svgdoc == null)
 	{
 		console.warn("null svgdoc")
-		return { width: 10, height: 10 };
+		return { width: 100, height: 100 };
 	}
 	
 	// Get the SVG element
