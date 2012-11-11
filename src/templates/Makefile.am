@@ -23,15 +23,34 @@ templates = index.template.html \
 	css/layout-default-latest.css \
 	js/coflo.resizer.js \
 	js/jquery.layout-latest.js \
-	js/jquery.jstree.js
+	js/jquery.jstree.js \
+	js/jquery-1.8.2.js \
+	js/jquery-ui.js
 
-intermediate_cpp_files_1 = $(templates:%.html=%.html.cpp)
-intermediate_cpp_files_2 = $(intermediate_cpp_files_1:%.css=%.css.cpp)
-intermediate_cpp_files = $(intermediate_cpp_files_2:%.js=%.js.cpp)
-	
+#intermediate_cpp_files_1 = $(templates:%.html=%.html.cpp)
+#intermediate_cpp_files_2 = $(intermediate_cpp_files_1:%.css=%.css.cpp)
+#intermediate_cpp_files = $(intermediate_cpp_files_2:%.js=%.js.cpp)
+
+intermediate_cpp_files = index.template.html.cpp \
+	css/index.template.css.cpp \
+	css/layout-default-latest.css.cpp \
+	js/coflo.resizer.js.cpp \
+	js/jquery.layout-latest.js.cpp \
+	js/jquery.jstree.js.cpp \
+	js/jquery-1.8.2.js.cpp \
+	js/jquery-ui.js.cpp
+
+test1:
+	echo $(intermediate_cpp_files)
+	echo "2:"
+	echo $(intermediate_cpp_files)
+	echo "3"
+	echo $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
+
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp $(intermediate_cpp_files)
+
 # Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
 # for the libtemplates.a library.  If we do so, Automake generates dependency tracking files (*.Po) in the source tree
 # for them.  I haven't been able to find a better workaround. 
@@ -79,15 +98,21 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 
 # Makefile action for copying a file only if it is different from the target.
 # Leverages "move-if-change". 
-recipie_copy_if_change = TEMPFILE_NAME=$$(mktemp) && \
+recipie_copy_if_change = TEMPFILE_NAME="$$(mktemp)" && \
 	cp -p "$<" "$${TEMPFILE_NAME}" && \
-	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@" 
+	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@"
 
 $(srcdir)/css/layout-default-latest.css: $(top_srcdir)/third_party/jquery-ui-layout-plugin/layout-default-latest.css
 	$(recipie_copy_if_change)
-	
+
 $(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jquery.jstree.js
 	$(recipie_copy_if_change)
 
+$(srcdir)/js/jquery.layout-latest.js: $(top_srcdir)/third_party/jquery-ui-layout-plugin/jquery.layout-latest.js
+	$(recipie_copy_if_change)
 
+$(srcdir)/js/jquery-1.8.2.js: $(top_srcdir)/third_party/jquery/jquery-1.8.2.js
+	$(recipie_copy_if_change)
 
+$(srcdir)/js/jquery-ui.js: $(top_srcdir)/third_party/jquery-ui-1.9.1/ui/jquery-ui.js
+	$(recipie_copy_if_change)

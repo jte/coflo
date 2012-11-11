@@ -98,9 +98,10 @@ analysis-static-all: cppcheck-reports/cppcheck-result-NOVERSION.xml
 
 # cppcheck
 cppcheck-reports/cppcheck-result-NOVERSION.xml: FORCE
-	rm -rf '$@'
+	rm -f '$@' && rm -f '$@-temp'
 	$(MKDIR_P) "$$(dirname '$@')"
-	cppcheck --verbose --enable=all --xml --xml-version=2 -I ./third_party/boost_1_49_0/ $(srcdir)/src 2> '$@'
+	cppcheck --verbose --enable=all --xml --xml-version=2 -I ./third_party/boost_1_49_0/ $(srcdir)/src 2> '$@-temp'
+	mv '$@-temp' '$@'
 
 # Run sonar-runner.
 $(top_srcdir)/sonar-project.properties: sonar-project.template.properties $(srcdir)/BuildInfoFile.sh FORCE

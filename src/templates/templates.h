@@ -21,4 +21,9 @@
 
 extern const char index_template_html[];
 extern const char css_index_template_css[];
+extern const char css_layout_default_latest_css[];
 extern const char js_coflo_resizer_js[];
+extern const char js_jquery_layout_latest_js[];
+extern const char js_jquery_jstree_js[];
+extern const char js_jquery_1_8_2_js[];
+extern const char js_jquery_ui_js[];

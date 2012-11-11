@@ -189,11 +189,27 @@ const std::string str_template_function_cfg = std::string(""
 		"	<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
 		"</div>\n");
 
+/*
 const char f_str_template_nav_tree_file_entry[] =
 		"{ id: \'@UNIQUE_FILE_ID@\', name:\'@FILENAME@\', type:\'file\', parent: \'all_files\' },";
-
+*/
+/*
 const char f_str_template_nav_tree_function_entry[] =
 		"{ id: \'@UNIQUE_FUNCTION_ID@\', tabid: \'tabs-@TABNUMBER@\', name:\'@IDENTIFIER_FUNCTION@\', type:\'function\', parent: \'@UNIQUE_FILE_ID@\' },";
+*/
+const char f_str_template_nav_tree_function_entry[] =
+		"			<li rel=\"function\">\n"
+		"				<a href=\"#@IDENTIFIER_FUNCTION@\">@IDENTIFIER_FUNCTION@()</a>\n"
+		"			</li>\n";
+
+const char f_str_template_nav_tree_file_entry[] =
+		"	<li id=\"@UNIQUE_FILE_ID@\" class=\"coflo-nav-tree-file\">\n"
+		"		<a href=\"#\">@FILENAME@</a>\n"
+		"		<ul>\n"
+		"			<!-- NAV_FUNCTION_ENTRY_START -->\n"
+		"			<!-- NAV_FUNCTION_ENTRY_END -->\n"
+		"		</ul>\n"
+		"	</li>";
 
 void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, FileTemplate & index_html_out)
 {
@@ -209,10 +225,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	
 	// Create filenames for the index and primary css files.
 	std::string index_html_filename = (output_dir / "index.html").generic_string();
-/*
-	index_html_out << "<p>Filename: "+m_source_filename.generic_string()+"</p>" << std::endl;
-	index_html_out << "<p>Control Flow Graphs:\n<ul>" << std::endl;
-*/
+
 	// Create an entry for this file in the navigation tree.
 	FileTemplate nav_tree_table_entry(f_str_template_nav_tree_file_entry);
 
@@ -224,7 +237,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	nav_tree_table_entry.regex_replace("@FILENAME@", m_source_filename.filename().generic_string());
 
 	// Now insert it into the navigation tree.
-	index_html_out.regex_insert_before("<!-- TAB_LIST_END -->", nav_tree_table_entry.str());
+	index_html_out.regex_insert_before("<!-- NAV_END -->", nav_tree_table_entry.str());
 
 	std::stringstream ss;
 	int i = 1;
@@ -243,7 +256,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 		nav_tree_table_entry_function.regex_replace("@IDENTIFIER_FUNCTION@", fp->GetIdentifier());
 		nav_tree_table_entry_function.regex_replace("@UNIQUE_FUNCTION_ID@", fp->GetIdentifier());
 		nav_tree_table_entry_function.regex_replace("@TABNUMBER@", ss.str());
-		index_html_out.regex_insert_before("<!-- TAB_LIST_END -->", nav_tree_table_entry_function.str());
+		index_html_out.regex_insert_before("<!-- NAV_FUNCTION_ENTRY_END -->", nav_tree_table_entry_function.str());
 
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
