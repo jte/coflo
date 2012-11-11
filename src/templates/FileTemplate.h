@@ -111,6 +111,8 @@ public:
 	 */
 	std::string str();
 
+	void SaveAs(const std::string &filename);
+
 	/**
 	 * Friend declaration for the stream insertion operator.
 	 *

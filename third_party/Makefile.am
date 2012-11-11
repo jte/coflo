@@ -141,9 +141,44 @@ stamp_boost_src_installed: stamp_boost_src_configured
 
 endif
 
+###
+### Automake rules for creating archives of the jQuery UI css theme.
+###
+
+css_dark_hive_src_root_dir = $(srcdir)/jquery-ui-1.9.1.custom
+
+css_dark_hive_files = css/dark-hive/images/ui-bg_flat_30_cccccc_40x100.png \
+	css/dark-hive/images/ui-bg_flat_50_5c5c5c_40x100.png \
+	css/dark-hive/images/ui-bg_glass_40_ffc73d_1x400.png \
+	css/dark-hive/images/ui-bg_highlight-hard_20_0972a5_1x100.png \
+	css/dark-hive/images/ui-bg_highlight-soft_33_003147_1x100.png \
+	css/dark-hive/images/ui-bg_highlight-soft_35_222222_1x100.png \
+	css/dark-hive/images/ui-bg_highlight-soft_44_444444_1x100.png \
+	css/dark-hive/images/ui-bg_highlight-soft_80_eeeeee_1x100.png \
+	css/dark-hive/images/ui-bg_loop_25_000000_21x21.png \
+	css/dark-hive/images/ui-icons_222222_256x240.png \
+	css/dark-hive/images/ui-icons_4b8e0b_256x240.png \
+	css/dark-hive/images/ui-icons_a83300_256x240.png \
+	css/dark-hive/images/ui-icons_cccccc_256x240.png \
+	css/dark-hive/images/ui-icons_ffffff_256x240.png \
+	css/dark-hive/jquery-ui-1.9.1.custom.css \
+	css/dark-hive/jquery-ui-1.9.1.custom.min.css
+
+css_dark_hive_dirs = css/dark-hive/images \
+	css/dark-hive
+
+css_dark_hive.cpio: $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%)
+	rm -f "$@-temp" && rm -f "$@-filelist"
+	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
+	echo $(css_dark_hive_files) | sed -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
+	cd $(css_dark_hive_src_root_dir) && \
+		cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp"
+	rm -f "$@-filelist"
+	mv "$@-temp" "$@"
+
 
 # Force DParser and Boost to be rebuilt. 
-BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST)
+BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio
 
 # Delete all the stamps except for the untarring ones for any clean.
 MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST)

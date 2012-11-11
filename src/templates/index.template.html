@@ -22,10 +22,10 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- The date the report was generated (must be GMT in RFC 1123 format). -->
 	<meta http-equiv="date" content="Mon, 24 Jun 2012 12:34:56 GMT">
 
-	<title>Insert title here</title>
-
+	<title>@INDEX_TITLE@</title>
+	
 	<!-- The jQuery UI stylesheet. -->
-	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="css/dark-hive/jquery-ui-1.9.1.custom.css">
 	
 	<!-- The jQuery UI Layout Plug-in's default stylesheet. -->
 	<link rel="stylesheet" type="text/css" href="css/layout-default-latest.css">
@@ -33,6 +33,13 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- CoFlo's stylesheet. -->
 	<link rel="stylesheet" type="text/css" href="css/index.template.css">
 	
+	<style>
+	.ui-layout-pane
+	{
+		/* Override the default layout's pane background so it blends in with the Themeroller theme. */
+		background: #000000 url(css/dark-hive/images/ui-bg_loop_25_000000_21x21.png) 50% 50% repeat; color: #ffffff;
+	}
+	</style>
 	
 	<!-- SCRIPTS -->
 	<!-- CoFlo's main support script. -->
@@ -196,6 +203,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			// goes over an SVG.  Enabling this allows it to work as expected.
 			maskIframesOnResize: true,
 			
+			paneClass: "ui-layout-pane",
+			
 			// The header pane.
 			north:
 				{
@@ -229,7 +238,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 <body>
 
 <!-- The Report Header -->
-<div class="ui-layout-north">CoFlo Analysis</div>
+<div class="ui-layout-north">@REPORT_HEADER@</div>
 
 <!-- The Navigation Pane -->
 <div id="nav_tree_id" class="ui-layout-west">
@@ -298,8 +307,7 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<div id="decode_switches">
 		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
 		<p><a id="file1-decode_switches">decode_switches()</a></p>
-		<!-- <object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object> -->
-		<embed id="test" class="svg-cfg" type="image/svg+xml" src="decode_switches.svg">
+		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
 	</div>
 	<div id="die">
 		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
