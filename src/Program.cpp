@@ -200,8 +200,31 @@ void Program::Print(const std::string &output_path)
 	primary_css << index_css << std::endl;
 
 	// Copy the JavaScript and supporting css verbatim.
-	std::ofstream js((output_dir / "js/coflo.resizer.js").generic_string().c_str());
-	js << js_coflo_resizer_js << std::endl;
+	{
+		std::ofstream js((output_dir / "js/coflo.resizer.js").generic_string().c_str());
+		js << js_coflo_resizer_js << std::endl;
+	}
+	{
+		std::ofstream js((output_dir / "js/jquery.layout-latest.js").generic_string().c_str());
+		js << js_jquery_layout_latest_js << std::endl;
+	}
+	{
+		std::ofstream js((output_dir / "js/jquery.jstree.js").generic_string().c_str());
+		js << js_jquery_jstree_js << std::endl;
+	}
+	{
+		std::ofstream js((output_dir / "js/jquery-1.8.2.js").generic_string().c_str());
+		js << js_jquery_1_8_2_js << std::endl;
+	}
+	{
+		std::ofstream js((output_dir / "js/jquery-ui.js").generic_string().c_str());
+		js << js_jquery_ui_js << std::endl;
+	}
+
+	{
+		std::ofstream css((output_dir / "css/layout-default-latest.css").generic_string().c_str());
+		css << css_layout_default_latest_css << std::endl;
+	}
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
