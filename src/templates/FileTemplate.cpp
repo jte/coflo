@@ -19,6 +19,8 @@
 
 #include "FileTemplate.h"
 
+#include <fstream>
+
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 
@@ -72,6 +74,12 @@ std::string FileTemplate::str()
 
 	// Return the resulting string.
 	return m_current_file_contents;
+}
+
+void FileTemplate::SaveAs(const std::string& filename)
+{
+	std::ofstream output_file(filename.c_str());
+	output_file << str();
 }
 
 std::ostream& FileTemplate::InsertionHelper(std::ostream& os)

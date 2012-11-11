@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp
+SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .cpio .cpio.cpp
 
 # The template source files.  These will be converted to C++ arrays and compiled into the binary.
 templates = index.template.html \
 	css/index.template.css \
 	css/layout-default-latest.css \
+	css_dark_hive.cpio \
 	js/coflo.resizer.js \
 	js/jquery.layout-latest.js \
 	js/jquery.jstree.js \
@@ -34,6 +35,7 @@ templates = index.template.html \
 intermediate_cpp_files = index.template.html.cpp \
 	css/index.template.css.cpp \
 	css/layout-default-latest.css.cpp \
+	css_dark_hive.cpio.cpp \
 	js/coflo.resizer.js.cpp \
 	js/jquery.layout-latest.js.cpp \
 	js/jquery.jstree.js.cpp \
@@ -68,16 +70,22 @@ libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 ## @todo This should really be maintainer clean.
 MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
 
-# Makefile action to turn any input file into a file containing a '0'-terminated C++ const char array.
-recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
-	RELATIVE_SOURCE_NAME=$$(realpath --relative-to=$(srcdir) "$<") && \
+recipie_any_file_to_cpp_array = \
+	@: First order of business is to remove any leftover temp files. && \
+	rm -f "$@.tmp" && \
+	RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" && \
+	: Generate the name we will use for the C++ array and length variable. && \
+	ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.-],_,'g)" && \
+	: Create the file and add the boilerplate at the top. && \
 	:;{ \
 	echo "// Generated file, do not edit." && \
-	echo "// File generated $$(date)" && \
-	echo "extern const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.-],_,'g)"[] = {" ; \
+	echo "// File generated $$(date)" ; \
 	} > "$@.tmp" && \
-	$(XXD) -i < "$<" >> "$@.tmp" && \
-	echo ', 0 };' >> "$@.tmp" && \
+	: Generate the file, fixing up the identifier names in the process. && \
+	$(XXD) -i "$<" | \
+		sed -r "s,(unsigned char )([^ \[]+),extern const unsigned char $${ARRAY_IDENTIFIER}," | \
+		sed -r "s,(unsigned int )([^ =]+),extern \1$${ARRAY_IDENTIFIER}_len," | \
+		sed -r 's/};/, 0x00};/' >> "$@.tmp" && \
 	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 
 # Rule to convert *.css files to *.css.cpp files.
@@ -90,6 +98,9 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	
 # Rule to convert *.js files to *.js.cpp files.
 .js.js.cpp:
+	$(recipie_any_file_to_cpp_array)
+	
+.cpio.cpio.cpp:
 	$(recipie_any_file_to_cpp_array)
 
 # Some of the sources we need are in the third_party subdirectory.
@@ -115,4 +126,7 @@ $(srcdir)/js/jquery-1.8.2.js: $(top_srcdir)/third_party/jquery/jquery-1.8.2.js
 	$(recipie_copy_if_change)
 
 $(srcdir)/js/jquery-ui.js: $(top_srcdir)/third_party/jquery-ui-1.9.1/ui/jquery-ui.js
+	$(recipie_copy_if_change)
+
+$(srcdir)/css_dark_hive.cpio: $(top_builddir)/third_party/css_dark_hive.cpio
 	$(recipie_copy_if_change)

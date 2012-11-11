@@ -27,3 +27,6 @@ extern const char js_jquery_layout_latest_js[];
 extern const char js_jquery_jstree_js[];
 extern const char js_jquery_1_8_2_js[];
 extern const char js_jquery_ui_js[];
+
+extern const char css_dark_hive_cpio[];
+extern unsigned int css_dark_hive_cpio_len;

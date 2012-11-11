@@ -179,7 +179,9 @@ void Program::Print(const std::string &output_path)
 	// Remove the sections which are for development only.
 	index_htmlt.regex_replace("(?s:<!-- REMOVE_START.*?REMOVE_END -->)", "<!-- REMOVED DEV TEXT -->");
 	// Insert the title.
-	index_htmlt.regex_replace("<h1>Insert Header Paragraph Here</h1>", "<h1>CoFlo Analysis Results</h1>");
+	/// @todo Make this settable from the command line.
+	index_htmlt.regex_replace("@INDEX_TITLE@", "CoFlo Analysis Results");
+	index_htmlt.regex_replace("@REPORT_HEADER@", "CoFlo Analysis Results");
 	// Change the name of the referenced stylesheet from "index.template.css" to "index.css".
 	index_htmlt.regex_replace("index.template.css", "index.css");
 
@@ -201,8 +203,8 @@ void Program::Print(const std::string &output_path)
 
 	// Copy the JavaScript and supporting css verbatim.
 	{
-		std::ofstream js((output_dir / "js/coflo.resizer.js").generic_string().c_str());
-		js << js_coflo_resizer_js << std::endl;
+		FileTemplate file(js_coflo_resizer_js);
+		file.SaveAs((output_dir / "js/coflo.resizer.js").generic_string());
 	}
 	{
 		std::ofstream js((output_dir / "js/jquery.layout-latest.js").generic_string().c_str());
@@ -225,6 +227,18 @@ void Program::Print(const std::string &output_path)
 		std::ofstream css((output_dir / "css/layout-default-latest.css").generic_string().c_str());
 		css << css_layout_default_latest_css << std::endl;
 	}
+
+	{
+		// Extract the jQuery UI theme.
+		FILE *fp = fopen((output_dir / "css_dark_hive.cpio").generic_string().c_str(), "w");
+		fwrite(css_dark_hive_cpio, css_dark_hive_cpio_len, 1, fp);
+		fclose(fp);
+		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I css_dark_hive.cpio").c_str());
+	}
+
+	// Set permissions on the generated report appropriately.
+	/// @todo This is for development only at the moment.  We'll probably want to remove this.
+	::system(("cd " + output_dir.generic_string() + " && chmod -R 666 .").c_str());
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
