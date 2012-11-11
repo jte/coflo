@@ -24,7 +24,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 
 	<title>Insert title here</title>
 
-	<!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"> -->
 	<!-- The jQuery UI stylesheet. -->
 	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 	
@@ -37,7 +36,8 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	
 	<!-- SCRIPTS -->
 	<!-- CoFlo's main support script. -->
-	<script src="js/coflo/coflo-report.js"></script>
+	<script src="js/coflo.resizer.js"></script>
+	<!-- <script src="js/coflo/coflo-report.js"></script> -->
 	<!-- 
 	@todo Put this or something like it back when we use local copies of these libraries.
 	<script src="js/jquery-1.8.2.js"></script>
@@ -47,7 +47,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
 	<script src="js/jquery.layout-latest.js"></script>
 	<script src="js/jstree_pre1.0_fix_1/jquery.jstree.js"></script>
-	<script src="js/coflo.resizer.js"></script>
 	<script>
 	// The layout object.
 	var mainLayout;
@@ -279,7 +278,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 	<!-- The tab panels are put in this special div which the layout plugin uses to keep the tabs from
 	being considered part of the scrollable area -->
 	<div class="ui-layout-content ui-widget-content ui-corner-bottom">
-		
 		<div id="tabs-1">
 			<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
 			<!-- <p><a id="decode_switches">decode_switches()</a></p> -->
@@ -292,9 +290,6 @@ CoFlo.  If not, see http://www.gnu.org/licenses/.
 			<p id="tab-2-cfg-header-text">Select a function from the navigation list on the left.</p>
 			<p>FEATURE NOT YET IMPLEMENTED</p>
 		</div>
-		<!-- REMOVE_END -->
-	
-
 	</div>
 </div>
 
