@@ -20,14 +20,18 @@ SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp
 # The template source files.  These will be converted to C++ arrays and compiled into the binary.
 templates = index.template.html \
 	css/index.template.css \
-	js/coflo.resizer.js
+	css/layout-default-latest.css \
+	js/coflo.resizer.js \
+	js/jquery.layout-latest.js \
+	js/jquery.jstree.js
 
-intermediate_cpp_files = index.template.html.cpp css/index.template.css.cpp js/coflo.resizer.js.cpp
-
+intermediate_cpp_files_1 = $(templates:%.html=%.html.cpp)
+intermediate_cpp_files_2 = $(intermediate_cpp_files_1:%.css=%.css.cpp)
+intermediate_cpp_files = $(intermediate_cpp_files_2:%.js=%.js.cpp)
+	
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
-libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp \
-	$(intermediate_cpp_files)
+libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp $(intermediate_cpp_files)
 # Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
 # for the libtemplates.a library.  If we do so, Automake generates dependency tracking files (*.Po) in the source tree
 # for them.  I haven't been able to find a better workaround. 
@@ -51,18 +55,39 @@ recipie_any_file_to_cpp_array = rm -f "$@.tmp" && \
 	:;{ \
 	echo "// Generated file, do not edit." && \
 	echo "// File generated $$(date)" && \
-	echo "extern const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.],_,'g)"[] = {" ; \
+	echo "extern const char "$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.-],_,'g)"[] = {" ; \
 	} > "$@.tmp" && \
 	$(XXD) -i < "$<" >> "$@.tmp" && \
 	echo ', 0 };' >> "$@.tmp" && \
 	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 
-
+# Rule to convert *.css files to *.css.cpp files.
 .css.css.cpp:
 	$(recipie_any_file_to_cpp_array)
 
+# Rule to convert *.html files to *.html.cpp files.
 .html.html.cpp:
 	$(recipie_any_file_to_cpp_array)
 	
+# Rule to convert *.js files to *.js.cpp files.
 .js.js.cpp:
 	$(recipie_any_file_to_cpp_array)
+
+# Some of the sources we need are in the third_party subdirectory.
+# We'll copy them to source directories under this $(srcdir) if needed so we can use that same build
+# mechanisms for all of the template files.
+
+# Makefile action for copying a file only if it is different from the target.
+# Leverages "move-if-change". 
+recipie_copy_if_change = TEMPFILE_NAME=$$(mktemp) && \
+	cp -p "$<" "$${TEMPFILE_NAME}" && \
+	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@" 
+
+$(srcdir)/css/layout-default-latest.css: $(top_srcdir)/third_party/jquery-ui-layout-plugin/layout-default-latest.css
+	$(recipie_copy_if_change)
+	
+$(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jquery.jstree.js
+	$(recipie_copy_if_change)
+
+
+
