@@ -183,20 +183,21 @@ void TranslationUnit::Link(const std::map< std::string, Function* > &function_ma
 /**
  * Template for HTML <div> for the function CFG image, with an <h2> title.
  */
+/*
 const std::string str_template_function_cfg = std::string(""
 		"<div id=\"tabs-TABNUMBER\" class=\"cfg-pane\">\n"
 		"	<h2>Control Flow Graph for IDENTIFIER_FUNCTION()</h2>\n"
 		"	<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"IDENTIFIER_FUNCTION.svg\"></object>\n"
 		"</div>\n");
+*/
 
-/*
-const char f_str_template_nav_tree_file_entry[] =
-		"{ id: \'@UNIQUE_FILE_ID@\', name:\'@FILENAME@\', type:\'file\', parent: \'all_files\' },";
-*/
-/*
-const char f_str_template_nav_tree_function_entry[] =
-		"{ id: \'@UNIQUE_FUNCTION_ID@\', tabid: \'tabs-@TABNUMBER@\', name:\'@IDENTIFIER_FUNCTION@\', type:\'function\', parent: \'@UNIQUE_FILE_ID@\' },";
-*/
+const std::string str_template_function_cfg = std::string(""
+	"<div id=\"@IDENTIFIER_FUNCTION@\">\n"
+	"		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->\n"
+	"		<p><a id=\"file1-@IDENTIFIER_FUNCTION@\">@IDENTIFIER_FUNCTION@()</a></p>\n"
+	"		<object class=\"svg-cfg\" type=\"image/svg+xml\" data=\"@IDENTIFIER_FUNCTION@.svg\"></object>\n"
+	"	</div>");
+
 const char f_str_template_nav_tree_function_entry[] =
 		"			<li rel=\"function\">\n"
 		"				<a href=\"#@IDENTIFIER_FUNCTION@\">@IDENTIFIER_FUNCTION@()</a>\n"
@@ -264,7 +265,7 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 
 		// Output the tab panel HTML for this function.
 		FileTemplate function_cfg(str_template_function_cfg);
-		function_cfg.regex_replace("IDENTIFIER_FUNCTION", fp->GetIdentifier());
+		function_cfg.regex_replace("@IDENTIFIER_FUNCTION@", fp->GetIdentifier());
 		function_cfg.regex_replace("TABNUMBER",	ss.str());
 		index_html_out.regex_insert_before("<!-- TAB_PANEL_LIST_END -->", function_cfg.str());
 
