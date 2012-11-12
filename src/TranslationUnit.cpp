@@ -199,12 +199,12 @@ const std::string str_template_function_cfg = std::string(""
 	"	</div>");
 
 const char f_str_template_nav_tree_function_entry[] =
-		"			<li rel=\"function\">\n"
+		"			<li data-nav-tree-node-type=\"function\">\n"
 		"				<a href=\"#@IDENTIFIER_FUNCTION@\">@IDENTIFIER_FUNCTION@()</a>\n"
 		"			</li>\n";
 
 const char f_str_template_nav_tree_file_entry[] =
-		"	<li id=\"@UNIQUE_FILE_ID@\" class=\"coflo-nav-tree-file\">\n"
+		"	<li id=\"@UNIQUE_FILE_ID@\" class=\"coflo-nav-tree-file\" data-nav-tree-node-type=\"source_file\">\n"
 		"		<a href=\"#\">@FILENAME@</a>\n"
 		"		<ul>\n"
 		"			<!-- NAV_FUNCTION_ENTRY_START -->\n"
