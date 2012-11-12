@@ -22,7 +22,7 @@
 /**
  * console.log()/.warn()/etc. stub, for running without Firebug and/or a console.
  */
-if (!console) console = {
+if (typeof console === "undefined") console = {
 		log:function(){},
 		debug:function(){},
 		warn:function(){},
@@ -35,8 +35,12 @@ if (!console) console = {
 /**
  * IE 9 (at least) doesn't support console.group/groupEnd.
  */
-if (!console.group) console.group = function(){};
-if (!console.groupEnd) console.groupEnd = function(){};
+if (typeof console.group === "undefined") console.group = function(params){
+	console.info("GROUP>>>"+params);
+};
+if (typeof console.groupEnd === "undefined") console.groupEnd = function(){
+	console.info("GROUP<<<");
+};
 
 /**
  * Determine the intrinsic (aka "natural") dimensions of an svg file embedded as a <object> element.
@@ -120,8 +124,8 @@ function fitToContainer( object, container_obj )
 
 	// Finally we set the size of object.
 	/// @todo Not sure which way is better.
-	object.outerWidth( width_new );
-	//object.css({"width": width_new});
+	//object.outerWidth( width_new );
+	object.css({"width": width_new});
 	
 	console.log("outerWidth: " + width_obj + ", naturalWidth: " + intrinsic_dims.width + ", container width: " + width_obj_container);
 }
