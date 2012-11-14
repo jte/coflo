@@ -166,19 +166,33 @@ css_dark_hive_files = css/dark-hive/images/ui-bg_flat_30_cccccc_40x100.png \
 
 css_dark_hive_dirs = css/dark-hive/images \
 	css/dark-hive
+	
+# The jQuery UI Layout files.
 
-css_dark_hive.cpio: $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%)
-	rm -f "$@-temp" && rm -f "$@-filelist"
-	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
-	echo $(css_dark_hive_files) | sed -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
-	cd $(css_dark_hive_src_root_dir) && \
-		cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp"
-	rm -f "$@-filelist"
+jquery_ui_layout_root = $(srcdir)/jquery-ui-layout-plugin
+
+jquery_ui_layout_files = layout-default-latest.css
+
+# Create "$@-filelist", pushd into the root directory, and run these commands.
+create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
+create_cpio = cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp" && \
+	popd && rm -f "$@-filelist" && \
 	mv "$@-temp" "$@"
 
+css_dark_hive.cpio: $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%)
+	$(create_cpio_preamble)
+	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
+	echo $(css_dark_hive_files) | sed -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
+	pushd $(css_dark_hive_src_root_dir) && $(create_cpio)
+
+jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
+	$(create_cpio_preamble)
+	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
+	echo $(jquery_ui_layout_files) | sed -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
+	pushd $(jquery_ui_layout_root) && $(create_cpio)
 
 # Force DParser and Boost to be rebuilt. 
-BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio
+BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio
 
 # Delete all the stamps except for the untarring ones for any clean.
 MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST)

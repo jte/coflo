@@ -17,11 +17,11 @@
 
 SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .cpio .cpio.cpp
 
+jquery_ui_layout_dir = $(top_srcdir)/third_party/jquery-ui-layout-plugin
+
 # The template source files.  These will be converted to C++ arrays and compiled into the binary.
 templates = index.template.html \
 	css/index.template.css \
-	css/layout-default-latest.css \
-	css_dark_hive.cpio \
 	js/coflo.resizer.js \
 	js/jquery.layout-latest.js \
 	js/jquery.jstree.js \
@@ -34,13 +34,14 @@ templates = index.template.html \
 
 intermediate_cpp_files = index.template.html.cpp \
 	css/index.template.css.cpp \
-	css/layout-default-latest.css.cpp \
-	css_dark_hive.cpio.cpp \
 	js/coflo.resizer.js.cpp \
 	js/jquery.layout-latest.js.cpp \
 	js/jquery.jstree.js.cpp \
 	js/jquery-1.8.2.js.cpp \
 	js/jquery-ui.js.cpp
+	
+# Files that we'll need to tell Automake to clean.
+intermediate_clean_files =  css_dark_hive.cpio  css_dark_hive.cpio.cpp jquery_ui_layout.cpio jquery_ui_layout.cpio.cpp
 
 test1:
 	echo $(intermediate_cpp_files)
@@ -52,6 +53,8 @@ test1:
 noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp $(intermediate_cpp_files)
+#EXTRA_libtemplates_a_SOURCES = $(top_builddir)/third_party/css_dark_hive.cpio $(top_builddir)/third_party/jquery_ui_layout.cpio
+libtemplates_a_LIBADD = $(builddir)/css_dark_hive.cpio.$(OBJEXT) $(builddir)/jquery_ui_layout.cpio.$(OBJEXT)
 
 # Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
 # for the libtemplates.a library.  If we do so, Automake generates dependency tracking files (*.Po) in the source tree
@@ -68,14 +71,22 @@ libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
 # We have to manually register the built sources for cleaning.
 ## @todo This should really be maintainer clean.
-MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
+MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp) $(intermediate_clean_files)
+
+define test555 =
+echo "Hello: $${TARGET_NAME} $@"
+endef
+
+test56:
+	TARGET_NAME="gjhg" && $(test555)
 
 recipie_any_file_to_cpp_array = \
 	@: First order of business is to remove any leftover temp files. && \
 	rm -f "$@.tmp" && \
 	RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" && \
 	: Generate the name we will use for the C++ array and length variable. && \
-	ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | sed 's,[/ \\\.-],_,'g)" && \
+	: The grep extracts the filename and at most one preceeding directory, while the sed converts non-C-identifier characters. && \
+	ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o '([^/]+/)?([^/]+)$$' | sed 's,[/ \\\.-],_,'g)" && \
 	: Create the file and add the boilerplate at the top. && \
 	:;{ \
 	echo "// Generated file, do not edit." && \
@@ -103,6 +114,12 @@ recipie_any_file_to_cpp_array = \
 .cpio.cpio.cpp:
 	$(recipie_any_file_to_cpp_array)
 
+css_dark_hive.cpio.cpp: css_dark_hive.cpio
+	$(recipie_any_file_to_cpp_array)
+	
+jquery_ui_layout.cpio.cpp: jquery_ui_layout.cpio
+	$(recipie_any_file_to_cpp_array)
+
 # Some of the sources we need are in the third_party subdirectory.
 # We'll copy them to source directories under this $(srcdir) if needed so we can use that same build
 # mechanisms for all of the template files.
@@ -113,8 +130,8 @@ recipie_copy_if_change = TEMPFILE_NAME="$$(mktemp)" && \
 	cp -p "$<" "$${TEMPFILE_NAME}" && \
 	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@"
 
-$(srcdir)/css/layout-default-latest.css: $(top_srcdir)/third_party/jquery-ui-layout-plugin/layout-default-latest.css
-	$(recipie_copy_if_change)
+#$(builddir)/css/layout-default-latest.css: $(top_srcdir)/third_party/jquery-ui-layout-plugin/layout-default-latest.css
+#	$(recipie_copy_if_change)
 
 $(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jquery.jstree.js
 	$(recipie_copy_if_change)
@@ -128,5 +145,8 @@ $(srcdir)/js/jquery-1.8.2.js: $(top_srcdir)/third_party/jquery/jquery-1.8.2.js
 $(srcdir)/js/jquery-ui.js: $(top_srcdir)/third_party/jquery-ui-1.9.1/ui/jquery-ui.js
 	$(recipie_copy_if_change)
 
-$(srcdir)/css_dark_hive.cpio: $(top_builddir)/third_party/css_dark_hive.cpio
+css_dark_hive.cpio: $(top_builddir)/third_party/css_dark_hive.cpio
+	$(recipie_copy_if_change)
+
+jquery_ui_layout.cpio: $(top_builddir)/third_party/jquery_ui_layout.cpio
 	$(recipie_copy_if_change)

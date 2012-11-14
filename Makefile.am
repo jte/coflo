@@ -93,7 +93,25 @@ MOSTLYCLEANFILES = $(DX_CLEANFILES)
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
 	
-# Static Analysis rules
+###
+### Development-only rules.
+###
+
+# Copy/create the third-party files which must be in the src/templates directory
+# in order for the index.template.html file to be openable in a web browser from there.
+FROM_ROOT = $(top_srcdir)/third_party
+TO_ROOT = $(top_srcdir)/src/templates
+
+dev-prep:
+	cp -p -r $(FROM_ROOT)/jquery-ui-1.9.1.custom/css/dark-hive $(TO_ROOT)/css/dark-hive
+
+clean-dev-prep:
+	rm -rf $(TO_ROOT)/css/dark-hive
+	rm -f $(TO_ROOT)/css/layout-default-latest.css
+
+###
+### Static Analysis rules
+###
 analysis-static-all: cppcheck-reports/cppcheck-result-NOVERSION.xml
 
 # cppcheck
