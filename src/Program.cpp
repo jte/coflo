@@ -207,10 +207,6 @@ void Program::Print(const std::string &output_path)
 		file.SaveAs((output_dir / "js/coflo.resizer.js").generic_string());
 	}
 	{
-		std::ofstream js((output_dir / "js/jquery.layout-latest.js").generic_string().c_str());
-		js << js_jquery_layout_latest_js << std::endl;
-	}
-	{
 		std::ofstream js((output_dir / "js/jquery.jstree.js").generic_string().c_str());
 		js << js_jquery_jstree_js << std::endl;
 	}
@@ -224,16 +220,17 @@ void Program::Print(const std::string &output_path)
 	}
 
 	{
-		std::ofstream css((output_dir / "css/layout-default-latest.css").generic_string().c_str());
-		css << css_layout_default_latest_css << std::endl;
-	}
-
-	{
 		// Extract the jQuery UI theme.
 		FILE *fp = fopen((output_dir / "css_dark_hive.cpio").generic_string().c_str(), "w");
 		fwrite(css_dark_hive_cpio, css_dark_hive_cpio_len, 1, fp);
 		fclose(fp);
 		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I css_dark_hive.cpio").c_str());
+
+		// Extract the jQuery UI Layout Plugin css and js files to the destination directory.
+		fp = fopen((output_dir / "jquery_ui_layout.cpio").generic_string().c_str(), "w");
+		fwrite(jquery_ui_layout_cpio, jquery_ui_layout_cpio_len, 1, fp);
+		fclose(fp);
+		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I jquery_ui_layout.cpio").c_str());
 	}
 
 	// Set permissions on the generated report appropriately.

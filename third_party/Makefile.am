@@ -171,7 +171,8 @@ css_dark_hive_dirs = css/dark-hive/images \
 
 jquery_ui_layout_root = $(srcdir)/jquery-ui-layout-plugin
 
-jquery_ui_layout_files = layout-default-latest.css
+jquery_ui_layout_files = css/layout-default-latest.css \
+	js/jquery.layout-latest.js
 
 # Create "$@-filelist", pushd into the root directory, and run these commands.
 create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
@@ -194,8 +195,11 @@ jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
 # Force DParser and Boost to be rebuilt. 
 BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio
 
+EXTRA_DIST = $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
+	$(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
+
 # Delete all the stamps except for the untarring ones for any clean.
-MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST)
+MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio
 	 
 # Additional files to clean during a "make clean".
 CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 
