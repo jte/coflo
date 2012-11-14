@@ -174,6 +174,10 @@ jquery_ui_layout_root = $(srcdir)/jquery-ui-layout-plugin
 jquery_ui_layout_files = css/layout-default-latest.css \
 	js/jquery.layout-latest.js
 
+# Other files and directory trees we need to distribute.
+other_dist_files = jstree_pre1.0_fix_1 jquery-ui-1.9.1.custom
+	
+
 # Create "$@-filelist", pushd into the root directory, and run these commands.
 create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
 create_cpio = cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp" && \
@@ -196,7 +200,8 @@ jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
 BUILT_SOURCES = $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio
 
 EXTRA_DIST = $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
-	$(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
+	$(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%) \
+	$(other_dist_files)
 
 # Delete all the stamps except for the untarring ones for any clean.
 MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio
