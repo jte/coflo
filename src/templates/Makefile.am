@@ -23,7 +23,6 @@ jquery_ui_layout_dir = $(top_srcdir)/third_party/jquery-ui-layout-plugin
 templates = index.template.html \
 	css/index.template.css \
 	js/coflo.resizer.js \
-	js/jquery.layout-latest.js \
 	js/jquery.jstree.js \
 	js/jquery-1.8.2.js \
 	js/jquery-ui.js
@@ -35,7 +34,6 @@ templates = index.template.html \
 intermediate_cpp_files = index.template.html.cpp \
 	css/index.template.css.cpp \
 	js/coflo.resizer.js.cpp \
-	js/jquery.layout-latest.js.cpp \
 	js/jquery.jstree.js.cpp \
 	js/jquery-1.8.2.js.cpp \
 	js/jquery-ui.js.cpp
@@ -73,52 +71,46 @@ libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 ## @todo This should really be maintainer clean.
 MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp) $(intermediate_clean_files)
 
-define test555 =
-echo "Hello: $${TARGET_NAME} $@"
+define recipie_any_file_to_cpp_array =
+: First order of business is to remove any leftover temp files. && \
+rm -f "$@.tmp" && \
+RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" && \
+: Generate the name we will use for the C++ array and length variable. && \
+: The grep extracts the filename and at most one preceeding directory, while the sed converts non-C-identifier characters. && \
+ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o "([^/]+/){0,$${MAX_DIRS}}([^/]+)$$" | sed 's,[/ \\\.-],_,'g)" && \
+: Create the file and add the boilerplate at the top. && \
+:;{ \
+echo "// Generated file, do not edit." && \
+echo "// File generated $$(date)" ; \
+} > "$@.tmp" && \
+: Generate the file, fixing up the identifier names in the process. && \
+$(XXD) -i "$<" | \
+	sed -r "s,(unsigned char )([^ \[]+),extern const unsigned char $${ARRAY_IDENTIFIER}," | \
+	sed -r "s,(unsigned int )([^ =]+),extern \1$${ARRAY_IDENTIFIER}_len," | \
+	sed -r 's/};/, 0x00};/' >> "$@.tmp" && \
+mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 endef
-
-test56:
-	TARGET_NAME="gjhg" && $(test555)
-
-recipie_any_file_to_cpp_array = \
-	@: First order of business is to remove any leftover temp files. && \
-	rm -f "$@.tmp" && \
-	RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" && \
-	: Generate the name we will use for the C++ array and length variable. && \
-	: The grep extracts the filename and at most one preceeding directory, while the sed converts non-C-identifier characters. && \
-	ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o '([^/]+/)?([^/]+)$$' | sed 's,[/ \\\.-],_,'g)" && \
-	: Create the file and add the boilerplate at the top. && \
-	:;{ \
-	echo "// Generated file, do not edit." && \
-	echo "// File generated $$(date)" ; \
-	} > "$@.tmp" && \
-	: Generate the file, fixing up the identifier names in the process. && \
-	$(XXD) -i "$<" | \
-		sed -r "s,(unsigned char )([^ \[]+),extern const unsigned char $${ARRAY_IDENTIFIER}," | \
-		sed -r "s,(unsigned int )([^ =]+),extern \1$${ARRAY_IDENTIFIER}_len," | \
-		sed -r 's/};/, 0x00};/' >> "$@.tmp" && \
-	mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
 
 # Rule to convert *.css files to *.css.cpp files.
 .css.css.cpp:
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=1 && $(recipie_any_file_to_cpp_array)
 
 # Rule to convert *.html files to *.html.cpp files.
 .html.html.cpp:
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 	
 # Rule to convert *.js files to *.js.cpp files.
 .js.js.cpp:
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=1 && $(recipie_any_file_to_cpp_array)
 	
 .cpio.cpio.cpp:
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 
 css_dark_hive.cpio.cpp: css_dark_hive.cpio
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 	
 jquery_ui_layout.cpio.cpp: jquery_ui_layout.cpio
-	$(recipie_any_file_to_cpp_array)
+	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 
 # Some of the sources we need are in the third_party subdirectory.
 # We'll copy them to source directories under this $(srcdir) if needed so we can use that same build
@@ -130,13 +122,7 @@ recipie_copy_if_change = TEMPFILE_NAME="$$(mktemp)" && \
 	cp -p "$<" "$${TEMPFILE_NAME}" && \
 	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@"
 
-#$(builddir)/css/layout-default-latest.css: $(top_srcdir)/third_party/jquery-ui-layout-plugin/layout-default-latest.css
-#	$(recipie_copy_if_change)
-
 $(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jquery.jstree.js
-	$(recipie_copy_if_change)
-
-$(srcdir)/js/jquery.layout-latest.js: $(top_srcdir)/third_party/jquery-ui-layout-plugin/jquery.layout-latest.js
 	$(recipie_copy_if_change)
 
 $(srcdir)/js/jquery-1.8.2.js: $(top_srcdir)/third_party/jquery/jquery-1.8.2.js
