@@ -210,38 +210,20 @@ void Program::Print(const std::string &output_path)
 		std::ofstream js((output_dir / "js/jquery.jstree.js").generic_string().c_str());
 		js << js_jquery_jstree_js << std::endl;
 	}
-	{
-		std::ofstream js((output_dir / "js/jquery-1.8.2.js").generic_string().c_str());
-		js << js_jquery_1_8_2_js << std::endl;
-	}
-	{
-		std::ofstream js((output_dir / "js/jquery-ui.js").generic_string().c_str());
-		js << js_jquery_ui_js << std::endl;
-	}
 
 	{
-		// Extract the jQuery UI theme.
-		FILE *fp = fopen((output_dir / "css_dark_hive.cpio").generic_string().c_str(), "w");
-		fwrite(css_dark_hive_cpio, css_dark_hive_cpio_len, 1, fp);
-		fclose(fp);
-		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I css_dark_hive.cpio").c_str());
+		FILE *fp;
 
-		// Extract the jQuery UI Layout Plugin css and js files to the destination directory.
-		fp = fopen((output_dir / "jquery_ui_layout.cpio").generic_string().c_str(), "w");
-		fwrite(jquery_ui_layout_cpio, jquery_ui_layout_cpio_len, 1, fp);
+		// Extract the report boilerplate files (e.g. jQuery UI js and css theme files) to the destination directory.
+		fp = fopen((output_dir / "report_boilerplate.tar").generic_string().c_str(), "w");
+		fwrite(report_boilerplate_tar, report_boilerplate_tar_len, 1, fp);
 		fclose(fp);
-		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I jquery_ui_layout.cpio").c_str());
-
-		// Extract the jQuery UI js files to the destination directory.
-		fp = fopen((output_dir / "jquery_ui.tar").generic_string().c_str(), "w");
-		fwrite(jquery_ui_tar, jquery_ui_tar_len, 1, fp);
-		fclose(fp);
-		::system(("cd " + output_dir.generic_string() + " && tar -xaf jquery_ui.tar").c_str());
+		::system(("cd " + output_dir.generic_string() + " && tar -xaf report_boilerplate.tar").c_str());
 	}
 
 	// Set permissions on the generated report appropriately.
 	/// @todo This is for development only at the moment.  We'll probably want to remove this.
-	::system(("cd " + output_dir.generic_string() + " && chmod -R 666 .").c_str());
+	//::system(("cd " + output_dir.generic_string() + " && chmod -R 666 .").c_str());
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)

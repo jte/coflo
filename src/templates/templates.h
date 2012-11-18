@@ -34,3 +34,6 @@ extern const unsigned int jquery_ui_layout_cpio_len;
 
 extern const unsigned char jquery_ui_tar[];
 extern const unsigned int jquery_ui_tar_len;
+
+extern const unsigned char report_boilerplate_tar[];
+extern const unsigned int report_boilerplate_tar_len;
