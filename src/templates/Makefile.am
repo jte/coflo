@@ -15,39 +15,20 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .cpio .cpio.cpp .tar.cpp
-
-jquery_ui_layout_dir = $(top_srcdir)/third_party/jquery-ui-layout-plugin
+SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .tar.cpp
 
 # The template source files.  These will be converted to C++ arrays and compiled into the binary.
 templates = index.template.html \
 	css/index.template.css \
-	js/coflo.resizer.js \
-	js/jquery.jstree.js
+	js/coflo.resizer.js
 
-#intermediate_cpp_files_1 = $(templates:%.html=%.html.cpp)
-#intermediate_cpp_files_2 = $(intermediate_cpp_files_1:%.css=%.css.cpp)
-#intermediate_cpp_files = $(intermediate_cpp_files_2:%.js=%.js.cpp)
-
+# The .cpp files below are all built sources.
 intermediate_cpp_files = index.template.html.cpp \
 	css/index.template.css.cpp \
-	js/coflo.resizer.js.cpp \
-	js/jquery.jstree.js.cpp
+	js/coflo.resizer.js.cpp
 	
-# Files that we'll need to tell Automake to clean.
-intermediate_clean_files = jquery_ui_layout.cpio jquery_ui_layout.cpio.cpp
-
-test1:
-	echo $(intermediate_cpp_files)
-	echo "2:"
-	echo $(intermediate_cpp_files)
-	echo "3"
-	echo $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
-
 noinst_LIBRARIES = libtemplates.a
-# The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp $(intermediate_cpp_files)
-#EXTRA_libtemplates_a_SOURCES = $(top_builddir)/third_party/css_dark_hive.cpio $(top_builddir)/third_party/jquery_ui_layout.cpio
 libtemplates_a_LIBADD = $(builddir)/report_boilerplate.tar.$(OBJEXT)
 
 # Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
@@ -65,19 +46,13 @@ libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
 # We have to manually register the built sources for cleaning.
 ## @todo This should really be maintainer clean.
-MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp) $(intermediate_clean_files)
-
-#RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" 
-
+MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
 
 recipie_any_file_to_cpp_array = : First order of business is to remove any leftover temp files. && \
 rm -f "$@.tmp" && \
-: Generate the path && \
-RELATIVE_SOURCE_NAME="$<" && \
-echo "REL SRC NAME = $${RELATIVE_SOURCE_NAME}" && \
 : Generate the name we will use for the C++ array and length variable. && \
 : The grep extracts the filename and at most one preceeding directory, while the sed converts non-C-identifier characters. && \
-ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o "([^/]+/){0,$${MAX_DIRS}}([^/]+)$$" | $(SED) 's,[/ \\\.-],_,'g)" && \
+ARRAY_IDENTIFIER="$$(echo "$<" | grep -E -o "([^/]+/){0,$${MAX_DIRS}}([^/]+)$$" | $(SED) 's,[/ \\\.-],_,'g)" && \
 : Create the file and add the boilerplate at the top. && \
 :;{ \
 echo "// Generated file, do not edit." && \
@@ -102,27 +77,8 @@ mv "$@-temp" "$@"
 # Rule to convert *.js files to *.js.cpp files.
 .js.js.cpp:
 	MAX_DIRS=1 && $(recipie_any_file_to_cpp_array)
-	
+
+# The boilerplate JavaScript and CSS files from the third_party directory.
 report_boilerplate.tar.cpp: $(top_builddir)/third_party/report_boilerplate.tar
 	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 
-# Some of the sources we need are in the third_party subdirectory.
-# We'll copy them to source directories under this $(srcdir) if needed so we can use that same build
-# mechanisms for all of the template files.
-
-# Makefile action for copying a file only if it is different from the target.
-# Leverages "move-if-change". 
-recipie_copy_if_change = TEMPFILE_NAME="$$(mktemp)" && \
-	cp -p "$<" "$${TEMPFILE_NAME}" && \
-	"$(top_srcdir)/build-aux/move-if-change" "$${TEMPFILE_NAME}" "$@"
-
-$(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jquery.jstree.js
-	$(recipie_copy_if_change)
-
-# Files which have been created by the Makefile in the ../third_party directory.
-
-#report_boilerplate.tar: $(top_builddir)/third_party/report_boilerplate.tar
-#	$(recipie_copy_if_change)
-	
-#jquery_ui_layout.cpio: $(top_builddir)/third_party/jquery_ui_layout.cpio
-#	$(recipie_copy_if_change)
