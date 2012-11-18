@@ -182,31 +182,20 @@ jquery_ui_layout_root = $(srcdir)/jquery-ui-layout-plugin
 jquery_ui_layout_files = css/layout-default-latest.css \
 	js/jquery.layout-latest.js
 	
-# The jQuery and jQuery UI files which need to go into reports.
+# The jQuery, jQuery UI, and jsTree JavaScript files which need to go into reports.
 jquery_ui_report_js_files = jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js \
-	jquery/jquery-1.8.2.js
+	jquery/jquery-1.8.2.js \
+	jstree_pre1.0_fix_1/jquery.jstree.js
 
 # Other files and directory trees we need to distribute.
 other_dist_files = jstree_pre1.0_fix_1 jquery-ui-1.9.1.custom jquery
 	
-
-# Create "$@-filelist", pushd into the root directory, and run these commands.
-#create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
-#create_cpio = cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp" && \
-#	popd && rm -f "$@-filelist" && \
-#	mv "$@-temp" "$@"
-
-#jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
-#	$(create_cpio_preamble)
-#	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
-#	echo $(jquery_ui_layout_files) | $(SED) -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
-#	pushd $(jquery_ui_layout_root) && $(create_cpio)
-	
+# The jQuery UI Layout intermediate tar file.
 jquery_ui_layout.tar: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
 	tar --format=posix --create --file="$@-temp" --directory=$(jquery_ui_layout_root) $(jquery_ui_layout_files)
 	mv "$@-temp" "$@"
 
-CLEANFILES_JQUERY_UI = jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar
+CLEANFILES_REPORT_BOILERPLATE = jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar report_boilerplate.tar
 
 jquery_ui_js.tar: $(jquery_ui_report_js_files)
 	@: Create an empty tar archive.  Note that we must "trick" tar into doing this.
@@ -247,7 +236,7 @@ EXTRA_DIST = $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
 # Delete all the stamps except for the untarring ones for any clean.
 # Also delete the generated .tar files, they're cheap to rebuild.
 MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) \
-	jquery_ui_layout.tar report_boilerplate.tar $(CLEANFILES_JQUERY_UI) stampfile-all-third-party-builds-complete
+	jquery_ui_layout.tar report_boilerplate.tar $(CLEANFILES_REPORT_BOILERPLATE) stampfile-all-third-party-builds-complete
 	 
 # Additional files to clean during a "make clean".
 CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 
