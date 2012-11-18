@@ -49,6 +49,7 @@ m4_define([AT_COFLO_CHECK],[
 		AT_CLEANUP])
 ])
 
+dnl Quadrigraphs (for reference):
 dnl @S|@ = "$"
 dnl @<:@ = "["
 
@@ -56,7 +57,7 @@ dnl @<:@ = "["
 ### Start of the test suite proper.
 ###
 AT_INIT([CoFlo Test Suite])
-AT_COPYRIGHT([Copyright (C) 2011 Gary R. Van Sickle])
+AT_COPYRIGHT([Copyright (C) 2011, 2012 Gary R. Van Sickle])
 AT_COLOR_TESTS
 
 # We have one main executable to test, and possibly the unit test executable.
@@ -67,9 +68,17 @@ AT_TESTED([coflo coflotest])
 ### Start the Unit Test test category.
 ###
 AT_BANNER([CoFlo unit tests (coflotest)])
-AT_SETUP([Basic tests])
-AT_KEYWORDS([xUnit])
-AT_CHECK([coflotest],
+AT_SETUP([Base graph library tests])
+AT_KEYWORDS([xUnit gtest graph])
+AT_CHECK([coflotest '--gtest_filter=GraphTest.*'],
+	0,
+	ignore,
+	ignore)
+AT_CLEANUP
+
+AT_SETUP([Control flow graph library tests])
+AT_KEYWORDS([xUnit gtest controlflowgraph])
+AT_CHECK([coflotest '--gtest_filter=ControlFlowGraphTest.*'],
 	0,
 	ignore,
 	ignore)

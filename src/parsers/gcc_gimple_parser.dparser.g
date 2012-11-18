@@ -32,18 +32,13 @@
 #define D_ParseNode_Globals gcc_gimple_parser_ParseNode_Globals
 #define D_ParseNode_User gcc_gimple_parser_ParseNode_User
 
-#include <dparse.h>
-
-// Redefine P_PN with C++ casts to avoid warnings.
-#undef D_PN
-#define D_PN(_x, _o) (reinterpret_cast<D_ParseNode*>(static_cast<char*>(_x) + _o))
+#include "parser_grammar_helper.h"
 
 extern D_ParserTables parser_tables_gcc_gimple_parser;
 
+
 void gcc_gimple_parser_FreeNodeFn(D_ParseNode *d);
 
-#define M_TO_STR(the_n) std::string(the_n.start_loc.s, the_n.end-the_n.start_loc.s)
-#define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0) 
 
 // The globals.
 static gcc_gimple_parser_ParseNode_Globals TheGlobals;

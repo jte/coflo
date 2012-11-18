@@ -16,20 +16,29 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug_utils libexttools parsers
+SUBDIRS = controlflowgraph debug_utils libexttools parsers templates
 
-# Make sure to distribute the Doxygen configuration file.
-EXTRA_DIST = Doxyfile 
+# Make sure to distribute:
+# - The Doxygen configuration file.
+# - The /etc/coflo.conf template file.
+EXTRA_DIST = Doxyfile coflo.conf.in
 
+# The /etc/coflo.conf file.
+dist_sysconf_DATA = coflo.conf
+
+# Source files common to both the normal CoFlo and the coflotest executables.
 COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
+	RuntimeConfiguration.cpp RuntimeConfiguration.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
 	UEI.cpp UEI.h \
 	safe_enum.h safe_enum.cpp
+	
+TESTSOURCES = RuntimeConfiguration_test.cpp
 
 # The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
@@ -58,7 +67,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a 
+	./libexttools/libexttools.a \
+	./templates/libtemplates.a
 
 	
 #	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
@@ -66,7 +76,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 
 coflo_CPPFLAGS = $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
 	-I $(top_srcdir)/src/debug_utils \
-	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) \
+	-DCOFLO_PKGDATA_DIR='$(pkgdatadir)' $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
@@ -91,8 +102,9 @@ gtest-all.cc: $(GTEST_ROOT)/src/gtest-all.cc
 
 BUILT_SOURCES = gtest-all.cc
 MOSTLYCLEANFILES = gtest-all.cc
+
 check_PROGRAMS = coflotest
-coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
+coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
 coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \

@@ -97,9 +97,9 @@ void ResponseFileParser::LoadFileIntoVectorOfStrings(std::istream &ifs, std::vec
 		}
 
 		// Check for comment lines.
-		if(line[char_index] == ';')
+		if(line[char_index] == '#')
 		{
-			// It's a comment, skip it.
+			// This line is a comment, skip it.
 			continue;
 		}
 

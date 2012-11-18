@@ -93,14 +93,33 @@ MOSTLYCLEANFILES = $(DX_CLEANFILES)
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
 	
-# Static Analysis rules
+###
+### Development-only rules.
+###
+
+# Copy/create the third-party files which must be in the src/templates directory
+# in order for the index.template.html file to be openable in a web browser from there.
+FROM_ROOT = $(top_srcdir)/third_party
+TO_ROOT = $(top_srcdir)/src/templates
+
+dev-prep:
+	cp -p -r $(FROM_ROOT)/jquery-ui-1.9.1.custom/css/dark-hive $(TO_ROOT)/css/dark-hive
+
+clean-dev-prep:
+	rm -rf $(TO_ROOT)/css/dark-hive
+	rm -f $(TO_ROOT)/css/layout-default-latest.css
+
+###
+### Static Analysis rules
+###
 analysis-static-all: cppcheck-reports/cppcheck-result-NOVERSION.xml
 
 # cppcheck
 cppcheck-reports/cppcheck-result-NOVERSION.xml: FORCE
-	rm -rf '$@'
+	rm -f '$@' && rm -f '$@-temp'
 	$(MKDIR_P) "$$(dirname '$@')"
-	cppcheck --verbose --enable=all --xml --xml-version=2 -I ./third_party/boost_1_49_0/ $(srcdir)/src 2> '$@'
+	cppcheck --verbose --enable=all --xml --xml-version=2 -I ./third_party/boost_1_49_0/ $(srcdir)/src 2> '$@-temp'
+	mv '$@-temp' '$@'
 
 # Run sonar-runner.
 $(top_srcdir)/sonar-project.properties: sonar-project.template.properties $(srcdir)/BuildInfoFile.sh FORCE

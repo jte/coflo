@@ -20,19 +20,50 @@
 #ifndef SAFE_ENUM_H
 #define	SAFE_ENUM_H
 
+#include <iosfwd>
+#include <vector>
 #include <string>
 
 class SafeEnumBaseClass
 {
 public:
 	SafeEnumBaseClass(const std::string &enum_names);
-	~SafeEnumBaseClass();
+	virtual ~SafeEnumBaseClass();
 
 	std::string asString(int value) const;
 
+	virtual std::string asString() const = 0;
+
+	std::string GetEnumeratorsAsString() const;
+
 private:
-	/** String of the enumerator names.*/
-	std::string m_names;
+
+	/**
+	 * Convert a string of enumerator declarations to a vector of strings with the value of the enumerators' identifiers.
+	 *
+	 * @todo The SafeEnumBaseClass currently doesn't handle enumerators with assigned values.
+	 *
+	 * @param enum_names
+	 */
+	void EnumeratorStringToVectorOfStrings(const std::string &enum_names);
+
+	/**
+	 * A vector of strings which will hold the enumerator names.
+	 */
+	std::vector<std::string> m_enumerator_names;
+
+};
+
+/**
+ * Insertion operator for classes derived from SafeEnumBaseClass.
+ * @param os
+ * @param n
+ * @return
+ */
+inline std::ostream &operator<<(std::ostream &os, const SafeEnumBaseClass& n)
+{
+	os << n.asString();
+	return os;
 };
 
 /**
@@ -65,6 +96,7 @@ public:\
 	/** An accessor to return the underlying integral type.  Unfortunately there isn't */ \
 	/** any real way around this if we want to support switch statements. */ \
 	value_type as_enum() const { return m_value; };\
+	/** Returns the current value of this safe enum as a string. */ \
 	std::string asString() const { return SafeEnumBaseClass::asString(static_cast<int>(m_value)); };\
 \
 private:\
