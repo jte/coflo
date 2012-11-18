@@ -32,7 +32,7 @@ CLEAN_LOCAL_DIRS =
 # the various sub-builds. 
 BUILT_SOURCES = stampfile-all-third-party-builds-complete
 
-# Append any stamp files which indicate that a sub-build is complete.
+# Append any stamp (or other) files which indicate that a sub-build is complete.
 third_party_complete_deps =
 
 
@@ -191,22 +191,20 @@ other_dist_files = jstree_pre1.0_fix_1 jquery-ui-1.9.1.custom jquery
 	
 
 # Create "$@-filelist", pushd into the root directory, and run these commands.
-create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
-create_cpio = cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp" && \
-	popd && rm -f "$@-filelist" && \
+#create_cpio_preamble = rm -f "$@-temp" && rm -f "$@-filelist"
+#create_cpio = cat "$(abs_builddir)/$@-filelist" | cpio -ov > "$(abs_builddir)/$@-temp" && \
+#	popd && rm -f "$@-filelist" && \
+#	mv "$@-temp" "$@"
+
+#jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
+#	$(create_cpio_preamble)
+#	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
+#	echo $(jquery_ui_layout_files) | $(SED) -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
+#	pushd $(jquery_ui_layout_root) && $(create_cpio)
+	
+jquery_ui_layout.tar: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
+	tar --format=posix --create --file="$@-temp" --directory=$(jquery_ui_layout_root) $(jquery_ui_layout_files)
 	mv "$@-temp" "$@"
-
-css_dark_hive.cpio: $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%)
-	$(create_cpio_preamble)
-	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
-	echo $(css_dark_hive_files) | $(SED) -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
-	pushd $(css_dark_hive_src_root_dir) && $(create_cpio)
-
-jquery_ui_layout.cpio: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
-	$(create_cpio_preamble)
-	:;# Create a file containing a newline-separated list of the files we will pass to cpio.
-	echo $(jquery_ui_layout_files) | $(SED) -r 's,(\.[^ ]+)[ ],\1\n,g' > "$@-filelist"
-	pushd $(jquery_ui_layout_root) && $(create_cpio)
 
 CLEANFILES_JQUERY_UI = jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar
 
@@ -223,12 +221,18 @@ jquery_ui_css.tar: $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%)
 	mv "$@-temp" "$@"
 	
 jquery_ui.tar: jquery_ui_js.tar jquery_ui_css.tar
-	: tar --format=posix --create --file="$@-temp" --files-from=/dev/null
+	: For some reason, creating an empty tar file and then --concatenating into it results in a corrupt tarfile.
+	: So instead, we will copy the first file and concat into that. 
 	cp "$<" "$@-temp"
 	tar --concatenate --file="$@-temp" jquery_ui_css.tar
 	mv "$@-temp" "$@"
+	
+report_boilerplate.tar: jquery_ui.tar jquery_ui_layout.tar
+	cp "$<" "$@-temp"
+	tar --concatenate --file="$@-temp" jquery_ui_layout.tar
+	mv "$@-temp" "$@"
 
-third_party_complete_deps += $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) css_dark_hive.cpio jquery_ui_layout.cpio jquery_ui.tar
+third_party_complete_deps += $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) report_boilerplate.tar
 
 # The stamp file which will depend on all active third-party builds.
 # We do this this way so as to maximize parallel build potential.
@@ -241,9 +245,9 @@ EXTRA_DIST = $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
 	$(other_dist_files)
 
 # Delete all the stamps except for the untarring ones for any clean.
-# Also delete the generated .cpio files, they're cheap to rebuild.
+# Also delete the generated .tar files, they're cheap to rebuild.
 MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) \
-	css_dark_hive.cpio jquery_ui_layout.cpio $(CLEANFILES_JQUERY_UI) stampfile-all-third-party-builds-complete
+	jquery_ui_layout.tar report_boilerplate.tar $(CLEANFILES_JQUERY_UI) stampfile-all-third-party-builds-complete
 	 
 # Additional files to clean during a "make clean".
 CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 
