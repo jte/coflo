@@ -231,6 +231,12 @@ void Program::Print(const std::string &output_path)
 		fwrite(jquery_ui_layout_cpio, jquery_ui_layout_cpio_len, 1, fp);
 		fclose(fp);
 		::system(("cd " + output_dir.generic_string() + " && cpio -idu -I jquery_ui_layout.cpio").c_str());
+
+		// Extract the jQuery UI js files to the destination directory.
+		fp = fopen((output_dir / "jquery_ui.tar").generic_string().c_str(), "w");
+		fwrite(jquery_ui_tar, jquery_ui_tar_len, 1, fp);
+		fclose(fp);
+		::system(("cd " + output_dir.generic_string() + " && tar -xaf jquery_ui.tar").c_str());
 	}
 
 	// Set permissions on the generated report appropriately.

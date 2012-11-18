@@ -66,7 +66,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 # Require our source control version checking script. 
 #AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 # Require our move-if-file-contents-differ script.
-#AC_REQUIRE_AUX_FILE([move-if-change])
+AC_REQUIRE_AUX_FILE([move-if-change])
 #AC_REQUIRE_AUX_FILE([config.guess])
 
 # If/when we need to use any AC_REPLACE_FUNCS, we'll put them in ./portable. 
