@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
-SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .cpio .cpio.cpp
+SUFFIXES = .js .js.cpp .html .html.cpp .css .css.cpp .cpio .cpio.cpp .tar.cpp
 
 jquery_ui_layout_dir = $(top_srcdir)/third_party/jquery-ui-layout-plugin
 
@@ -52,7 +52,9 @@ noinst_LIBRARIES = libtemplates.a
 # The .cpp files below are all built sources.
 libtemplates_a_SOURCES = templates.h FileTemplate.h FileTemplate.cpp $(intermediate_cpp_files)
 #EXTRA_libtemplates_a_SOURCES = $(top_builddir)/third_party/css_dark_hive.cpio $(top_builddir)/third_party/jquery_ui_layout.cpio
-libtemplates_a_LIBADD = $(builddir)/css_dark_hive.cpio.$(OBJEXT) $(builddir)/jquery_ui_layout.cpio.$(OBJEXT)
+libtemplates_a_LIBADD = $(builddir)/css_dark_hive.cpio.$(OBJEXT) \
+	$(builddir)/jquery_ui_layout.cpio.$(OBJEXT) \
+	$(builddir)/jquery_ui.tar.$(OBJEXT)
 
 # Note that we don't list the template files in the _SOURCES Automake variable, even though they are sources
 # for the libtemplates.a library.  If we do so, Automake generates dependency tracking files (*.Po) in the source tree
@@ -71,13 +73,17 @@ libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 ## @todo This should really be maintainer clean.
 MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp) $(intermediate_clean_files)
 
-define recipie_any_file_to_cpp_array =
-: First order of business is to remove any leftover temp files. && \
+#RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" 
+
+
+recipie_any_file_to_cpp_array = : First order of business is to remove any leftover temp files. && \
 rm -f "$@.tmp" && \
-RELATIVE_SOURCE_NAME="$$(realpath --relative-to=$(srcdir) "$<")" && \
+: Generate the path && \
+RELATIVE_SOURCE_NAME="$<" && \
+echo "REL SRC NAME = $${RELATIVE_SOURCE_NAME}" && \
 : Generate the name we will use for the C++ array and length variable. && \
 : The grep extracts the filename and at most one preceeding directory, while the sed converts non-C-identifier characters. && \
-ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o "([^/]+/){0,$${MAX_DIRS}}([^/]+)$$" | sed 's,[/ \\\.-],_,'g)" && \
+ARRAY_IDENTIFIER="$$(echo $${RELATIVE_SOURCE_NAME} | grep -E -o "([^/]+/){0,$${MAX_DIRS}}([^/]+)$$" | $(SED) 's,[/ \\\.-],_,'g)" && \
 : Create the file and add the boilerplate at the top. && \
 :;{ \
 echo "// Generated file, do not edit." && \
@@ -85,11 +91,11 @@ echo "// File generated $$(date)" ; \
 } > "$@.tmp" && \
 : Generate the file, fixing up the identifier names in the process. && \
 $(XXD) -i "$<" | \
-	sed -r "s,(unsigned char )([^ \[]+),extern const unsigned char $${ARRAY_IDENTIFIER}," | \
-	sed -r "s,(unsigned int )([^ =]+),extern \1$${ARRAY_IDENTIFIER}_len," | \
-	sed -r 's/};/, 0x00};/' >> "$@.tmp" && \
+	$(SED) -r "s,(unsigned char )([^ \[]+),extern const unsigned char $${ARRAY_IDENTIFIER}," | \
+	$(SED) -r "s,(unsigned int )([^ =]+),\1$${ARRAY_IDENTIFIER}_len," | \
+	$(SED) -r 's/};/, 0x00};/' >> "$@.tmp" && \
 mv "$@.tmp" "$(srcdir)/$${RELATIVE_SOURCE_NAME}.cpp"
-endef
+
 
 # Rule to convert *.css files to *.css.cpp files.
 .css.css.cpp:
@@ -111,6 +117,9 @@ css_dark_hive.cpio.cpp: css_dark_hive.cpio
 	
 jquery_ui_layout.cpio.cpp: jquery_ui_layout.cpio
 	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
+	
+jquery_ui.tar.cpp: jquery_ui.tar
+	MAX_DIRS=0 && $(recipie_any_file_to_cpp_array)
 
 # Some of the sources we need are in the third_party subdirectory.
 # We'll copy them to source directories under this $(srcdir) if needed so we can use that same build
@@ -128,9 +137,14 @@ $(srcdir)/js/jquery.jstree.js: $(top_srcdir)/third_party/jstree_pre1.0_fix_1/jqu
 $(srcdir)/js/jquery-1.8.2.js: $(top_srcdir)/third_party/jquery/jquery-1.8.2.js
 	$(recipie_copy_if_change)
 
-$(srcdir)/js/jquery-ui.js: $(top_srcdir)/third_party/jquery-ui-1.9.1/ui/jquery-ui.js
+$(srcdir)/js/jquery-ui.js: $(top_srcdir)/third_party/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js
 	$(recipie_copy_if_change)
+	
+# Files which have been created by the Makefile in the ../third_party directory.
 
+jquery_ui.tar: $(top_builddir)/third_party/jquery_ui.tar
+	$(recipie_copy_if_change)
+	
 css_dark_hive.cpio: $(top_builddir)/third_party/css_dark_hive.cpio
 	$(recipie_copy_if_change)
 
