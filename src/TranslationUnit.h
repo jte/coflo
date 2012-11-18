@@ -31,10 +31,13 @@ class FunctionCall;
 class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 struct FunctionInfo;
+class FileTemplate;
 
 /**
- * Class representing a single source file.
+ * Class representing a single translation unit.
  * 
+ * @todo Currently, this class makes the assumption that one translation unit == one source file.
+ *
  * @param file_path
  */
 class TranslationUnit
@@ -75,8 +78,13 @@ public:
 	void Link(const std::map< std::string, Function* > &function_map,
 			T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls);
 
-	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, std::ofstream & index_html_stream);
+	void Print(ToolDot *the_dot, const boost::filesystem::path &output_dir, FileTemplate & index_html_stream);
 	
+	/**
+	 * Returns the file path.
+	 *
+	 * @return std::string representing the path to the file.
+	 */
 	std::string GetFilePath() const { return m_source_filename.string(); };
 	
 	/**

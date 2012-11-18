@@ -15,12 +15,18 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file */
+/** @file
+ * main() entry point for the coflotest unit test executable.
+ */
 
 #include "gtest/gtest.h"
 
+/// @name Dummy functions pulled in solely to trick the linker into not optimizing away the test libraries.
+/// If you get link errors when building via "make check", this is probably the problem.
+///@{
 extern int PullInMyLibrary();
 extern int GetMeToo();
+///@}
 
 int main(int argc, char* argv[])
 {

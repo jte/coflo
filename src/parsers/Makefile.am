@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+# The cpp files generated from the .dparser.g files.
 DPARSER_BUILTSRC = $(srcdir)/gcc_gimple_parser.cpp
 
 # Make sure to distribute the parser built source.
 # @todo Currently we need to have DParser installed in order to build (need its library), so there's
 # not much point in distributing the .cpp files it generates.  We'll put this back once we figure out how to
 # avoid the configure-time dependency on an installed DParser.
-EXTRA_DIST = $(srcdir)/gcc_gimple_parser.cpp
+EXTRA_DIST = $(DPARSER_BUILTSRC)
 
 # The generated parser .cpp files should not normally be cleaned.  Make them maintainer-clean files.
 # @todo Put this back once we figure out how to avoid the configure-time dependency on an installed DParser.  For now we're
@@ -31,7 +32,7 @@ MOSTLYCLEANFILES = $(DPARSER_BUILTSRC)
 
 #BUILT_SOURCES = $(DPARSER_BUILTSRC)
 noinst_LIBRARIES = libparsers.a 
-libparsers_a_SOURCES = gcc_gimple_parser.dparser.g gcc_gimple_parser.h
+libparsers_a_SOURCES = parser_grammar_helper.h gcc_gimple_parser.dparser.g gcc_gimple_parser.h
 libparsers_a_CPPFLAGS = -I $(top_srcdir)/src $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS)
 libparsers_a_CFLAGS = -Wno-missing-field-initializers $(AM_CFLAGS)
@@ -41,13 +42,18 @@ libparsers_a_CXXFLAGS = -Wno-missing-field-initializers -Wno-unused-parameter $(
 # which is set at configure time.
 #PROG_ABSPATH_MAKE_DPARSER = $(top_builddir)/third_party/make_dparser
 # Flags for make_dparser.
-DPARSER_FLAGS = --verbose=2 --debug=2 --ext=cpp
+MAKE_DPARSER_FLAGS = -v -d -d --ext=cpp
+# -v -v -d -d <<- These work too well.
+#--verbose=2 --debug=2 <<- These don't work.
 
 # Suffix for DParser grammars.
 SUFFIXES = .dparser.g .dparser.g.gdebug
 
 # Rule to make *.cpp from *.dparser.g using DParser.
-# Note:
+# Notes:
+# - make_dparser as of at least 1.29 can only include grammar fragments relative to the current directory or absolute.
+#   Since we can't know where we'll be building, we have to cd into the source dir and use absolute paths to make the
+#   grammar includes work.
 # - The output file (*.cpp) is built source, but we don't want the user to have to have dparser installed,
 # so it is created under $(srcdir) and gets distributed.
 # - @TODO Actually, at the moment we're going to require the user to have DParser, so we won't do either.

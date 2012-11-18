@@ -22,10 +22,10 @@
 # DESCRIPTION
 #
 #   Adds options to the generated configure which requre a file to be specified with either:
-#       "configure --with-with-option-suffix=/path/to/file"
+#       "configure --with-<with-option-suffix>=/path/to/file"
 #   or:
 #       "configure VARIABLE=/path/to/file"
-#   Specified file is check for existence, readability, and that it's a regular file.  Configuration
+#   Specified file is checked for existence, readability, and that it's a regular file.  Configuration
 #   aborts if the file is not specified or if any of the checks fail.
 #   The given path is stored in the precious variable VARIABLE.
 # 
@@ -36,42 +36,42 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 [
 	AC_PREREQ([2.68])
 	
-	pushdef([VARIABLE],$1)
-	pushdef([ARG_TEXT],$2)
-	pushdef([VAR_AND_OPT_DESCRIPTION],$3)
-	pushdef([ACTION_IF_FOUND],$4)
-	pushdef([ACTION_IF_NOT_FOUND],$5)
+	m4_pushdef([VARIABLE],$1)
+	m4_pushdef([ARG_TEXT],$2)
+	m4_pushdef([VAR_AND_OPT_DESCRIPTION],$3)
+	m4_pushdef([ACTION_IF_FOUND],$4)
+	m4_pushdef([ACTION_IF_NOT_FOUND],$5)
 	
-	dnl Temp vars.
+	# Temp vars.
 	coflo_exit_no_path_specified=no
 	
-	dnl Add the precious variable and associated help text.
+	# Add the precious variable and associated help text.
 	AC_ARG_VAR(VARIABLE,Absolute path to VAR_AND_OPT_DESCRIPTION.)
 	
-	dnl Check if the associated variable is already defined.
+	# Check if the associated variable is already defined.
 	AS_IF([test -z "$VARIABLE"],
 	[
-		dnl It isn't.
+		# It isn't.
 		AC_MSG_CHECKING([if VAR_AND_OPT_DESCRIPTION was specified])
 		AC_ARG_WITH(ARG_TEXT,AS_HELP_STRING([--with-ARG_TEXT=PATH],[Absolute path to VAR_AND_OPT_DESCRIPTION.]),
 		[
-			dnl The option was passed, but check if the user didn't provide a value for PATH,
-			dnl or gave a "yes" or "no" instead of a path. 
+			# The option was passed, but check if the user didn't provide a value for PATH,
+			# or gave a "yes" or "no" instead of a path. 
 			AS_IF([test "$withval" != yes && test "$withval" != no && test -n "$withval"],
 			[
-				dnl The provided path was something other than empty, "yes", or "no".
+				# The provided path was something other than empty, "yes", or "no".
 				VARIABLE="$withval"
 				AC_MSG_RESULT([yes: "$VARIABLE"])
 			],
 			[
-				dnl Nothing that might be a path was provided.
+				# Nothing that might be a path was provided.
 				VARIABLE=""
 				AC_MSG_RESULT([no])
 			])
 		])
 	])
 	
-	dnl See if we now have a defined and non-empty VARIABLE.
+	# See if we now have a defined and non-empty VARIABLE.
 	AS_IF([test -z "$VARIABLE"],
 	[
 		dnl If VARIABLE is empty at this point, we didn't get it from either AC_ARG_VAR or AC_ARG_WITH.
@@ -115,10 +115,10 @@ AC_DEFUN([COFLO_ARG_WITH_FILE],
 		])
 	fi
 	
-	popdef([ACTION_IF_NOT_FOUND])
-	popdef([ACTION_IF_FOUND])
-	popdef([VAR_AND_OPT_DESCRIPTION])
-	popdef([ARG_TEXT])
-	popdef([VARIABLE])
+	m4_popdef([ACTION_IF_NOT_FOUND])
+	m4_popdef([ACTION_IF_FOUND])
+	m4_popdef([VAR_AND_OPT_DESCRIPTION])
+	m4_popdef([ARG_TEXT])
+	m4_popdef([VARIABLE])
 ])# COFLO_ARG_WITH_FILE
 

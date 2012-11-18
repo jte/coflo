@@ -1,0 +1,81 @@
+/*
+ * Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ *
+ * This file is part of CoFlo.
+ *
+ * CoFlo is free software: you can redistribute it and/or modify it under the
+ * terms of version 3 of the GNU General Public License as published by the Free
+ * Software Foundation.
+ *
+ * CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+/**
+ * @file Template for the top level css file.
+ */
+
+/**
+ *	Style for jQuery UI Layout Plug-in content panes. 
+ */
+.ui-layout-content 
+{
+	/* This makes the content divs add a scrollbar when the contents get too big. */
+	overflow:		auto;
+	/* Don't put a border on the top edge of the content pane, the tab buttons already 
+	have a border on the bottom edge. */
+	border-top:		0 !important;
+}
+
+/**
+ *	Tab theme adjustments required for the center panel's tab control.
+ */
+.ui-tabs-nav li
+{
+	white-space:	nowrap;
+}
+.ui-tabs-nav li a
+{
+	font-size:		1em !important;
+	padding:		4px 1.5ex 3px !important;
+}
+.ui-tabs-panel
+{
+	font-size:		1em !important;
+	padding:		0 1em !important;
+}
+
+/**
+ *	Styles for the center pane and the tab control it contains.
+ */
+.ui-layout-pane-center
+{
+	/* No padding around the tab control, we want it to fill the pane. */
+	padding:	0;
+	/* Clip any contents which overflow the boundaries. */
+	overflow:	hidden;
+}
+.ui-layout-pane-center .ui-tabs-nav
+{
+	/* Remove border and rounded corners so the tabs fill the pane. */
+	border: 0;
+	padding-bottom:	0 !important;
+	/** @note CSS3, requires IE9+ */
+	border-radius:		0;
+}
+
+/**
+ * Style for centering svg <object>s in their containing div.
+ */
+.svg-cfg
+{
+	display:block;
+	/* Center the svg in its container. */
+	margin-left:auto;
+	margin-right:auto;
+	top: 0;
+}
