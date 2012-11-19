@@ -15,6 +15,12 @@
  * CoFlo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file
+ * Header file containing the graph adapter free functions which adapt the Graph class
+ *       (and any derived classes) to the Boost Graph Library's interface.
+ */
+
 #ifndef GRAPHADAPTER_H
 #define GRAPHADAPTER_H
 

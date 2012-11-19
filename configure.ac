@@ -66,7 +66,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 # Require our source control version checking script. 
 #AC_REQUIRE_AUX_FILE([coflo_version_control_info])
 # Require our move-if-file-contents-differ script.
-#AC_REQUIRE_AUX_FILE([move-if-change])
+AC_REQUIRE_AUX_FILE([move-if-change])
 #AC_REQUIRE_AUX_FILE([config.guess])
 
 # If/when we need to use any AC_REPLACE_FUNCS, we'll put them in ./portable. 
@@ -107,7 +107,7 @@ AM_INIT_AUTOMAKE([1.11.1
 ])
 
 # Get canonical Build and Host system types.
-# This is mainly for issue reports.
+# This is mainly so we have this info for issue reports.
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 # Put the triples we found in config.h as #define'd string literals.
@@ -115,7 +115,7 @@ AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_BUILD],["$build"],[Define to the build triple.
 AC_DEFINE_UNQUOTED([SYSTEM_TRIPLE_HOST],["$host"],[Define to the host triple.])
 
 # Determine how many CPUs we have on the build machine.
-# We use this for building Boost with multiple jobs.
+# We use this for building Boost in parallel with multiple jobs.
 AX_COUNT_CPUS
 AC_SUBST([CPU_COUNT])
 
@@ -155,9 +155,10 @@ AC_LANG_POP([C++])
 
 
 ###
-### Checks for the programs we need to do a build.
+### Checks for the programs
 ###
 
+## Checks for the programs needed to do a build.
 AC_PROG_CC
 # This is required instead of AC_PROG_CC_C_O by automake's "subdir-objects" option.
 AM_PROG_CC_C_O
@@ -165,16 +166,61 @@ AC_PROG_CXX
 AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_CPP
+# @note The following line is to work around an arguable bug in Autoconf 1.12/Libtool.
+# (q.v. http://lists.gnu.org/archive/html/automake/2012-05/msg00014.html).
+# Probably remove this when/if that is fixed. 
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
+AC_PROG_EGREP
 # Initialize Libtool.  This looks like it doesn't belong here, but thing go awry if it's moved
 # up by AC_INIT.
 LT_INIT
 # Create a variable for updating the libtool script if it gets out of date.
 AC_SUBST([LIBTOOL_DEPS])
 
+## Checks for maintainer tools.
+
+# Autotest needs autom4te, or 'missing's stub for it. 
+AM_MISSING_PROG([AUTOM4TE], [autom4te])
+
+# We need xxd to convert the templates into C arrays.
+AM_MISSING_PROG([XXD], [xxd])
+
+
+# Check for an installed make_dparser.
+COFLO_SEARCH_PACKAGE([dparser], [dparse], [dparse], [dparse.h], [make_dparser], [/usr/local:/usr], [], [])
+AS_IF([test "x$PROG_ABSPATH_MAKE_DPARSER" != xNOT_FOUND],
+	[
+		AC_MSG_CHECKING([if ${PROG_ABSPATH_MAKE_DPARSER} is a usable version])
+		# Get the version of the make_dparser we found.
+		PROG_MAKE_DPARSER_VERSION=`$PROG_ABSPATH_MAKE_DPARSER --help 2>&1 | $EGREP -o '[[0-9]]\.[[0-9]]+' | tr -d '\n'`;
+		# Check if it's a usable version.
+		AS_VERSION_COMPARE([${PROG_MAKE_DPARSER_VERSION}], [1.29],
+			[
+				AC_MSG_RESULT([no, version is ${PROG_MAKE_DPARSER_VERSION}])
+				version_ok=no;
+			],
+			 [
+			 	version_ok=yes;
+			 ],
+			 [
+			 	version_ok=yes;
+			 ])
+	],
+	[version_ok=false])
+AM_CONDITIONAL([HAVE_SYSTEM_MAKE_DPARSER],[test "x$version_ok" = xyes])
+AM_COND_IF([HAVE_SYSTEM_MAKE_DPARSER],
+	[
+		AC_MSG_RESULT([yes, version is ${PROG_MAKE_DPARSER_VERSION}])
+	],
+	[
+		AC_MSG_WARN([no usable system make_dparser found.])
+	]
+)
+	
 # Look for Doxygen and configure it if it does exist.
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(ON)
@@ -205,12 +251,10 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 # See if the user specified a path to it on the configure command line.
 COFLO_ARG_WITH_DIR([GTEST_ROOT], [gtest], [root directory of the Google C++ Testing Framework source distribution])
 
-
 # The DParser source distribution's tarball.
 # To avoid requiring the user to build and install DParser on their system, we'll take the tarball
 # as a configure parameter and build it with the parameters we need.
 COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_SOURCE_TARBALL], [dparser-tarball], [dparser 1.26 source distribution tarball])
-AC_MSG_NOTICE([FILE_PATH_DPARSER_SOURCE_TARBALL=$FILE_PATH_DPARSER_SOURCE_TARBALL])
 
 # The Boost source distribution's tarball.
 # If the user doesn't already have a suitable Boost installation, we'll do something similar to what we do
@@ -225,7 +269,7 @@ AC_MSG_NOTICE([FILE_PATH_DPARSER_SOURCE_TARBALL=$FILE_PATH_DPARSER_SOURCE_TARBAL
 COFLO_ARG_WITH_FILE([FILE_PATH_BOOST_SOURCE_TARBALL], [boost-tarball], [boost source distribution tarball],
 	[],[AC_MSG_WARN([No Boost source tarball specified.])])
 
-AM_CONDITIONAL([BOOST_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
+AM_CONDITIONAL([COFLO_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL"])
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,random,regex])
@@ -238,7 +282,7 @@ AC_SUBST([BOOST_TARBALL_TARBZ2])
 AC_SUBST([BOOST_TARBALL_TAR])
 
 
-AM_COND_IF([BOOST_USE_BUILT_BOOST],
+AM_COND_IF([COFLO_USE_BUILT_BOOST],
 [
 	# A path to a boost source tarball was specified.
 	# Populate the necessary variables.
@@ -248,32 +292,42 @@ AM_COND_IF([BOOST_USE_BUILT_BOOST],
 	AC_SUBST([BOOST_LIBTOOL_FLAGS],[""])
 ],
 [
-	AC_MSG_ERROR([Linking with system Boost libraries is currently unsupported.  Please download the Boost source tarball, version 1.48.0 or newer, and reconfigure using --with-boost-tarball.])
 	# Try to find a Boost version we can use.
 	# Use the Autoconf Macro Archive macros.
 	# Note that there is a bug in Boost.Filesystem prior to 1.47.0 which causes an exception to be thrown if the
 	# current locale as specified in the LANG environment variable is anything other than "C" (see
 	# <https://svn.boost.org/trac/boost/ticket/4688>).  For that reason, Boost 1.47.0 or greater is required.
-	AX_BOOST_BASE([1.47.0])
-	AX_BOOST_PROGRAM_OPTIONS
-	AX_BOOST_REGEX
-	AX_BOOST_SYSTEM
-	AX_BOOST_FILESYSTEM
-	
+
 	# Use the boost.m4 macro.
-	#BOOST_REQUIRE([1.47.0])
+	BOOST_REQUIRE([1.47.0])
+	boost_type="s";
 	# Header-only libs
-	#BOOST_FOREACH
-	#BOOST_UTILITY
+	BOOST_FOREACH([$boost_type])
+	BOOST_UTILITY([$boost_type])
 	# Libs requiring linking
-	#BOOST_PROGRAM_OPTIONS
-	#BOOST_REGEX
-	#BOOST_SYSTEM
-	#BOOST_FILESYSTEM
+	BOOST_GRAPH([$boost_type])
+	BOOST_PROGRAM_OPTIONS([$boost_type])
+	BOOST_REGEX([$boost_type])
+	BOOST_SYSTEM([$boost_type])
+	BOOST_FILESYSTEM([$boost_type])
 	
-	AC_MSG_NOTICE(["BOOST_LDFLAGS=$BOOST_LDFLAGS"])
-	AC_SUBST([BOOST_LIBTOOL_FLAGS], [-rpath `echo -n "$BOOST_LDFLAGS" | sed 's/-L//'`])
-	AC_MSG_NOTICE(["BOOST_LIBTOOL_FLAGS=$BOOST_LIBTOOL_FLAGS"])
+	AC_MSG_NOTICE([The following Boost library flags will be used:])
+	AC_MSG_NOTICE([BOOST_LIB_VERSION=$BOOST_LIB_VERSION])
+	AC_MSG_NOTICE([BOOST_CPPFLAGS=$BOOST_CPPFLAGS])
+	AC_MSG_NOTICE([BOOST_LDPATH=$BOOST_LDPATH])
+	
+	# Let the user know what values we'll be using for the various Boost components.
+	m4_pattern_allow([BOOST_])
+	for NAME in FOREACH UTILITY GRAPH PROGRAM_OPTIONS REGEX SYSTEM FILESYSTEM;
+	do
+		LDFLAGS_VAR=BOOST_${NAME}_LDFLAGS;
+		LDPATH_VAR=BOOST_${NAME}_LDPATH;
+		LIBS_VAR=BOOST_${NAME}_LIBS;
+		AC_MSG_NOTICE([${LDFLAGS_VAR}=${!LDFLAGS_VAR}])
+		AC_MSG_NOTICE([${LDPATH_VAR}=${!LDPATH_VAR}])
+		AC_MSG_NOTICE([${LIBS_VAR}=${!LIBS_VAR}])
+	done;
+	m4_pattern_forbid([BOOST_])
 ])
 
 
@@ -286,13 +340,14 @@ AC_CHECK_FUNC(glob)
 ### Checks for optional libraries.
 ###
 
-# Google Test library.
-# Defines HAVE_GTEST="yes" or "no".
-# Vars if found are:
-# GTEST_CONFIG = full path to gtest-config.
-# GTEST_CPPFLAGS, GTEST_CXXFLAGS, GTEST_LDFLAGS, GTEST_LIBS = Vars to add to the compile/link lines.
-# GTEST_VERSION = The version found (e.g. "1.5.0").
-#GTEST_LIB_CHECK([1.5.0])
+# If we have a system make-dparser, find the library that goes with it.
+AM_COND_IF([HAVE_SYSTEM_MAKE_DPARSER],
+	[
+		#AX_CHECK_LIBRARY([DPARSE], [dparse.h], [dparse],
+		#	[AC_MSG_WARN([dparse check ok])],
+		#	[AC_MSG_WARN([dparse check failed])])
+		#AC_CHECK_LIB([dparse],[dparse])
+	])
 
 # Allow the user to build with dmalloc.
 AX_WITH_DMALLOC
@@ -304,8 +359,12 @@ AX_WITH_DMALLOC
 AC_CONFIG_TESTDIR([tests])
 # The files to be generated by configure.
 AC_CONFIG_FILES([tests/Makefile tests/atlocal])
-# Autotest needs autom4te, or 'missing's stub for it. 
-AM_MISSING_PROG([AUTOM4TE], [autom4te])
+
+
+###
+### Create the default site configuration file for the program.
+###
+AC_CONFIG_FILES([src/coflo.conf])
 
 ###
 ### Create the Makefiles for the program.
@@ -322,6 +381,7 @@ AC_CONFIG_FILES([Makefile
 	src/parsers/Makefile
 	src/debug_utils/Makefile
 	src/libexttools/Makefile
+	src/templates/Makefile
 	third_party/Makefile])
 AC_OUTPUT
 

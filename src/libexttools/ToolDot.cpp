@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -22,6 +22,8 @@
 
 #include "ToolDot.h"
 
+const char* ToolDot::format_strings[] = { "svg", "png" };
+
 ToolDot::ToolDot(const std::string &cmd)
 {
 	SetCommand(cmd);
@@ -31,9 +33,10 @@ ToolDot::ToolDot(const ToolDot& orig) : ToolBase(orig) { }
 
 ToolDot::~ToolDot() { }
 
-bool ToolDot::CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename) const
+bool ToolDot::CompileDotToPNG(const std::string &dot_filename, const std::string &output_filename,
+		OUTPUT_FORMAT_DOT output_format) const
 {
-	System((" -o"+output_filename+" -Tpng "+dot_filename).c_str());
+	System((" -o" + output_filename + " -T" + format_strings[output_format] + " "+ dot_filename).c_str());
 	
 	/// @todo Handle errors.
 	return true;

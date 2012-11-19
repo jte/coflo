@@ -21,33 +21,49 @@
 #
 # DESCRIPTION
 #
-#   Adds options to the generated configure which requre a file to be specified with either:
-#       "configure --with-with-option-suffix=/path/to/file"
+#   Adds options to the generated configure which requre a directory to be specified with either:
+#       "configure --with-<with-option-suffix>=/path/to/dir"
 #   or:
 #       "configure VARIABLE=/path/to/file"
-#   Specified file is check for existence, readability, and that it's a regular file.  Configuration
+#   Specified file is checked for existence, readability, and that it's a regular directory.  Configuration
+#   aborts if the file is not specified or if any of the checks fail.
+#   The given path is stored in the precious variable VARIABLE.
+#
+
+# SYNOPSIS
+#
+#   COFLO_ARG_WITH_FILE([VARIABLE], [with-option-suffix], [description of the file],
+#      [ACTION_IF_FOUND], [ACTION_IF_NOT_FOUND])
+#
+# DESCRIPTION
+#
+#   Adds options to the generated configure which requre a file to be specified with either:
+#       "configure --with-<with-option-suffix>=/path/to/file"
+#   or:
+#       "configure VARIABLE=/path/to/file"
+#   Specified file is checked for existence, readability, and that it's a regular file.  Configuration
 #   aborts if the file is not specified or if any of the checks fail.
 #   The given path is stored in the precious variable VARIABLE.
 # 
 
-#serial 1
+#serial 2
 
 # The common part of the COFLO_ARG_WITH_xxx macros.
 AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 [
 	AC_PREREQ([2.68])
 
-	pushdef([VARIABLE],$1)
-	pushdef([ARG_TEXT],$2)
-	pushdef([VAR_AND_OPT_DESCRIPTION],$3)
-	pushdef([ACTION_IF_FOUND],$4)
-	pushdef([ACTION_IF_NOT_FOUND],[m4_default([$5],
+	m4_pushdef([VARIABLE],$1)
+	m4_pushdef([ARG_TEXT],$2)
+	m4_pushdef([VAR_AND_OPT_DESCRIPTION],$3)
+	m4_pushdef([ACTION_IF_FOUND],$4)
+	m4_pushdef([ACTION_IF_NOT_FOUND],[m4_default([$5],
 		[
 			# Default ACTION_IF_NOT_FOUND is to abort with an error message.
 			AC_MSG_FAILURE([Either --with-ARG_TEXT=PATH or VARIABLE=PATH must be specified.])
 		])
 	])
-	pushdef([TEST_D_OR_F],$6)	
+	m4_pushdef([TEST_D_OR_F],$6)	
 	
 	# Temp vars.
 	coflo_exit_no_path_specified=no
@@ -76,6 +92,7 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 			])
 		])
 		
+		# See if we now have a defined and non-empty VARIABLE.
 		AS_IF([test -z "$VARIABLE"],
 		[
 			# If VARIABLE is still empty at this point, we didn't get it from either AC_ARG_VAR or AC_ARG_WITH,
@@ -87,7 +104,7 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 	
 	if test "x$coflo_exit_no_path_specified" != "xyes"; then
 		# If we haven't failed yet, make sure the path we return is an absolute path.
-		VARIABLE=`readlink -f "$VARIABLE"`		
+		VARIABLE=`readlink -fn "$VARIABLE"`		
 		
 		# Check if the specified file exists and is a regular file.
 		AS_CASE(["TEST_D_OR_F"],
@@ -106,7 +123,7 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 			AC_MSG_FAILURE([path does not exist or is not a regular $MESSAGE_TEXT_FILE_OR_DIR: "$VARIABLE"])
 		])
 		
-		# Check if the specified file is readable by us.
+		# Check if the specified dir is readable by us.
 		AC_MSG_CHECKING([if specified VAR_AND_OPT_DESCRIPTION \"$VARIABLE\" is readable])
 		AS_IF([test -r "$VARIABLE"],
 		[
@@ -118,12 +135,12 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 		])
 	fi
 	
-	popdef([TEST_D_OR_F])	
-	popdef([ACTION_IF_NOT_FOUND])
-	popdef([ACTION_IF_FOUND])
-	popdef([VAR_AND_OPT_DESCRIPTION])
-	popdef([ARG_TEXT])
-	popdef([VARIABLE])
+	m4_popdef([TEST_D_OR_F])	
+	m4_popdef([ACTION_IF_NOT_FOUND])
+	m4_popdef([ACTION_IF_FOUND])
+	m4_popdef([VAR_AND_OPT_DESCRIPTION])
+	m4_popdef([ARG_TEXT])
+	m4_popdef([VARIABLE])
 ])# _COFLO_ARG_WITH_SOMETHING
 
 
@@ -131,4 +148,9 @@ AC_DEFUN([COFLO_ARG_WITH_DIR],
 [
 	_COFLO_ARG_WITH_SOMETHING([$1],[$2],[$3],[$4],[$5],[d])
 ])# COFLO_ARG_WITH_DIR
+
+AC_DEFUN([COFLO_ARG_WITH_FILE],
+[
+	_COFLO_ARG_WITH_SOMETHING([$1],[$2],[$3],[$4],[$5],[f])
+])# COFLO_ARG_WITH_FILE
 

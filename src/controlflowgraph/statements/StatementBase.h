@@ -60,7 +60,7 @@ public:
 	typedef boost::transform_iterator< CFGEdgeDescriptorConv, Vertex::base_edge_list_iterator, CFGEdgeDescriptor, CFGEdgeDescriptor > in_edge_iterator;
 
 public:
-	StatementBase() {};
+	StatementBase() { m_owning_function = NULL; };
 	explicit StatementBase(const Location &location);
 	StatementBase(const StatementBase& orig);
 	virtual ~StatementBase();
