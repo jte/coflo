@@ -98,6 +98,8 @@ private:
 	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list,
 			T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
+	void ParseWithCoFloCParser(const std::string &filename);
+
 	/// Pointer to the program which contains this TranslationUnit.
 	Program *m_parent_program;
 

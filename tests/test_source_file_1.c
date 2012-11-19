@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+ * Copyright 2011, 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
  *
  * This file is part of CoFlo.
  *
@@ -23,6 +23,12 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+int var1;
+
+int var2 = 3;
+
+int var4 = 9;
 
 typedef double (*T_FUNCTION_PTR)(void);
 

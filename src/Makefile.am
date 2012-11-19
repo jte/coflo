@@ -61,7 +61,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./libexttools/libexttools.a \
 	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
 
-coflo_CPPFLAGS = -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+coflo_CPPFLAGS = -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/parsers \
+-I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
@@ -90,7 +91,8 @@ MOSTLYCLEANFILES = gtest-all.cc
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
-coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) \
+	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
