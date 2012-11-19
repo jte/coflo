@@ -18,6 +18,7 @@
 #include "Location.h"
 
 #include <sstream>
+#include <string>
 
 // Include the necessary Boost libraries.
 #include <boost/regex.hpp>
@@ -129,6 +130,20 @@ std::string Location::asGNUCompilerMessageLocation() const
 	std::stringstream retval;
 
 	retval << m_passed_file_path << ":" << m_line_number;
+	if(m_column != -1)
+	{
+		retval << ":" << m_column;
+	}
+
+	return retval.str();
+
+}
+
+std::string Location::asLineColumn() const
+{
+	std::stringstream retval;
+
+	retval << m_line_number;
 	if(m_column != -1)
 	{
 		retval << ":" << m_column;

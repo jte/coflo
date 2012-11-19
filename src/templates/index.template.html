@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+Copyright 2012 Gary R. Van Sickle (grvs@users.sourceforge.net).
+
+This file is part of CoFlo.
+
+CoFlo is free software: you can redistribute it and/or modify it under the
+terms of version 3 of the GNU General Public License as published by the Free
+Software Foundation.
+
+CoFlo is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ 
+You should have received a copy of the GNU General Public License along with
+CoFlo.  If not, see http://www.gnu.org/licenses/.
+-->
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	
+	<!-- The date the report was generated (must be GMT in RFC 1123 format). -->
+	<meta http-equiv="date" content="Mon, 24 Jun 2012 12:34:56 GMT">
+
+	<title>@INDEX_TITLE@</title>
+	
+	<!-- The jQuery UI stylesheet. -->
+	<link rel="stylesheet" type="text/css" href="css/dark-hive/jquery-ui-1.9.1.custom.css">
+	
+	<!-- The jQuery UI Layout Plug-in's default stylesheet. -->
+	<link rel="stylesheet" type="text/css" href="css/layout-default-latest.css">
+	
+	<!-- CoFlo's stylesheet. -->
+	<link rel="stylesheet" type="text/css" href="css/index.template.css">
+	
+	<style>
+	.ui-layout-pane
+	{
+		/* Override the default layout's pane background so it blends in with the Themeroller theme. */
+		background: #000000 url(css/dark-hive/images/ui-bg_loop_25_000000_21x21.png) 50% 50% repeat; color: #ffffff;
+	}
+	</style>
+	
+	<!-- SCRIPTS -->
+	<!-- CoFlo's main support script. -->
+	<script src="js/coflo.resizer.js"></script>
+	<!-- <script src="js/coflo/coflo-report.js"></script> -->
+	<script src="js/jquery-1.8.2.js"></script>
+	<script src="js/jquery-ui-1.9.1.custom.js"></script>
+	<script src="js/jquery.layout-latest.js"></script>
+	<script src="js/jquery.jstree.js"></script>
+	<script>
+	// The layout object.
+	var mainLayout;
+	var center_pane_resize_callback;
+	// The center pane tab control.
+	var center_pane_tabs;
+	// The jQuery object tied to the tag we'll load the SVGs into.
+	var svg_placeholder;
+	
+	function ResizeSVG()
+	{
+		console.group("ResizeSVG");
+		var active_tab_index = center_pane_tabs.tabs("option", "active");
+		var active_tab_panel = center_pane_tabs.find(".ui-tabs-panel").eq(active_tab_index);
+		
+		if(svg_placeholder && active_tab_panel)
+		{
+			fitToContainer(svg_placeholder, active_tab_panel);
+		}
+		else
+		{
+			console.warn("Can\'t resize, bad params on object load:", svg_placeholder, active_tab_panel);	
+		}
+		
+		console.groupEnd();
+	};
+	
+	$(document).ready(function() {
+		
+		/**
+		 * Event handler callback for fitting the svg to the tab control when a new tab is selected.
+		 */
+		function onTabsActivate(event, ui)
+		{
+			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
+			var svg = ui.newPanel.find(".svg-cfg");
+			
+			
+			// Fit it to its container.
+			fitToContainer(svg, ui.newPanel);
+			
+			console.log( "Tab Activated, tab:" +  $( "#tabs" ).tabs("option", "active") + "\n" );
+		}
+		
+		// First hook the onTabsActivate callback to them, so the initially-shown tab is resized if necessary.
+		//$( "#tabs" ).bind("tabsactivate", onTabsActivate);
+
+		/// Initialize the tabs.
+		center_pane_tabs = $( "#tabs" ).tabs({
+			//activate: onTabsActivate,
+		});
+		svg_placeholder = $("#tabs-1 .svg-cfg");
+		
+		// Set up the nav pane's tree control.
+		var nav_tree = $("#nav_tree_id").jstree({
+			/**
+			 * Configuration for the jsTree types plugin.
+			 */
+			// This defaults to "rel", which makes some sense, but is not a valid attribute for <li> elements.
+			// We'll use "data-nav-tree-node-type" instead.
+			type_attr: "data-nav-tree-node-type",
+			"types" : {
+				"valid_children" : [ "source_file" ],
+				"types" : {
+					"source_file" : {
+						"valid_children" : [ "function" ]
+					},
+				"function" : {
+						"max_children": 0, 
+						"valid_children" : [ "none" ]
+					},
+				"default" : {
+	                    "valid_children" : [ "default" ]
+					}
+				},
+			},
+			
+			// Configuration for jsTree's Themeroller support.
+			themeroller :
+				{
+					// We'll use a "document" item for the files.
+					item_open : "ui-icon-document",
+					item_clsd : "ui-icon-document",
+					
+					// For functions, we'll use the gear icon.
+					item_leaf : "ui-icon-gear"
+				},
+				
+			// Docs say to list themeroller last.
+			"plugins" : ["html_data", "ui", "types", "themeroller"],
+			"core" : 
+			{
+				// Start with the first file open.
+				"initially_open" : [ $(".coflo-nav-tree-file").attr("id") ]
+			}
+		});
+
+		// Bind to the nav tree's select event.  Here we'll update the tab panels to match the
+		// function and file the user selected.
+		nav_tree.bind("select_node.jstree", function (event, data) 
+		{ 
+            // `data.rslt.obj` is the jquery extended node that was clicked
+            var selected_node = data.rslt.obj;
+            
+            // Get the href contained in the selected list item's <a> tag.
+            var selected_function_id = $(selected_node).find("a").attr("href");
+            // The identifier of the function as it appears in the source language.
+            var selected_function_identifier = selected_function_id.replace(/#/,"");
+            var selected_function_svg_url = selected_function_identifier + ".svg";
+            console.info("href=" + selected_function_id);
+            
+            // Find the svg object placeholder.
+            // "data" if the placeholder is an <object>.
+            $(svg_placeholder).attr("data", selected_function_svg_url);
+            // "src" for iframes.
+            //$(svg_placeholder).attr("src", selected_function_svg_url);
+            // "xlink:href" for <svg>
+            //$(svg_placeholder).attr("xlink:href", selected_function_svg_url);
+
+   			            
+            // Update the header text of the tab panels.
+            center_pane_tabs.find("#tab-1-cfg-header-text").text("Control Flow Graph of function "
+            		+ selected_function_identifier + "():");
+            center_pane_tabs.find("#tab-2-cfg-header-text").text("Source code of function "
+            		+ selected_function_identifier + "():");
+            
+            // Refresh the tab control.
+            center_pane_tabs.tabs("refresh");
+
+            // Tell the center pane to resize its contents, mainly to cause the svg to be fit to the tab control.
+            mainLayout.sizeContent("center");
+            
+            console.info("Node selected: " + selected_node.attr("id"));
+	    });
+
+		/**
+		 * Callback for handling the center pane's onresize event.
+		 * The main thing we have to do here is resize the svg.
+		 */
+		function center_pane_resize_callback(pane, dollar_pane, paneState, paneOptions)
+		{
+			console.group("center_pane_resize_callback");
+			// Get the currently active tab panel.
+			var active_tab_index = center_pane_tabs.tabs("option", "active");
+			var active_tab_panel = center_pane_tabs.find(".ui-tabs-panel").eq(active_tab_index);
+			if(!active_tab_panel)
+			{
+				console.warn("Couldn\'t find active tab panel");
+			}
+			
+			// Get the svg <object>, wrapped in a jQuery object, which is contained in this tab panel.
+			var svg = active_tab_panel.find(".svg-cfg");
+			
+			// Fit it to its container.
+			fitToContainer(svg, active_tab_panel);
+			
+			console.info("center pane resized");
+			console.groupEnd();
+		};
+		
+		// Initialize the jQuery UI Layout Plug-in.
+		mainLayout = $("body").layout({
+			
+			livePaneResizing: false,
+			
+			// We need this to allow natural resizing behavior with (at least) the svg's.
+			// For some reason, when you're resizing, the cursor doesn't want to drag the resizer when it
+			// goes over an SVG.  Enabling this allows it to work as expected.
+			maskIframesOnResize: true,
+			
+			paneClass: "ui-layout-pane",
+			
+			// The header pane.
+			north:
+				{
+					// Top pane can't be closed or resized.
+					closable: false,
+					resizable: false,
+					size: "auto"
+				},
+				
+			// Nav pane.
+			west:
+				{
+					size: "auto"
+				},
+			
+			// Center pane.
+			center:
+				{
+					// Hook to the panel's resize event so we can resize the SVG.
+					onresize: center_pane_resize_callback
+				},
+				
+				// Start with the bottom and right panes closed.
+				east__initClosed: true,
+				south__initClosed:	true
+			});
+	});
+	</script>
+</head>
+
+<body>
+
+<!-- The Report Header -->
+<div class="ui-layout-north">@REPORT_HEADER@</div>
+
+<!-- The Navigation Pane -->
+<div id="nav_tree_id" class="ui-layout-west">
+<ul>
+	<!-- REMOVE_START -->
+	<li id="nav_tree_file_1" class="coflo-nav-tree-file" data-nav-tree-node-type="source_file">
+		<a href="#">File 1</a>
+		<ul>
+			<li id="nav_tree_2" data-nav-tree-node-type="function">
+				<a href="#decode_switches">decode_switches()</a>
+			</li>
+			<li id="nav_tree_3" data-nav-tree-node-type="function">
+				<a href="#die">die()</a>
+			</li>
+		</ul>
+	</li>
+	<li id="nav_tree_file_2" class="coflo-nav-tree-file" data-nav-tree-node-type="source_file">
+		<a href="#">File 2</a>
+		<ul>
+			<li id="nav_tree_5" data-nav-tree-node-type="function">
+				<a href="#">Function 3</a>
+			</li>
+			<li id="nav_tree_6" data-nav-tree-node-type="function">
+				<a href="#">Function 4</a>
+			</li>
+		</ul>
+	</li>
+	<!-- REMOVE_END -->
+	
+	<!-- NAV_START -->
+	<!-- NAV_END -->
+</ul>
+</div>
+
+<!-- The center pane's tab control -->
+<div id="tabs" class="ui-tabs ui-layout-center">
+	<ul>
+		<li><a href="#tabs-1">Control Flow Graph</a></li>
+		<li><a href="#tabs-2">Source</a></li>
+	</ul>
+	<!-- The tab panels are put in this special div which the layout plugin uses to keep the tabs from
+	being considered part of the scrollable area -->
+	<div class="ui-layout-content ui-widget-content ui-corner-bottom">
+		<div id="tabs-1">
+			<p id="tab-1-cfg-header-text">Select a function from the navigation list on the left.</p>
+			<!-- Note that we purposely leave off the "data=" attribute here.  
+			We'll load that when the user selects something from the nav tree. data="decode_switches.svg" -->
+ 			<object onload="ResizeSVG();" class="svg-cfg" type="image/svg+xml"></object>
+ 			<!--
+ 			  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+			    <svg viewBox="0 0 100% 100%">
+			    	<image class="svg-cfg" height="100%" width="100%" overflow="scroll" preserveAspectRatio="xMinYMin slice" xlink:href="decode_switches.svg" />
+			    </svg>
+			  </svg>
+			--> 			
+		</div>
+		<div id="tabs-2">
+			<p id="tab-2-cfg-header-text">Select a function from the navigation list on the left.</p>
+			<p>FEATURE NOT YET IMPLEMENTED</p>
+		</div>
+	</div>
+</div>
+
+<div class="ui-layout-east"></div>
+
+<div class="ui-layout-south">Bottom Pane</div>
+
+<!-- The svgs. -->
+<div style="display:none">
+<!-- REMOVE_START -->
+	<div id="decode_switches">
+		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+		<p><a id="file1-decode_switches">decode_switches()</a></p>
+		<object class="svg-cfg" type="image/svg+xml" data="decode_switches.svg"></object>
+	</div>
+	<div id="die">
+		<!-- Surround the function name with an anchor in an attempt at having reasonable <noscript> nav fallback. -->
+		<p><a id="file1-die">die()</a></p>
+		<object class="svg-cfg" type="image/svg+xml" data="die.svg"></object>
+	</div>
+<!-- REMOVE_END -->
+		<!-- TAB_PANEL_LIST_START -->	
+		<!-- TAB_PANEL_LIST_END -->
+</div>
+
+</body>
+</html>

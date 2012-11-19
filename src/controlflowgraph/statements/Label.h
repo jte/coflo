@@ -21,6 +21,7 @@
 #define LABEL_H_
 
 #include "PseudoStatement.h"
+#include <string>
 
 /*
  *

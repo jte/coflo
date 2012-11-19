@@ -16,27 +16,36 @@
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug_utils libexttools parsers
+SUBDIRS = controlflowgraph debug_utils libexttools parsers templates
 
-# Make sure to distribute the Doxygen configuration file.
-EXTRA_DIST = Doxyfile 
+# Make sure to distribute:
+# - The Doxygen configuration file.
+# - The /etc/coflo.conf template file.
+EXTRA_DIST = Doxyfile coflo.conf.in
 
+# The /etc/coflo.conf file.
+dist_sysconf_DATA = coflo.conf
+
+# Source files common to both the normal CoFlo and the coflotest executables.
 COMMONSOURCES = Function.cpp Function.h \
 	Location.cpp Location.h \
 	Program.cpp Program.h \
 	ResponseFileParser.cpp ResponseFileParser.h \
+	RuntimeConfiguration.cpp RuntimeConfiguration.h \
 	Successor.cpp Successor.h \
 	SuccessorTypes.h \
 	TranslationUnit.cpp TranslationUnit.h \
 	UEI.cpp UEI.h \
-	safe_enum.h
+	safe_enum.h safe_enum.cpp
+	
+TESTSOURCES = RuntimeConfiguration_test.cpp
 
 # The Automake rules for the CoFlo executable.
 bin_PROGRAMS = coflo
 coflo_SOURCES = main.cpp $(COMMONSOURCES)
 
 # Collect all the Boost libraries we found into a single variable.
-if BOOST_USE_BUILT_BOOST
+if COFLO_USE_BUILT_BOOST
 BOOST_LOCAL_LIB = $(top_builddir)/third_party/$(BOOST_TARBALL_DIRNAME)/stage/lib
 ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_program_options.a \
@@ -45,9 +54,9 @@ ALLBOOSTLIBS = $(BOOST_LOCAL_LIB)/libboost_graph.a \
 	$(BOOST_LOCAL_LIB)/libboost_filesystem.a
 else
 # Boost libs determined by Autoconf Macro Archive macros.
-ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+#ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 # Boost libs determined by boost.m4.
-#ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
+ALLBOOSTLIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
 endif
 
 NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
@@ -59,11 +68,16 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./debug_utils/libdebugutils.a \
 	./libexttools/libexttools.a \
-	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
+	./templates/libtemplates.a
 
-coflo_CPPFLAGS = -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/parsers \
--I $(top_srcdir)/src/debug_utils \
-	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
+	
+#	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
+#-I $(top_builddir)/third_party/dparser/local/include
+
+coflo_CPPFLAGS = $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
+	-I $(top_srcdir)/src/debug_utils \
+	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) \
+	-DCOFLO_PKGDATA_DIR='$(pkgdatadir)' $(AM_CPPFLAGS) 
 coflo_CFLAGS = $(AM_CFLAGS)
 coflo_CXXFLAGS = $(AM_CXXFLAGS)
 # Note that the "BOOST_<lib>_LDFLAGS" are used only by boost.m4, not the Autoconf Macro Achive macros,
@@ -71,7 +85,7 @@ coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflo_LDADD = $(NORMALLIBS) $(ALLBOOSTLIBS)
+coflo_LDADD = $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
 
 
 ###
@@ -88,8 +102,9 @@ gtest-all.cc: $(GTEST_ROOT)/src/gtest-all.cc
 
 BUILT_SOURCES = gtest-all.cc
 MOSTLYCLEANFILES = gtest-all.cc
+
 check_PROGRAMS = coflotest
-coflotest_SOURCES = coflotest.cpp $(COMMONSOURCES)
+coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cc
 coflotest_CPPFLAGS = -I $(GTEST_ROOT)/include -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
@@ -99,4 +114,4 @@ coflotest_CXXFLAGS = $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflotest_LDADD = $(TESTLIBS) $(CPPUNIT_LIBS) $(NORMALLIBS) $(ALLBOOSTLIBS)
+coflotest_LDADD = $(TESTLIBS) $(CPPUNIT_LIBS) $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
