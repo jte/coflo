@@ -46,6 +46,14 @@
 
 #include "parsers/gcc_gimple_parser.h"
 
+// The parser for C files.
+#include "parsers/coflo_c_parser.h"
+
+extern "C"
+{
+#include "dparse_tree.h"
+}
+
 using namespace boost;
 using namespace boost::filesystem;
 
@@ -86,6 +94,9 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 		file_is_cpp = true;
 	}
 	
+	// Extract what we can with the C source parser.
+	ParseWithCoFloCParser(filename.generic_string());
+
 	// Try to compile the source file into the .gimple intermediate form.
 	CompileSourceFile(filename.generic_string(), the_filter, compiler, defines, include_paths);
 	
@@ -266,6 +277,84 @@ void TranslationUnit::BuildFunctionsFromThreeAddressFormStatementLists(const std
 		// Create the control flow graph for this function.
 		f->CreateControlFlowGraph(*(fi->m_statement_list));
 	}
+
 }
 
 
+extern D_ParserTables parser_tables_coflo_c_parser;
+
+void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
+{
+	// Try to open the file whose name we were passed.
+		std::ifstream input_file(filename.c_str(), std::ifstream::in);
+
+		// Check if we were able to open the file.
+		if(input_file.fail())
+		{
+			std::cerr << "ERROR: Couldn't open file \"" << filename << "\"" << std::endl;
+		}
+
+
+		// Load the given file into memory.
+		std::string buffer;
+		char previous_char = '\n';
+
+		while (input_file.good())     // loop while extraction from file is possible
+		{
+			char c;
+			c = input_file.get();       // get character from file
+			if (input_file.good())
+			{
+				if(c == '\r')
+				{
+					// Strip CR's.
+					continue;
+				}
+				else
+				{
+					buffer += c;
+				}
+				previous_char = c;
+			}
+		}
+
+		// Close file
+		input_file.close();
+
+		std::cout << "Read >>>>>" << buffer << "<<<<<" << std::endl;
+
+		// Create a new parser.
+		D_Parser *parser = new_coflo_c_parser_Parser(filename);
+		D_ParseNode *tree = coflo_c_parser_dparse(parser, const_cast<char*>(buffer.c_str()), buffer.length());
+
+		if (tree && !coflo_c_parser_GetSyntaxErrorCount(parser))
+		{
+			// Parsed the .coflo.gimple file successfully.
+
+			dlog_parse_gimple << "File \"" << filename << "\" parsed successfully." << std::endl;
+
+			//FunctionInfoList *fil = coflo_c_parser_GetUserInfo(tree)->m_function_info_list;
+
+			// Build the Functions out of the info obtained from the parsing.
+			//std::cout << "Building Functions..." << std::endl;
+			//BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
+}
+		else
+		{
+			// The parse failed.
+
+			std::cout << "Failure: " << coflo_c_parser_GetSyntaxErrorCount(parser) << " syntax errors." << std::endl;
+		}
+
+		if(tree != NULL)
+		{
+			// Print the parse tree.
+			//std::cout << "Parse tree:" << std::endl;
+			//print_parsetree(parser_tables_coflo_c_parser, tree, NULL, NULL);
+
+			// Destroy the parse tree.
+			free_coflo_c_parser_ParseTreeBelow(parser, tree);
+		}
+		// Destroy the parser.
+		free_coflo_c_parser_Parser(parser);
+}

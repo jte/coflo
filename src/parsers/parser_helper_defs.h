@@ -21,7 +21,7 @@
 #define PARSER_HELPER_DEFS_H
 
 #define M_DECLARE_PARSER_INTERFACE(grammar_id) \
-	D_Parser* new_##grammar_id##_Parser(); \
+	D_Parser* new_##grammar_id##_Parser(const std::string &filename = "UNKNOWN_FILE"); \
 	D_ParseNode* grammar_id##_dparse(D_Parser *parser, char* buffer, long length); \
 	long grammar_id##_GetSyntaxErrorCount(D_Parser *parser); \
 	grammar_id##_ParseNode_User* grammar_id##_GetUserInfo(D_ParseNode *tree); \
