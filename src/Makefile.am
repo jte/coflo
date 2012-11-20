@@ -104,12 +104,13 @@ gtest-all.cpp: $(top_builddir)/third_party/gtest-1.6.0/fused-src/gtest/gtest-all
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
 nodist_coflotest_SOURCES = gtest-all.cpp
+coflotest_CC = $(PTHREAD_CC)
 coflotest_CPPFLAGS = -I $(GTEST_ROOT)/gtest -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
-coflotest_CFLAGS = $(AM_CFLAGS)
+coflotest_CFLAGS = $(PTHREAD_CFLAGS) $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
+coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS) $(PTHREAD_LIBS)
