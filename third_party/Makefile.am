@@ -35,6 +35,11 @@ BUILT_SOURCES = stampfile-all-third-party-builds-complete
 # Append any stamp (or other) files which indicate that a sub-build is complete.
 third_party_complete_deps =
 
+# Extra files we'll need to distribute.
+EXTRA_DIST =
+
+# Files to clean for "make mostlyclean" and "make clean".
+MOSTLYCLEANFILES =
 
 if !HAVE_SYSTEM_MAKE_DPARSER
 ###
@@ -150,6 +155,18 @@ stamp_boost_src_installed: stamp_boost_src_configured
 endif
 
 ###
+### Rules to extract the googletest distribution.
+###
+stamp-gtest-extracted: gtest-1.6.0.tar.bz2
+	tar -xaf "$<"
+	echo "$$(date)" > "$@-temp" && mv "$@-temp" "$@"
+	
+third_party_complete_deps += stamp-gtest-extracted
+CLEAN_LOCAL_DIRS += gtest-1.6.0
+EXTRA_DIST += gtest-1.6.0.tar.bz2
+MOSTLYCLEANFILES += $(third_party_complete_deps)
+
+###
 ### Automake rules for creating archives of the jQuery UI css theme.
 ###
 
@@ -229,14 +246,14 @@ stampfile-all-third-party-builds-complete: $(third_party_complete_deps)
 	echo "All third-party builds complete, $$(date)" > "$@-temp"
 	mv "$@-temp" "$@"
 
-EXTRA_DIST = $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
+EXTRA_DIST += $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
 	$(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%) \
 	$(other_dist_files)
 
 # Delete all the stamps except for the untarring ones for any clean.
 # Also delete the generated .tar files, they're cheap to rebuild.
-MOSTLYCLEANFILES =  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) \
-	jquery_ui_layout.tar report_boilerplate.tar $(CLEANFILES_REPORT_BOILERPLATE) stampfile-all-third-party-builds-complete
+MOSTLYCLEANFILES +=  $(MOSTLYCLEANFILES_DPARSER) $(MOSTLYCLEANFILES_BOOST) \
+	$(CLEANFILES_REPORT_BOILERPLATE) stampfile-all-third-party-builds-complete
 	 
 # Additional files to clean during a "make clean".
 CLEANFILES = $(CLEANFILES_DPARSER) $(CLEANFILES_BOOST) 

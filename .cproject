@@ -38,6 +38,22 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.cygwin.base.979248749.1592305602" name="/" resourcePath="build">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cygwin.base.1839920077" name="cdt.managedbuild.toolchain.gnu.cygwin.base" superClass="cdt.managedbuild.toolchain.gnu.cygwin.base" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.base.709218480" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.base.2058643113">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2094672423" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.1726811609" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base.273394022"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1486272056" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.2104017220">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.77020170" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.750848452" name="Cygwin C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.314969893">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1974727140" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.cygwin.base.192846652" name="Cygwin C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.cygwin.base.1713859793"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.cygwin.base.440252583" name="Cygwin C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.cygwin.base.398258174"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
 						<entry excluding="build/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -58,10 +74,10 @@
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cygwin.base.979248749;cdt.managedbuild.toolchain.gnu.cygwin.base.979248749.707707647;cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.2104017220;cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.41961803">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"/>
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cygwin.base.979248749;cdt.managedbuild.toolchain.gnu.cygwin.base.979248749.707707647;cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.314969893;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.233109389">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC"/>
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
