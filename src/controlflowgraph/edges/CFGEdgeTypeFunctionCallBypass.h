@@ -26,7 +26,7 @@ class CFGEdgeTypeFunctionCallBypass : public CFGEdgeTypeBase
 public:
 	CFGEdgeTypeFunctionCallBypass();
 	CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFunctionCallBypass& orig);
-	virtual ~CFGEdgeTypeFunctionCallBypass();
+	virtual ~CFGEdgeTypeFunctionCallBypass() {};
 	
 	virtual std::string GetDotLabel() const { return "CallBypass"; };
 	
