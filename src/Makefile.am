@@ -109,7 +109,7 @@ coflotest_CPPFLAGS = -I $(GTEST_ROOT)/gtest -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
 coflotest_CFLAGS = $(PTHREAD_CFLAGS) $(AM_CFLAGS)
-coflotest_CXXFLAGS = $(AM_CXXFLAGS)
+coflotest_CXXFLAGS = $(PTHREAD_CFLAGS) $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
