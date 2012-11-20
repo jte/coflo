@@ -17,7 +17,7 @@
 
 # For Google Test, we need the following to be defined by configure:
 # - GTEST_ROOT: The directory of source distribution.
-GTEST_ROOT = $(top_builddir)/third_party/gtest-1.6.0/fused-src
+#GTEST_ROOT = $(top_builddir)/third_party/gtest-1.6.0/fused-src
 
 # Subdirectories with their own Makefile{.am}'s.
 SUBDIRS = controlflowgraph debug_utils libexttools parsers templates
