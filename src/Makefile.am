@@ -96,15 +96,18 @@ TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
 
 # For Google Test, we need the following to be defined by configure:
 # - GTEST_ROOT: The directory of source distribution.
-GTEST_ROOT = $(top_srcdir)/third_party/gtest-1.6.0/fused-src
+GTEST_ROOT = $(top_builddir)/third_party/gtest-1.6.0/fused-src
+
+gtest-all.cpp: $(top_builddir)/third_party/gtest-1.6.0/fused-src/gtest/gtest-all.cc
+	cp "$<" "$@" 
 
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
-nodist_coflotest_SOURCES = $(GTEST_ROOT)/gtest/gtest-all.cc
+nodist_coflotest_SOURCES = gtest-all.cpp
 coflotest_CPPFLAGS = -I $(GTEST_ROOT)/gtest -I $(GTEST_ROOT) \
 	-I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils -I $(top_srcdir)/src/parsers \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS) 
-coflotest_CFLAGS = $(CPPUNIT_CFLAGS) $(AM_CFLAGS)
+coflotest_CFLAGS = $(AM_CFLAGS)
 coflotest_CXXFLAGS = $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
