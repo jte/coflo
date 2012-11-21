@@ -638,8 +638,12 @@ identifier_ssa
 	: "[a-zA-Z_][a-zA-Z0-9_]*.[0-9]+" $term -2
 		{ $$.m_str = new M_TO_STR($n0); }
 	;
+//identifier
+//	: "[a-zA-Z_][a-zA-Z0-9_]*" $term -3
+//		{ $$.m_str = new M_TO_STR($n0); }
+//	;
 identifier
-	: "[a-zA-Z_][a-zA-Z0-9_]*" $term -3
+	: "(::)?[a-zA-Z_]([a-zA-Z0-9_]|::)*" $term -3
 		{ $$.m_str = new M_TO_STR($n0); }
 	;
 comment: "\/\/[^\n]+";

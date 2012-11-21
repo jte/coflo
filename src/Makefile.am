@@ -99,7 +99,7 @@ coflo_LDADD = $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
 TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
 
 gtest-all.cpp: $(top_builddir)/third_party/gtest-1.6.0/fused-src/gtest/gtest-all.cc
-	cp "$<" "$@" 
+	cp "$<" "$@"
 
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
