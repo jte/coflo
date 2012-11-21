@@ -212,8 +212,6 @@ jquery_ui_layout.tar: $(jquery_ui_layout_files:%=$(jquery_ui_layout_root)/%)
 	tar --format=posix --create --file="$@-temp" --directory=$(jquery_ui_layout_root) $(jquery_ui_layout_files)
 	mv "$@-temp" "$@"
 
-CLEANFILES_REPORT_BOILERPLATE = jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar report_boilerplate.tar
-
 jquery_ui_js.tar: $(jquery_ui_report_js_files)
 	@: Create an empty tar archive.  Note that we must "trick" tar into doing this.
 	tar --format=posix --create --file="$@-temp" --files-from=/dev/null
@@ -237,6 +235,8 @@ report_boilerplate.tar: jquery_ui.tar jquery_ui_layout.tar
 	cp "$<" "$@-temp"
 	tar --concatenate --file="$@-temp" jquery_ui_layout.tar
 	mv "$@-temp" "$@"
+
+CLEANFILES_REPORT_BOILERPLATE = jquery_ui_layout.tar jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar report_boilerplate.tar
 
 third_party_complete_deps += $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) report_boilerplate.tar
 
@@ -268,9 +268,9 @@ mostlyclean-local:
 # We need to hook 'clean' here because we need to rm the entire untarred source trees, not just individual files.	
 clean-local:
 	@:; # Strip any spaces off the ends of the directory list.
-	@DIRLIST="$$(echo "$(CLEAN_LOCAL_DIRS)" | $(SED) -r 's/[ ]*(.*)[ ]*/\1/')"; \
+	DIRLIST="$$(echo "$(CLEAN_LOCAL_DIRS)" | $(SED) -r 's/[ ]*(.*)[ ]*/\1\n/')"; \
 	if [ -n "$${DIRLIST}" ]; then \
-		for DIRNAME in "$${DIRLIST}"; \
+		for DIRNAME in $${DIRLIST}; \
 		do \
 			echo "Removing directory $${DIRNAME}...";\
 			test ! -d "$${DIRNAME}" || rm -rf "$${DIRNAME}"; \
