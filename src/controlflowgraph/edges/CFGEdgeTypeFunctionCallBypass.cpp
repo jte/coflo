@@ -23,5 +23,5 @@ CFGEdgeTypeFunctionCallBypass::CFGEdgeTypeFunctionCallBypass(const CFGEdgeTypeFu
 {
 }
 
-CFGEdgeTypeFunctionCallBypass::~CFGEdgeTypeFunctionCallBypass() { }
+//CFGEdgeTypeFunctionCallBypass::~CFGEdgeTypeFunctionCallBypass() { }
 
