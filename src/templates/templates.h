@@ -22,18 +22,6 @@
 extern const char index_template_html[];
 extern const char css_index_template_css[];
 extern const char js_coflo_resizer_js[];
-extern const char js_jquery_jstree_js[];
-extern const char js_jquery_1_8_2_js[];
-extern const char js_jquery_ui_js[];
-
-extern const unsigned char css_dark_hive_cpio[];
-extern const unsigned int css_dark_hive_cpio_len;
-
-extern const unsigned char jquery_ui_layout_cpio[];
-extern const unsigned int jquery_ui_layout_cpio_len;
-
-extern const unsigned char jquery_ui_tar[];
-extern const unsigned int jquery_ui_tar_len;
 
 extern const unsigned char report_boilerplate_tar[];
 extern const unsigned int report_boilerplate_tar_len;

@@ -72,7 +72,8 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/libcontrolflowgraph.a \
 	./graph/libgraph.a \
 	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a 
+	./libexttools/libexttools.a \
+	./templates/libtemplates.a
 
 	
 #	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
