@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+# The cpp files generated from the .dparser.g files.
 DPARSER_BUILTSRC = $(srcdir)/coflo_c_parser.cpp \
 	$(srcdir)/gcc_gimple_parser.cpp
 
@@ -32,10 +33,30 @@ MOSTLYCLEANFILES = $(DPARSER_BUILTSRC)
 
 BUILT_SOURCES = $(DPARSER_BUILTSRC)
 
-noinst_LIBRARIES = libparsers.a 
-libparsers_a_SOURCES = gcc_gimple_parser.dparser.g gcc_gimple_parser.h coflo_c_parser.dparser.g coflo_c_parser.h
+# The source files for the Coflo C Parser.
+COFLOCPARSER_SRC = coflo_c_parser.dparser.g coflo_c_parser.h \
+	coflo_c_parser_expressions.include.g \
+	coflo_c_parser_terminals.include.g \
+	coflo_c_parser_extensions.include.g \
+	coflo_c_parser_preprocessor.include.g
 
-libparsers_a_CPPFLAGS = -I $(top_srcdir)/src -I $(top_builddir)/third_party/dparser/local/include -I $(top_srcdir)/src/debug_utils \
+noinst_LIBRARIES = libparsers.a 
+libparsers_a_SOURCES = ASTNode.cpp ASTNode.h \
+	ParserBaseClass.cpp ParserBaseClass.h \
+	Token.cpp Token.h \
+	gcc_gimple_parser.dparser.g gcc_gimple_parser.h \
+	$(COFLOCPARSER_SRC)
+
+# Explicitly record dependencies of coflo_c_parser.dparser.g.
+# @todo It'd be better if we could make this automatic, but I haven't been able to get
+# it to work and simultaneously have Automake not complain about it being GNU make specific.
+$(srcdir)/coflo_c_parser.cpp: \
+	$(srcdir)/coflo_c_parser_expressions.include.g \
+	$(srcdir)/coflo_c_parser_terminals.include.g \
+	$(srcdir)/coflo_c_parser_extensions.include.g \
+	$(srcdir)/coflo_c_parser_preprocessor.include.g
+	
+libparsers_a_CPPFLAGS = -I $(top_srcdir)/src $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS)
 libparsers_a_CFLAGS = -Wno-missing-field-initializers $(AM_CFLAGS)
 libparsers_a_CXXFLAGS = -Wno-missing-field-initializers -Wno-unused-parameter $(AM_CXXFLAGS)
@@ -49,7 +70,8 @@ MAKE_DPARSER_FLAGS = -v -d -d --ext=cpp
 #--verbose=2 --debug=2 <<- These don't work.
 
 # Suffix for DParser grammars.
-SUFFIXES = .dparser.g .dparser.g.gdebug
+SUFFIXES = .dparser.g
+# .dparser.g.d
 
 # Rule to make *.cpp from *.dparser.g using DParser.
 # Notes:
@@ -65,12 +87,13 @@ SUFFIXES = .dparser.g .dparser.g.gdebug
 	BASENAME="$$(basename "$<" .dparser.g)" && \
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$$(basename "$<")" && \
-	INTER="$$(basename "$<").gdebug" && \
-	"$(PROG_ABSPATH_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(srcdir)/$${SOURCE}" \
-		--output="$(builddir)/$${INTER}" && \
-	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(builddir)/$${INTER}" > "$(builddir)/$${TARGET}-temp" && \
-	mv "$(builddir)/$${TARGET}-temp" "$(srcdir)/$${TARGET}"
-	:;# cd "$(srcdir)" && 
+	INTERMEDIATE="$$(basename "$<").gdebug" && \
+	: 'Now switch to the source directory' && \
+	cd "$(srcdir)" && \
+	"$(PROG_ABSPATH_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(abs_srcdir)/$${SOURCE}" \
+		--output="$(abs_builddir)/$${INTERMEDIATE}" && \
+	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(abs_builddir)/$${INTERMEDIATE}" > "$(abs_builddir)/$${TARGET}-temp" && \
+	mv "$(abs_builddir)/$${TARGET}-temp" "$(abs_srcdir)/$${TARGET}"
 
 # Generate dependencies.
 #.dparser.g.dparser.g.d:
