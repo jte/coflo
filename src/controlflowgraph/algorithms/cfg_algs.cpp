@@ -25,7 +25,7 @@
 #include <boost/graph/graph_concepts.hpp>
 
 #include "../ControlFlowGraph.h"
-#include "../GraphAdapter.h"
+//#include "../GraphAdapter.h"
 #include "../../Function.h"
 #include "../visitors/BackEdgeFixupVisitor.h"
 #include "../edges/CFGEdgeTypeImpossible.h"
