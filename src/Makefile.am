@@ -20,7 +20,7 @@
 #GTEST_ROOT = $(top_builddir)/third_party/gtest-1.6.0/fused-src
 
 # Subdirectories with their own Makefile{.am}'s.
-SUBDIRS = controlflowgraph debug_utils libexttools parsers templates
+SUBDIRS = graph controlflowgraph debug_utils libexttools parsers templates
 
 # Make sure to distribute:
 # - The Doxygen configuration file.
@@ -70,9 +70,9 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 	./controlflowgraph/edges/libedges.a \
 	./controlflowgraph/visitors/libvisitors.a \
 	./controlflowgraph/libcontrolflowgraph.a \
+	./graph/libgraph.a \
 	./debug_utils/libdebugutils.a \
-	./libexttools/libexttools.a \
-	./templates/libtemplates.a
+	./libexttools/libexttools.a 
 
 	
 #	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
@@ -98,6 +98,9 @@ coflo_LDADD = $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
 
 TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
 
+# This becomes an intermediate rule which simply copies the fused Google Test C++ file
+# into the build directory.  As an intermediate built file, we don't have to include it
+# in a *CLEAN variable, since make will automatically take care of that.
 gtest-all.cpp: $(top_builddir)/third_party/gtest-1.6.0/fused-src/gtest/gtest-all.cc
 	cp "$<" "$@"
 

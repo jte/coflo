@@ -376,6 +376,7 @@ AC_CONFIG_FILES([src/coflo.conf])
 AC_CONFIG_FILES([Makefile
 	doc/Makefile
 	src/Makefile
+	src/graph/Makefile
 	src/controlflowgraph/Makefile
 	src/controlflowgraph/algorithms/Makefile
 	src/controlflowgraph/analysis/Makefile

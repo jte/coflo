@@ -256,14 +256,15 @@ EXTRA_DIST += $(css_dark_hive_files:%=$(css_dark_hive_src_root_dir)/%) \
 ### These are strictly of use for the maintainer, e.g. to update the version of Boost.
 ###
 
-BOOST_BCP_ROOT = ~/src/boost_1_51_0
+BOOST_BCP_ROOT = /home/Gary/src/boost_1_51_0
 BOOST_BCP_OUTDIR = ./boost_subset
-BCP = ~/src/boost_1_51_0/dist/bin/bcp
+BCP = /home/Gary/src/boost_1_51_0/dist/bin/bcp
 
 .PHONY: maintainer-make-boost-subset
 maintainer-make-boost-subset:
-	: Use Boost's bcp utility to install only the required subset of the Boost libraries to 
-	find $(abs_top_srcdir) | xargs {} $(BCP) --boost=$(BOOST_BCP_ROOT) --scan {} $(BOOST_BCP_OUTDIR)
+	: Use the Boost bcp utility to install only the required subset of the Boost libraries.
+	rm -rf $(BOOST_BCP_OUTDIR) && mkdir $(BOOST_BCP_OUTDIR) && LANG=C && \
+	find $(abs_top_srcdir) | xargs -I '{}' $(BCP) --boost=$(BOOST_BCP_ROOT) --scan '{}' $(BOOST_BCP_OUTDIR)
 
 
 # Delete all the stamps except for the untarring ones for any clean.

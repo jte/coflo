@@ -45,28 +45,33 @@ struct EdgeDescriptorConv
 
 
 /**
- *
+ * The graph library's vertex class.  Use this as a base class for vertices of derived graph types.
  */
 class Vertex
 {
 public:
+	/// @name Member Typedefs
+	///@{
 	typedef boost::unordered_set< Edge* > edge_list_type;
 	typedef edge_list_type::iterator base_edge_list_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> edge_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> out_edge_iterator;
 	typedef boost::transform_iterator<EdgeDescriptorConv, base_edge_list_iterator, EdgeDescriptor, EdgeDescriptor> in_edge_iterator;
 	typedef edge_list_type::size_type degree_size_type;
+	///@}
 
 public:
 	/**
 	 * Default vertex constructor.
 	 */
 	Vertex();
+
 	/**
 	 * Copy constructor.
 	 * @param other
 	 */
 	Vertex(const Vertex& other);
+
 	/**
 	 * Destructor.
 	 */

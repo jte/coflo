@@ -24,8 +24,8 @@
 #ifndef GRAPHADAPTER_H
 #define GRAPHADAPTER_H
 
-#include "Graph.h"
-#include "ControlFlowGraph.h"
+#include "../graph/Graph.h"
+//#include "ControlFlowGraph.h"
 
 #include <boost/utility/enable_if.hpp>
 //#include <boost/type_traits/is_base_of.hpp>
