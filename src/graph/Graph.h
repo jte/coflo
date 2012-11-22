@@ -171,7 +171,7 @@ public:
 			typedef boost::property<boost::vertex_index_t, edge_index_type> EdgeProperty;
 			typedef VertexProperty vertex_property_type;
 			typedef EdgeProperty edge_property_type;
-			typedef boost::no_property graph_property_type;
+			typedef typename boost::no_property graph_property_type;
 			typedef void vertex_bundled;
 			typedef void edge_bundled;
 		//@}

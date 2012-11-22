@@ -39,10 +39,6 @@
 #include "libexttools/ToolDot.h"
 #include "controlflowgraph/analysis/Analyzer.h"
 
-/**
- * Prints the versions of the various libraries we were compiled against.
- */
-static void print_build_info();
 
 /**
  * CoFlo entry point.
