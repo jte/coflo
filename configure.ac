@@ -247,9 +247,13 @@ AC_DEFINE_UNQUOTED([PROG_ABSPATH_DOT],["$PROG_ABSPATH_DOT"],[Define to the absol
 ### Checks for libraries
 ###
 
+# The Google Test library requires POSIX threads.
+AX_PTHREAD
+
 # The Google Test library.
 # See if the user specified a path to it on the configure command line.
-COFLO_ARG_WITH_DIR([GTEST_ROOT], [gtest], [root directory of the Google C++ Testing Framework source distribution])
+#COFLO_ARG_WITH_DIR([GTEST_ROOT], [gtest], [root directory of the Google C++ Testing Framework source distribution])
+AC_SUBST([GTEST_ROOT], ['$(top_builddir)/third_party/gtest-1.6.0/fused-src'])
 
 # The DParser source distribution's tarball.
 # To avoid requiring the user to build and install DParser on their system, we'll take the tarball

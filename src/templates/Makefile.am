@@ -45,8 +45,7 @@ libtemplates_a_CFLAGS = $(AM_CFLAGS)
 libtemplates_a_CXXFLAGS = $(AM_CXXFLAGS)
 
 # We have to manually register the built sources for cleaning.
-## @todo This should really be maintainer clean.
-MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp)
+MOSTLYCLEANFILES = $(intermediate_cpp_files:%.cpp=$(srcdir)/%.cpp) report_boilerplate.tar.cpp
 
 recipie_any_file_to_cpp_array = : First order of business is to remove any leftover temp files. && \
 rm -f "$@.tmp" && \
