@@ -31,12 +31,9 @@
 
 #include "statements/statements.h"
 #include "edges/CFGEdgeTypeBase.h"
-#include "VertexID.h"
 
-#include "Graph.h"
-#include "GraphAdapter.h"
-
-class Function;
+#include "../graph/Graph.h"
+#include "../graph/GraphAdapter.h"
 
 
 /// @name Control Flow Graph definitions.

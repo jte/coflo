@@ -19,8 +19,7 @@ noinst_LIBRARIES = libexttools.a
 libexttools_a_SOURCES = ToolBase.cpp ToolBase.h \
     ToolCompiler.cpp ToolCompiler.h \
     ToolDot.cpp ToolDot.h \
-    VersionNumber.cpp VersionNumber.h \
-    toollib.cpp toollib.h
+    VersionNumber.cpp VersionNumber.h
 
 # Propagate any AM_*FLAGS to the per-target flags.
 # We need to do this because per the Automake manual, "In compilations with per-target flags,

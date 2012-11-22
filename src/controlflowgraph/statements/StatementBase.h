@@ -27,7 +27,7 @@
 
 #include "../../debug_utils/debug_utils.hpp"
 #include "../../Location.h"
-#include "../Vertex.h"
+#include "../../graph/Vertex.h"
 //#include "../Edge.h"
 
 class Function;

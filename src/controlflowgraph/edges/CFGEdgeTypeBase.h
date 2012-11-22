@@ -22,7 +22,7 @@
 
 #include <string>
 #include "coflo_exceptions.hpp"
-#include "../Edge.h"
+#include "../../graph/Edge.h"
 
 class StatementBase;
 
