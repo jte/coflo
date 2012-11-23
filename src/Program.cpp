@@ -219,7 +219,7 @@ void Program::Print(const std::string &output_path)
 
 	// Set permissions on the generated report appropriately.
 	/// @todo This is for development only at the moment.  We'll probably want to remove this.
-	//::system(("cd " + output_dir.generic_string() + " && chmod -R 666 .").c_str());
+	::system(("cd " + output_dir.generic_string() + " && chmod -R 666 .").c_str());
 }
 
 void Program::PrintUnresolvedFunctionCalls(T_ID_TO_FUNCTION_CALL_UNRESOLVED_MAP *unresolved_function_calls)
