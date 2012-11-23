@@ -85,7 +85,24 @@ public:
 	 * @param s The string to initialize the FileTemplate with.
 	 */
 	FileTemplate(const std::string& s) : m_current_file_contents(s) { };
+	FileTemplate(const char *s) : m_current_file_contents(s) { };
 	~FileTemplate();
+
+	/**
+	 * Assignment operator.
+	 *
+	 * @param other
+	 * @return
+	 */
+	FileTemplate& operator=(FileTemplate& other);
+
+	/**
+	 * Append operator.
+	 *
+	 * @param other
+	 * @return
+	 */
+	FileTemplate& operator+=(FileTemplate& other);
 
 	/**
 	 * Replace all instances of @a regex_to_match with @a replacement.
@@ -94,7 +111,7 @@ public:
 	 * @param replacement
 	 * @return
 	 */
-	FileTemplate& regex_replace(const std::string &regex_to_match, const std::string &replacement);
+	FileTemplate& regex_replace(const std::string &regex_to_match, const FileTemplate &replacement);
 
 	/**
 	 * Insert @a replacement immediately before @a regex_to_match.
@@ -103,14 +120,18 @@ public:
 	 * @param replacement
 	 * @return
 	 */
-	FileTemplate& regex_insert_before(const std::string &regex_to_match, const std::string &replacement);
-
+	FileTemplate& regex_insert_before(const std::string &regex_to_match, const FileTemplate &replacement);
 
 	/**
 	 * Return this FileTemplate's contents, with all attached modifiers applied, as a std::string.
 	 */
-	std::string str();
+	std::string str() const;
 
+	/**
+	 * Save the contents of this FileTemplate to the named file.
+	 *
+	 * @param filename
+	 */
 	void SaveAs(const std::string &filename);
 
 	/**
@@ -127,7 +148,7 @@ private:
 	/**
 	 * Apply all attached modifiers to m_current_file_contents.
 	 */
-	void Apply();
+	void Apply() const;
 
 	/**
 	 * Helper function for the stream insertion operator.
@@ -138,10 +159,10 @@ private:
 	std::ostream& InsertionHelper(std::ostream& os);
 
 	/// A string containing the contents of the file.
-	std::string m_current_file_contents;
+	mutable std::string m_current_file_contents;
 
 	/// List of attached filters.
-	std::vector<modifier_base_t*> m_filter_list;
+	mutable std::vector<modifier_base_t*> m_filter_list;
 };
 
 inline std::ostream& operator<<(std::ostream& os, FileTemplate &ft)
