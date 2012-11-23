@@ -6,6 +6,40 @@
 			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
 			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuildCommandParser" id="org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser" keep-relative-paths="false" name="CDT GCC Build Output Parser" parameter="(gcc)|([gc]\+\+)|(clang)" prefer-non-shared="true" store-entries-with-project="true">
 				<language id="org.eclipse.cdt.core.g++">
+					<resource project-relative-path="src/TranslationUnit.cpp">
+						<entry kind="includePath" name="/CoFlo/src">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/usr/include"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/parsers"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="COFLO_PKGDATA_DIR" value="/usr/local/share/coflo"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
+					<resource project-relative-path="src/templates/FileTemplate.cpp">
+						<entry kind="includePath" name="/CoFlo/src/templates">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/templates"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
 					<resource project-relative-path="src/Program.cpp">
 						<entry kind="includePath" name="/CoFlo/src">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>

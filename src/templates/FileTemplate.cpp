@@ -44,30 +44,30 @@ FileTemplate::FileTemplate()
 
 FileTemplate::~FileTemplate()
 {
-	/// @todo Memeory leak, delete all members of m_filter_list.
+	/// @todo Memory leak, delete all members of m_filter_list.
 }
 
 FileTemplate& FileTemplate::regex_replace(const std::string& regex_to_match,
-		const std::string& replacement)
+		const FileTemplate& replacement)
 {
 	// Append a simple replacement functor to the modifier list.
-	simple_replace_t *r = new simple_replace_t(regex_to_match, replacement);
+	simple_replace_t *r = new simple_replace_t(regex_to_match, replacement.str());
 	m_filter_list.push_back(r);
 
 	return *this;
 }
 
 FileTemplate& FileTemplate::regex_insert_before(const std::string& regex_to_match,
-		const std::string& replacement)
+		const FileTemplate& replacement)
 {
 	// Append a simple replacement functor to the modifier list.
-	insert_before *r = new insert_before(regex_to_match, replacement);
+	insert_before *r = new insert_before(regex_to_match, replacement.str());
 	m_filter_list.push_back(r);
 
 	return *this;
 }
 
-std::string FileTemplate::str()
+std::string FileTemplate::str() const
 {
 	// Apply the modifiers.
 	Apply();
@@ -93,7 +93,7 @@ std::ostream& FileTemplate::InsertionHelper(std::ostream& os)
 	return os;
 }
 
-void FileTemplate::Apply()
+void FileTemplate::Apply() const
 {
 	// Apply all attached filters in sequence.
 	BOOST_FOREACH(modifier_base_t *m, m_filter_list)

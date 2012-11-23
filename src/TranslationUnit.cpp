@@ -242,8 +242,9 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 	nav_tree_table_entry.regex_replace("@FILENAME@", m_source_filename.filename().generic_string());
 
 	// Now insert it into the navigation tree.
-	index_html_out.regex_insert_before("<!-- NAV_END -->", nav_tree_table_entry.str());
+	index_html_out.regex_insert_before("<!-- NAV_END -->", nav_tree_table_entry);
 
+	// Now add all the functions in this Translation Unit.
 	std::stringstream ss;
 	int i = 1;
 	BOOST_FOREACH(Function* fp, m_function_defs)
@@ -255,13 +256,13 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 			ss << " (possible entry point)";
 		}*/
 
-		// Generate the tab list item for this function.
+		// Generate the navigation list item for this function.
 		FileTemplate nav_tree_table_entry_function(f_str_template_nav_tree_function_entry);
 		nav_tree_table_entry_function.regex_replace("@UNIQUE_FILE_ID@", unique_file_id);
 		nav_tree_table_entry_function.regex_replace("@IDENTIFIER_FUNCTION@", fp->GetIdentifier());
 		nav_tree_table_entry_function.regex_replace("@UNIQUE_FUNCTION_ID@", fp->GetIdentifier());
 		nav_tree_table_entry_function.regex_replace("@TABNUMBER@", ss.str());
-		index_html_out.regex_insert_before("<!-- NAV_FUNCTION_ENTRY_END -->", nav_tree_table_entry_function.str());
+		index_html_out.regex_insert_before("<!-- NAV_FUNCTION_ENTRY_END -->", nav_tree_table_entry_function);
 
 		std::string cfg_image_filename;
 		cfg_image_filename = fp->GetIdentifier()+".svg";
@@ -275,6 +276,9 @@ void TranslationUnit::Print(ToolDot *the_dot, const boost::filesystem::path &out
 
 		i++;
 	}
+	/// @todo This removes the placeholder comment, but we probably should really return this subtree as a FileTemplate,
+	/// and then in the caller insert them as a group, and not have to do textual find/replace at all.
+	index_html_out.regex_replace("NAV_FUNCTION_ENTRY_END", "INTERIM_TEXT_REMOVED");
 }
 
 void TranslationUnit::CompileSourceFile(const std::string& file_path, const std::string &the_filter, ToolCompiler *compiler,
