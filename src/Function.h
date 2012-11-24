@@ -40,6 +40,12 @@ typedef std::multimap< std::string, FunctionCallUnresolved*> T_ID_TO_FUNCTION_CA
 class Function : boost::noncopyable
 {
 public:
+	/**
+	 * Craete a new Function given the TranslationUnit it is defined in and the Function's identifier.
+	 *
+	 * @param parent_tu
+	 * @param m_function_id
+	 */
 	Function(TranslationUnit *parent_tu, const std::string &m_function_id);
 	~Function();
 	
