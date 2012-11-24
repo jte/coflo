@@ -408,7 +408,7 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
 		{
 			// Print the parse tree.
 		std::cout << "Parse tree: ================================================================" << std::endl;
-		print_parsetree(parser_tables_coflo_c_parser, tree, print_node, NULL);
+		//print_parsetree(parser_tables_coflo_c_parser, tree, print_node, NULL);
 		std::cout << "============================================================================" << std::endl;
 		}
 	else

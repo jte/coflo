@@ -76,6 +76,15 @@ public:
 	 */
 	virtual ~Location();
 	
+	void swap(Location &other)
+	{
+		// None of these throw.
+		m_passed_file_path.swap(other.m_passed_file_path);
+		m_absolute_file_path.swap(other.m_absolute_file_path);
+		m_line_number = other.m_line_number;
+		m_column = other.m_column;
+	};
+
 	/// @name Overloaded operators.
 	///@{
 

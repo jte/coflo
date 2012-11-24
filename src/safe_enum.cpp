@@ -53,9 +53,10 @@ std::string SafeEnumBaseClass::GetEnumeratorsAsString() const
 {
 	std::string retval;
 
-	std::cout << "Enumerators:" << std::endl;
 	BOOST_FOREACH(std::string s, m_enumerator_names)
 	{
 		retval += s + ", ";
 	}
+
+	return retval;
 }

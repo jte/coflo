@@ -34,6 +34,11 @@ public:
 
 	virtual std::string asString() const = 0;
 
+	/**
+	 * Returns the enumerators as a comma-separated list.
+	 *
+	 * @return
+	 */
 	std::string GetEnumeratorsAsString() const;
 
 private:

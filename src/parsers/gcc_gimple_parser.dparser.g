@@ -156,7 +156,9 @@ declaration
 	
 var_declaration
 	: decl_spec+ var_id declarator_suffix* ('=' (constant | string_literal))? ';'
-		{ /*std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;*/ }
+		{
+			std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;
+		}
 	;
 	
 declarator_suffix
@@ -165,7 +167,9 @@ declarator_suffix
 	
 local_function_declaration
 	: decl_spec+ identifier '(' param_decls_list ')' ';'
-		{ /*std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;*/ }
+		{
+			std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;
+		}
 	;
 
 statement_list
@@ -477,6 +481,7 @@ decl_spec
 	| '(' decl_spec+ (',' decl_spec+)* ')'
 	// gcc 4.5.3 emits this one in some C code.  First encountered it when running against make 3.82 sources.
 	| '<unnamed type>'
+	| "<unnamed-unsigned:[0-9]+>"
 	;
 	
 type_qualifier
