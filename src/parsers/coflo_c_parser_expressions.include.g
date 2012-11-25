@@ -24,7 +24,8 @@ cpp_binary_operator_scope_resolution
 	;
 
 binary_operator_member_access
-	: ('.'|'->') $binary_op_left 1099
+	: '.' $binary_op_left 1099 { $$ = M_NEW_AST_BINOP(MEMBER_ACCESS_DOT, $n0); }
+	| '->' $binary_op_left 1099 { $$ = M_NEW_AST_BINOP(MEMBER_ACCESS_DOT, $n0); }
 	;
 
 unary_postfix_inc_dec_operator
