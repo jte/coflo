@@ -212,13 +212,13 @@ declaration
     			/* There was a typedef in the declspecs. Find the identifier that was declared to be a new type. */
     			D_ParseNode *n = d_find_in_tree(&$n1, ${nterm identifier});
     			if(n)
-{
+    			{
     				/* Found the identifier, add it to the scope as a new typename. */
     				//std::cout << "SPEC: ADDING NEW TYPEDEF TO SCOPE: " << std::string(n->start_loc.s, n->end) << std::endl; 
     				D_Sym *s = NEW_D_SYM(${scope}, n->start_loc.s, n->end);
     				s->user.m_is_typename = true;
     				s->user.m_namespace_membership = E_OTHER_IDENTIFIER;
-}
+    			}
     		}
     	]
     	{
@@ -247,20 +247,20 @@ declaration
     			{
     				D_ParseNode *pn = d_get_child(&$n1, i);
     				if(pn != NULL && pn->user.m_ast_node != NULL)
-{
+    				{
     					$$ += pn->user;
     				}
-}
-}
+    			}
+    		}
     		else if(true /* VARDECL */)
-{
+    		{
     			$$ = M_NEW_AST_NODE_I(decl_var);
     			// Add the decl spec children.
     			M_APPEND_ALL_CHILD_ASTS($$, $n0);
-}
+    		}
 
        		std::cout << *($$.m_ast_node) << std::endl;
-}
+       	}
     ;
 
 /**
@@ -472,13 +472,7 @@ init_declarator_list
     : init_declarator (',' init_declarator)*
     	{
     		$$ = M_NEW_AST_NODE_I(nil);
-    		
-    		// Append every other child (the others are commas).
-    		for(int i=0; i < $#; i+=2)
-    		{
-    			D_ParseNode *pn = d_get_child(&$n, i);
-    			$$ += pn->user.m_ast_node;
-    		}
+     		M_APPEND_AST_LIST($$, $0, $n1);
     	}
 	;
     
@@ -577,6 +571,11 @@ function_declarator
 
 parameter_type_list
     : parameter_decl (',' parameter_decl)* (',' '...')?
+    	{
+    		$$ = M_NEW_AST_NODE_I(nil);
+     		M_APPEND_AST_LIST($$, $0, $n1);
+     		/// @todo
+    	}
 	;
 
 parameter_decl
@@ -585,9 +584,9 @@ parameter_decl
 
 type_name
 	: (type_specifier | type_qualifier)+ abstract_declarator?
-		/*{
-			std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << *($0.m_ast_node) << std::endl;
-		}*/
+//		{
+//			std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << *($0.m_ast_node) << std::endl;
+//		}
     ;
 
 abstract_declarator
@@ -604,7 +603,7 @@ direct_abstract_declarator
 	;
 	
 initializer
-	: assignment_expression
+	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }
 	| '{' initializer (',' initializer)* ','? '}'
 	;
 

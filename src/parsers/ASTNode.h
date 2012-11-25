@@ -432,7 +432,8 @@ public:
 	} \
 	} while(0)
 
-#define M_APPEND_OPTIONAL_CHILD_AST(usr_node_to_append_to, parent_sys_node) M_APPEND_ALL_CHILD_ASTS(usr_node_to_append_to, parent_sys_node)
+#define M_APPEND_OPTIONAL_CHILD_AST(usr_node_to_append_to, parent_sys_node) \
+	M_APPEND_ALL_CHILD_ASTS(usr_node_to_append_to, parent_sys_node)
 
 #define M_APPEND_EVERY_NTH_CHILD_AST(usr_node_to_append_to, parent_sys_node, start, n) \
 	do { \
