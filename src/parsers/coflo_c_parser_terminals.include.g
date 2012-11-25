@@ -105,9 +105,8 @@ identifier
 typedef_name
 	: ID
 		[
-			/* Look up the string in the typename symbol table and reject it if it has not been declared. */
+			/* Look up the string in the typename symbol table and reject the parse if it has not been declared. */
 			D_Sym *s = find_D_Sym(${scope}, $n0.start_loc.s, $n0.end);
-			/* if (!s) ${reject}; */
 			if (!s || !s->user.m_is_typename)
 			{
 				${reject};

@@ -194,6 +194,9 @@ public:
 	template <typename Type>
 	bool isType() const { return NULL != dynamic_cast<const Type*>(this); };
 
+	/*
+	 * @return
+	 */
 	template <typename Type>
 	ASTNodeList GetAllChildrenOfType()
 	{
@@ -369,6 +372,10 @@ public:
 #define M_NEW_AST_NODE_I(node_name) \
 		new ASTNode_##node_name(Token(std::string(#node_name)))
 
+/// Create a new imaginary node.
+#define M_NEW_AST_NODE_I2(node_name, sys_parse_node) \
+		new ASTNode_##node_name(Token(std::string(#node_name)))
+
 /// Nodes with enumerated kinds.
 #define M_NEW_AST_NODE_ENUM(node_name, kind, value, sys_parse_node) \
 	new ASTNode_##node_name(ASTNode_##node_name::kind_t::kind, Token(sys_parse_node));
@@ -403,6 +410,9 @@ public:
  */
 #define M_PROPAGATE_AST_NODE(to, from) do { to.m_ast_node = from.m_ast_node; from.m_ast_node = NULL; } while(0)
 
+#define M_NEW_AST_NODE_LIST(node_name, sys_node_with_children) \
+	new M_AST_NODE_CLASSNAME(node_name)(sys_node_with_children)
+
 /**
  * Move the ASTNode specified by @a from to a child node of the ASTNode specified by @a to.
  */
@@ -420,6 +430,80 @@ public:
 			usr_node_to_append_to += pn->user.m_ast_node; \
 		} \
 	} \
-	} while(0);
+	} while(0)
+
+#define M_APPEND_OPTIONAL_CHILD_AST(usr_node_to_append_to, parent_sys_node) M_APPEND_ALL_CHILD_ASTS(usr_node_to_append_to, parent_sys_node)
+
+#define M_APPEND_EVERY_NTH_CHILD_AST(usr_node_to_append_to, parent_sys_node, start, n) \
+	do { \
+	M_FOREACH_NTH_CHILD(i, parent_sys_node, start, n) \
+    { \
+    	/* Get the next decl_spec. */ \
+    	D_ParseNode *pn = d_get_child(&parent_sys_node, i); \
+    	\
+		if(pn->user.m_ast_node != NULL) \
+		{ \
+			usr_node_to_append_to += pn->user.m_ast_node; \
+			pn->user.m_ast_node = NULL; \
+		} \
+		else \
+		{ \
+			std::cout << "WARNING: NULL child ASTNode* found at index " << i << " of " << num_children << std::endl;\
+		} \
+	} \
+	} while(0)
+
+#define M_APPEND_AST_LIST_EACH(usr_node_to_append_to, first_element_usernode, optional_element_sysnode, which_child) \
+	do { \
+		/* Append the first element. */ \
+		usr_node_to_append_to += first_element_usernode; \
+		M_FOREACH_CHILD(i, optional_element_sysnode) \
+		{\
+			D_ParseNode *pn = d_get_child(&optional_element_sysnode, i);\
+			/* Get the second part of this subrule's instance, since the first is the separator. */ \
+			D_ParseNode *child_pn = d_get_child(pn, which_child); \
+			if(child_pn->user.m_ast_node != NULL) \
+			{ \
+				usr_node_to_append_to += child_pn->user.m_ast_node; \
+				child_pn->user.m_ast_node = NULL; \
+			} \
+		} \
+	} while(0)
+
+/**
+ * Append a parenthesized list of symbols (either terminal or non-terminal) to the given DParser user node.
+ * The rule should be of the form:
+ *   production: symbol1 (separator symbol2)*
+ * where:
+ *   - symbol1 corresponds to first_element_usernode.
+ *   - separator is whatever symbol separates the list elements.  The only restriction is that it is a single symbol.
+ *   - symbol2 corresponds to the list of zero or more subsequent symbols which will be appended to the list.
+ */
+#define M_APPEND_AST_LIST(usr_node_to_append_to, first_element_usernode, optional_element_sysnode) \
+	do { \
+		/* Append the first element. */ \
+		usr_node_to_append_to += first_element_usernode; \
+		M_APPEND_PARENTHESIZED_AST_LIST(usr_node_to_append_to, optional_element_sysnode);\
+	} while(0)
+
+
+#define M_APPEND_PARENTHESIZED_AST_LIST(usr_node_to_append_to, optional_element_sysnode) \
+		do { \
+			M_FOREACH_CHILD(i, optional_element_sysnode) \
+			{\
+				D_ParseNode *pn = d_get_child(&optional_element_sysnode, i);\
+				if(pn == NULL) { M_ERR("PARSENODE=NULL"); continue; } \
+				/* Get the second part of this subrule's instance, since the first is the separator. */ \
+				D_ParseNode *child_pn = d_get_child(pn, 1); \
+				if(child_pn == NULL) { M_ERR("CHILDNODE=NULL"); continue; } \
+				if(child_pn->user.m_ast_node != NULL) \
+				{ \
+					usr_node_to_append_to += child_pn->user.m_ast_node; \
+					child_pn->user.m_ast_node = NULL; \
+				} \
+			} \
+		} while(0)
+
+#define M_ERR(msg) do { std::cout << msg << std::endl; } while(0)
 
 #endif /* ASTNODE_H_ */

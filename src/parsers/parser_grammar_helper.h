@@ -72,12 +72,24 @@
 #define M_PROPAGATE_PTR(from, to, field_name) do { to.field_name = from.field_name; from.field_name = NULL; } while(0)
 
 /**
+ * Macro for looping over all immediate children of @a parent_sys_node, starting from the child at index @a start,
+ * with a stride of @a n.  This macro is primarily for use in iterating over "something"-separated lists.
+ *
+ * @param child_index_name The variable name to use for the loop index.
+ * @param parent_sys_node  The parent D_ParseNode () whose children we want to iterate over.
+ * @param n The number of children to skip on each iteration.
+ */
+#define M_FOREACH_NTH_CHILD(child_index_name, parent_sys_node, start, n) \
+	for(int num_children = d_get_number_of_children(&parent_sys_node), child_index_name = start; \
+		child_index_name < num_children; \
+		child_index_name += n )
+
+/**
  * Macro for looping over all immediate children of @a parent_sys_node.
  *
  * @param child_index_name The variable name to use for the loop index.
  * @param parent_sys_node  The parent D_ParseNode () whose children we want to iterate over.
  */
-#define M_FOREACH_CHILD(child_index_name, parent_sys_node) \
-	for(int num_children = d_get_number_of_children(&parent_sys_node), child_index_name = 0; child_index_name != num_children; ++child_index_name )
+#define M_FOREACH_CHILD(child_index_name, parent_sys_node)  M_FOREACH_NTH_CHILD(child_index_name, parent_sys_node, 0, 1)
 
 #endif // PARSER_GRAMMAR_HELPER_H

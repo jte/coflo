@@ -118,9 +118,9 @@ new_global_scope:
 
 translation_unit_component
 	: preprocessor_element
-{
-			std::cout << "Preproc Element: " << M_TO_STR($n0) << std::endl;
-		}
+	{
+		std::cout << "Preproc Element: " << M_TO_STR($n0) << std::endl;
+	}
 	| function_definition
 		{
 			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
@@ -562,7 +562,8 @@ function_declarator
     	]
     	{
     		$$ = M_NEW_AST_NODE(decl_func, $n1);
-    		// Append the AST tree describing the paramater types.
+    		$$ += $0;
+    		// Append the AST tree describing the parameter types.
     		M_APPEND_ALL_CHILD_ASTS($$, $n2);    		
     	}
     | direct_declarator '(' ')'
