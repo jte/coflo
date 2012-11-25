@@ -59,6 +59,9 @@ compound_statement
 			//$g->m_the_parser->PrintScope(${scope});
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
+    		
+    		/// @todo
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0);
     	}
     ;
     
@@ -69,7 +72,9 @@ block_item
 
 expression_statement
 	: expression ';'
+		{ $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
 	| ';'
+		{ $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
 	;
 
 selection_statement
@@ -96,7 +101,17 @@ selection_statement
 
 iteration_statement
 	: WHILE '(' expression ')' statement
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, WHILE, $n0);
+			$$ += $2;
+			$$ += $4;
+		}
 	| DO statement WHILE '(' expression ')' ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, DO, $n0);
+			$$ += $1;
+			$$ += $4;
+		}
 	| FOR '(' new_scope (declaration | expression_statement) expression_statement expression? ')' statement
 	    [
     		/* Return to the previous scope we were in before we entered the one created by the new_scope rule. */
@@ -105,12 +120,29 @@ iteration_statement
    		{
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
+    		
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, FOR, $n0);
+			/// @todo
     	}
 	;
 
 jump_statement
 	: GOTO identifier ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, GOTO, $n0);
+			$$ += $1;
+		}
 	| CONTINUE ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, CONTINUE, $n0);
+		}
 	| BREAK ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, BREAK, $n0);
+		}
 	| KEYWORD_RETURN expression? ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, RETURN, $n0);
+			/// @todo
+		}
 	;
