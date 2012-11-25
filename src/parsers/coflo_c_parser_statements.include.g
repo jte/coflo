@@ -19,22 +19,33 @@
   * @file Grammar for C statements.
   */
   
- statement
-	: expression_statement
-	| compound_statement
-	| labeled_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+statement
+	: expression_statement { M_PROPAGATE_AST_NODE($$, $0); }
+	| compound_statement { M_PROPAGATE_AST_NODE($$, $0); }
+	| labeled_statement { M_PROPAGATE_AST_NODE($$, $0); }
+	| selection_statement { M_PROPAGATE_AST_NODE($$, $0); }
+	| iteration_statement { M_PROPAGATE_AST_NODE($$, $0); }
+	| jump_statement { M_PROPAGATE_AST_NODE($$, $0); }
 	;
 
 labeled_statement
 	: identifier ':' statement
 		{
-			std::cout << "LABEL: " << M_TO_STR($n0) << std::endl;
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(labeled_statement, LABEL, $n1);
+			$$ += $0;
+			$$ += $2;
 		}
 	| CASE constant_expression ':' statement
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(labeled_statement, CASE, $n0);
+			$$ += $1;
+			$$ += $3;
+		}
 	| DEFAULT ':' statement
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(labeled_statement, DEFAULT, $n1);
+			$$ += $2;
+		}
 	;
 
 compound_statement
@@ -52,8 +63,8 @@ compound_statement
     ;
     
 block_item
-	: declaration
-	| statement
+	: declaration { M_PROPAGATE_AST_NODE($$, $0); }
+	| statement { M_PROPAGATE_AST_NODE($$, $0); }
 	;
 
 expression_statement
@@ -63,8 +74,24 @@ expression_statement
 
 selection_statement
 	: IF '(' expression ')' statement //$right 100
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, IF, $n0);
+			$$ += $2;
+			$$ += $4;
+		}
 	| IF '(' expression ')' statement ELSE statement //$right 101
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, IF, $n0);
+			$$ += $2;
+			$$ += $4;
+			$$ += $6;
+		}
 	| SWITCH '(' expression ')' statement
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, SWITCH, $n0);
+			$$ += $2;
+			$$ += $4;
+		}
 	; 
 
 iteration_statement

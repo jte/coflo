@@ -65,7 +65,7 @@ basic_binary_operator
 	;
 
 comma_operator
-	: ',' $binary_op_left 1083
+	: ',' $binary_op_left 1083 { $$ = M_NEW_AST_BINOP(COMMA, $n0); }
 	;
 	
 unary_prefix_inc_dec_operator
@@ -75,11 +75,20 @@ unary_prefix_inc_dec_operator
 
 unary_prefix_operator
 	/* Unary prefix plus/minus, logical/bitwise NOT, dereference, address-of. */
-	: ('+'|'-'|'!'|'~'|'*'|'&') $unary_op_right 1098
+	: '+' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(UNARY_PLUS, $n0); }
+	| '-' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(UNARY_MINUS, $n0); }
+	| '!' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(LOGICAL_NOT, $n0); }
+	| '~' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(BITWISE_NOT, $n0); }
+	| '*' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(DEREFERENCE, $n0); }
+	| '&' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(ADDRESS_OF, $n0); }
 	;
 
 unary_postfix_function_call_operator
-	: '(' argument_expression_list? ')' $unary_op_left 1099
+	: '(' argument_expression_list? ')' $unary_op_left 1099 
+		{
+			$$ = M_NEW_AST_UNOP(FUNCTION_CALL, $n0);
+			/// @todo
+		}
 	;
 	
 unary_postfix_array_subscript_operator
@@ -90,20 +99,6 @@ unary_postfix_array_subscript_operator
 		}
 	; 
 
-prefix_ops
-	: '(' type_name ')' $unary_op_right 1098
-	| ('+'|'-'|'!'|'~'|'*'|'&') $unary_op_right 1098
-	| '++' $unary_op_right 1098
-	| '--' $unary_op_right 1098
-	;
-	
-postfix_ops
-	: '(' argument_expression_list? ')' $unary_op_left 1099
-	| '[' expression ']' $unary_op_left 1099
-	| '++' $unary_op_left 1099
-	| '--' $unary_op_left 1099
-	;
-
 bitfield_colon
 	: ':' $binary_op_right 1085
 	;
@@ -112,22 +107,18 @@ primary_expression
 	: LITERAL_INTEGER
 		{
 			$$ = M_NEW_AST_NODE(literal_integer, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_HEX
 		{
 			$$ = M_NEW_AST_NODE(literal_integer, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_OCTAL
 		{
 			$$ = M_NEW_AST_NODE(literal_integer, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_FLOATING_POINT
 		{
 			$$ = M_NEW_AST_NODE(literal_float, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	| concatenated_literal_strings
 		{
@@ -136,7 +127,6 @@ primary_expression
 	| LITERAL_CHAR
 		{
 			$$ = M_NEW_AST_NODE(literal_character, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	| identifier
 		{
@@ -153,7 +143,6 @@ concatenated_literal_strings
 	: LITERAL_STRING+
 		{
 			$$ = M_NEW_AST_NODE(literal_string, $n0);
-			//$$.m_str = new M_TO_STR($n0);
 		}
 	;
 
@@ -165,29 +154,23 @@ postfix_expression
 	/* Array subscripting. */
 	| postfix_expression unary_postfix_array_subscript_operator $unary_left 1099
 		{
-			//$$.m_str = new std::string;
-			//*($$.m_str) = *($0.m_str) + "[" + M_TO_STR($n1) + "]";
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n1);
 			$$ += $0;
 		}
 	/* Function call */
 	| postfix_expression unary_postfix_function_call_operator $unary_left 1099
 		{
-			//$$.m_str = new std::string("FC");
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, FUNCTION_CALL, $n1);
 			$$ += $0;
 		}
 	| postfix_expression binary_operator_member_access identifier $unary_left 1099
 		{
-			//$$.m_str = new std::string;
-			//*($$.m_str) = "(" + *($0.m_str) + M_TO_STR($n1) + M_TO_STR($n2) + ")"; 
 			$$ = $1;
 			$$ += $0;
 			$$ += $2;
 		}
 	| postfix_expression unary_postfix_inc_dec_operator $unary_left 1099
 		{
-			//$$.m_str = new std::string("UPF");
 			$$ = $1;
 			$$ += $0;
 		}
@@ -265,46 +248,6 @@ binary_expression
 			$$ += $0;
 			$$ += $2;  
 		}
-	/* Experimental *************************/
-//	| binary_expression '?' expression ':' binary_expression $right 1086
-//		{
-//			$$.m_str = new std::string;
-//			*($$.m_str) = "(" + *($0.m_str) + " ? " + *($2.m_str) + " : " + *($4.m_str) + ")";
-//			std::cout << "TERNARY EXPRESSION: (" << *($$.m_str) << ")" << std::endl;
-//		}
-	/*| binary_expression unary_postfix_inc_dec_operator
-		{
-			$$.m_str = new std::string;
-			*($$.m_str) = "(" + *($0.m_str) + M_TO_STR($n1) + ")";
-			std::cout << "UNARY POSTFIX EXPRESSION: " << *($$.m_str) << std::endl;
-		}*/
-//	| unary_expression assignment_operator assignment_expression
-//		{
-//			std::cout << "ASSIGNMENT: " << M_TO_STR($n0) << ", op=\"" << M_TO_STR($n1) << "\", " << M_TO_STR($n2) << std::endl;
-//			M_PROPAGATE_PTR($0,$$,m_str);
-//		}
-//	| binary_expression postfix_ops
-//		{
-//			$$.m_str = new std::string("M1");
-//		}
-//	| prefix_ops binary_expression
-//		{
-//			$$.m_str = new std::string("M1");
-//		}
-//	| SIZEOF binary_expression
-//		{
-//			$$.m_str = new std::string("SIZEOF ");
-//			*($$.m_str) += *($1.m_str);
-//		}
-//	| SIZEOF '(' type_name ')'
-//		{
-//			$$.m_str = new std::string("SIZEOF ");
-//			*($$.m_str) += "TN1"; //*($2.m_str);
-//		}
-//	| '(' type_name ')' '{' initializer (',' initializer)* ','? '}' $left 1099
-//		{
-//			$$.m_str = new std::string("M1");
-//		}
 	| extension_gcc_statements_within_expressions
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
@@ -318,10 +261,12 @@ conditional_expression
 		}
 	| binary_expression '?' expression ':' conditional_expression $right 1086
 		{
+			std::cout << "Ternary Start" << std::endl;
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, TERNARY, $n1);
 			$$ += $0;
 			$$ += $2;
 			$$ += $4;
+			std::cout << "Ternary End" << std::endl;
 		}
 	;
 
@@ -339,7 +284,18 @@ assignment_expression
 	;
 	
 assignment_operator
-	: ('='|'+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'^='|'|=') $binary_op_right 1085
+	: '=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '+=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '-=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '*=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '/=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '%=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '<<=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '>>=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '&=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '^=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	| '|=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
+	
 	;
 
 expression

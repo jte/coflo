@@ -34,11 +34,13 @@ MOSTLYCLEANFILES = $(DPARSER_BUILTSRC)
 BUILT_SOURCES = $(DPARSER_BUILTSRC)
 
 # The source files for the Coflo C Parser.
-COFLOCPARSER_SRC = coflo_c_parser.dparser.g coflo_c_parser.h \
+COFLOCPARSER_SRC = coflo_c_parser.h \
+	coflo_c_parser.dparser.g \
 	coflo_c_parser_expressions.include.g \
-	coflo_c_parser_terminals.include.g \
 	coflo_c_parser_extensions.include.g \
-	coflo_c_parser_preprocessor.include.g
+	coflo_c_parser_preprocessor.include.g \
+	coflo_c_parser_statements.include.g \
+	coflo_c_parser_terminals.include.g
 
 noinst_LIBRARIES = libparsers.a 
 libparsers_a_SOURCES = ASTNode.cpp ASTNode.h \
@@ -50,11 +52,7 @@ libparsers_a_SOURCES = ASTNode.cpp ASTNode.h \
 # Explicitly record dependencies of coflo_c_parser.dparser.g.
 # @todo It'd be better if we could make this automatic, but I haven't been able to get
 # it to work and simultaneously have Automake not complain about it being GNU make specific.
-$(srcdir)/coflo_c_parser.cpp: \
-	$(srcdir)/coflo_c_parser_expressions.include.g \
-	$(srcdir)/coflo_c_parser_terminals.include.g \
-	$(srcdir)/coflo_c_parser_extensions.include.g \
-	$(srcdir)/coflo_c_parser_preprocessor.include.g
+$(srcdir)/coflo_c_parser.cpp: $(COFLOCPARSER_SRC:%.g=$(srcdir)/%.g)
 	
 libparsers_a_CPPFLAGS = -I $(top_srcdir)/src $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) $(AM_CPPFLAGS)
