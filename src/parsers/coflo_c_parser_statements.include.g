@@ -30,9 +30,9 @@
 
 labeled_statement
 	: identifier ':' statement
-{
+		{
 			std::cout << "LABEL: " << M_TO_STR($n0) << std::endl;
-}
+		}
 	| CASE constant_expression ':' statement
 	| DEFAULT ':' statement
 	;
@@ -43,12 +43,12 @@ compound_statement
     		/* Return to the previous scope we were in before we entered the one created by the new_scope rule. */
     		${scope} = enter_D_Scope(${scope}, $n0.scope);
     	]
-{
+    	{
     		//std::cout << "Compound statement pre-commit scope: " << std::endl;
 			//$g->m_the_parser->PrintScope(${scope});
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
-}
+    	}
     ;
     
 block_item
@@ -75,10 +75,10 @@ iteration_statement
     		/* Return to the previous scope we were in before we entered the one created by the new_scope rule. */
     		${scope} = enter_D_Scope(${scope}, $n0.scope);
     	]
-{
+   		{
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
-}
+    	}
 	;
 
 jump_statement

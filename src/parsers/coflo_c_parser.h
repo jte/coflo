@@ -65,7 +65,14 @@ M_DECLARE_AST_NODE(typedef_name, ASTNode);
 M_DECLARE_AST_LEAF_NODE_ENUM(built_in_type, VOID, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, SIGNED, UNSIGNED);
 ///@}
 
-M_DECLARE_AST_NODE_ENUM(expression, void, UNARY, BINARY, FUNCTION_CALL, CAST, SIZEOF_EXPR, SIZEOF_TYPE);
+M_DECLARE_AST_LEAF_NODE_ENUM(unary_operator, PRE_INC, PRE_DEC, POST_INC, POST_DEC, SIZEOF, ARRAY_SUBSCRIPT);
+M_DECLARE_AST_LEAF_NODE_ENUM(assignment_operator, BASIC_ASSIGNMENT);
+M_DECLARE_AST_LEAF_NODE_ENUM(binary_operator, ADD, SUB, MUL, DIV, MOD,
+		BITWISE_AND, BITWISE_OR, BITWISE_XOR,
+		LOGICAL_AND, LOGICAL_OR,
+		LSHIFT, RSHIFT,
+		LESSTHAN, GREATERTHAN, LESSEQ, GREATEREQ, EQUAL, NOT_EQUAL);
+M_DECLARE_AST_LEAF_NODE_ENUM(expression, UNARY, BINARY, TERNARY, COMMA, ASSIGNMENT, FUNCTION_CALL, CAST, SIZEOF_EXPR, SIZEOF_TYPE);
 M_DECLARE_AST_NODE_ENUM(statement, void, IF, SWITCH, WHILE, FOR, DO);
 
 /**
@@ -83,7 +90,28 @@ M_DECLARE_AST_NODE(declarator, ASTNode);
 
 M_DECLARE_AST_NODE(pointer, ASTNode);
 
+M_DECLARE_AST_NODE(literals, ASTNode);
+M_DECLARE_DERIVED_AST_NODE(literal_integer, literals);
+M_DECLARE_DERIVED_AST_NODE(literal_float, literals);
+M_DECLARE_DERIVED_AST_NODE(literal_character, literals);
+M_DECLARE_DERIVED_AST_NODE(literal_string, literals);
 
+/// @name Constructor helper macros.
+///@{
+
+/// Binary operators
+#define M_NEW_AST_BINOP(op_enum, sys_parse_node) \
+	M_NEW_AST_LEAF_NODE_ENUM(binary_operator, op_enum, sys_parse_node)
+
+/// Unary operators
+#define M_NEW_AST_UNOP(op_enum, sys_parse_node) \
+	M_NEW_AST_LEAF_NODE_ENUM(unary_operator, op_enum, sys_parse_node)
+
+/// Assignment operators
+#define M_NEW_AST_ASSIGN(op_enum, sys_parse_node) \
+	M_NEW_AST_LEAF_NODE_ENUM(assignment_operator, op_enum, sys_parse_node)
+
+///@}
 
 struct VariableDeclInfo : public M_AST_NODE_CLASSNAME(declaration)
 {
@@ -130,9 +158,7 @@ public:
 	virtual ~coflo_c_parser_ParseNode_User() {};
 
 	DeclaratorType m_decltype;
-	long m_int;
-	std::string *m_str;
-	Location *m_location;
+
 	ASTNodeBase *m_ast_node;
 
 	coflo_c_parser_ParseNode_User& operator=(ASTNodeBase *ast_node) { m_ast_node = ast_node; return *this; };

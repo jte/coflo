@@ -41,7 +41,7 @@ class Function : boost::noncopyable
 {
 public:
 	/**
-	 * Craete a new Function given the TranslationUnit it is defined in and the Function's identifier.
+	 * Create a new Function given the TranslationUnit it is defined in and the Function's identifier.
 	 *
 	 * @param parent_tu
 	 * @param m_function_id

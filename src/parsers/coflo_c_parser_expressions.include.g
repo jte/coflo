@@ -28,8 +28,12 @@ binary_operator_member_access
 	;
 
 unary_postfix_inc_dec_operator
-	: '++' $unary_op_left 1099
-	| '--' $unary_op_left 1099
+	: '++' $unary_op_left 1099 { $$ = M_NEW_AST_UNOP(POST_INC, $n0); }
+	| '--' $unary_op_left 1099 { $$ = M_NEW_AST_UNOP(POST_DEC, $n0); }
+	;
+	
+sizeof
+	: SIZEOF { $$ = M_NEW_AST_UNOP(SIZEOF, $n0); }
 	;
 
 /**
@@ -39,16 +43,24 @@ unary_postfix_inc_dec_operator
  */
 basic_binary_operator
 	: /*('.'|'->') $binary_op_left 1099
-	|*/ ('*'|'/'|'%') $binary_op_left 1096
-	| ('+'|'-') $binary_op_left 1095
-	| ('<<'|'>>') $binary_op_left 1094
-	| ('<'|'>'|'<='|'>=') $binary_op_left 1093
-	| ('==' | '!=') $binary_op_left 1092
-	| '&' $binary_op_left 1091
-	| '^' $binary_op_left 1090
-	| '|' $binary_op_left 1089
-	| '&&' $binary_op_left 1088
-	| '||' $binary_op_left 1087
+	|*/ '*' $binary_op_left 1096 { $$ = M_NEW_AST_BINOP(MUL, $n0); }
+	| '/' $binary_op_left 1096 { $$ = M_NEW_AST_BINOP(DIV, $n0); }
+	| '%' $binary_op_left 1096 { $$ = M_NEW_AST_BINOP(MOD, $n0); }
+	| '+' $binary_op_left 1095 { $$ = M_NEW_AST_BINOP(ADD, $n0); }
+	| '-' $binary_op_left 1095 { $$ = M_NEW_AST_BINOP(SUB, $n0); }
+	| '<<' $binary_op_left 1094 { $$ = M_NEW_AST_BINOP(LSHIFT, $n0); }
+	| '>>' $binary_op_left 1094 { $$ = M_NEW_AST_BINOP(RSHIFT, $n0); }
+	| '<' $binary_op_left 1093 { $$ = M_NEW_AST_BINOP(LESSTHAN, $n0); }
+	| '>' $binary_op_left 1093 { $$ = M_NEW_AST_BINOP(GREATERTHAN, $n0); }
+	| '<=' $binary_op_left 1093 { $$ = M_NEW_AST_BINOP(LESSEQ, $n0); }
+	| '>=' $binary_op_left 1093 { $$ = M_NEW_AST_BINOP(GREATEREQ, $n0); }
+	| '==' $binary_op_left 1092 { $$ = M_NEW_AST_BINOP(EQUAL, $n0); }
+	| '!=' $binary_op_left 1092 { $$ = M_NEW_AST_BINOP(NOT_EQUAL, $n0); }
+	| '&' $binary_op_left 1091 { $$ = M_NEW_AST_BINOP(BITWISE_AND, $n0); }
+	| '^' $binary_op_left 1090 { $$ = M_NEW_AST_BINOP(BITWISE_XOR, $n0); }
+	| '|' $binary_op_left 1089 { $$ = M_NEW_AST_BINOP(BITWISE_OR, $n0); }
+	| '&&' $binary_op_left 1088 { $$ = M_NEW_AST_BINOP(LOGICAL_AND, $n0); }
+	| '||' $binary_op_left 1087 { $$ = M_NEW_AST_BINOP(LOGICAL_OR, $n0); }
 	//| ('='|'+='|'-='|'*='|'/='|'%='|'<<='|'>>='|'&='|'^='|'|=') $binary_op_right 1085
 	;
 
@@ -57,8 +69,8 @@ comma_operator
 	;
 	
 unary_prefix_inc_dec_operator
-	: '++' $unary_op_right 1098
-	| '--' $unary_op_right 1098 
+	: '++' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(PRE_INC, $n0); }
+	| '--' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(PRE_DEC, $n0); }
 	;
 
 unary_prefix_operator
@@ -72,6 +84,10 @@ unary_postfix_function_call_operator
 	
 unary_postfix_array_subscript_operator
 	: '[' expression ']' $unary_op_left 1099
+		{
+			$$ = M_NEW_AST_UNOP(ARRAY_SUBSCRIPT, $n0);
+			$$ += $1;
+		}
 	; 
 
 prefix_ops
@@ -95,125 +111,140 @@ bitfield_colon
 primary_expression
 	: LITERAL_INTEGER
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_integer, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_HEX
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_integer, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_OCTAL
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_integer, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	| LITERAL_FLOATING_POINT
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_float, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	| concatenated_literal_strings
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	| LITERAL_CHAR
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_character, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	| identifier
 		{
-			$$.m_str = new M_TO_STR($n0);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	/* Parenthesized expression. */
 	| '(' expression ')' $left 1101
 		{
-			M_PROPAGATE_PTR($1,$$,m_str);
-			*($$.m_str) = "P(" + *($$.m_str) + ")"; 
+			M_PROPAGATE_AST_NODE($$, $1); 
 		}
 	;
 
 concatenated_literal_strings
 	: LITERAL_STRING+
 		{
-			$$.m_str = new M_TO_STR($n0);
+			$$ = M_NEW_AST_NODE(literal_string, $n0);
+			//$$.m_str = new M_TO_STR($n0);
 		}
 	;
 
 postfix_expression
 	: primary_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	/* Array subscripting. */
 	| postfix_expression unary_postfix_array_subscript_operator $unary_left 1099
 		{
-			$$.m_str = new std::string;
-			*($$.m_str) = *($0.m_str) + "[" + M_TO_STR($n1) + "]";
+			//$$.m_str = new std::string;
+			//*($$.m_str) = *($0.m_str) + "[" + M_TO_STR($n1) + "]";
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n1);
+			$$ += $0;
 		}
 	/* Function call */
 	| postfix_expression unary_postfix_function_call_operator $unary_left 1099
 		{
-			$$.m_str = new std::string("FC");
+			//$$.m_str = new std::string("FC");
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, FUNCTION_CALL, $n1);
+			$$ += $0;
 		}
 	| postfix_expression binary_operator_member_access identifier $unary_left 1099
 		{
-			$$.m_str = new std::string;
-			*($$.m_str) = "(" + *($0.m_str) + M_TO_STR($n1) + M_TO_STR($n2) + ")"; 
-			
+			//$$.m_str = new std::string;
+			//*($$.m_str) = "(" + *($0.m_str) + M_TO_STR($n1) + M_TO_STR($n2) + ")"; 
+			$$ = $1;
+			$$ += $0;
+			$$ += $2;
 		}
 	| postfix_expression unary_postfix_inc_dec_operator $unary_left 1099
 		{
-			$$.m_str = new std::string("UPF");
+			//$$.m_str = new std::string("UPF");
+			$$ = $1;
+			$$ += $0;
 		}
 	/* Compound literals. */
 	| '(' type_name ')' '{' initializer (',' initializer)* ','? '}' $unary_left 1099
 		{
-			$$.m_str = new std::string("M1");
+			//$$.m_str = new std::string("M1");
+			$$ = $1;
+			/// @todo
 		}
 	;
 
 argument_expression_list
 	: assignment_expression (',' assignment_expression)*
+		{
+			$$ = M_NEW_AST_NODE(nil, $n0);
+			M_APPEND_AST_LIST($$, $0, $n1);
+		}
 	;
 
 unary_expression
 	: postfix_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0); 
 		}
 	| unary_prefix_inc_dec_operator unary_expression $unary_right 1098
 		{
-			$$.m_str = new std::string;
-			*($$.m_str) = "(" + M_TO_STR($n0) + *($1.m_str) + ")";
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			$$ += $1;
 		}
 	| unary_prefix_operator cast_expression $unary_right 1098
 		{
-			$$.m_str = new std::string("M1");
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			$$ += $1;
 		}
-	| SIZEOF unary_expression $unary_op_right 1098
+	| sizeof unary_expression $unary_op_right 1098
 		{
-			$$.m_str = new std::string("SIZEOF ");
-			*($$.m_str) += *($1.m_str);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, SIZEOF_EXPR, $n0);
+			$$ += $1;
 		}
-	| SIZEOF '(' type_name ')' $unary_op_right 1098
+	| sizeof '(' type_name ')' $unary_op_right 1098
 		{
-			$$.m_str = new std::string("SIZEOF ");
-			*($$.m_str) += "TN1"; //*($2.m_str);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, SIZEOF_TYPE, $n0);
+			$$ += $2;
 		}
 	;
 
 cast_expression
 	: unary_expression
 		{
-			if($0.m_str != NULL)
-			{
-				M_PROPAGATE_PTR($0,$$,m_str);
-			}
-			else
-			{
-				$$.m_str = new std::string("M1");
-			}
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	| '(' type_name ')' cast_expression $unary_op_right 1098
 		{
-			$$.m_str = new std::string("CAST");
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, CAST, $n0);
+			$$ += $1;
+			$$ += $3;
 		}
 	; 
 
@@ -226,13 +257,13 @@ cast_expression
 binary_expression
 	: /*primary_expression*/ cast_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	| binary_expression basic_binary_operator binary_expression
 		{
-			$$.m_str = new std::string;
-			*($$.m_str) = "(" + *($0.m_str) + ") " + M_TO_STR($n1) + " (" + *($2.m_str) + ")";
-			std::cout << "BINARY EXPRESSION: (" << *($$.m_str) << ")" << std::endl;  
+			$$ = $1;
+			$$ += $0;
+			$$ += $2;  
 		}
 	/* Experimental *************************/
 //	| binary_expression '?' expression ':' binary_expression $right 1086
@@ -276,35 +307,34 @@ binary_expression
 //		}
 	| extension_gcc_statements_within_expressions
 		{
-			$$.m_str = new std::string("M1");
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	;
 
 conditional_expression
 	: binary_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	| binary_expression '?' expression ':' conditional_expression $right 1086
-//		[
-//			std::cout << "TERNARY: " << M_TO_STR($n0) << ", " << M_TO_STR($n2) << "," << M_TO_STR($n4) << std::endl;
-//		]
 		{
-			$$.m_str = new std::string;
-			*($$.m_str) = "(" + *($0.m_str) + "), (" + M_TO_STR($n2) + "), (" + *($4.m_str) + ")";
-			std::cout << "TERNARY EXPRESSION: (" << *($$.m_str) << ")" << std::endl;
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, TERNARY, $n1);
+			$$ += $0;
+			$$ += $2;
+			$$ += $4;
 		}
 	;
 
 assignment_expression
 	: /*binary_expression*/ conditional_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	| unary_expression assignment_operator assignment_expression
 		{
-			std::cout << "ASSIGNMENT: " << M_TO_STR($n0) << ", op=\"" << M_TO_STR($n1) << "\", " << M_TO_STR($n2) << std::endl;
-			M_PROPAGATE_PTR($0,$$,m_str);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, ASSIGNMENT, $n1);
+			$$ += $0;
+			$$ += $2;
 		}
 	;
 	
@@ -313,17 +343,21 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression (comma_operator assignment_expression)*
+	: assignment_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
-			//$$.m_str = new std::string("EX");
+			M_PROPAGATE_AST_NODE($$, $0);
+		}
+	| assignment_expression (comma_operator assignment_expression)*
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, ASSIGNMENT, $n0);
+			M_APPEND_AST_LIST($$, $0, $n1);
 		}
 	;
 	
 constant_expression
 	: conditional_expression
 		{
-			M_PROPAGATE_PTR($0,$$,m_str);
+			M_PROPAGATE_AST_NODE($$, $0);
 		}
 	;
 
