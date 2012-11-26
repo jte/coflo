@@ -61,7 +61,8 @@ compound_statement
     		${scope} = commit_D_Scope(${scope});
     		
     		/// @todo
-    		$$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0);
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, COMPOUND, $n0);
+    		M_APPEND_ALL_CHILD_ASTS($$, $n2);
     	}
     ;
     

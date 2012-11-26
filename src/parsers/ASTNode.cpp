@@ -63,7 +63,7 @@ std::string indent(int level)
 
 }
 
-std::string ASTNodeBase::asString(int indent_level) const
+std::string ASTNodeBase::asString() const
 {
 	std::string retval;
 
@@ -77,39 +77,43 @@ std::string ASTNodeBase::asStringTree(int indent_level) const
 	if(m_children.empty())
 	{
 		// No children, just return this ASTNode as a plain string.
-		return asString(indent_level);
+		return indent(indent_level) + asString() + "\n";
 	}
 	else
 	{
 		// Start with a paren and the string.
-		std::string retval = "(" + asString();
+		std::string retval = indent(indent_level) + "( " + asString() + "\n";
 		indent_level++;
 		// Now append all the children.
 		BOOST_FOREACH(const ASTNodeBase *c, m_children)
 		{
-			retval += " " + c->asStringTree(indent_level);
+			retval += c->asStringTree(indent_level);
 		}
 		indent_level--;
-		retval += ")";
+		retval += indent(indent_level) + ")\n";
 
 		return retval;
 	}
 }
 
 
-std::ostream& ASTNodeBase::InsertionHelper(std::ostream& os) const
+std::ostream& ASTNodeBase::InsertionHelper(std::ostream& os, long indent_level) const
 {
 	if(true /** @todo stream is in "parens AST representation" mode */)
 	{
 		if(m_children.empty())
 		{
 			// No children, just insert this node's info.
-			os << asString();
+			os << indent(indent_level) << asString();
 		}
 		else
 		{
 			// Stream out this node and all of its children.
-			os << "(" << asStringTree() << ")";
+			os << indent(indent_level) << "(\n";
+			indent_level++;
+			os << asStringTree(indent_level);
+			indent_level--;
+			os << indent(indent_level) << ")\n";
 		}
 	}
 
@@ -139,12 +143,13 @@ void ASTNodeList::Append(const ASTNodeList *nl)
 	m_ast_node_list.insert(m_ast_node_list.end(), nl->m_ast_node_list.begin(), nl->m_ast_node_list.end());
 }
 
-std::ostream& ASTNodeList::InsertionHelper(std::ostream& os) const
+std::ostream& ASTNodeList::InsertionHelper(std::ostream& os, long indent_level) const
 {
 	const ASTNodeBase *c;
 
 	if(!m_ast_node_list.empty())
 	{
+		os << "<<<LIST>>>" << std::endl;
 		BOOST_FOREACH(c, m_ast_node_list)
 		{
 			os << " " << *c;
