@@ -123,6 +123,8 @@ translation_unit_component
 	}
 	| function_definition
 		{
+			std::cout << "Found function definition: \n" << *($0.m_ast_node) << std::endl;
+			if(0) {
 			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
 			/* Find the declarator. */
 			D_ParseNode *decl;
@@ -147,9 +149,12 @@ translation_unit_component
     		{
     			std::cout << "ERROR: CAN'T FIND DECLARATOR" << std::endl;
     		}
+    		}
 		}
 	| declaration
 		{
+			std::cout << "Found declaration: \n" << *($0.m_ast_node) << std::endl;
+			if(0) {
 			if(d_find_in_tree(&$n0, ${nterm function_declarator}))
     		{
     			/* There was a function declarator in the declaration tree.
@@ -170,6 +175,7 @@ translation_unit_component
     		{
     			std::cout << "Found declaration: " << *($0.m_ast_node) << std::endl;
     		}
+    		}
 		}
     ;
 
@@ -185,6 +191,10 @@ new_scope:
 function_definition
 	/* This is ANSI */
     : function_definition_prefix compound_statement
+    	{
+    		$$ = $0;
+    		$$ += $1;
+    	}
     /* This is K&R */
     | function_definition_prefix declaration+ compound_statement
     ;
@@ -201,6 +211,10 @@ function_definition_prefix
     		}
     		if(rej) ${reject};
 		]
+		{
+			$$ = $0;
+			$$ += $1;
+		}
 	;
 	
 declaration
@@ -352,11 +366,15 @@ struct_or_union_specifier
 		{
 			std::cout << "Found struct or union declaration at " << Location($n0.start_loc) << std::endl;
 			$$ = $0;
+			$$ += $2;
+			// Note that the optional identifier is appended last.
+			M_APPEND_OPTIONAL_CHILD_AST($$, $n1);
 		}
 	| struct_or_union identifier
 		{
 			std::cout << "Found struct type specifier at " << M_LOC_OUT($n0) << std::endl;
 			$$ = $0;
+			$$ += $1;
 		}
     ;
 
@@ -368,17 +386,36 @@ struct_declaration_block
 		]
 		{
 			${scope} = commit_D_Scope(${scope});
+			
+			$$ = M_NEW_AST_NODE_I(nil);
+			M_APPEND_ALL_CHILD_ASTS($$, $n2); 
 		}
     ;
     
 struct_declaration
 	: (type_specifier | type_qualifier)+ struct_declarator (',' struct_declarator)* ';'
+		{
+			$$ = M_NEW_AST_NODE_I(nil);
+			ASTNode_nil *list = M_NEW_AST_NODE_I(nil);
+			M_APPEND_ALL_CHILD_ASTS(*list, $n0);
+			$$ += list;
+			ASTNode_nil *list2 = M_NEW_AST_NODE_I(nil);
+			*list2 += $1.m_ast_node;
+			//M_APPEND_AST_LIST(*list2, $1, $n2);
+			M_APPEND_PARENTHESIZED_AST_LIST(*list2, $n2);
+			$$ += list2;
+		}
 	| anonymous_struct_or_union_struct_declaration ';'
 	;
 
 struct_declarator
-	: declarator
+	: declarator { M_PROPAGATE_AST_NODE($$, $0); }
 	| declarator? bitfield_colon constant_expression
+		{
+			$$ = $1;
+			$$ += $2;
+			M_APPEND_OPTIONAL_CHILD_AST($$, $n0);
+		}
     ;
 
 /**
@@ -410,63 +447,7 @@ function_specifier
 	| extension_function_specifier { $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
     ;
     
-extension_function_specifier
-	: extension_gcc_function_attribute_specifier 
-	| PRAGMA_UNDERSCORE '(' LITERAL_STRING ')'
-    ;
-    
-extension_gcc_function_attribute_specifier
-	: INLINE_ANSI_C89
-	| GCC_ATTRIBUTE '(' '(' extension_gcc_function_attribute (',' extension_gcc_function_attribute)* ')' ')'
-    ;
-    
-extension_gcc_attribute
-	: GCC_ATTRIBUTE '(' '(' extension_gcc_function_attribute (',' extension_gcc_function_attribute)* ')' ')'
-	;
-    
-extension_gcc_format_arg
-	: '__printf__'
-	| '__scanf__'
-	| LITERAL_INTEGER
-    ;
-    
-extension_gcc_function_attribute
-	: 'alias'
-	| '__always_inline__'
-	| '__cdecl__'
-	| 'deprecated'
-	| 'dllimport'
-	| '__format__' '(' extension_gcc_format_arg (',' extension_gcc_format_arg)* ')'
-	| '__format_arg__' '(' LITERAL_INTEGER ')'
-	| '__warning__' '(' LITERAL_STRING ')'
-	| 'noreturn'
-	| '__noreturn__'
-	| 'warn_unused_result'
-	| extension_gcc_function_parameter_decl_attribute
-    ;
-    
-extension_gcc_function_parameter_decl_attribute
-	: 'unused'
-	;
 
-extension_gcc_typeof
-	: GCC_TYPEOF '(' type_name | expression ')'
-		{
-			std::cout << "GCC_TYPEOF" << std::endl;
-		}
-	;
-	
-/**
- * This class of specifiers are strictly for extensions which apply to all declarations.
- * If a specifier applies only to a function, it should not go in here.
- */  
-extension_specifier
-	: GCC_EXTENSION
-	;
-    
-extension_gcc_asm
-	: ASM '(' LITERAL_STRING+ ')'
-    ;
     
 init_declarator_list
     : init_declarator (',' init_declarator)*
@@ -605,6 +586,10 @@ direct_abstract_declarator
 initializer
 	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }
 	| '{' initializer (',' initializer)* ','? '}'
+	;
+	
+_
+	: { $$ = M_NEW_AST_NODE_I(nil); }
 	;
 
 //

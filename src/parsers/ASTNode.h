@@ -52,7 +52,7 @@ public:
 	void Append(const ASTNodeBase *n);
 	void Append(const ASTNodeList *nl);
 
-	std::ostream& InsertionHelper(std::ostream &os) const;
+	std::ostream& InsertionHelper(std::ostream &os, long indent_level) const;
 
 	/**
 	 * Returns the empty/not-empty status of this ASTNodeList.
@@ -74,7 +74,7 @@ private:
 
 inline std::ostream &operator<<(std::ostream &os, const ASTNodeList& n)
 {
-	return n.InsertionHelper(os);
+	return n.InsertionHelper(os, 0);
 };
 
 /**
@@ -132,20 +132,15 @@ public:
 		m_token(other.m_token),
 		m_children(other.m_children)
 	{
-		if(&other == this)
-		{
-			// Trying to copy ourself.
-			BOOST_THROW_EXCEPTION(ast_exception_assignment_to_self());
-		}
 	};
 	virtual ~ASTNodeBase();
 
-	virtual std::string asString(int indent_level = 0) const;
+	virtual std::string asString() const;
 	virtual std::string asStringTree(int indent_level = 0) const;
 
 	void AddChild(const ASTNodeBase *child) { m_children.Append(child); };
 
-	virtual std::ostream& InsertionHelper(std::ostream &os) const;
+	virtual std::ostream& InsertionHelper(std::ostream &os, long indent_level) const;
 
 	/**
 	 * @name Operators.
@@ -194,7 +189,9 @@ public:
 	template <typename Type>
 	bool isType() const { return NULL != dynamic_cast<const Type*>(this); };
 
-	/*
+	/**
+	 * Returns an ASTNodeList of all direct child nodes of a specific Type.
+	 *
 	 * @return
 	 */
 	template <typename Type>
@@ -229,7 +226,7 @@ public:
 
 inline std::ostream &operator<<(std::ostream &os, const ASTNodeBase& n)
 {
-	return n.InsertionHelper(os);
+	return n.InsertionHelper(os, 0);
 };
 
 
@@ -261,6 +258,8 @@ public:
 
 	virtual this_t* GetTypedThis() { return this; };
 	virtual std::string GetNodeTypeName() const { return NameStruct::GetName(); };
+
+	virtual std::string asString() const { return m_value.asString() + "<node_type=" + GetNodeTypeName() + ">";  };
 
 	/// The value of this leaf node.
 	value_type m_value;
@@ -432,6 +431,11 @@ public:
 	} \
 	} while(0)
 
+/**
+ * Append an optional node to a given node.  The rule should look like this:
+ * production: symbol1 symbol2? symbol3
+ *
+ */
 #define M_APPEND_OPTIONAL_CHILD_AST(usr_node_to_append_to, parent_sys_node) \
 	M_APPEND_ALL_CHILD_ASTS(usr_node_to_append_to, parent_sys_node)
 
@@ -483,8 +487,8 @@ public:
 #define M_APPEND_AST_LIST(usr_node_to_append_to, first_element_usernode, optional_element_sysnode) \
 	do { \
 		/* Append the first element. */ \
-		usr_node_to_append_to += first_element_usernode; \
-		M_APPEND_PARENTHESIZED_AST_LIST(usr_node_to_append_to, optional_element_sysnode);\
+		(usr_node_to_append_to) += first_element_usernode; \
+		M_APPEND_PARENTHESIZED_AST_LIST((usr_node_to_append_to), optional_element_sysnode);\
 	} while(0)
 
 

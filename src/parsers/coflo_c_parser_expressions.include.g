@@ -101,7 +101,7 @@ unary_postfix_array_subscript_operator
 	; 
 
 bitfield_colon
-	: ':' $binary_op_right 1085
+	: ':' $binary_op_right 1085 { $$ = M_NEW_AST_BINOP(BITFIELD_COLON, $n0); }
 	;
 	
 primary_expression
@@ -262,17 +262,15 @@ conditional_expression
 		}
 	| binary_expression '?' expression ':' conditional_expression $right 1086
 		{
-			std::cout << "Ternary Start" << std::endl;
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, TERNARY, $n1);
 			$$ += $0;
 			$$ += $2;
 			$$ += $4;
-			std::cout << "Ternary End" << std::endl;
 		}
 	;
 
 assignment_expression
-	: /*binary_expression*/ conditional_expression
+	: conditional_expression
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
 		}
@@ -316,12 +314,4 @@ constant_expression
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
 		}
-	;
-
-/**
- * Extensions
- */
- 
-extension_gcc_statements_within_expressions
-	: GCC_EXTENSION? '(' compound_statement ')'
 	;
