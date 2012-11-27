@@ -41,15 +41,16 @@ class ASTNodeBase;
 class ASTNodeList
 {
 public:
-	typedef std::vector<const ASTNodeBase*> underlying_storage_t;
+	typedef std::vector<ASTNodeBase*> underlying_storage_t;
 	typedef underlying_storage_t::iterator iterator;
 	typedef underlying_storage_t::const_iterator const_iterator;
 
 public:
 	ASTNodeList();
+	ASTNodeList(const ASTNodeList &other);
 	~ASTNodeList();
 
-	void Append(const ASTNodeBase *n);
+	void Append(ASTNodeBase *n);
 	void Append(const ASTNodeList *nl);
 
 	std::ostream& InsertionHelper(std::ostream &os, long indent_level) const;
@@ -138,7 +139,7 @@ public:
 	virtual std::string asString() const;
 	virtual std::string asStringTree(int indent_level = 0) const;
 
-	void AddChild(const ASTNodeBase *child) { m_children.Append(child); };
+	void AddChild(ASTNodeBase *child) { m_children.Append(child); };
 
 	virtual std::ostream& InsertionHelper(std::ostream &os, long indent_level) const;
 
@@ -170,7 +171,7 @@ public:
 	 * @param rhs
 	 * @return
 	 */
-	ASTNodeBase& operator+=(const ASTNodeBase *rhs)
+	ASTNodeBase& operator+=(ASTNodeBase *rhs)
 	{
 		if(rhs == this)
 		{
@@ -189,6 +190,12 @@ public:
 	template <typename Type>
 	bool isType() const { return NULL != dynamic_cast<const Type*>(this); };
 
+	/// @name AST Query Routines.
+	///@{
+
+	ASTNodeList GetAllChildren();
+
+
 	/**
 	 * Returns an ASTNodeList of all direct child nodes of a specific Type.
 	 *
@@ -199,7 +206,7 @@ public:
 	{
 		ASTNodeList retval;
 
-		BOOST_FOREACH(const ASTNodeBase *c, m_children)
+		BOOST_FOREACH(ASTNodeBase *c, m_children)
 		{
 			if(c->isType<Type>())
 			{
@@ -209,6 +216,32 @@ public:
 
 		return retval;
 	};
+
+	template <typename Type>
+	ASTNodeList GetAllChildrenOfTypeAndValue(typename Type::value_type value)
+	{
+		ASTNodeList retval;
+
+		BOOST_FOREACH(ASTNodeBase *c, m_children)
+		{
+			if(c->isType<Type>())
+			{
+				// Type matches, does the contained value?
+				Type *p = dynamic_cast<Type>(c);
+				if(p->GetValue() == value)
+				{
+					// Yes.
+					retval.Append(c);
+				}
+			}
+		}
+
+		return retval;
+	}
+
+	ASTNodeList depth_first_search();
+
+	///@}
 
 private:
 
@@ -237,17 +270,17 @@ struct ASTLeafNode_default_namestruct { static const char *GetName() { return "U
  *
  * @tparam T The value type which this leaf node will contain.
  */
-template <typename T, typename NameStruct = ASTLeafNode_default_namestruct>
-class ASTLeafNode : public ASTNodeBase
+template <typename T, typename NameStruct = ASTLeafNode_default_namestruct, typename BaseClass = ASTNodeBase>
+class ASTLeafNode : public BaseClass
 {
 public:
 	/// Member typedef defining the value type of this node.
 	typedef T value_type;
-	typedef ASTLeafNode<T, NameStruct> this_t;
+	typedef ASTLeafNode<T, NameStruct, BaseClass> this_t;
 
 public:
 	ASTLeafNode() {};
-	ASTLeafNode(T value, const Token &token) : ASTNodeBase(token) { m_value = value; };
+	ASTLeafNode(T value, const Token &token) : BaseClass(token) { m_value = value; };
 	virtual ~ASTLeafNode() {};
 
 	virtual std::ostream& InsertionHelper(std::ostream &os) const
@@ -260,6 +293,10 @@ public:
 	virtual std::string GetNodeTypeName() const { return NameStruct::GetName(); };
 
 	virtual std::string asString() const { return m_value.asString() + "<node_type=" + GetNodeTypeName() + ">";  };
+
+	value_type GetValue() const { return m_value; };
+
+private:
 
 	/// The value of this leaf node.
 	value_type m_value;
@@ -327,7 +364,10 @@ public:
 		virtual std::string GetNodeTypeName() const { return std::string( #new_class ); }; \
 	};
 
-
+#define M_DECLARE_DERIVED_AST_NODE_ENUM(new_class, base_class, ...) \
+		DECLARE_ENUM_CLASS(ASTNode_##new_class##_enum_type, __VA_ARGS__); \
+			struct ASTNode_name_functor_##new_class { static const char *GetName() { return #new_class ; }; };\
+			typedef ASTLeafNode< ASTNode_##new_class##_enum_type, ASTNode_name_functor_##new_class, M_AST_NODE_CLASSNAME(base_class) > ASTNode_##new_class
 
 /**
  * Macro for declaring new ASTNode types with an enumerated value_type.
@@ -345,7 +385,7 @@ public:
 #define M_DECLARE_AST_LEAF_NODE_ENUM(new_class, ...) \
 	DECLARE_ENUM_CLASS(ASTNode_##new_class##_enum_type, __VA_ARGS__); \
 	struct ASTNode_name_functor_##new_class { static const char *GetName() { return #new_class ; }; };\
-	typedef ASTLeafNode< ASTNode_##new_class##_enum_type, ASTNode_name_functor_##new_class > ASTNode_##new_class
+	typedef ASTLeafNode< ASTNode_##new_class##_enum_type, ASTNode_name_functor_##new_class> ASTNode_##new_class
 
 /**
  * Macro for declaring new std::string ASTLeafNode<> types.

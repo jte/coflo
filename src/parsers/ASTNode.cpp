@@ -19,6 +19,7 @@
 
 #include "ASTNode.h"
 
+#include <stack>
 #include <boost/foreach.hpp>
 
 /*
@@ -96,6 +97,36 @@ std::string ASTNodeBase::asStringTree(int indent_level) const
 	}
 }
 
+ASTNodeList ASTNodeBase::GetAllChildren()
+{
+	ASTNodeList retval(m_children);
+	return retval;
+}
+
+ASTNodeList ASTNodeBase::depth_first_search()
+{
+	std::stack<ASTNodeBase*> node_stack;
+
+	// Prime the search by pushing this node onto the work stack.
+	node_stack.push(this);
+
+	while(!node_stack.empty())
+	{
+		ASTNodeList children;
+
+		// Visit the top node.
+		/// @todo
+
+		// Prepare to visit the children by pushing pointers to them on the stack.
+		children = node_stack.top()->GetAllChildren();
+		node_stack.pop();
+		BOOST_REVERSE_FOREACH(ASTNodeBase* p, children)
+		{
+			node_stack.push(p);
+		}
+	}
+}
+
 
 std::ostream& ASTNodeBase::InsertionHelper(std::ostream& os, long indent_level) const
 {
@@ -129,11 +160,15 @@ ASTNodeList::ASTNodeList()
 {
 }
 
+ASTNodeList::ASTNodeList(const ASTNodeList &other) : m_ast_node_list(other.m_ast_node_list)
+{
+}
+
 ASTNodeList::~ASTNodeList()
 {
 }
 
-void ASTNodeList::Append(const ASTNodeBase *n)
+void ASTNodeList::Append(ASTNodeBase *n)
 {
 	m_ast_node_list.push_back(n);
 }

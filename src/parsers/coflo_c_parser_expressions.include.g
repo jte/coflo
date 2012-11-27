@@ -155,7 +155,8 @@ postfix_expression
 	/* Array subscripting. */
 	| postfix_expression unary_postfix_array_subscript_operator $unary_left 1099
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n1);
+			//$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n1);
+			M_PROPAGATE_AST_NODE($$, $1);
 			$$ += $0;
 		}
 	/* Function call */
@@ -166,19 +167,18 @@ postfix_expression
 		}
 	| postfix_expression binary_operator_member_access identifier $unary_left 1099
 		{
-			$$ = $1;
+			M_PROPAGATE_AST_NODE($$, $1);
 			$$ += $0;
 			$$ += $2;
 		}
 	| postfix_expression unary_postfix_inc_dec_operator $unary_left 1099
 		{
-			$$ = $1;
+			M_PROPAGATE_AST_NODE($$, $1);
 			$$ += $0;
 		}
 	/* Compound literals. */
 	| '(' type_name ')' '{' initializer (',' initializer)* ','? '}' $unary_left 1099
 		{
-			//$$.m_str = new std::string("M1");
 			$$ = $1;
 			/// @todo
 		}
@@ -199,12 +199,14 @@ unary_expression
 		}
 	| unary_prefix_inc_dec_operator unary_expression $unary_right 1098
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			//$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
 		}
 	| unary_prefix_operator cast_expression $unary_right 1098
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			//$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
+			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
 		}
 	| sizeof unary_expression $unary_op_right 1098
@@ -239,7 +241,7 @@ cast_expression
  * with an "exit" to cast_expression.
  */
 binary_expression
-	: /*primary_expression*/ cast_expression
+	: cast_expression
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
 		}
@@ -276,7 +278,7 @@ assignment_expression
 		}
 	| unary_expression assignment_operator assignment_expression
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, ASSIGNMENT, $n1);
+			M_PROPAGATE_AST_NODE($$, $1);
 			$$ += $0;
 			$$ += $2;
 		}
