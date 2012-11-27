@@ -192,7 +192,7 @@ function_definition
 	/* This is ANSI */
     : function_definition_prefix compound_statement
     	{
-    		$$ = $0;
+    		M_PROPAGATE_AST_NODE($$, $0);
     		$$ += $1;
     	}
     /* This is K&R */
@@ -212,7 +212,7 @@ function_definition_prefix
     		if(rej) ${reject};
 		]
 		{
-			$$ = $0;
+			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
 		}
 	;
@@ -273,7 +273,7 @@ declaration
     			M_APPEND_ALL_CHILD_ASTS($$, $n0);
     		}
 
-       		std::cout << *($$.m_ast_node) << std::endl;
+       		//std::cout << *($$.m_ast_node) << std::endl;
        	}
     ;
 
@@ -290,19 +290,15 @@ decl_specs
 		{
     		// Append all the declaration specifiers.
     		$$ = M_NEW_AST_NODE_I(decl_specs);
-    		
     		M_APPEND_ALL_CHILD_ASTS($$, $n0);
-    		
-    		/// @TODO Print out the results.
-    		std::cout << *($$.m_ast_node) << std::endl;
     	}
 	;
 	
 decl_spec
-	: storage_class_specifier { $$ = $0; }
-	| type_specifier { $$ = $0; }
-	| type_qualifier { $$ = $0; }
-	| function_specifier { $$ = $0; }
+	: storage_class_specifier { M_PROPAGATE_AST_NODE($$, $0); }
+	| type_specifier { M_PROPAGATE_AST_NODE($$, $0); }
+	| type_qualifier { M_PROPAGATE_AST_NODE($$, $0); }
+	| function_specifier { M_PROPAGATE_AST_NODE($$, $0); }
 	;
 
 /* Per the C99 draft spec 6.7.1, at most one storage_class_specifier may be given in the decl_specs in a declaration */
@@ -460,14 +456,8 @@ init_declarator_list
 init_declarator
     : declarator ('=' initializer)?
     	{
-    		if($0.m_ast_node == NULL)
-    		{
-    			$$ = M_NEW_AST_NODE_I(nil);
-    		}
-    		else
-    		{
-    			$$ = $0;
-    		}
+   			$$ = $0;
+   			M_APPEND_PARENTHESIZED_AST_LIST($$, $n1);
     	}
 	;
 	
@@ -478,14 +468,16 @@ declarator
     	]
     	{
     		/* (pointer-to)? */
-    		$$ = M_NEW_AST_NODE(declarator, $n);
+    		$$ = M_NEW_AST_NODE_I(declarator);
+    		$$ += $1;
     	}
     ;
 
 pointer
 	: '*' ('*' | type_qualifier)*
 		{
-			$$ = M_NEW_AST_NODE(pointer, $n);
+			$$ = M_NEW_AST_NODE(pointer, $n0);
+			M_APPEND_ALL_CHILD_ASTS($$, $n1);
 		}
     ;
     
@@ -539,7 +531,7 @@ function_declarator
     		$$ = M_NEW_AST_NODE(decl_func, $n1);
     		$$ += $0;
     		// Append the AST tree describing the parameter types.
-    		M_APPEND_ALL_CHILD_ASTS($$, $n2);    		
+    		$$ += $2; //M_APPEND_ALL_CHILD_ASTS($$, $n2);    		
     	}
     | direct_declarator '(' ')'
     	[
@@ -547,6 +539,7 @@ function_declarator
     	]
     	{
     		$$ = M_NEW_AST_NODE(decl_func, $n1);
+    		$$ += $0;
     	}
 	;
 
@@ -561,6 +554,10 @@ parameter_type_list
 
 parameter_decl
     : decl_specs (declarator | abstract_declarator)? extension_gcc_attribute?
+    	{
+    		$$ = M_NEW_AST_NODE_I(nil);
+    		/// @todo
+    	}
 	;
 
 type_name

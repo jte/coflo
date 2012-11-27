@@ -226,9 +226,6 @@ LITERAL_FLOATING_POINT
 	;
 
 LITERAL_STRING : "L?\"(\\.|[^\"])*\""
-	[
-		//std::cout << "STRLIT: " << M_TO_STR($n0) << std::endl;
-	]
 	;
 
 LITERAL_CHAR

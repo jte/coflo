@@ -61,7 +61,7 @@ compound_statement
     		${scope} = commit_D_Scope(${scope});
     		
     		/// @todo
-    		$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, COMPOUND, $n0);
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(compound_statement, COMPOUND, $n0);
     		M_APPEND_ALL_CHILD_ASTS($$, $n2);
     	}
     ;
@@ -73,7 +73,10 @@ block_item
 
 expression_statement
 	: expression ';'
-		{ $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
+		{
+		 	/// @todo should we have an expression_statement?
+			M_PROPAGATE_AST_NODE($$, $0); 
+		}
 	| ';'
 		{ $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
 	;
@@ -81,20 +84,20 @@ expression_statement
 selection_statement
 	: IF '(' expression ')' statement //$right 100
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, IF, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, IF, $n0);
 			$$ += $2;
 			$$ += $4;
 		}
 	| IF '(' expression ')' statement ELSE statement //$right 101
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, IF, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, IF, $n0);
 			$$ += $2;
 			$$ += $4;
 			$$ += $6;
 		}
 	| SWITCH '(' expression ')' statement
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, SWITCH, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, SWITCH, $n0);
 			$$ += $2;
 			$$ += $4;
 		}
@@ -103,13 +106,13 @@ selection_statement
 iteration_statement
 	: WHILE '(' expression ')' statement
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, WHILE, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, WHILE, $n0);
 			$$ += $2;
 			$$ += $4;
 		}
 	| DO statement WHILE '(' expression ')' ';'
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, DO, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, DO, $n0);
 			$$ += $1;
 			$$ += $4;
 		}
@@ -122,7 +125,7 @@ iteration_statement
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
     		
-    		$$ = M_NEW_AST_LEAF_NODE_ENUM(statement, FOR, $n0);
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, FOR, $n0);
 			/// @todo
     	}
 	;
