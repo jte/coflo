@@ -402,6 +402,9 @@ struct_declaration
 			$$ += list2;
 		}
 	| anonymous_struct_or_union_struct_declaration ';'
+		{
+			$$ = $0;
+		}
 	;
 
 struct_declarator
@@ -419,6 +422,10 @@ struct_declarator
  */
 anonymous_struct_or_union_struct_declaration
 	: GCC_EXTENSION? struct_or_union_specifier
+		{
+			/// @todo?
+			$$ = $1;
+		}
     ;
 
 enum_specifier
@@ -497,7 +504,8 @@ direct_declarator
     		$$.m_decltype = $2.m_decltype;
     	]
     	{
-    		/* Possibly Pointer-to-function */
+    		/** @todo Possibly Pointer-to-function */
+    		$$ = $2;
     	}
     | array_declarator
     	{
