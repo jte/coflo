@@ -165,3 +165,7 @@ void ParserBaseClass::PrintSubtree(const D_ParseNode* start_node)
 
 }
 
+bool was_given(const D_ParseNode* nonterminal)
+{
+	return (d_get_number_of_children(const_cast<D_ParseNode*>(nonterminal)) != 0);
+}
