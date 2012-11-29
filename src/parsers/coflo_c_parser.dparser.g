@@ -90,6 +90,11 @@ translation_unit
 			// Commit the top-level scope.
 			${scope} = commit_D_Scope(${scope});
 
+			$$ = M_NEW_AST_NODE_I(nil);
+			M_APPEND_ALL_CHILD_ASTS($$, $n1);
+			
+			std::cout << "Translation unit AST: \n" << *($$.m_ast_node) << std::endl;
+			
 			std::cout << "Top-level scope: " << std::endl;
 			$g->m_the_parser->PrintScope(${scope});
 		}
@@ -120,10 +125,13 @@ translation_unit_component
 	: preprocessor_element
 	{
 		std::cout << "Preproc Element: " << M_TO_STR($n0) << std::endl;
+		$$ = $0;
 	}
 	| function_definition
 		{
-			std::cout << "Found function definition: \n" << *($0.m_ast_node) << std::endl;
+			//std::cout << "Found function definition: \n" << *($0.m_ast_node) << std::endl;
+			$$ = $0;
+			
 			if(0) {
 			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
 			/* Find the declarator. */
@@ -153,7 +161,9 @@ translation_unit_component
 		}
 	| declaration
 		{
-			std::cout << "Found declaration: \n" << *($0.m_ast_node) << std::endl;
+			//std::cout << "Found declaration: \n" << *($0.m_ast_node) << std::endl;
+			$$ = $0;
+			
 			if(0) {
 			if(d_find_in_tree(&$n0, ${nterm function_declarator}))
     		{
@@ -261,6 +271,9 @@ declaration
     			$$ = M_NEW_AST_NODE_I(decl_var);
     			// Add the decl spec children.
     			M_APPEND_ALL_CHILD_ASTS($$, $n0);
+    			
+    			M_APPEND_OPTIONAL_CHILD_AST($$, $n1);
+    			/// @todo
     		}
 
        		//std::cout << *($$.m_ast_node) << std::endl;
@@ -350,7 +363,7 @@ struct_or_union
 struct_or_union_specifier
 	: struct_or_union identifier? struct_declaration_block
 		{
-			std::cout << "Found struct or union declaration at " << Location($n0.start_loc) << std::endl;
+			//std::cout << "Found struct or union declaration at " << Location($n0.start_loc) << std::endl;
 			$$ = $0;
 			$$ += $2;
 			// Note that the optional identifier is appended last.
@@ -358,7 +371,7 @@ struct_or_union_specifier
 		}
 	| struct_or_union identifier
 		{
-			std::cout << "Found struct type specifier at " << M_LOC_OUT($n0) << std::endl;
+			//std::cout << "Found struct type specifier at " << M_LOC_OUT($n0) << std::endl;
 			$$ = $0;
 			$$ += $1;
 		}
@@ -460,9 +473,6 @@ init_declarator
 	
 declarator
     : pointer? direct_declarator
-    	[
-    		$$.m_decltype = $1.m_decltype;
-    	]
     	{
     		/* (pointer-to)? */
     		$$ = M_NEW_AST_NODE_I(declarator);
@@ -482,18 +492,12 @@ pointer
 direct_declarator
 	/* This is the single identifier being declared by this declarator. */
     : extension_gcc_attribute? identifier
-    	[
-    		$$.m_decltype = E_DECLTYPE_UNKNOWN;
-    	]
     	{
     		/* We found an identifier that is being declared. */
     		$$ = M_NEW_AST_LEAF_NODE_ID($n1);
     	}
     /* extension_gcc_attribute is for function pointer declarations. */
     | '(' extension_gcc_attribute? declarator ')'
-    	[
-    		$$.m_decltype = $2.m_decltype;
-    	]
     	{
     		/** @todo Possibly Pointer-to-function */
     		$$ = $2;
@@ -503,10 +507,10 @@ direct_declarator
     		M_PROPAGATE_AST_NODE($$,$0);
     	}
     | direct_declarator '('  identifier (',' identifier)* ')'
+    	{
+    		$$ = M_NEW_AST_NODE_I(nil);
+    	}
     | function_declarator
-    	[
-    		$$.m_decltype = $0.m_decltype;
-    	]
     	{
     		M_PROPAGATE_AST_NODE($$,$0);
     	}
@@ -523,19 +527,13 @@ array_declarator
 	
 function_declarator
 	: direct_declarator '(' parameter_type_list ')'
-    	[
-    		$$.m_decltype = E_DECLTYPE_FUNCTION;
-    	]
     	{
     		$$ = M_NEW_AST_NODE(decl_func, $n1);
     		$$ += $0;
     		// Append the AST tree describing the parameter types.
-    		$$ += $2; //M_APPEND_ALL_CHILD_ASTS($$, $n2);    		
+    		$$ += $2; 		
     	}
     | direct_declarator '(' ')'
-    	[
-    		$$.m_decltype = E_DECLTYPE_FUNCTION;
-    	]
     	{
     		$$ = M_NEW_AST_NODE(decl_func, $n1);
     		$$ += $0;
@@ -547,27 +545,42 @@ parameter_type_list
     	{
     		$$ = M_NEW_AST_NODE_I(nil);
      		M_APPEND_AST_LIST($$, $0, $n1);
-     		/// @todo
+     		/// @todo variadic
     	}
 	;
 
 parameter_decl
     : decl_specs (declarator | abstract_declarator)? extension_gcc_attribute?
     	{
-    		$$ = M_NEW_AST_NODE_I(nil);
+    		//$$ = M_NEW_AST_NODE_I(nil);
+    		$$ = $0;
     		/// @todo
     	}
 	;
 
 type_name
 	: (type_specifier | type_qualifier)+ abstract_declarator?
-//		{
-//			std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << *($0.m_ast_node) << std::endl;
-//		}
+		{
+			$$ = M_NEW_AST_NODE_I(nil);
+			M_APPEND_ALL_CHILD_ASTS($$, $n0);
+			/// @todo 
+		}
     ;
 
 abstract_declarator
-	: pointer? direct_abstract_declarator?
+	: pointer
+		{
+			$$ = $0;
+		}
+	| direct_abstract_declarator
+		{
+			$$ = $0;
+		}
+	| pointer direct_abstract_declarator
+		{
+			$$ = $0;
+			$$ += $1;
+		}
     ;
 
 direct_abstract_declarator
@@ -577,6 +590,9 @@ direct_abstract_declarator
 	| '[' assignment_expression ']'
 	| '[' '*' ']'
 	| '[' ']' )+
+		{
+			$$ = M_NEW_AST_NODE_I(nil);
+		}
 	;
 	
 initializer

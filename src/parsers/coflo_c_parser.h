@@ -178,7 +178,7 @@ public:
 	coflo_c_parser_ParseNode_User() : m_ast_node(NULL) {};
 	virtual ~coflo_c_parser_ParseNode_User() {};
 
-	DeclaratorType m_decltype;
+	//DeclaratorType m_decltype;
 
 	ASTNodeBase *m_ast_node;
 

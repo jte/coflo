@@ -56,7 +56,7 @@ std::string indent(int level)
 	while(level>0)
 	{
 		level--;
-		retval += " ";
+		retval += "\t";
 	}
 
 	return retval;
@@ -102,31 +102,6 @@ ASTNodeList ASTNodeBase::GetAllChildren()
 	ASTNodeList retval(m_children);
 	return retval;
 }
-
-ASTNodeList ASTNodeBase::depth_first_search()
-{
-	std::stack<ASTNodeBase*> node_stack;
-
-	// Prime the search by pushing this node onto the work stack.
-	node_stack.push(this);
-
-	while(!node_stack.empty())
-	{
-		ASTNodeList children;
-
-		// Visit the top node.
-		/// @todo
-
-		// Prepare to visit the children by pushing pointers to them on the stack.
-		children = node_stack.top()->GetAllChildren();
-		node_stack.pop();
-		BOOST_REVERSE_FOREACH(ASTNodeBase* p, children)
-		{
-			node_stack.push(p);
-		}
-	}
-}
-
 
 std::ostream& ASTNodeBase::InsertionHelper(std::ostream& os, long indent_level) const
 {
