@@ -84,14 +84,6 @@ unary_prefix_operator
 	| '&' $unary_op_right 1098 { $$ = M_NEW_AST_UNOP(ADDRESS_OF, $n0); }
 	;
 
-unary_postfix_function_call_operator
-	: '(' argument_expression_list? ')' $unary_op_left 1099 
-		{
-			$$ = M_NEW_AST_UNOP(FUNCTION_CALL, $n0);
-			/// @todo
-		}
-	;
-	
 unary_postfix_array_subscript_operator
 	: '[' expression ']' $unary_op_left 1099
 		{
@@ -159,12 +151,24 @@ postfix_expression
 			M_PROPAGATE_AST_NODE($$, $1);
 			$$ += $0;
 		}
-	/* Function call */
-	| postfix_expression unary_postfix_function_call_operator $unary_left 1099
+	/* Function call, no params. */
+	| postfix_expression '(' ')' $unary_left 1099
 		{
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, FUNCTION_CALL, $n1);
+			// Should contain the identifier of the function to be called.
 			$$ += $0;
+			/* No params. */
+			$$ += M_NEW_AST_NODE(nil, $n1);
 		}
+	| postfix_expression '(' argument_expression_list ')' $unary_left 1099
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, FUNCTION_CALL, $n1);
+			/* Should contain the identifier of the function to be called. */
+			$$ += $0;
+			/* The parameters. */
+			$$ += $2;
+		}
+	/* Member access. */
 	| postfix_expression binary_operator_member_access identifier $unary_left 1099
 		{
 			M_PROPAGATE_AST_NODE($$, $1);
@@ -187,7 +191,7 @@ postfix_expression
 argument_expression_list
 	: assignment_expression (',' assignment_expression)*
 		{
-			$$ = M_NEW_AST_NODE(nil, $n0);
+			$$ = M_NEW_AST_NODE_I(nil);
 			M_APPEND_AST_LIST($$, $0, $n1);
 		}
 	;
@@ -199,13 +203,11 @@ unary_expression
 		}
 	| unary_prefix_inc_dec_operator unary_expression $unary_right 1098
 		{
-			//$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
 			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
 		}
 	| unary_prefix_operator cast_expression $unary_right 1098
 		{
-			//$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, UNARY, $n0);
 			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
 		}
@@ -286,17 +288,16 @@ assignment_expression
 	
 assignment_operator
 	: '=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '+=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '-=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '*=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '/=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '%=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '<<=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '>>=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '&=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '^=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	| '|=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BASIC_ASSIGNMENT, $n0); }
-	
+	| '+=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(ADD_ASSIGNMENT, $n0); }
+	| '-=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(SUB_ASSIGNMENT, $n0); }
+	| '*=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(MUL_ASSIGNMENT, $n0); }
+	| '/=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(DIV_ASSIGNMENT, $n0); }
+	| '%=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(MOD_ASSIGNMENT, $n0); }
+	| '<<=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(LSHIFT_ASSIGNMENT, $n0); }
+	| '>>=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(RSHIFT_ASSIGNMENT, $n0); }
+	| '&=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BITAND_ASSIGNMENT, $n0); }
+	| '^=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BITXOR_ASSIGNMENT, $n0); }
+	| '|=' $binary_op_right 1085 { $$ = M_NEW_AST_ASSIGN(BITOR_ASSIGNMENT, $n0); }
 	;
 
 expression
@@ -304,10 +305,11 @@ expression
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
 		}
-	| assignment_expression (comma_operator assignment_expression)*
+	| expression comma_operator assignment_expression
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression, ASSIGNMENT, $n0);
-			M_APPEND_AST_LIST($$, $0, $n1);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(binary_operator, COMMA, $n1);
+			$$ += $0;
+			$$ += $2;
 		}
 	;
 	

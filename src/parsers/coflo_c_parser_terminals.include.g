@@ -232,6 +232,10 @@ LITERAL_CHAR
 	: "'[^']*'"
     ;
     
+POINTER_TO
+	: '*' { $$ = M_NEW_AST_LEAF_NODE_ENUM(unary_operator, POINTER_TO, $n0); }
+	;
+    
 WHITESPACE: "[ \t\r\n]+";
 
 COMMENT_CPP: "\/\/[^\n]*" '\n';

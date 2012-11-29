@@ -106,13 +106,13 @@ selection_statement
 iteration_statement
 	: WHILE '(' expression ')' statement
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, WHILE, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(iteration_statement, WHILE, $n0);
 			$$ += $2;
 			$$ += $4;
 		}
 	| DO statement WHILE '(' expression ')' ';'
 		{
-			$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, DO, $n0);
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(iteration_statement, DO, $n0);
 			$$ += $1;
 			$$ += $4;
 		}
@@ -125,8 +125,13 @@ iteration_statement
 			/* Commit any changes to the symbol table discovered by the speculative parsing tree. */
     		${scope} = commit_D_Scope(${scope});
     		
-    		$$ = M_NEW_AST_LEAF_NODE_ENUM(selection_statement, FOR, $n0);
-			/// @todo
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(iteration_statement, FOR, $n0);
+			/// @todo decl or expr
+			// The middle expression_statement.
+			$$ += $4;
+			/// @todo the last optional expression.
+			// The statement to iterate.
+			$$ += $7;
     	}
 	;
 

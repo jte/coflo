@@ -201,16 +201,6 @@ function_definition
 	
 function_definition_prefix
 	: decl_specs declarator
-		[
-			/* Check if this declarator is a function type. */
-    		bool rej = false;
-    		if($1.m_decltype != E_DECLTYPE_FUNCTION)
-    		{
-    			rej = true;
-    			//std::cout << "Rejecting ANSI Function def parse: " << M_TO_STR($n0) << ", "  << M_TO_STR($n1) << std::endl;
-    		}
-    		if(rej) ${reject};
-		]
 		{
 			M_PROPAGATE_AST_NODE($$, $0);
 			$$ += $1;
@@ -476,14 +466,15 @@ declarator
     	{
     		/* (pointer-to)? */
     		$$ = M_NEW_AST_NODE_I(declarator);
+    		M_APPEND_OPTIONAL_CHILD_AST($$, $n0);
     		$$ += $1;
     	}
     ;
 
 pointer
-	: '*' ('*' | type_qualifier)*
+	: POINTER_TO (POINTER_TO | type_qualifier)*
 		{
-			$$ = M_NEW_AST_NODE(pointer, $n0);
+			$$ = $0;
 			M_APPEND_ALL_CHILD_ASTS($$, $n1);
 		}
     ;
@@ -591,6 +582,10 @@ direct_abstract_declarator
 initializer
 	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }
 	| '{' initializer (',' initializer)* ','? '}'
+		{
+			$$ = M_NEW_AST_NODE_I(nil);
+			M_APPEND_AST_LIST($$, $1, $n2);
+		}
 	;
 	
 _

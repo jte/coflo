@@ -81,4 +81,26 @@ private:
 	D_ParseNode *m_root_parsenode;
 };
 
+/// @name Some free helper functions.
+///@{
+
+/**
+ * Determines if the given optional nonterminal was given in a rule.
+ *
+ * Example:
+ *    production: nonterm1? nonterm2
+ *    {
+ *    	if(was_given($n0))
+ *    	{
+ *    	  ...
+ *    	}
+ *    }
+ *
+ * @param
+ * @return
+ */
+bool was_given(const D_ParseNode *nonterminal);
+
+///@}
+
 #endif // PARSERBASECLASS_H
