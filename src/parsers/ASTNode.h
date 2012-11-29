@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
+#include <functional>
+#include <stack>
 
 #include <boost/exception/all.hpp>
 #include <boost/throw_exception.hpp>
@@ -239,7 +241,40 @@ public:
 		return retval;
 	}
 
-	ASTNodeList depth_first_search();
+	template <typename VisitorType>
+	ASTNodeList depth_first_search(VisitorType &visitor)
+	{
+		std::stack<ASTNodeBase*> node_stack;
+		ASTNodeList retval;
+
+		// Prime the search by pushing this node onto the work stack.
+		node_stack.push(this);
+
+		while(!node_stack.empty())
+		{
+			ASTNodeList children;
+			bool return_it = false;
+
+			// Visit the top node.
+			return_it = visitor(node_stack.top());
+
+			if(return_it == true)
+			{
+				retval.Append(node_stack.top());
+			}
+
+			// Prepare to visit the children by pushing pointers to them on the stack.
+			// We push them in reverse, so that the leftmost child will be the next one visited.
+			children = node_stack.top()->GetAllChildren();
+			node_stack.pop();
+			BOOST_REVERSE_FOREACH(ASTNodeBase* p, children)
+			{
+				node_stack.push(p);
+			}
+		}
+
+		return retval;
+	}
 
 	///@}
 
