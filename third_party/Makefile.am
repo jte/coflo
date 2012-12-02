@@ -32,7 +32,7 @@ CLEAN_LOCAL_DIRS =
 # the various sub-builds. 
 BUILT_SOURCES = stampfile-all-third-party-builds-complete
 
-# Append any stamp (or other) files which indicate that a sub-build is complete.
+# Append any stamp (or other) files which indicate that a sub-build is complete to this variable.
 third_party_complete_deps =
 
 # Extra files we'll need to distribute.
@@ -167,7 +167,8 @@ EXTRA_DIST += gtest-1.6.0.tar.bz2
 MOSTLYCLEANFILES += $(third_party_complete_deps)
 
 ###
-### Automake rules for creating archives of the jQuery UI css theme.
+### Automake rules for creating archives of the JavaScript and CSS files
+### used in the report.
 ###
 
 css_dark_hive_src_root_dir = $(srcdir)/jquery-ui-1.9.1.custom

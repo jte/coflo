@@ -189,8 +189,7 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 # We need xxd to convert the templates into C arrays.
 AM_MISSING_PROG([XXD], [xxd])
 
-
-# Check for an installed make_dparser.
+# Check for a system DParser installation.
 COFLO_SEARCH_PACKAGE([dparser], [dparse], [dparse], [dparse.h], [make_dparser], [/usr/local:/usr], [], [])
 AS_IF([test "x$PROG_ABSPATH_MAKE_DPARSER" != xNOT_FOUND],
 	[
@@ -277,7 +276,7 @@ AM_CONDITIONAL([COFLO_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,random,regex])
-# Extract the "boost_1_4x_x" part of the filename.
+# Extract the "boost_1_xx_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
 BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")
 BOOST_TARBALL_TAR=$(basename "${BOOST_TARBALL_TARBZ2}" .bz2)
