@@ -99,7 +99,7 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	}
 	
 	// Extract what we can with the C source parser.
-	ParseWithCoFloCParser(filename.generic_string());
+	ParseWithCoFloCParser(filename.generic_string(), function_map);
 
 	// Try to compile the source file into the .gimple intermediate form.
 	CompileSourceFile(filename.generic_string(), the_filter, compiler, defines, include_paths);
@@ -387,7 +387,7 @@ private:
 	T_AST_GRAPH m_ast_graph;
 };
 
-void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
+void TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO_FUNCTION_PTR_MAP *function_map)
 {
 	// Create a new parser.
 	CoFloCParser parser(filename);
@@ -417,8 +417,8 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
 		boost::write_graphviz(ofs, ast_graph, vpw);
 
 		// Build the Functions out of the info obtained from the parsing.
-		//std::cout << "Building Functions..." << std::endl;
-		//BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
+		std::cout << "Building Functions..." << std::endl;
+		BuildFunctionsFromAST(ast_graph, function_map);
 	}
 	else
 	{
@@ -440,4 +440,32 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
 	}
 
 	std::cout << "Parsing with CofloCParser complete." << std::endl;
+}
+
+struct dfs_visitor_is_function : public base_visitor<dfs_visitor_is_function>
+{
+	typedef boost::on_discover_vertex event_filter;
+	void operator()(T_AST_GRAPH::vertex_descriptor v, const T_AST_GRAPH &g)
+	{
+		if(g[v]->isType<ASTNode_function_definition>())
+		{
+			std::cout << "DFS: " << g[v]->asString() << std::endl;
+			m_function_definitions.push_back(g[v]);
+		}
+	};
+	std::vector<ASTNodeBase*> m_function_definitions;
+};
+
+void TranslationUnit::BuildFunctionsFromAST(T_AST_GRAPH &root, T_ID_TO_FUNCTION_PTR_MAP *function_map)
+{
+	// Find all function definitions.
+	typedef std::map<boost::graph_traits<T_AST_GRAPH>::vertex_descriptor,
+			boost::graph_traits<T_AST_GRAPH>::vertex_descriptor> T_PREDECESSOR_MAP;
+	T_PREDECESSOR_MAP predecessor_map;
+	typedef boost::associative_property_map<T_PREDECESSOR_MAP> T_PREDECESSOR_PROP_MAP;
+	T_PREDECESSOR_PROP_MAP predecessor_property_map(predecessor_map);
+	boost::predecessor_recorder<T_PREDECESSOR_PROP_MAP,boost::on_tree_edge> pr(predecessor_property_map);
+	dfs_visitor_is_function fvis;
+
+	boost::depth_first_search(root,	boost::visitor(boost::make_dfs_visitor(std::make_pair(pr, fvis))));
 }

@@ -547,7 +547,7 @@ initializer
 	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }
 	| '{' initializer (',' initializer)* ','? '}'
 		{
-			$$ = M_NEW_AST_NODE_I(nil);
+			$$ = M_NEW_AST_NODE_I(list);
 			M_APPEND_AST_LIST($$, $1, $n2);
 		}
 	;
