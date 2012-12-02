@@ -90,11 +90,13 @@ translation_unit
 			// Commit the top-level scope.
 			${scope} = commit_D_Scope(${scope});
 
-			$$ = M_NEW_AST_NODE_I(nil);
+			$$ = M_NEW_AST_NODE_I(translation_unit);
 			M_APPEND_ALL_CHILD_ASTS($$, $n1);
 			
-			std::cout << "Translation unit AST: \n" << *($$.m_ast_node) << std::endl;
-			
+			// Move the root AST node to a variable in the global info space.
+			// For some reason this won't be returned in the value returned by dparse().
+			$g->m_root_node = $$.m_ast_node;
+						
 			std::cout << "Top-level scope: " << std::endl;
 			$g->m_the_parser->PrintScope(${scope});
 		}
@@ -123,69 +125,19 @@ new_global_scope:
 
 translation_unit_component
 	: preprocessor_element
-	{
-		std::cout << "Preproc Element: " << M_TO_STR($n0) << std::endl;
-		$$ = $0;
-	}
+		{
+			std::cout << "Preproc Element: " << M_TO_STR($n0) << std::endl;
+			$$ = $0;
+		}
 	| function_definition
 		{
 			//std::cout << "Found function definition: \n" << *($0.m_ast_node) << std::endl;
 			$$ = $0;
-			
-			if(0) {
-			std::cout << "Found function definition: " << M_TO_STR($n0) << std::endl;
-			/* Find the declarator. */
-			D_ParseNode *decl;
-   			D_ParseNode *return_type = d_find_in_tree(&$n0, ${nterm decl_specs});
-    		decl = d_find_in_tree(&$n0, ${nterm declarator});
-    		if(decl)
-    		{
-    			/* Found the declarator. Now find the identifier that is the name of the function. */
-    			D_ParseNode *n = d_find_in_tree(decl, ${nterm identifier});
-    			if(n)
-    			{
-    				/* Found the identifier, add it to the scope as a new "other" identifier. */
-    				std::cout << "FOUND FUNCTION DEFINITION: \n"
-    				 	<< "  IDENTIFIER:  " << std::string(n->start_loc.s, n->end) << "\n"
-    				 	<< "  RETURN TYPE: " << std::string(return_type->start_loc.s, return_type->end) << std::endl; 
-    				D_Sym *s = NEW_D_SYM(${scope}, n->start_loc.s, n->end);
-    				s->user.m_is_typename = false;
-    				s->user.m_namespace_membership = E_OTHER_IDENTIFIER;
-    			}
-    		}
-    		else
-    		{
-    			std::cout << "ERROR: CAN'T FIND DECLARATOR" << std::endl;
-    		}
-    		}
 		}
 	| declaration
 		{
 			//std::cout << "Found declaration: \n" << *($0.m_ast_node) << std::endl;
 			$$ = $0;
-			
-			if(0) {
-			if(d_find_in_tree(&$n0, ${nterm function_declarator}))
-    		{
-    			/* There was a function declarator in the declaration tree.
-    			 Find the identifier that was declared to be the new function. */
-    			D_ParseNode *n = d_find_in_tree(&$n0, ${nterm identifier});
-    			if(n)
-    			{
-    				/* Found the identifier, add it to the scope as a new typename. */
-    				std::cout << "FOUND FUNCTION DECL: \n"
-    				 << "  IDENTIFIER: " << std::string(n->start_loc.s, n->end) << "\n"
-    				 << "  LOCATION: " << Location(n->start_loc) << std::endl; 
-    				//D_Sym *s = NEW_D_SYM(${scope}, n->start_loc.s, n->end);
-    				//s->user.m_is_typename = true;
-    				//s->user.m_namespace_membership = E_OTHER_IDENTIFIER;
-    			}
-    		}
-    		else
-    		{
-    			std::cout << "Found declaration: " << *($0.m_ast_node) << std::endl;
-    		}
-    		}
 		}
     ;
 
@@ -200,23 +152,25 @@ new_scope:
 	
 function_definition
 	/* This is ANSI */
-    : function_definition_prefix compound_statement
+    : decl_specs declarator compound_statement
     	{
-    		M_PROPAGATE_AST_NODE($$, $0);
+    		$$ = M_NEW_AST_NODE_I(function_definition);
+    		$$ += $0;
     		$$ += $1;
+    		$$ += $2;
     	}
     /* This is K&R */
-    | function_definition_prefix declaration+ compound_statement
+    | decl_specs declarator declaration+ compound_statement
+    	{
+    		$$ = M_NEW_AST_NODE_I(function_definition);
+    		$$ += $0;
+    		$$ += $1;
+    		$$ += M_NEW_AST_NODE_I(list);
+    		/// @todo param declarations.
+    		$$ += $3;
+    	}
     ;
-	
-function_definition_prefix
-	: decl_specs declarator
-		{
-			M_PROPAGATE_AST_NODE($$, $0);
-			$$ += $1;
-		}
-	;
-	
+
 declaration
     : decl_specs init_declarator_list? extension_gcc_asm? extension_gcc_function_attribute_specifier* ';'
     	[
@@ -238,12 +192,6 @@ declaration
     	{
     		${scope} = commit_D_Scope(${scope});
     		//print_scope(${scope});
-    		
-    		//if(M_SS($$, decl_specs)->m_storage_class_specifier_node != NULL)
-    		//{
-	    		/* Look at the decl_specs. */
-	    		//std::cout << "DECL_SPECS: Storage Class Spec= " << *(M_SS($$, decl_specs)->m_storage_class_specifier_node) << std::endl;
-	    	//}
     		
     		/* For each declarator in the init_declarator_list, determine a type for it.
     		The type consists of info from the decl_specs and possibly some info from the init_declarator_list. */
@@ -270,7 +218,8 @@ declaration
     		{
     			$$ = M_NEW_AST_NODE_I(decl_var);
     			// Add the decl spec children.
-    			M_APPEND_ALL_CHILD_ASTS($$, $n0);
+    			//M_APPEND_ALL_CHILD_ASTS($$, $n0);
+    			$$ += $0;
     			
     			M_APPEND_OPTIONAL_CHILD_AST($$, $n1);
     			/// @todo
@@ -395,12 +344,11 @@ struct_declaration
 	: (type_specifier | type_qualifier)+ struct_declarator (',' struct_declarator)* ';'
 		{
 			$$ = M_NEW_AST_NODE_I(nil);
-			ASTNode_nil *list = M_NEW_AST_NODE_I(nil);
+			ASTNode_list *list = M_NEW_AST_NODE_I(list);
 			M_APPEND_ALL_CHILD_ASTS(*list, $n0);
 			$$ += list;
-			ASTNode_nil *list2 = M_NEW_AST_NODE_I(nil);
+			ASTNode_list *list2 = M_NEW_AST_NODE_I(list);
 			*list2 += $1.m_ast_node;
-			//M_APPEND_AST_LIST(*list2, $1, $n2);
 			M_APPEND_PARENTHESIZED_AST_LIST(*list2, $n2);
 			$$ += list2;
 		}
@@ -458,7 +406,7 @@ function_specifier
 init_declarator_list
     : init_declarator (',' init_declarator)*
     	{
-    		$$ = M_NEW_AST_NODE_I(nil);
+    		$$ = M_NEW_AST_NODE_I(list);
      		M_APPEND_AST_LIST($$, $0, $n1);
     	}
 	;
@@ -543,7 +491,7 @@ function_declarator
 parameter_type_list
     : parameter_decl (',' parameter_decl)* (',' '...')?
     	{
-    		$$ = M_NEW_AST_NODE_I(nil);
+    		$$ = M_NEW_AST_NODE_I(list);
      		M_APPEND_AST_LIST($$, $0, $n1);
      		/// @todo variadic
     	}
@@ -561,7 +509,7 @@ parameter_decl
 type_name
 	: (type_specifier | type_qualifier)+ abstract_declarator?
 		{
-			$$ = M_NEW_AST_NODE_I(nil);
+			$$ = M_NEW_AST_NODE_I(list);
 			M_APPEND_ALL_CHILD_ASTS($$, $n0);
 			/// @todo 
 		}

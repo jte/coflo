@@ -26,6 +26,9 @@
  
 extension_gcc_statements_within_expressions
 	: GCC_EXTENSION? '(' compound_statement ')'
+		{
+			$$ = $2;
+		}
 	;
 	
 extension_function_specifier

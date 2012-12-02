@@ -30,5 +30,7 @@ std::string regex_append_after(const std::string &input_string,
 
 void fcopy(const std::string &from, const std::string &to);
 
+std::string escape_for_graphviz_label(const std::string &input_string);
+
 #endif // TOOLLIB_H
 

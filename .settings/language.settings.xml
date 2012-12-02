@@ -209,21 +209,6 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/templates/FileTemplate.cpp">
-						<entry kind="includePath" name="/CoFlo/src/templates">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/templates"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
 					<resource project-relative-path="src/controlflowgraph/visitors/ReachabilityVisitor.cpp">
 						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/visitors">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -241,11 +226,42 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
+					<resource project-relative-path="src/templates/FileTemplate.cpp">
+						<entry kind="includePath" name="/CoFlo/src/templates">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/templates"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
 					<resource project-relative-path="src/controlflowgraph/statements/AssignmentBase.cpp">
 						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
+					<resource project-relative-path="src/graph/VertexID.cpp">
+						<entry kind="includePath" name="/CoFlo/src/graph">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/graph"/>
 						<entry kind="includePath" name="/CoFlo">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -275,11 +291,11 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/graph/VertexID.cpp">
-						<entry kind="includePath" name="/CoFlo/src/graph">
+					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeFunctionCall.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/graph"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
 						<entry kind="includePath" name="/CoFlo">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -291,11 +307,11 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeFunctionCall.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
+					<resource project-relative-path="src/controlflowgraph/statements/Exit.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
 						<entry kind="includePath" name="/CoFlo">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -317,22 +333,6 @@
 						</entry>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/graph"/>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
-					<resource project-relative-path="src/controlflowgraph/statements/Exit.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
 						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -393,20 +393,6 @@
 						<entry kind="macro" name="COFLO_PKGDATA_DIR" value="/usr/local/share/coflo"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="build/coflo_c_parser.cpp">
-						<entry kind="includePath" name="/CoFlo/build">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src/parsers"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src"/>
-						<entry kind="includePath" name="C:/usr/include"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src/debug_utils"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/third_party/boost_1_51_0"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
 					<resource project-relative-path="src/controlflowgraph/statements/StatementBase.cpp">
 						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -419,6 +405,20 @@
 						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
+					<resource project-relative-path="build/coflo_c_parser.cpp">
+						<entry kind="includePath" name="/CoFlo/build">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src/parsers"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src"/>
+						<entry kind="includePath" name="C:/usr/include"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/src/debug_utils"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/third_party/boost_1_51_0"/>
 						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
@@ -945,6 +945,22 @@
 						<entry kind="macro" name="COFLO_PKGDATA_DIR" value="/usr/local/share/coflo"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
+					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeReturn.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
 					<resource project-relative-path="src/parsers/coflo_c_parser.cpp">
 						<entry kind="includePath" name="/CoFlo/src/parsers">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -955,22 +971,6 @@
 						</entry>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src"/>
 						<entry kind="includePath" name="C:/usr/include"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
-					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeReturn.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
 						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -993,6 +993,22 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
+					<resource project-relative-path="src/controlflowgraph/statements/ParseHelpers.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
 					<resource project-relative-path="src/RuntimeConfiguration.cpp">
 						<entry kind="includePath" name="/CoFlo/src">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -1010,22 +1026,6 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="COFLO_PKGDATA_DIR" value="/usr/local/share/coflo"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
-					<resource project-relative-path="src/controlflowgraph/statements/ParseHelpers.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
 					<resource project-relative-path="src/controlflowgraph/ControlFlowGraphTraversalBase.cpp">
@@ -1107,22 +1107,6 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeFallthrough.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
 					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeFunctionCallBypass.cpp">
 						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -1139,11 +1123,11 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/graph/Graph.cpp">
-						<entry kind="includePath" name="/CoFlo/src/graph">
+					<resource project-relative-path="src/controlflowgraph/edges/CFGEdgeTypeFallthrough.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/edges">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/graph"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/edges"/>
 						<entry kind="includePath" name="/CoFlo">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1171,7 +1155,7 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/graph/DescriptorBaseClass.cpp">
+					<resource project-relative-path="src/graph/Graph.cpp">
 						<entry kind="includePath" name="/CoFlo/src/graph">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
@@ -1192,6 +1176,22 @@
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>
 						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/statements"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
+					<resource project-relative-path="src/graph/DescriptorBaseClass.cpp">
+						<entry kind="includePath" name="/CoFlo/src/graph">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/graph"/>
 						<entry kind="includePath" name="/CoFlo">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
 						</entry>

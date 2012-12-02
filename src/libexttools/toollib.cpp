@@ -50,3 +50,8 @@ void fcopy(const std::string& from, const std::string& to)
 	// Do the copy.
 	to_stream << from_stream << std::endl;
 }
+
+std::string escape_for_graphviz_label(const std::string& input_string)
+{
+	return regex_replace(input_string, "\\\"", "\\\\\"");
+}

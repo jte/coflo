@@ -39,6 +39,9 @@ class TranslationUnit;
 /// @name Declare the AST node types we need.
 ///@{
 M_DECLARE_AST_NODE(nil, ASTNode);
+M_DECLARE_AST_NODE(list, ASTNode);
+M_DECLARE_AST_NODE(translation_unit, ASTNode);
+M_DECLARE_AST_NODE(function_definition, ASTNode);
 M_DECLARE_AST_LEAF_NODE_ENUM(todo, nil, TODO);
 M_DECLARE_AST_LEAF_NODE_ENUM(storage_class_specifier, ASTNodeBase, TYPEDEF, EXTERN, STATIC, AUTO, REGISTER);
 M_DECLARE_AST_LEAF_NODE_ENUM(type_qualifier, ASTNodeBase, CONST, RESTRICT, VOLATILE);
@@ -154,6 +157,8 @@ struct coflo_c_parser_ParseNode_Globals
 	/// Pointer to the parser instance.  For use by grammar actions.
 	CoFloCParser * m_the_parser;
 
+	ASTNodeBase *m_root_node;
+
 	/// Set containing the keywords of the language.
 	/// Useful for preventing the return of invalid identifiers.
 	//std::set<std::string> m_keyword_set;
@@ -177,8 +182,6 @@ class coflo_c_parser_ParseNode_User
 public:
 	coflo_c_parser_ParseNode_User() : m_ast_node(NULL) {};
 	virtual ~coflo_c_parser_ParseNode_User() {};
-
-	//DeclaratorType m_decltype;
 
 	ASTNodeBase *m_ast_node;
 
@@ -225,6 +228,11 @@ public:
 	coflo_c_parser_ParseNode_User* GetUserInfo(D_ParseNode *tree)
 	{
 		return static_cast<coflo_c_parser_ParseNode_User*>(GetUserInfoAsVoidPtr(tree));
+	};
+
+	coflo_c_parser_ParseNode_Globals* GetGlobalInfo()
+	{
+		return static_cast<coflo_c_parser_ParseNode_Globals*>(GetGlobalInfoAsVoidPtr());
 	};
 
 private:

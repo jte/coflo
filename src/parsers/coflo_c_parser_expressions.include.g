@@ -158,7 +158,7 @@ postfix_expression
 			// Should contain the identifier of the function to be called.
 			$$ += $0;
 			/* No params. */
-			$$ += M_NEW_AST_NODE(nil, $n1);
+			$$ += M_NEW_AST_NODE(list, $n1);
 		}
 	| postfix_expression '(' argument_expression_list ')' $unary_left 1099
 		{
@@ -191,7 +191,7 @@ postfix_expression
 argument_expression_list
 	: assignment_expression (',' assignment_expression)*
 		{
-			$$ = M_NEW_AST_NODE_I(nil);
+			$$ = M_NEW_AST_NODE_I(list);
 			M_APPEND_AST_LIST($$, $0, $n1);
 		}
 	;
