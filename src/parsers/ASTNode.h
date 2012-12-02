@@ -118,6 +118,8 @@ protected:
 };
 
 
+class D_ParseNode;
+
 /**
  *
  */
@@ -131,6 +133,8 @@ public:
 	 * @param token
 	 */
 	ASTNodeBase(const Token &token);
+
+	ASTNodeBase(const Token &token, ASTNodeBase* first_element_usernode, D_ParseNode* optional_element_sysnode);
 
 	ASTNodeBase(const std::string &s, const Location& loc) : m_token(s,loc) {};
 
@@ -147,6 +151,7 @@ public:
 
 	virtual std::string asString() const;
 	virtual std::string asStringTree(int indent_level = 0) const;
+	T_AST_GRAPH asASTGraph();
 
 	void AddChild(ASTNodeBase *child) { m_children.Append(child); };
 
@@ -248,7 +253,6 @@ public:
 		return retval;
 	}
 
-	T_AST_GRAPH asASTGraph();
 
 	std::vector<ASTNodeList> find_all();
 
@@ -483,6 +487,11 @@ namespace boost
 #define M_NEW_AST_NODE_I2(node_name, sys_parse_node) \
 		new ASTNode_##node_name(Token(std::string(#node_name)))
 
+/// Create a new imaginary node, and add a something-separated list of children to it.
+#define M_NEW_AST_NODE_LIST(node_name, sys_parse_node, first_element_usernode, optional_element_sysnode) \
+		new ASTNode_##node_name(Token(std::string(#node_name))) \
+		M_APPEND_AST_LIST(usr_node_to_append_to, first_element_usernode, optional_element_sysnode)
+
 /// Nodes with enumerated kinds.
 #define M_NEW_AST_NODE_ENUM(node_name, kind, value, sys_parse_node) \
 	new ASTNode_##node_name(ASTNode_##node_name::kind_t::kind, Token(sys_parse_node));
@@ -517,8 +526,6 @@ namespace boost
  */
 #define M_PROPAGATE_AST_NODE(to, from) do { to.m_ast_node = from.m_ast_node; from.m_ast_node = NULL; } while(0)
 
-#define M_NEW_AST_NODE_LIST(node_name, sys_node_with_children) \
-	new M_AST_NODE_CLASSNAME(node_name)(sys_node_with_children)
 
 /**
  * Move the ASTNode specified by @a from to a child node of the ASTNode specified by @a to.
@@ -612,7 +619,7 @@ namespace boost
 				if(child_pn == NULL) { M_ERR("CHILDNODE=NULL"); continue; } \
 				if(child_pn->user.m_ast_node != NULL) \
 				{ \
-					usr_node_to_append_to += child_pn->user.m_ast_node; \
+					(usr_node_to_append_to) += child_pn->user.m_ast_node; \
 					child_pn->user.m_ast_node = NULL; \
 				} \
 			} \

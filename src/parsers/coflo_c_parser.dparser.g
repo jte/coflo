@@ -312,7 +312,6 @@ struct_or_union
 struct_or_union_specifier
 	: struct_or_union identifier? struct_declaration_block
 		{
-			//std::cout << "Found struct or union declaration at " << Location($n0.start_loc) << std::endl;
 			$$ = $0;
 			$$ += $2;
 			// Note that the optional identifier is appended last.
@@ -456,7 +455,11 @@ direct_declarator
     	}
     | direct_declarator '('  identifier (',' identifier)* ')'
     	{
-    		$$ = M_NEW_AST_NODE_I(nil);
+    		ASTNode_list *list = M_NEW_AST_NODE_I(list);
+    		*list += $2.m_ast_node;
+    		M_APPEND_PARENTHESIZED_AST_LIST(*list, $n3);
+    		$$ = list;
+    		$$ += $0;
     	}
     | function_declarator
     	{
@@ -467,23 +470,40 @@ direct_declarator
 array_declarator
 	/* Array declarator, unspecified size (==incomplete type). */
 	: direct_declarator '[' ']'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, ARRAY_OF, $n1);
+			$$ += $0;
+		}
     /* (C99) Array declarator, variable length array of unspecified size. In function prototypes only. */
     | direct_declarator '[' '*' ']'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, ARRAY_OF, $n1);
+			$$ += $0;
+		}
     | direct_declarator '[' STATIC? type_qualifier+ (STATIC? assignment_expression | '*')? ']'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, ARRAY_OF, $n1);
+			$$ += $0;
+		}
     | direct_declarator '[' assignment_expression ']'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, ARRAY_OF, $n1);
+			$$ += $0;
+			$$ += $2;
+		}
 	;
 	
 function_declarator
 	: direct_declarator '(' parameter_type_list ')'
     	{
-    		$$ = M_NEW_AST_NODE(decl_func, $n1);
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, FUNCTION, $n1);
     		$$ += $0;
     		// Append the AST tree describing the parameter types.
     		$$ += $2; 		
     	}
     | direct_declarator '(' ')'
     	{
-    		$$ = M_NEW_AST_NODE(decl_func, $n1);
+    		$$ = M_NEW_AST_LEAF_NODE_ENUM(declr, FUNCTION, $n1);
     		$$ += $0;
     	}
 	;
@@ -500,12 +520,18 @@ parameter_type_list
 parameter_decl
     : decl_specs (declarator | abstract_declarator)? extension_gcc_attribute?
     	{
-    		//$$ = M_NEW_AST_NODE_I(nil);
-    		$$ = $0;
+    		$$ = M_NEW_AST_NODE_I(list);
+    		$$ += $0;
+    		M_APPEND_ALL_CHILD_ASTS($$, $n1);
     		/// @todo
     	}
 	;
 
+/**
+ * Type names
+ */
+///@{
+ 
 type_name
 	: (type_specifier | type_qualifier)+ abstract_declarator?
 		{
@@ -532,8 +558,11 @@ abstract_declarator
     ;
 
 direct_abstract_declarator
-	: ('(' abstract_declarator ')'
-	| '(' parameter_type_list ')'
+	: '(' abstract_declarator ')'
+		{
+			$$ = $1;
+		}
+	| direct_abstract_declarator? ('(' parameter_type_list ')'
 	| '(' ')'
 	| '[' assignment_expression ']'
 	| '[' '*' ']'
@@ -542,6 +571,8 @@ direct_abstract_declarator
 			$$ = M_NEW_AST_NODE_I(nil);
 		}
 	;
+	
+///@}
 	
 initializer
 	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }

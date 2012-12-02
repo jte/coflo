@@ -444,7 +444,7 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO
 
 struct dfs_visitor_is_function : public base_visitor<dfs_visitor_is_function>
 {
-	typedef boost::on_discover_vertex event_filter;
+	typedef boost::on_finish_vertex event_filter;
 	void operator()(T_AST_GRAPH::vertex_descriptor v, const T_AST_GRAPH &g)
 	{
 		if(g[v]->isType<ASTNode_function_definition>())
