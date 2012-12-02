@@ -23,6 +23,8 @@
 #include <stack>
 #include <boost/foreach.hpp>
 
+#include <dparse.h>
+
 /*
  * AbstractASTNodeBase
  */
@@ -41,6 +43,38 @@ ASTNodeBase::ASTNodeBase() : m_token(std::string("NIL"), Location())
 
 ASTNodeBase::ASTNodeBase(const Token &token) : m_token(token)
 {
+}
+
+ASTNodeBase::ASTNodeBase(const Token &token, ASTNodeBase* first_element_usernode,
+		D_ParseNode* optional_element_sysnode) : m_token(token)
+{
+	AddChild(first_element_usernode);
+
+	int num_children = d_get_number_of_children(optional_element_sysnode);
+	int child_index;
+	for(child_index = 0; child_index < num_children; ++child_index)
+	{
+		D_ParseNode *pn = d_get_child(optional_element_sysnode, child_index);
+		if(pn == NULL)
+		{
+			M_ERR("PARSENODE=NULL");
+			continue;
+		}
+		/* Get the second part of this subrule's instance, since the first is the separator. */
+		D_ParseNode *child_pn = d_get_child(pn, 1);
+		if(child_pn == NULL)
+		{
+			M_ERR("CHILDNODE=NULL");
+			continue;
+		}
+		/// @todo
+		/*
+		if(static_cast<ASTNodeBase*>(child_pn->user).m_ast_node != NULL)
+		{
+			AddChild(child_pn->user.m_ast_node);
+			child_pn->user.m_ast_node = NULL;
+		}*/
+	}
 }
 
 ASTNodeBase::~ASTNodeBase()

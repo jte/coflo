@@ -53,7 +53,6 @@ M_DECLARE_AST_NODE(identifier, ASTNode);
 ///@{
 M_DECLARE_AST_NODE(declaration, ASTNode);
 M_DECLARE_DERIVED_AST_NODE(decl_var, declaration);
-M_DECLARE_DERIVED_AST_NODE(decl_func, declaration);
 M_DECLARE_DERIVED_AST_NODE(decl_typedef, declaration);
 ///@}
 
@@ -111,6 +110,7 @@ M_DECLARE_AST_NODE(decl_specs, ASTNode);
 M_DECLARE_DERIVED_AST_NODE(TYPEDEF, decl_specs);
 
 M_DECLARE_AST_NODE(declarator, ASTNode);
+M_DECLARE_DERIVED_AST_NODE_ENUM(declr, declarator, FUNCTION, ARRAY_OF);
 
 M_DECLARE_AST_NODE(pointer, ASTNode);
 
