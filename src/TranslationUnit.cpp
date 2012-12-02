@@ -77,6 +77,23 @@ TranslationUnit::~TranslationUnit()
 {
 }
 
+
+
+class VertexPropWriter
+{
+public:
+	VertexPropWriter(T_AST_GRAPH ast_graph) : m_ast_graph(ast_graph) {};
+
+	void operator()(std::ostream& out, const T_AST_GRAPH::vertex_descriptor& v) const
+	{
+		out << "[label=\"" << escape_for_graphviz_label(m_ast_graph[v]->asString()) << "\"]";
+	};
+private:
+	T_AST_GRAPH m_ast_graph;
+};
+
+
+
 bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 								T_ID_TO_FUNCTION_PTR_MAP *function_map,
 								const std::string &the_filter,
@@ -99,7 +116,18 @@ bool TranslationUnit::ParseFile(const boost::filesystem::path &filename,
 	}
 	
 	// Extract what we can with the C source parser.
-	ParseWithCoFloCParser(filename.generic_string(), function_map);
+	T_AST_GRAPH ast_graph = ParseWithCoFloCParser(filename.generic_string(), function_map);
+	if(boost::num_vertices(ast_graph) != 0)
+	{
+		// Graph was generated OK.
+		VertexPropWriter vpw(ast_graph);
+		std::ofstream ofs("ast_graph.dot");
+		boost::write_graphviz(ofs, ast_graph, vpw);
+
+		// Build the Functions out of the info obtained from the parsing.
+		std::cout << "Building Functions..." << std::endl;
+		BuildFunctionsFromAST(ast_graph, function_map);
+	}
 
 	// Try to compile the source file into the .gimple intermediate form.
 	CompileSourceFile(filename.generic_string(), the_filter, compiler, defines, include_paths);
@@ -374,21 +402,11 @@ print_node(int depth, char *name, char *value, void *client_data)
 	std::cout << "\"" << std::endl;
 }
 
-class VertexPropWriter
+T_AST_GRAPH TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO_FUNCTION_PTR_MAP *function_map)
 {
-public:
-	VertexPropWriter(T_AST_GRAPH ast_graph) : m_ast_graph(ast_graph) {};
+	// Create the AST Graph we'll return.
+	T_AST_GRAPH retval;
 
-	void operator()(std::ostream& out, const T_AST_GRAPH::vertex_descriptor& v) const
-	{
-		out << "[label=\"" << escape_for_graphviz_label(m_ast_graph[v]->asString()) << "\"]";
-	};
-private:
-	T_AST_GRAPH m_ast_graph;
-};
-
-void TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO_FUNCTION_PTR_MAP *function_map)
-{
 	// Create a new parser.
 	CoFloCParser parser(filename);
 
@@ -410,15 +428,7 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO
 		ASTNodeBase* root = parser.GetGlobalInfo()->m_root_node;
 		std::cout << *root << std::endl;
 
-		T_AST_GRAPH ast_graph = root->asASTGraph();
-
-		VertexPropWriter vpw(ast_graph);
-		std::ofstream ofs("ast_graph.dot");
-		boost::write_graphviz(ofs, ast_graph, vpw);
-
-		// Build the Functions out of the info obtained from the parsing.
-		std::cout << "Building Functions..." << std::endl;
-		BuildFunctionsFromAST(ast_graph, function_map);
+		retval = root->asASTGraph();
 	}
 	else
 	{
@@ -440,6 +450,8 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename, T_ID_TO
 	}
 
 	std::cout << "Parsing with CofloCParser complete." << std::endl;
+
+	return retval;
 }
 
 struct dfs_visitor_is_function : public base_visitor<dfs_visitor_is_function>

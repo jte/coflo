@@ -242,6 +242,7 @@ private:
 	{
 		coflo_c_parser_ParseNode_Globals *retval = new coflo_c_parser_ParseNode_Globals;
 		retval->m_the_parser = this;
+		retval->m_root_node = NULL;
 
 		return retval;
 	};
