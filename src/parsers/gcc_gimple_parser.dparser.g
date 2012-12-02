@@ -157,7 +157,7 @@ declaration
 var_declaration
 	: decl_spec+ var_id declarator_suffix* ('=' (constant | string_literal))? ';'
 		{
-			std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;
+			/*std::cout << "VAR_DECL: " << M_TO_STR($n1) << std::endl;*/
 		}
 	;
 	
@@ -168,7 +168,7 @@ declarator_suffix
 local_function_declaration
 	: decl_spec+ identifier '(' param_decls_list ')' ';'
 		{
-			std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;
+			/*std::cout << "LOCAL_FUNC_DECL: " << M_TO_STR($n1) << std::endl;*/
 		}
 	;
 
