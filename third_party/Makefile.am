@@ -41,17 +41,30 @@ EXTRA_DIST =
 # Files to clean for "make mostlyclean" and "make clean".
 MOSTLYCLEANFILES =
 
-if !HAVE_SYSTEM_MAKE_DPARSER
+
 ###
-### The Automake rules for building DParser from an upstream tarball.
+### The Automake rules for building DParser from the upstream tarball.
+### The tarball can be either the one distributed with CoFlo, or one specified at configure-time.
 ###
+
+# Path to the bundled DParser source distribution.
+BUNDLED_DPARSER_TARBALL = $(srcdir)/d-1.26-src.tar.gz
+
+# Add the untarred DParser source directory and the local install tree to the "make clean" list. 
+CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
+
+third_party_complete_deps += stamp_dparser_src_installed
+
+EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL)
+
+if !HAVE_DPARSER_EXTERNAL_TARBALL
+# Specify the DParser tarball in the CoFlo distribution.
+FILE_PATH_DPARSER_SOURCE_TARBALL = $(BUNDLED_DPARSER_TARBALL)
+endif
 
 # DParser directory vars.
 DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
-
-# Add the untarred DParser source directory and the local install tree to the "make clean" list. 
-CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
 # We only need these during the build, so instead of requiring the user to install DParser, we'll build them
@@ -91,7 +104,6 @@ stamp_dparser_src_installed: stamp_dparser_src_built
 	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
-endif
 
 if COFLO_USE_BUILT_BOOST
 ###
@@ -239,7 +251,7 @@ report_boilerplate.tar: jquery_ui.tar jquery_ui_layout.tar
 
 CLEANFILES_REPORT_BOILERPLATE = jquery_ui_layout.tar jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar report_boilerplate.tar
 
-third_party_complete_deps += $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) report_boilerplate.tar
+third_party_complete_deps += $(BUILTSOURCES_BOOST) report_boilerplate.tar
 
 # The stamp file which will depend on all active third-party builds.
 # We do this this way so as to maximize parallel build potential.
