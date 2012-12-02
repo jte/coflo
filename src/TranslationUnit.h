@@ -109,7 +109,7 @@ private:
 	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list,
 			T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
-	void ParseWithCoFloCParser(const std::string &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map);
+	T_AST_GRAPH ParseWithCoFloCParser(const std::string &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
 	void BuildFunctionsFromAST(T_AST_GRAPH &root, T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
