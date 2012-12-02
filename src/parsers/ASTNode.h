@@ -29,6 +29,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/foreach.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "Token.h"
 #include "Location.h"
@@ -38,7 +39,13 @@
 struct ast_exception_base: virtual std::exception, virtual boost::exception { };
 struct ast_exception_assignment_to_self: virtual ast_exception_base {};
 
+
 class ASTNodeBase;
+
+/// The ASTGraph typedef.
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
+		ASTNodeBase*> T_AST_GRAPH;
+
 
 class ASTNodeList
 {
@@ -241,40 +248,9 @@ public:
 		return retval;
 	}
 
-	template <typename VisitorType>
-	ASTNodeList depth_first_search(VisitorType &visitor)
-	{
-		std::stack<ASTNodeBase*> node_stack;
-		ASTNodeList retval;
+	T_AST_GRAPH asASTGraph();
 
-		// Prime the search by pushing this node onto the work stack.
-		node_stack.push(this);
-
-		while(!node_stack.empty())
-		{
-			ASTNodeList children;
-			bool return_it = false;
-
-			// Visit the top node.
-			return_it = visitor(node_stack.top());
-
-			if(return_it == true)
-			{
-				retval.Append(node_stack.top());
-			}
-
-			// Prepare to visit the children by pushing pointers to them on the stack.
-			// We push them in reverse, so that the leftmost child will be the next one visited.
-			children = node_stack.top()->GetAllChildren();
-			node_stack.pop();
-			BOOST_REVERSE_FOREACH(ASTNodeBase* p, children)
-			{
-				node_stack.push(p);
-			}
-		}
-
-		return retval;
-	}
+	std::vector<ASTNodeList> find_all();
 
 	///@}
 
@@ -368,6 +344,63 @@ public:
 	};
 
 };
+
+#if 0
+/// @name Adaptor functions to make ASTNodeBase trees compatible with Boost.Graph algorithms.
+
+/// Partial specialization of the boost::graph_traits<> template for the ASTNodeBase class.
+namespace boost
+{
+
+	struct out_edge_iterator_policies
+  {
+    static void increment(edge& e)
+    { e = Succ_Adj_Edge(e,0); }
+
+    static void decrement(edge& e)
+    { e = Pred_Adj_Edge(e,0); }
+
+    template <class Reference>
+    static Reference dereference(type<Reference>, const edge& e)
+    { return const_cast<Reference>(e); }
+
+    static bool equal(const edge& x, const edge& y)
+    { return x == y; }
+  };
+
+
+	template <>
+  struct graph_traits< ASTNodeBase* >
+  {
+    typedef ASTNodeBase* vertex_descriptor;
+    typedef std::pair<ASTNodeBase*, ASTNodeList::iterator> edge_descriptor;
+
+    typedef out_edge_iterator;
+
+    typedef directed_tag directed_category;
+    typedef disallow_parallel_edge_tag edge_parallel_category;
+    typedef int vertices_size_type;
+    typedef int edges_size_type;
+  };
+
+  typename graph_traits<ASTNodeBase*>::vertex_descriptor
+  	  source(typename graph_traits<ASTNodeBase*>::edge_descriptor e,
+  			  const ASTNodeBase* g)
+  {
+	  // The first element of the std::pair is the source node.
+	  return e.first;
+  }
+
+  typename graph_traits<ASTNodeBase*>::vertex_descriptor
+    	  target(typename graph_traits<ASTNodeBase*>::edge_descriptor e,
+    			  const ASTNodeBase* g)
+    {
+  	  // The second element of the std::pair is the target node.
+  	  return *(e.second);
+    }
+
+} // namespace boost
+#endif
 
 
 /**

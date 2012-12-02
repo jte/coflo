@@ -28,35 +28,75 @@
 //#include "ControlFlowGraph.h"
 
 #include <boost/utility/enable_if.hpp>
+#include <boost/type_traits.hpp>
 //#include <boost/type_traits/is_base_of.hpp>
 
 #include "coflo_exceptions.hpp"
 
-/// @name Free-function declarations for adapting this graph class to the Boost graph library.
+#if 0
+namespace boost
+{
+	template<>
+	struct graph_traits< Graph >
+	{
+		typedef Graph::vertex_descriptor vertex_descriptor;
+		typedef Graph::edge_descriptor edge_descriptor;
+
+		typedef Vertex::out_edge_iterator out_edge_iterator;
+		typedef boost::transform_iterator<VertexDescriptorConv,
+						vertex_list_type::iterator,
+						VertexDescriptor,
+						VertexDescriptor> vertex_iterator;
+
+		typedef directed_tag directed_category;
+		typedef allow_parallel_edge_tag edge_parallel_category;
+		typedef int vertices_size_type;
+		typedef int edges_size_type;
+		typedef Vertex::degree_size_type degree_size_type;
+
+		typedef Graph_traversal_tag traversal_category;
+	};
+
+	typename graph_traits<Graph>::vertex_descriptor target(const typename graph_traits<Graph>::edge_descriptor &e,
+		const Graph &/*g*/)
+	{
+		return graph_traits<Graph>::vertex_descriptor(e->Target());
+	};
+}
+#endif
+
+/// @name Free-function declarations for adapting the Graph class to the Boost graph library.
 //@{
 
 /// @name Functions for the IncidenceGraph concept.
 ///@{
+
+#define M_ENABLE_IF_GRAPH(return_type) \
+		typename boost::enable_if<boost::is_convertible<GraphType*, Graph*>, return_type>::type
+
 template <typename GraphType>
-inline typename boost::graph_traits<GraphType>::vertex_descriptor target(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
+M_ENABLE_IF_GRAPH(typename boost::graph_traits<GraphType>::vertex_descriptor)
+target(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
 {
 	return typename GraphType::vertex_descriptor(e->Target());
 };
 
 template <typename GraphType>
-inline typename boost::graph_traits<GraphType>::vertex_descriptor source(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
+M_ENABLE_IF_GRAPH(typename boost::graph_traits<GraphType>::vertex_descriptor)
+source(const typename GraphType::edge_descriptor &e, const GraphType &/*g*/)
 {
 	return typename GraphType::vertex_descriptor(e->Source());
 };
 
 template <typename GraphType>
-inline typename GraphType::degree_size_type out_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
+M_ENABLE_IF_GRAPH(typename GraphType::degree_size_type)
+out_degree(typename GraphType::vertex_descriptor u, const GraphType& /*g*/)
 {
 	return u->OutDegree();
 };
 
 template <typename GraphType>
-inline std::pair<typename GraphType::out_edge_iterator, typename GraphType::out_edge_iterator>
+typename boost::enable_if<boost::is_convertible<GraphType*, Graph*>, std::pair<typename GraphType::out_edge_iterator, typename GraphType::out_edge_iterator> >::type
 out_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 {
 	return u->OutEdges();
@@ -85,7 +125,8 @@ in_edges(typename GraphType::vertex_descriptor u, const GraphType &/*g*/)
 ///@{
 
 template <typename GraphType>
-inline std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> vertices(const GraphType& g)
+typename boost::enable_if<boost::is_convertible<GraphType*, Graph*>, std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> >::type
+vertices(const GraphType& g)
 {
 	std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex_iterator> retval;
 
@@ -95,7 +136,8 @@ inline std::pair<typename GraphType::vertex_iterator, typename GraphType::vertex
 };
 
 template <typename GraphType>
-inline typename GraphType::vertices_size_type num_vertices(const GraphType& g)
+M_ENABLE_IF_GRAPH(typename GraphType::vertices_size_type)
+num_vertices(const GraphType& g)
 {
 	return g.NumVertices();
 };

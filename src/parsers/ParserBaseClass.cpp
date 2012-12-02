@@ -67,7 +67,7 @@ D_ParseNode* ParserBaseClass::Parse()
 	m_parser->loc.pathname = strdup(m_filename.c_str());
 	m_parser->loc.line = 1;
 	m_parser->loc.col = 0;
-	// Create the intial globals.
+	// Create the initial globals.
 	m_parser->initial_globals = InitGlobalData();
 	//m_parser->initial_scope = new_D_Scope(NULL);
 

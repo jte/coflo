@@ -35,6 +35,9 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/build/third_party/boost_1_51_0&quot;"/>
 									<listOptionValue builtIn="false" value="../$(ProjDirPath}/build/third_party/gtest-1.6.0"/>
 								</option>
+								<option id="gnu.cpp.link.option.libs.458535122" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;C:\cygwin\lib\libdparse.a&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1375667038" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

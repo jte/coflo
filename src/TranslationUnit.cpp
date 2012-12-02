@@ -31,6 +31,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
+#include <boost/graph/graphviz.hpp>
 
 #include "debug_utils/debug_utils.hpp"
 
@@ -373,10 +374,22 @@ print_node(int depth, char *name, char *value, void *client_data)
 	std::cout << "\"" << std::endl;
 }
 
+class VertexPropWriter
+{
+public:
+	VertexPropWriter(T_AST_GRAPH ast_graph) : m_ast_graph(ast_graph) {};
+
+	void operator()(std::ostream& out, const T_AST_GRAPH::vertex_descriptor& v) const
+	{
+		out << "[label=\"" << escape_for_graphviz_label(m_ast_graph[v]->asString()) << "\"]";
+	};
+private:
+	T_AST_GRAPH m_ast_graph;
+};
 
 void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
 {
-		// Create a new parser.
+	// Create a new parser.
 	CoFloCParser parser(filename);
 
 	parser.SetVerboseLevel(1);
@@ -386,31 +399,41 @@ void TranslationUnit::ParseWithCoFloCParser(const std::string& filename)
 	std::cout << "Parsing with CofloCParser complete." << std::endl;
 
 	if (tree && !parser.GetSyntaxErrorCount())
-		{
-			// Parsed the .coflo.gimple file successfully.
+	{
+		// Parsed the .coflo.gimple file successfully.
 
-			dlog_parse_gimple << "File \"" << filename << "\" parsed successfully." << std::endl;
+		dlog_parse_gimple << "File \"" << filename << "\" parsed successfully." << std::endl;
 
-			//FunctionInfoList *fil = coflo_c_parser_GetUserInfo(tree)->m_function_info_list;
+		//FunctionInfoList *fil = coflo_c_parser_GetUserInfo(tree)->m_function_info_list;
+		std::cout << "VVVVVV" << std::endl;
 
-			// Build the Functions out of the info obtained from the parsing.
-			//std::cout << "Building Functions..." << std::endl;
-			//BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
-}
-		else
-		{
-			// The parse failed.
+		ASTNodeBase* root = parser.GetGlobalInfo()->m_root_node;
+		std::cout << *root << std::endl;
+
+		T_AST_GRAPH ast_graph = root->asASTGraph();
+
+		VertexPropWriter vpw(ast_graph);
+		std::ofstream ofs("ast_graph.dot");
+		boost::write_graphviz(ofs, ast_graph, vpw);
+
+		// Build the Functions out of the info obtained from the parsing.
+		//std::cout << "Building Functions..." << std::endl;
+		//BuildFunctionsFromThreeAddressFormStatementLists(*fil, function_map);
+	}
+	else
+	{
+		// The parse failed.
 
 		std::cout << "Failure: " << parser.GetSyntaxErrorCount() << " syntax errors." << std::endl;
-		}
+	}
 
-		if(tree != NULL)
-		{
-			// Print the parse tree.
+	if(tree != NULL)
+	{
+		// Print the parse tree.
 		std::cout << "Parse tree: ================================================================" << std::endl;
 		//print_parsetree(parser_tables_coflo_c_parser, tree, print_node, NULL);
 		std::cout << "============================================================================" << std::endl;
-		}
+	}
 	else
 	{
 		std::cout << "Parse tree == NULL" << std::endl;

@@ -19,6 +19,7 @@
 
 #include "ASTNode.h"
 
+#include <boost/graph/graph_concepts.hpp>
 #include <stack>
 #include <boost/foreach.hpp>
 
@@ -97,6 +98,38 @@ std::string ASTNodeBase::asStringTree(int indent_level) const
 	}
 }
 
+T_AST_GRAPH ASTNodeBase::asASTGraph()
+{
+	T_AST_GRAPH retval;
+	std::stack< std::pair<ASTNodeBase*,T_AST_GRAPH::vertex_descriptor> > node_stack;
+	T_AST_GRAPH::vertex_descriptor p;
+
+	// Prime the traversal by pushing this node onto the work stack.
+	node_stack.push(std::make_pair(this, boost::add_vertex(this, retval)));
+
+	while(!node_stack.empty())
+	{
+		ASTNodeList children;
+
+		// Prepare to visit the children by pushing pointers to them on the stack.
+		// We push them in reverse, so that the leftmost child will be the next one visited.
+		children = node_stack.top().first->GetAllChildren();
+		p = node_stack.top().second;
+		node_stack.pop();
+		BOOST_REVERSE_FOREACH(ASTNodeBase* n, children)
+		{
+			T_AST_GRAPH::vertex_descriptor c;
+			c = boost::add_vertex(n, retval);
+			node_stack.push(std::make_pair(n,c));
+			// Add this child to the graph.
+			boost::add_edge(p, c, retval);
+		}
+	}
+
+	return retval;
+}
+
+
 ASTNodeList ASTNodeBase::GetAllChildren()
 {
 	ASTNodeList retval(m_children);
@@ -172,3 +205,17 @@ std::ostream& ASTNodeList::InsertionHelper(std::ostream& os, long indent_level) 
 
 	return os;
 }
+
+#if 0
+
+void concept_check()
+{
+  typedef ASTNodeBase* Graph;
+  BOOST_CONCEPT_ASSERT(( VertexListGraphConcept<Graph> ));
+  BOOST_CONCEPT_ASSERT(( BidirectionalGraphConcept<Graph> ));
+  BOOST_CONCEPT_ASSERT(( MutableGraphConcept<Graph> ));
+  return 0;
+}
+
+#endif
+
