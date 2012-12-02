@@ -126,7 +126,8 @@ iteration_statement
     		${scope} = commit_D_Scope(${scope});
     		
     		$$ = M_NEW_AST_LEAF_NODE_ENUM(iteration_statement, FOR, $n0);
-			/// @todo decl or expr
+			// The decl or expression_statement.
+			M_APPEND_ALL_CHILD_ASTS($$, $n3);
 			// The middle expression_statement.
 			$$ += $4;
 			/// @todo the last optional expression.
@@ -149,9 +150,13 @@ jump_statement
 		{
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, BREAK, $n0);
 		}
-	| KEYWORD_RETURN expression? ';'
+	| KEYWORD_RETURN expression ';'
 		{
 			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, RETURN, $n0);
-			/// @todo
+			$$ += $1;
+		}
+	| KEYWORD_RETURN ';'
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(jump_statement, RETURN, $n0);
 		}
 	;

@@ -794,23 +794,6 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
-					<resource project-relative-path="src/controlflowgraph/algorithms/cfg_algs.cpp">
-						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/algorithms">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/algorithms"/>
-						<entry kind="includePath" name="/CoFlo">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph"/>
-						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
-						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
-							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
-						</entry>
-						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
-						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
-						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
-					</resource>
 					<resource project-relative-path="src/controlflowgraph/statements/Goto.cpp">
 						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/statements">
 							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
@@ -844,6 +827,23 @@
 						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
 						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="COFLO_PKGDATA_DIR" value="/usr/local/share/coflo"/>
+						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
+					</resource>
+					<resource project-relative-path="src/controlflowgraph/algorithms/cfg_algs.cpp">
+						<entry kind="includePath" name="/CoFlo/src/controlflowgraph/algorithms">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph/algorithms"/>
+						<entry kind="includePath" name="/CoFlo">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/controlflowgraph"/>
+						<entry kind="includePath" name="C:/cygwin/home/Gary/src/coflo_dev/src/debug_utils"/>
+						<entry kind="includePath" name="/CoFlo/third_party/boost_1_51_0">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="BOOST_FILESYSTEM_NO_DEPRECATED" value="1"/>
+						<entry kind="macro" name="BOOST_FILESYSTEM_VERSION" value="3"/>
 						<entry kind="macro" name="HAVE_CONFIG_H" value=""/>
 					</resource>
 					<resource project-relative-path="src/libexttools/ToolDot.cpp">

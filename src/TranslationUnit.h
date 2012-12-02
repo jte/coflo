@@ -25,6 +25,8 @@
 #include "controlflowgraph/ControlFlowGraph.h"
 #include "Program.h"
 
+#include "parsers/ASTNode.h"
+
 // Forward declarations.
 class Function;
 class FunctionCall;
@@ -32,6 +34,7 @@ class ToolDot;
 typedef std::vector< FunctionCallUnresolved* > T_UNRESOLVED_FUNCTION_CALL_MAP;
 struct FunctionInfo;
 class FileTemplate;
+
 
 /**
  * Class representing a single translation unit.
@@ -106,7 +109,9 @@ private:
 	void BuildFunctionsFromThreeAddressFormStatementLists(const std::vector< FunctionInfo* > &function_info_list,
 			T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
-	void ParseWithCoFloCParser(const std::string &filename);
+	void ParseWithCoFloCParser(const std::string &filename, T_ID_TO_FUNCTION_PTR_MAP *function_map);
+
+	void BuildFunctionsFromAST(T_AST_GRAPH &root, T_ID_TO_FUNCTION_PTR_MAP *function_map);
 
 	/// Pointer to the program which contains this TranslationUnit.
 	Program *m_parent_program;
