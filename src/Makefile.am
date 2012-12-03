@@ -22,6 +22,16 @@
 # Subdirectories with their own Makefile{.am}'s.
 SUBDIRS = graph controlflowgraph debug_utils libexttools parsers templates
 
+if !HAVE_DPARSER_EXTERNAL_TARBALL
+# Use the distributed DParser distribution.
+USE_DPARSER_LDADD = $(top_builddir)/third_party/d/libdparse.a
+USE_DPARSER_CPPFLAGS = -I $(top_builddir)/third_party/d/ 
+else
+# Use the system DParser installation.
+USE_DPARSER_LDADD = $(DPARSER_LDADD)
+USE_DPARSER_CPPFLAGS = $(DPARSER_CPPFLAGS)
+endif
+
 # Make sure to distribute:
 # - The Doxygen configuration file.
 # - The /etc/coflo.conf template file.
@@ -79,7 +89,7 @@ NORMALLIBS = ./controlflowgraph/algorithms/libalgorithms.a \
 #	$(top_builddir)/third_party/dparser/local/lib/libdparse.a
 #-I $(top_builddir)/third_party/dparser/local/include
 
-coflo_CPPFLAGS = $(DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
+coflo_CPPFLAGS = $(USE_DPARSER_CPPFLAGS) -I $(top_srcdir)/src/parsers \
 	-I $(top_srcdir)/src/debug_utils \
 	$(BOOST_TR1_CPPFLAGS) $(BOOST_CPPFLAGS) \
 	-DCOFLO_PKGDATA_DIR='$(pkgdatadir)' $(AM_CPPFLAGS) 
@@ -90,7 +100,7 @@ coflo_CXXFLAGS = $(AM_CXXFLAGS)
 coflo_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflo_LDADD = $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS)
+coflo_LDADD = $(NORMALLIBS) $(USE_DPARSER_LDADD) $(ALLBOOSTLIBS)
 
 
 ###
@@ -117,4 +127,4 @@ coflotest_CXXFLAGS = $(PTHREAD_CFLAGS) $(AM_CXXFLAGS)
 coflotest_LDFLAGS = $(BOOST_LIBTOOL_FLAGS) $(BOOST_LDFLAGS) \
 	$(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_REGEX_LDFLAGS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) \
 	$(AM_LDFLAGS)
-coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(DPARSER_LDADD) $(ALLBOOSTLIBS) $(PTHREAD_LIBS)
+coflotest_LDADD = $(TESTLIBS) $(NORMALLIBS) $(USE_DPARSER_LDADD) $(ALLBOOSTLIBS) $(PTHREAD_LIBS)
