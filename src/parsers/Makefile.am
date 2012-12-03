@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # CoFlo.  If not, see <http://www.gnu.org/licenses/>.
 
+if !HAVE_DPARSER_EXTERNAL_TARBALL
+# Use the distributed DParser distribution.
+USE_MAKE_DPARSER = $(top_builddir)/third_party/d/make_dparser$(EXEEXT)
+else
+# Use the system DParser installation.
+USE_MAKE_DPARSER = $(PROG_ABSPATH_MAKE_DPARSER)
+endif
+
 # The cpp files generated from the .dparser.g files.
 DPARSER_BUILTSRC = $(srcdir)/coflo_c_parser.cpp \
 	$(srcdir)/gcc_gimple_parser.cpp
@@ -85,12 +93,10 @@ SUFFIXES = .dparser.g
 	BASENAME="$$(basename "$<" .dparser.g)" && \
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$$(basename "$<")" && \
-	INTERMEDIATE="$$(basename "$<").gdebug" && \
+	INTER="$$(basename "$<").gdebug" && \
 	: 'Now switch to the source directory' && \
-	cd "$(srcdir)" && \
-	"$(PROG_ABSPATH_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(abs_srcdir)/$${SOURCE}" \
-		--output="$(abs_builddir)/$${INTERMEDIATE}" && \
-	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(abs_builddir)/$${INTERMEDIATE}" > "$(abs_builddir)/$${TARGET}-temp" && \
+	"$(USE_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(srcdir)/$${SOURCE}" \
+		--output="$(abs_builddir)/$${INTERMEDIATE}" && \	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(abs_builddir)/$${INTERMEDIATE}" > "$(abs_builddir)/$${TARGET}-temp" && \
 	mv "$(abs_builddir)/$${TARGET}-temp" "$(abs_srcdir)/$${TARGET}"
 
 # Generate dependencies.

@@ -46,7 +46,7 @@
 #   The given path is stored in the precious variable VARIABLE.
 # 
 
-#serial 2
+#serial 3
 
 # The common part of the COFLO_ARG_WITH_xxx macros.
 AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
@@ -99,6 +99,7 @@ AC_DEFUN([_COFLO_ARG_WITH_SOMETHING],
 			# so we have to report that we can't find it.
 			AC_MSG_RESULT([no])
 			ACTION_IF_NOT_FOUND
+			coflo_exit_no_path_specified=yes
 		])
 	])
 	

@@ -189,37 +189,6 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 # We need xxd to convert the templates into C arrays.
 AM_MISSING_PROG([XXD], [xxd])
 
-
-# Check for an installed make_dparser.
-COFLO_SEARCH_PACKAGE([dparser], [dparse], [dparse], [dparse.h], [make_dparser], [/usr/local:/usr], [], [])
-AS_IF([test "x$PROG_ABSPATH_MAKE_DPARSER" != xNOT_FOUND],
-	[
-		AC_MSG_CHECKING([if ${PROG_ABSPATH_MAKE_DPARSER} is a usable version])
-		# Get the version of the make_dparser we found.
-		PROG_MAKE_DPARSER_VERSION=`$PROG_ABSPATH_MAKE_DPARSER --help 2>&1 | $EGREP -o '[[0-9]]\.[[0-9]]+' | tr -d '\n'`;
-		# Check if it's a usable version.
-		AS_VERSION_COMPARE([${PROG_MAKE_DPARSER_VERSION}], [1.29],
-			[
-				AC_MSG_RESULT([no, version is ${PROG_MAKE_DPARSER_VERSION}])
-				version_ok=no;
-			],
-			 [
-			 	version_ok=yes;
-			 ],
-			 [
-			 	version_ok=yes;
-			 ])
-	],
-	[version_ok=false])
-AM_CONDITIONAL([HAVE_SYSTEM_MAKE_DPARSER],[test "x$version_ok" = xyes])
-AM_COND_IF([HAVE_SYSTEM_MAKE_DPARSER],
-	[
-		AC_MSG_RESULT([yes, version is ${PROG_MAKE_DPARSER_VERSION}])
-	],
-	[
-		AC_MSG_WARN([no usable system make_dparser found.])
-	]
-)
 	
 # Look for Doxygen and configure it if it does exist.
 DX_DOXYGEN_FEATURE(ON)
@@ -255,11 +224,46 @@ AX_PTHREAD
 #COFLO_ARG_WITH_DIR([GTEST_ROOT], [gtest], [root directory of the Google C++ Testing Framework source distribution])
 AC_SUBST([GTEST_ROOT], ['$(top_builddir)/third_party/gtest-1.6.0/fused-src'])
 
+
+# Check for a system DParser installation.
+COFLO_SEARCH_PACKAGE([dparser], [dparse], [dparse], [dparse.h], [make_dparser], [/usr/local:/usr], [], [])
+AS_IF([test "x$PROG_ABSPATH_MAKE_DPARSER" != xNOT_FOUND],
+	[
+		AC_MSG_CHECKING([if ${PROG_ABSPATH_MAKE_DPARSER} is a usable version])
+		# Get the version of the make_dparser we found.
+		PROG_MAKE_DPARSER_VERSION=`$PROG_ABSPATH_MAKE_DPARSER --help 2>&1 | $EGREP -o '[[0-9]]\.[[0-9]]+' | tr -d '\n'`;
+		# Check if it's a usable version.
+		AS_VERSION_COMPARE([${PROG_MAKE_DPARSER_VERSION}], [1.29],
+			[
+				AC_MSG_RESULT([no, version is ${PROG_MAKE_DPARSER_VERSION}])
+				version_ok=no;
+			],
+			 [
+			 	version_ok=yes;
+			 ],
+			 [
+			 	version_ok=yes;
+			 ])
+	],
+	[version_ok=false])
+AM_CONDITIONAL([HAVE_SYSTEM_MAKE_DPARSER],[test "x$version_ok" = xyes])
+AM_COND_IF([HAVE_SYSTEM_MAKE_DPARSER],
+	[
+		AC_MSG_RESULT([yes, version is ${PROG_MAKE_DPARSER_VERSION}])
+	],
+	[
+		AC_MSG_WARN([no usable system make_dparser found.])
+	]
+)
+
 # The DParser source distribution's tarball.
 # To avoid requiring the user to build and install DParser on their system, we'll take the tarball
 # as a configure parameter and build it with the parameters we need.
-COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_SOURCE_TARBALL], [dparser-tarball], [dparser 1.26 source distribution tarball])
-
+COFLO_ARG_WITH_FILE([FILE_PATH_DPARSER_SOURCE_TARBALL], [dparser-tarball], [dparser (>=1.29) source distribution tarball],
+	[],[AC_MSG_WARN([No DParser source tarball specified.])])
+	
+AM_CONDITIONAL([HAVE_DPARSER_EXTERNAL_TARBALL],[test "x$FILE_PATH_DPARSER_SOURCE_TARBALL" != x])
+	
 # The Boost source distribution's tarball.
 # If the user doesn't already have a suitable Boost installation, we'll do something similar to what we do
 # for DParser, and build it from the source tarball and link to it statically.
@@ -277,7 +281,7 @@ AM_CONDITIONAL([COFLO_USE_BUILT_BOOST],[test -n "$FILE_PATH_BOOST_SOURCE_TARBALL
 
 # The list of Boost libraries we need, in a form that Boost's bootstrap.sh can understand.
 AC_SUBST([COFLO_BOOST_LIBS],[system,filesystem,graph,program_options,random,regex])
-# Extract the "boost_1_4x_x" part of the filename.
+# Extract the "boost_1_xx_x" part of the filename.
 BOOST_TARBALL_DIRNAME=$(echo "${FILE_PATH_BOOST_SOURCE_TARBALL}" | grep -o 'boost_._.._.')
 BOOST_TARBALL_TARBZ2=$(basename "${FILE_PATH_BOOST_SOURCE_TARBALL}")
 BOOST_TARBALL_TAR=$(basename "${BOOST_TARBALL_TARBZ2}" .bz2)
