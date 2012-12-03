@@ -55,11 +55,11 @@ CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
 
 third_party_complete_deps += stamp_dparser_src_installed
 
-EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL)
+EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL) d-1.26-to-1.29.grvs.patch
 
 if !HAVE_DPARSER_EXTERNAL_TARBALL
 # Specify the DParser tarball in the CoFlo distribution.
-FILE_PATH_DPARSER_SOURCE_TARBALL = $(BUNDLED_DPARSER_TARBALL)
+FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE = $(BUNDLED_DPARSER_TARBALL)
 endif
 
 # DParser directory vars.
@@ -86,11 +86,11 @@ MOSTLYCLEANFILES_DPARSER = stamp_dparser_src_built stamp_dparser_src_installed
 CLEANFILES_DPARSER = stamp_dparser_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 
 # Untar the DParser source tarball and create a stamp file indicating that we did it.
-stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL)
+stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)
 	rm -f $@-temp
-	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_DPARSER_SOURCE_TARBALL)\""
+	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)\""
 	@: 'Untar the DParser source distro into our build directory.'
-	tar -xaf "$(FILE_PATH_DPARSER_SOURCE_TARBALL)"
+	tar -xaf "$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)"
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 # Build the untarred DParser, again creating a stamp file indicating that we completed it.
