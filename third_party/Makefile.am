@@ -99,12 +99,12 @@ stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)
 # Build the untarred DParser, again creating a stamp file indicating that we completed it.
 stamp_dparser_src_built: stamp_dparser_src_untarred
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) D_BUILD_VERSION=exported all
+	cd d && $(MAKE) $(AM_MAKEFLAGS) EXEEXT=$(EXEEXT) D_BUILD_VERSION=exported all
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 	
 stamp_dparser_src_installed: stamp_dparser_src_built
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
+	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" EXEEXT=$(EXEEXT) D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 
