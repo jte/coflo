@@ -49,17 +49,19 @@ MOSTLYCLEANFILES =
 
 # Path to the bundled DParser source distribution.
 BUNDLED_DPARSER_TARBALL = $(srcdir)/d-1.26-src.tar.gz
+BUNDLED_DPARSER_PATCHFILE = $(srcdir)/d-1.26-to-1.29.grvs.patch
 
 # Add the untarred DParser source directory and the local install tree to the "make clean" list. 
 CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
 
 third_party_complete_deps += stamp_dparser_src_installed
 
-EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL) d-1.26-to-1.29.grvs.patch
+EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL) $(BUNDLED_DPARSER_PATCHFILE)
 
 if !HAVE_DPARSER_EXTERNAL_TARBALL
 # Specify the DParser tarball in the CoFlo distribution.
 FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE = $(BUNDLED_DPARSER_TARBALL)
+DPARSER_PATCHFILE_TO_USE = $(BUNDLED_DPARSER_PATCHFILE)
 endif
 
 # DParser directory vars.
@@ -81,7 +83,6 @@ LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 	$(DPARSER_INCLUDE_DIR)/dsymtab.h \
 	$(DPARSER_INCLUDE_DIR)/dparse_tree.h
 
-BUILTSOURCES_DPARSER = stamp_dparser_src_installed
 MOSTLYCLEANFILES_DPARSER = stamp_dparser_src_built stamp_dparser_src_installed
 CLEANFILES_DPARSER = stamp_dparser_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 
@@ -91,6 +92,8 @@ stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)
 	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)\""
 	@: 'Untar the DParser source distro into our build directory.'
 	tar -xaf "$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)"
+	@: 'Apply the patch file.'
+	patch -p1 -d ./d -i ../$(DPARSER_PATCHFILE_TO_USE)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 # Build the untarred DParser, again creating a stamp file indicating that we completed it.
