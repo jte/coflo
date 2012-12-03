@@ -32,7 +32,7 @@ CLEAN_LOCAL_DIRS =
 # the various sub-builds. 
 BUILT_SOURCES = stampfile-all-third-party-builds-complete
 
-# Append any stamp (or other) files which indicate that a sub-build is complete.
+# Append any stamp (or other) files which indicate that a sub-build is complete to this variable.
 third_party_complete_deps =
 
 # Extra files we'll need to distribute.
@@ -41,17 +41,32 @@ EXTRA_DIST =
 # Files to clean for "make mostlyclean" and "make clean".
 MOSTLYCLEANFILES =
 
-if !HAVE_SYSTEM_MAKE_DPARSER
+
 ###
-### The Automake rules for building DParser from an upstream tarball.
+### The Automake rules for building DParser from the upstream tarball.
+### The tarball can be either the one distributed with CoFlo, or one specified at configure-time.
 ###
+
+# Path to the bundled DParser source distribution.
+BUNDLED_DPARSER_TARBALL = $(srcdir)/d-1.26-src.tar.gz
+BUNDLED_DPARSER_PATCHFILE = $(srcdir)/d-1.26-to-1.29.grvs.patch
+
+# Add the untarred DParser source directory and the local install tree to the "make clean" list. 
+CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
+
+third_party_complete_deps += stamp_dparser_src_installed
+
+EXTRA_DIST += $(BUNDLED_DPARSER_TARBALL) $(BUNDLED_DPARSER_PATCHFILE)
+
+if !HAVE_DPARSER_EXTERNAL_TARBALL
+# Specify the DParser tarball in the CoFlo distribution.
+FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE = $(BUNDLED_DPARSER_TARBALL)
+DPARSER_PATCHFILE_TO_USE = $(BUNDLED_DPARSER_PATCHFILE)
+endif
 
 # DParser directory vars.
 DPARSER_PREFIX = ./dparser/local
 DPARSER_INCLUDE_DIR = $(DPARSER_PREFIX)/include
-
-# Add the untarred DParser source directory and the local install tree to the "make clean" list. 
-CLEAN_LOCAL_DIRS += $(builddir)/d $(DPARSER_PREFIX)
 
 # The Automake rules for building dparser's "make_dparser" and static library "libdparse.a" with headers.
 # We only need these during the build, so instead of requiring the user to install DParser, we'll build them
@@ -68,30 +83,30 @@ LIBDPARSE_BUILT_HEADER_LIST = $(DPARSER_INCLUDE_DIR)/dparse.h \
 	$(DPARSER_INCLUDE_DIR)/dsymtab.h \
 	$(DPARSER_INCLUDE_DIR)/dparse_tree.h
 
-BUILTSOURCES_DPARSER = stamp_dparser_src_installed
 MOSTLYCLEANFILES_DPARSER = stamp_dparser_src_built stamp_dparser_src_installed
 CLEANFILES_DPARSER = stamp_dparser_src_untarred $(LIBDPARSE_BUILT_HEADER_LIST)
 
 # Untar the DParser source tarball and create a stamp file indicating that we did it.
-stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL)
+stamp_dparser_src_untarred: $(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)
 	rm -f $@-temp
-	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_DPARSER_SOURCE_TARBALL)\""
+	@echo "In directory $$(pwd), attempting to untar \"$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)\""
 	@: 'Untar the DParser source distro into our build directory.'
-	tar -xaf "$(FILE_PATH_DPARSER_SOURCE_TARBALL)"
+	tar -xaf "$(FILE_PATH_DPARSER_SOURCE_TARBALL_TO_USE)"
+	@: 'Apply the patch file.'
+	patch -p1 -d ./d -i ../$(DPARSER_PATCHFILE_TO_USE)
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
 # Build the untarred DParser, again creating a stamp file indicating that we completed it.
 stamp_dparser_src_built: stamp_dparser_src_untarred
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) D_BUILD_VERSION=exported all
+	cd d && $(MAKE) $(AM_MAKEFLAGS) EXEEXT=$(EXEEXT) D_BUILD_VERSION=exported all
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 	
 stamp_dparser_src_installed: stamp_dparser_src_built
 	rm -f $@-temp
-	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
+	cd d && $(MAKE) $(AM_MAKEFLAGS) CFLAGS="$(make_dparser_CPPFLAGS)" EXEEXT=$(EXEEXT) D_BUILD_VERSION=exported PREFIX=../$(DPARSER_PREFIX) install
 	echo "`date -u`" > $@-temp && mv $@-temp $@
 
-endif
 
 if COFLO_USE_BUILT_BOOST
 ###
@@ -167,7 +182,8 @@ EXTRA_DIST += gtest-1.6.0.tar.bz2
 MOSTLYCLEANFILES += $(third_party_complete_deps)
 
 ###
-### Automake rules for creating archives of the jQuery UI css theme.
+### Automake rules for creating archives of the JavaScript and CSS files
+### used in the report.
 ###
 
 css_dark_hive_src_root_dir = $(srcdir)/jquery-ui-1.9.1.custom
@@ -238,7 +254,7 @@ report_boilerplate.tar: jquery_ui.tar jquery_ui_layout.tar
 
 CLEANFILES_REPORT_BOILERPLATE = jquery_ui_layout.tar jquery_ui.tar jquery_ui_js.tar jquery_ui_css.tar report_boilerplate.tar
 
-third_party_complete_deps += $(BUILTSOURCES_DPARSER) $(BUILTSOURCES_BOOST) report_boilerplate.tar
+third_party_complete_deps += $(BUILTSOURCES_BOOST) report_boilerplate.tar
 
 # The stamp file which will depend on all active third-party builds.
 # We do this this way so as to maximize parallel build potential.

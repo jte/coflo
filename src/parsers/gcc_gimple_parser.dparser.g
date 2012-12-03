@@ -532,6 +532,7 @@ decl_spec
 	| '(' decl_spec+ (',' decl_spec+)* ')'
 	// gcc 4.5.3 emits this one in some C code.  First encountered it when running against make 3.82 sources.
 	| '<unnamed type>'
+	| "<unnamed-unsigned:[0-9]+>"
 	;
 	
 type_qualifier

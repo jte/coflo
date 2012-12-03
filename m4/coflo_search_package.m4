@@ -33,20 +33,20 @@
 # @todo version checking.
 # 
 
-#serial 1
+#serial 2
 
 AC_DEFUN([COFLO_SEARCH_PACKAGE],
 [
 	AC_PREREQ([2.68])
 	
-	pushdef([PACKAGE_NAME],$1)
-	pushdef([FUNCTION],$2)
-	pushdef([LIBRARY_NAME],$3)
-	pushdef([HEADER_FILE],$4)
-	pushdef([PROGRAM],$5)
-	pushdef([PATH_PACKAGE_ROOT],$6)
-	pushdef([ACTION_IF_FOUND],$7)
-	pushdef([ACTION_IF_NOT_FOUND],[m4_default([$8],
+	m4_pushdef([PACKAGE_NAME],$1)
+	m4_pushdef([FUNCTION],$2)
+	m4_pushdef([LIBRARY_NAME],$3)
+	m4_pushdef([HEADER_FILE],$4)
+	m4_pushdef([PROGRAM],$5)
+	m4_pushdef([PATH_PACKAGE_ROOT],$6)
+	m4_pushdef([ACTION_IF_FOUND],$7)
+	m4_pushdef([ACTION_IF_NOT_FOUND],[m4_default([$8],
 		[
 			# Default ACTION_IF_NOT_FOUND is to abort with an error message.
 			AC_MSG_FAILURE([Either --with-ARG_TEXT=PATH or VARIABLE=PATH must be specified.])
@@ -83,12 +83,12 @@ AC_DEFUN([COFLO_SEARCH_PACKAGE],
 	m4_popdef([PATH_PACKAGE_ROOT_PLUS_BIN])
 	AS_VAR_POPDEF([PROG_ABSPATH])
 	
-	popdef([ACTION_IF_NOT_FOUND])
-	popdef([ACTION_IF_FOUND])
-	popdef([PATH_PACKAGE_ROOT])
-	popdef([PROGRAM])
-	popdef([HEADER_FILE])
-	popdef([LIBRARY_NAME])
-	popdef([FUNCTION])
-	popdef([PACKAGE_NAME])
+	m4_popdef([ACTION_IF_NOT_FOUND])
+	m4_popdef([ACTION_IF_FOUND])
+	m4_popdef([PATH_PACKAGE_ROOT])
+	m4_popdef([PROGRAM])
+	m4_popdef([HEADER_FILE])
+	m4_popdef([LIBRARY_NAME])
+	m4_popdef([FUNCTION])
+	m4_popdef([PACKAGE_NAME])
 ])
