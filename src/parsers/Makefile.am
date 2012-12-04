@@ -17,7 +17,7 @@
 
 if !HAVE_DPARSER_EXTERNAL_TARBALL
 # Use the distributed DParser distribution.
-USE_MAKE_DPARSER = $(top_builddir)/third_party/d/make_dparser$(EXEEXT)
+USE_MAKE_DPARSER = $(abs_top_builddir)/third_party/d/make_dparser$(EXEEXT)
 else
 # Use the system DParser installation.
 USE_MAKE_DPARSER = $(PROG_ABSPATH_MAKE_DPARSER)
@@ -54,6 +54,7 @@ noinst_LIBRARIES = libparsers.a
 libparsers_a_SOURCES = ASTNode.cpp ASTNode.h \
 	ParserBaseClass.cpp ParserBaseClass.h \
 	Token.cpp Token.h \
+	parser_grammar_helper.h \
 	gcc_gimple_parser.dparser.g gcc_gimple_parser.h \
 	$(COFLOCPARSER_SRC)
 
@@ -93,10 +94,11 @@ SUFFIXES = .dparser.g
 	BASENAME="$$(basename "$<" .dparser.g)" && \
 	TARGET="$$(basename "$@")" && \
 	SOURCE="$$(basename "$<")" && \
-	INTER="$$(basename "$<").gdebug" && \
-	: 'Now switch to the source directory' && \
-	"$(USE_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(srcdir)/$${SOURCE}" \
-		--output="$(abs_builddir)/$${INTERMEDIATE}" && \	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(abs_builddir)/$${INTERMEDIATE}" > "$(abs_builddir)/$${TARGET}-temp" && \
+	INTERMEDIATE="$$(basename "$<").gdebug" && \
+	cd "$(abs_srcdir)" && \
+	"$(USE_MAKE_DPARSER)" $(MAKE_DPARSER_FLAGS) --grammar_ident=$${BASENAME} "$(abs_srcdir)/$${SOURCE}" \
+		--output="$(abs_builddir)/$${INTERMEDIATE}" && \
+	"$(SED)" -r -e 's/\(void\*\)([a-zA-Z_][a-zA-Z0-9_]+)/static_cast<void*>\(\1\)/g' "$(abs_builddir)/$${INTERMEDIATE}" > "$(abs_builddir)/$${TARGET}-temp" && \
 	mv "$(abs_builddir)/$${TARGET}-temp" "$(abs_srcdir)/$${TARGET}"
 
 # Generate dependencies.

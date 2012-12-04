@@ -37,6 +37,9 @@ endif
 # - The /etc/coflo.conf template file.
 EXTRA_DIST = Doxyfile coflo.conf.in
 
+# Initialize to empty, we'll append to it later.
+CLEANFILES =
+
 # The /etc/coflo.conf file.
 dist_sysconf_DATA = coflo.conf
 
@@ -110,10 +113,11 @@ coflo_LDADD = $(NORMALLIBS) $(USE_DPARSER_LDADD) $(ALLBOOSTLIBS)
 TESTLIBS = ./controlflowgraph/libcontrolflowgraphtest.a
 
 # This becomes an intermediate rule which simply copies the fused Google Test C++ file
-# into the build directory.  As an intermediate built file, we don't have to include it
-# in a *CLEAN variable, since make will automatically take care of that.
+# into the build directory.  We have to include it in a *CLEAN variable, since Automake
+# doesn't know about it otherwise.
 gtest-all.cpp: $(top_builddir)/third_party/gtest-1.6.0/fused-src/gtest/gtest-all.cc
 	cp "$<" "$@"
+CLEANFILES += gtest-all.cpp
 
 check_PROGRAMS = coflotest
 coflotest_SOURCES = coflotest.cpp $(TESTSOURCES) $(COMMONSOURCES)
