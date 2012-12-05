@@ -575,7 +575,10 @@ direct_abstract_declarator
 ///@}
 	
 initializer
-	: assignment_expression { M_PROPAGATE_AST_NODE($$, $0); }
+	: assignment_expression 
+		{
+			M_PROPAGATE_AST_NODE($$, $0);
+		}
 	| '{' initializer (',' initializer)* ','? '}'
 		{
 			$$ = M_NEW_AST_NODE_I(list);

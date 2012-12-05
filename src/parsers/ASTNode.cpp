@@ -37,14 +37,28 @@ AbstractASTNodeBase::~AbstractASTNodeBase()
  *  ASTNodeBase
  */
 
-ASTNodeBase::ASTNodeBase() : m_token(std::string("NIL"), Location())
+ASTNodeBase::ASTNodeBase() : pimpl(new ASTNodeBaseImpl)
 {
+	pimpl->m_token = Token(std::string("NIL"), Location());
 }
 
-ASTNodeBase::ASTNodeBase(const Token &token) : m_token(token)
+ASTNodeBase::ASTNodeBase(const Token &token) : pimpl(new ASTNodeBaseImpl)
 {
+	pimpl->m_token = token;
 }
 
+ASTNodeBase::ASTNodeBase(const std::string &s, const Location& loc) : pimpl(new ASTNodeBaseImpl)
+{
+	pimpl->m_token = Token(s,loc);
+}
+
+ASTNodeBase::ASTNodeBase(const ASTNodeBase &other) : pimpl(new ASTNodeBaseImpl)
+{
+	*pimpl = *(other.pimpl);
+}
+
+
+#if 0
 ASTNodeBase::ASTNodeBase(const Token &token, ASTNodeBase* first_element_usernode,
 		D_ParseNode* optional_element_sysnode) : m_token(token)
 {
@@ -76,10 +90,17 @@ ASTNodeBase::ASTNodeBase(const Token &token, ASTNodeBase* first_element_usernode
 		}*/
 	}
 }
+#endif
 
 ASTNodeBase::~ASTNodeBase()
 {
 }
+
+void ASTNodeBase::AddChild(ASTNodeBase *child)
+{
+	pimpl->m_children.Append(child);
+};
+
 
 namespace
 {
@@ -103,14 +124,14 @@ std::string ASTNodeBase::asString() const
 {
 	std::string retval;
 
-	retval += m_token.getText();
+	retval += pimpl->m_token.getText();
 
 	return retval;
 }
 
 std::string ASTNodeBase::asStringTree(int indent_level) const
 {
-	if(m_children.empty())
+	if(pimpl->m_children.empty())
 	{
 		// No children, just return this ASTNode as a plain string.
 		return indent(indent_level) + asString() + "\n";
@@ -121,7 +142,7 @@ std::string ASTNodeBase::asStringTree(int indent_level) const
 		std::string retval = indent(indent_level) + "( " + asString() + "\n";
 		indent_level++;
 		// Now append all the children.
-		BOOST_FOREACH(const ASTNodeBase *c, m_children)
+		BOOST_FOREACH(const ASTNodeBase *c, pimpl->m_children)
 		{
 			retval += c->asStringTree(indent_level);
 		}
@@ -166,7 +187,7 @@ T_AST_GRAPH ASTNodeBase::asASTGraph()
 
 ASTNodeList ASTNodeBase::GetAllChildren()
 {
-	ASTNodeList retval(m_children);
+	ASTNodeList retval(pimpl->m_children);
 	return retval;
 }
 
@@ -174,7 +195,7 @@ std::ostream& ASTNodeBase::InsertionHelper(std::ostream& os, long indent_level) 
 {
 	if(true /** @todo stream is in "parens AST representation" mode */)
 	{
-		if(m_children.empty())
+		if(pimpl->m_children.empty())
 		{
 			// No children, just insert this node's info.
 			os << indent(indent_level) << asString();
