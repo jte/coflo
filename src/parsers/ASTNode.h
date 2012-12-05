@@ -20,6 +20,7 @@
 #ifndef ASTNODE_H_
 #define ASTNODE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <iosfwd>
@@ -120,11 +121,24 @@ protected:
 
 class D_ParseNode;
 
+
 /**
  *
  */
 class ASTNodeBase : public AbstractASTNodeBase
 {
+private:
+	class ASTNodeBaseImpl
+	{
+	public:
+		/// @name The input Token from which we created this AST node.
+		/// The input token is specified by its location and its text.
+		Token m_token;
+
+		/// The list of child AST nodes.
+		ASTNodeList m_children;
+	};
+
 public:
 	ASTNodeBase();
 
@@ -136,24 +150,21 @@ public:
 
 	ASTNodeBase(const Token &token, ASTNodeBase* first_element_usernode, D_ParseNode* optional_element_sysnode);
 
-	ASTNodeBase(const std::string &s, const Location& loc) : m_token(s,loc) {};
+	ASTNodeBase(const std::string &s, const Location& loc);
 
 	/**
 	 * Copy constructor.
 	 * @param other
 	 */
-	ASTNodeBase(const ASTNodeBase &other) :
-		m_token(other.m_token),
-		m_children(other.m_children)
-	{
-	};
+	ASTNodeBase(const ASTNodeBase &other);
+
 	virtual ~ASTNodeBase();
 
 	virtual std::string asString() const;
 	virtual std::string asStringTree(int indent_level = 0) const;
 	T_AST_GRAPH asASTGraph();
 
-	void AddChild(ASTNodeBase *child) { m_children.Append(child); };
+	void AddChild(ASTNodeBase *child);
 
 	virtual std::ostream& InsertionHelper(std::ostream &os, long indent_level) const;
 
@@ -162,19 +173,24 @@ public:
 	 */
 	///@{
 
-	ASTNodeBase& operator=(const ASTNodeBase &rhs)
+	/**
+	 * Copy-operator with a strong-exception-safety guarantee.
+	 *
+	 * @param rhs The object to assign from.  Note that this is passed by value so that the copy constructor
+	 * 				is invoked, creating a temporary object for us to use in the copy-and-swap operation.
+	 * @return Reference to this object.
+	 */
+	ASTNodeBase& operator=(ASTNodeBase rhs)
 	{
-		if(&rhs == this)
-		{
-			// Trying to assign to ourself.
-			BOOST_THROW_EXCEPTION(ast_exception_assignment_to_self());
-		}
+		// We'll use the copy-and-swap idiom to give this assignment operator a strong-exception-safety guarantee.
+		// That means that this operation might throw, but if it does, we can guarantee there's been no change
+		// to the state of the assignee (i.e. this).
 
 		// Call the assignment operator of our base class.
-		AbstractASTNodeBase::operator =(rhs);
+		//AbstractASTNodeBase::operator =(rhs);
 
-		m_token = rhs.m_token;
-		m_children = rhs.m_children;
+		// Swap the temporary object's internals (*pimpl) with this object's internals.
+		swap(rhs);
 
 		return *this;
 	};
@@ -220,7 +236,7 @@ public:
 	{
 		ASTNodeList retval;
 
-		BOOST_FOREACH(ASTNodeBase *c, m_children)
+		BOOST_FOREACH(ASTNodeBase *c, pimpl->m_children)
 		{
 			if(c->isType<Type>())
 			{
@@ -236,7 +252,7 @@ public:
 	{
 		ASTNodeList retval;
 
-		BOOST_FOREACH(ASTNodeBase *c, m_children)
+		BOOST_FOREACH(ASTNodeBase *c, pimpl->m_children)
 		{
 			if(c->isType<Type>())
 			{
@@ -259,18 +275,30 @@ public:
 	///@}
 
 private:
+	/**
+	 * Non-throwing swap.
+	 * @param other
+	 */
+	void swap( ASTNodeBase& other ) // throw()
+	{
+		std::auto_ptr<ASTNodeBaseImpl> temp( pimpl );
+	    pimpl = other.pimpl;
+	    other.pimpl = temp;
+	}
 
-	/// @name The input Token from which we created this AST node.
-	/// The input token is specified by its location and its text.
-	Token m_token;
+	/// Forward declaration of the implementation.
+	class ASTNodeBaseImpl;
 
-	/// The list of child AST nodes.
-	ASTNodeList m_children;
+	/// Pointer to the implementation.
+	/// @todo std::auto_ptr is deprecated in C++11, update this to std::unique_ptr when
+	/// there's enough support.
+	std::auto_ptr<ASTNodeBaseImpl> pimpl;
 
 public:
 	virtual std::string GetNodeTypeName() const { return "ASTNodeBase"; };
 	virtual ASTNodeBase* GetTypedThis() { return this; };
 };
+
 
 inline std::ostream &operator<<(std::ostream &os, const ASTNodeBase& n)
 {

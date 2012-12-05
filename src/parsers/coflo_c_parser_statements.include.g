@@ -74,11 +74,13 @@ block_item
 expression_statement
 	: expression ';'
 		{
-		 	/// @todo should we have an expression_statement?
-			M_PROPAGATE_AST_NODE($$, $0); 
+		 	$$ = M_NEW_AST_LEAF_NODE_ENUM(expression_statement, EXPRESSION_STATEMENT, $n1);
+			$$ += $0; 
 		}
 	| ';'
-		{ $$ = M_NEW_AST_LEAF_NODE_ENUM(todo, TODO, $n0); }
+		{
+			$$ = M_NEW_AST_LEAF_NODE_ENUM(expression_statement, NULL_EXPRESSION_STATEMENT, $n0); 
+		}
 	;
 
 selection_statement

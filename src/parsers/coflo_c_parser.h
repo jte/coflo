@@ -97,6 +97,7 @@ M_DECLARE_DERIVED_AST_NODE_ENUM(iteration_statement, statement, WHILE, FOR, DO);
 M_DECLARE_DERIVED_AST_NODE_ENUM(compound_statement, statement, COMPOUND);
 M_DECLARE_DERIVED_AST_NODE_ENUM(labeled_statement, statement, LABEL, CASE, DEFAULT);
 M_DECLARE_DERIVED_AST_NODE_ENUM(jump_statement, statement, GOTO, CONTINUE, BREAK, RETURN);
+M_DECLARE_DERIVED_AST_NODE_ENUM(expression_statement, statement, NULL_EXPRESSION_STATEMENT, EXPRESSION_STATEMENT);
 
 /**
  * Declaration specifiers.

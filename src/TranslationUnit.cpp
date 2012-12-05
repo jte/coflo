@@ -468,6 +468,28 @@ struct dfs_visitor_is_function : public base_visitor<dfs_visitor_is_function>
 	std::vector<ASTNodeBase*> m_function_definitions;
 };
 
+/**
+ * Visitor which extracts what we need from the AST to generate a CFG.
+ * We inherit from dfs_visitor here to fill in the functions we don't need.
+ */
+class ASTToCFGVisitor : public boost::dfs_visitor<boost::null_visitor>
+{
+public:
+	ASTToCFGVisitor() { m_search_index = 0; };
+	ASTToCFGVisitor(const ASTToCFGVisitor& other) { m_search_index = other.m_search_index; };
+	~ASTToCFGVisitor() {};
+
+	void discover_vertex(T_AST_GRAPH::vertex_descriptor v, const T_AST_GRAPH &g)
+	{
+		std::cout << "Discovered vertex: " << g[v]->asString() << std::endl;
+	}
+
+private:
+
+	int m_search_index;
+	ASTNodeBase* m_type_array[];
+};
+
 void TranslationUnit::BuildFunctionsFromAST(T_AST_GRAPH &root, T_ID_TO_FUNCTION_PTR_MAP *function_map)
 {
 	// Find all function definitions.
@@ -478,6 +500,8 @@ void TranslationUnit::BuildFunctionsFromAST(T_AST_GRAPH &root, T_ID_TO_FUNCTION_
 	T_PREDECESSOR_PROP_MAP predecessor_property_map(predecessor_map);
 	boost::predecessor_recorder<T_PREDECESSOR_PROP_MAP,boost::on_tree_edge> pr(predecessor_property_map);
 	dfs_visitor_is_function fvis;
+	ASTToCFGVisitor ast_to_cfg_visitor;
 
 	boost::depth_first_search(root,	boost::visitor(boost::make_dfs_visitor(std::make_pair(pr, fvis))));
+	boost::depth_first_search(root, boost::visitor(ast_to_cfg_visitor));
 }

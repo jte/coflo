@@ -56,7 +56,6 @@ private:
 	 * A vector of strings which will hold the enumerator names.
 	 */
 	std::vector<std::string> m_enumerator_names;
-
 };
 
 /**
