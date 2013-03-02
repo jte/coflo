@@ -1,8 +1,8 @@
 ======================
-README for CoFlo 0.0.3
+README for CoFlo 0.0.5.dev
 ======================
 
-Copyright 2011 Gary R. Van Sickle (grvs@users.sourceforge.net).
+Copyright 2011, 2013 Gary R. Van Sickle (grvs@users.sourceforge.net).
 
 This file is part of CoFlo.
 
@@ -34,5 +34,5 @@ Documentation
 
 For documentation on how to install and use CoFlo, see the CoFlo manual included
 with this distribution.  The CoFlo manual is available in HTML format in the
-doc/index.html file, and online at <http://coflo.sourceforge.net/manuals/0.0.3/index.html>.
+doc/index.html file, and online at <http://coflo.sourceforge.net/manuals/@VERSION@/index.html>.
 
