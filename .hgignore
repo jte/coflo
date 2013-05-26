@@ -3,4 +3,5 @@ aclocal.m4
 autom4te.cache
 build
 doc/index.html
-**/Makefile.in
+src/**/Makefile.in
+Makefile.in
