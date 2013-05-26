@@ -5,3 +5,5 @@ build
 doc/index.html
 src/**/Makefile.in
 Makefile.in
+tests/testsuite
+configure
